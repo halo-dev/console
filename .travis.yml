@@ -7,11 +7,11 @@ jobs:
       script:
         - npm run build
         - scripts/zip_dist.sh
+        - ls -la dist
       deploy:
         provider: releases
         api_key: $GITHUB_OAUTH_TOKEN
-        file_glob: true
-        file: dist/*.zip
+        file: dist/halo-admin-$PACKAGE_VERSION.zip
         on:
           tags: true
 stages:
