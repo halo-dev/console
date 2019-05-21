@@ -11,7 +11,9 @@ jobs:
       deploy:
         provider: releases
         api_key: $GITHUB_OAUTH_TOKEN
-        file: dist/halo-admin-$PACKAGE_VERSION.zip
+        file_glob: true
+        file: dist/*.zip
+        skip_cleanup: true
         on:
           tags: true
 stages:
