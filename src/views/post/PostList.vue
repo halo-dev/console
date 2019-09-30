@@ -12,7 +12,7 @@
               :sm="24"
             >
               <a-form-item label="关键词">
-                <a-input v-model="queryParam.keyword" />
+                <a-input v-model="queryParam.keyword" @keyup.enter="handleQuery"/>
               </a-form-item>
             </a-col>
             <a-col
@@ -203,7 +203,6 @@
               v-for="(category,index) in categoriesOfPost"
               :key="index"
               color="blue"
-              style="margin-bottom: 8px"
             >{{ category.name }}</a-tag>
           </span>
 
@@ -215,7 +214,6 @@
               v-for="(tag, index) in tags"
               :key="index"
               color="green"
-              style="margin-bottom: 8px"
             >{{ tag.name }}</a-tag>
           </span>
 
