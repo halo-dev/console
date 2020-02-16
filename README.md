@@ -19,19 +19,19 @@
 
 克隆项目：
 
-```
+```bash
 git clone https://github.com/halo-dev/halo-admin
 ```
 
 检出最新版本：
 
-```
+```bash
 git checkout v1.2.0
 ```
 
 打包构建：
 
-```
+```bash
 npm i
 
 npm run build
