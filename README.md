@@ -29,15 +29,6 @@ git clone https://github.com/halo-dev/halo-admin
 git checkout v1.2.0
 ```
 
-修改环境配置：
-
-```
-# .env 文件修改为
-
-NODE_ENV=production
-PUBLIC_PATH=/
-```
-
 打包构建：
 
 ```
