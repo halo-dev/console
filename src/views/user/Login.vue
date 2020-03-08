@@ -165,7 +165,7 @@ export default {
     }),
     verifyIsInstall() {
       adminApi.isInstalled().then(response => {
-        if (response.data.data) {
+        if (!response.data.data) {
           this.$router.push({ name: 'Install' })
         }
       })
