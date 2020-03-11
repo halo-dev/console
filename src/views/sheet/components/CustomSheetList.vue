@@ -318,7 +318,7 @@
     </div>
     <SheetSettingDrawer
       :sheet="selectedSheet"
-      :sheetMetas="selectedSheetMetas"
+      :metas="selectedSheetMetas"
       :visible="sheetSettingVisible"
       :needTitle="true"
       @close="onSheetSettingsClose"
@@ -472,7 +472,7 @@ export default {
     handleShowSheetSettings(sheet) {
       sheetApi.get(sheet.id).then(response => {
         this.selectedSheet = response.data.data
-        this.selectedSheetMetas = this.selectedSheet.sheetMetas
+        this.selectedSheetMetas = this.selectedSheet.metas
         this.sheetSettingVisible = true
       })
     },
@@ -510,8 +510,8 @@ export default {
     onRefreshSheetFromSetting(sheet) {
       this.selectedSheet = sheet
     },
-    onRefreshSheetMetasFromSetting(sheetMetas) {
-      this.selectedSheetMetas = sheetMetas
+    onRefreshSheetMetasFromSetting(metas) {
+      this.selectedSheetMetas = metas
     }
   }
 }
