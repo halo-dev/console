@@ -318,7 +318,7 @@
     </div>
     <SheetSettingDrawer
       :sheet="selectedSheet"
-      :metas="selectedSheetMetas"
+      :metas="selectedMetas"
       :visible="sheetSettingVisible"
       :needTitle="true"
       @close="onSheetSettingsClose"
@@ -404,7 +404,7 @@ export default {
       sheetStatus: sheetApi.sheetStatus,
       customColumns,
       selectedSheet: {},
-      selectedSheetMetas: [],
+      selectedMetas: [],
       sheetSettingVisible: false,
       sheetCommentVisible: false,
       internalSheets: [],
@@ -472,7 +472,7 @@ export default {
     handleShowSheetSettings(sheet) {
       sheetApi.get(sheet.id).then(response => {
         this.selectedSheet = response.data.data
-        this.selectedSheetMetas = this.selectedSheet.metas
+        this.selectedMetas = this.selectedSheet.metas
         this.sheetSettingVisible = true
       })
     },
@@ -511,7 +511,7 @@ export default {
       this.selectedSheet = sheet
     },
     onRefreshSheetMetasFromSetting(metas) {
-      this.selectedSheetMetas = metas
+      this.selectedMetas = metas
     }
   }
 }
