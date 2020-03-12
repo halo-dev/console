@@ -27,7 +27,9 @@
     "vue-ls": "^3.2.1",
     "vue-router": "^3.1.6",
     "vuejs-logger": "^1.5.3",
-    "vuex": "^3.1.1"
+    "vuex": "^3.1.1",
+    "tiptap": "^1.26.6",
+    "tiptap-extensions": "^1.28.6"
   },
   "devDependencies": {
     "@babel/polyfill": "^7.4.4",

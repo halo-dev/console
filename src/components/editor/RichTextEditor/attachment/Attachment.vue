@@ -1,0 +1,483 @@
+<template>
+  <div>
+    <a-row
+      :gutter="12"
+      type="flex"
+      align="middle"
+    >
+      <a-col
+        :span="24"
+        style="padding-bottom: 12px;"
+      >
+        <a-card
+          :bordered="false"
+          :bodyStyle="{ padding: '16px' }"
+        >
+          <div class="table-page-search-wrapper">
+
+            <a-form layout="inline">
+              <a-row :gutter="48">
+                <a-col
+                  :md="12"
+                  :sm="24"
+                >
+                  <a-form-item label="关键词">
+                    <a-input
+                      v-model="queryParam.keyword"
+                      @keyup.enter="handleQuery()"
+                    />
+                  </a-form-item>
+                  <a-form-item label="存储位置">
+                    <a-select
+                      v-model="queryParam.attachmentType"
+                      @change="handleQuery()"
+                    >
+                      <a-select-option
+                        v-for="item in types"
+                        :key="item"
+                        :value="item"
+                      >{{
+                        attachmentType[item].text
+                      }}
+                      </a-select-option>
+                    </a-select>
+                  </a-form-item>
+
+                  <span class="table-page-search-submitButtons">
+                    <a-button
+                      type="primary"
+                      @click="handleQuery()"
+                    >查询</a-button>
+                    <a-button
+                      style="margin-left: 2px;"
+                      @click="handleResetParam()"
+                    >重置</a-button>
+
+                    <span
+                      style="float: right;"
+                    >
+                      <a-button
+                        icon="select"
+                        v-show="!supportMultipleSelection"
+                        @click="handleMultipleSelection"
+                      >
+                        批量操作
+                      </a-button>
+                      <a-button
+                        type="danger"
+                        icon="delete"
+                        v-show="supportMultipleSelection"
+                        @click="handleDeleteAttachmentInBatch"
+                      >
+                        删除
+                      </a-button>
+                      <a-button
+                        icon="close"
+                        v-show="supportMultipleSelection"
+                        @click="handleCancelMultipleSelection"
+                      >
+                        取消
+                      </a-button>
+                    </span>
+                  </span>
+                </a-col>
+                <a-col
+                  :md="12"
+                  :sm="24"
+                >
+                  <a-row style="margin-bottom: 10px">
+                    <a-col
+                      :span="18"
+                      :xxl="20"
+                      :xl="18"
+                      :lg="16"
+                      :md="15"
+                      :sm="18"
+                      :xs="16"
+                    >
+                      <a-input v-model="imageByUrl" placeholder="http://"></a-input>
+                    </a-col>
+                    <a-col>
+                      <a-button
+                        style="float: right"
+                        type="primary"
+                        @click="insertImage"
+                      >插入图片</a-button>
+                    </a-col>
+                  </a-row>
+
+                  <div>
+                    <FilePondUpload
+                      ref="uploader"
+                      :uploadHandler="uploadHandler"
+                      @success="onUploadSuccess"
+                    ></FilePondUpload>
+                  </div>
+                </a-col>
+              </a-row>
+            </a-form>
+          </div>
+        </a-card>
+      </a-col>
+      <a-col :span="24">
+        <a-list
+          :grid="{ gutter: 24, xs: 2, sm: 2, md: 3, lg: 4, xl:6}"
+          :dataSource="formattedDatas"
+          :loading="listLoading"
+        >
+          <a-list-item
+            slot="renderItem"
+            slot-scope="item, index"
+            :key="index"
+          >
+            <a-card
+              :bodyStyle="{ padding: 0 }"
+              hoverable
+              @click="handleShowDetailDrawer(item)"
+            >
+              <div class="image-thumb center-layout">
+                <span v-show="!handleJudgeMediaType(item)">当前格式不支持预览</span>
+                <img
+                  :src="item.thumbPath"
+                  v-show="handleJudgeMediaType(item)"
+                  loading="lazy"
+                />
+              </div>
+              <a-card-meta style="padding: 0.8rem;">
+                <ellipsis
+                  :length="isMobile() ? 12 : 16"
+                  tooltip
+                  slot="description"
+                >{{ item.name }}
+                </ellipsis>
+              </a-card-meta>
+              <a-checkbox
+                class="select-attachment-checkbox"
+                :style="getCheckStatus(item.id) ? selectedAttachmentStyle : ''"
+                :checked="getCheckStatus(item.id)"
+                @click="handleAttachmentSelectionChanged($event, item)"
+                v-show="supportMultipleSelection"
+              ></a-checkbox>
+            </a-card>
+          </a-list-item>
+        </a-list>
+      </a-col>
+    </a-row>
+    <div class="page-wrapper">
+      <a-pagination
+        class="pagination"
+        :current="pagination.page"
+        :total="pagination.total"
+        :defaultPageSize="pagination.size"
+        :pageSizeOptions="['18', '36', '54', '72', '90', '108']"
+        showSizeChanger
+        @change="handlePaginationChange"
+        @showSizeChange="handlePaginationChange"
+      />
+    </div>
+    <!--    <a-modal-->
+    <!--      title="上传附件"-->
+    <!--      v-model="uploadVisible"-->
+    <!--      :footer="null"-->
+    <!--      :afterClose="onUploadClose"-->
+    <!--      destroyOnClose-->
+    <!--    >-->
+    <!--      <FilePondUpload-->
+    <!--        ref="upload"-->
+    <!--        :uploadHandler="uploadHandler"-->
+    <!--      ></FilePondUpload>-->
+    <!--    </a-modal>-->
+    <AttachmentDetailDrawer
+      v-model="drawerVisible"
+      v-if="selectAttachment"
+      :attachment="selectAttachment"
+      :addToPhoto="true"
+      @delete="() => this.loadAttachments()"
+    />
+  </div>
+</template>
+
+<script>
+import { mixin, mixinDevice } from '@/utils/mixin.js'
+import { PageView } from '@/layouts'
+import AttachmentDetailDrawer from './components/AttachmentDetailDrawer'
+import attachmentApi from '@/api/attachment'
+import { mapGetters } from 'vuex'
+import FilePondUpload from '@comp/Upload/FilePondUpload'
+
+export default {
+  name: 'Attachment',
+
+  components: {
+    FilePondUpload,
+    PageView,
+    AttachmentDetailDrawer
+  },
+  mixins: [mixin, mixinDevice],
+  data() {
+    return {
+      imageByUrl: '',
+      attachmentType: attachmentApi.type,
+      listLoading: true,
+      uploadVisible: false,
+      supportMultipleSelection: true,
+      selectedAttachmentCheckbox: {},
+      batchSelectedAttachments: [],
+      batchSelectedImages: {},
+      selectAttachment: {},
+      attachments: [],
+      mediaTypes: [],
+      types: [],
+      editable: false,
+      pagination: {
+        page: 1,
+        size: 18,
+        sort: null
+      },
+      queryParam: {
+        page: 0,
+        size: 18,
+        sort: null,
+        keyword: null,
+        mediaType: null,
+        attachmentType: null
+      },
+      drawerVisible: false,
+      uploadHandler: attachmentApi.upload
+    }
+  },
+  computed: {
+    formattedDatas() {
+      return this.attachments.map(attachment => {
+        attachment.typeProperty = this.attachmentType[attachment.type]
+        return attachment
+      })
+    },
+    selectedAttachmentStyle() {
+      return {
+        border: `2px solid ${this.color()}`
+      }
+    }
+  },
+  created() {
+    this.loadAttachments()
+    this.loadMediaTypes()
+    this.loadTypes()
+  },
+  destroyed: function() {
+    if (this.drawerVisible) {
+      this.drawerVisible = false
+    }
+  },
+  beforeRouteLeave(to, from, next) {
+    if (this.drawerVisible) {
+      this.drawerVisible = false
+    }
+    next()
+  },
+  methods: {
+    ...mapGetters(['color']),
+
+    onUploadSuccess: function(res, file) {
+      var item = res.data.data
+      this.batchSelectedImages[item.path] = item
+    },
+    insertImage: function() {
+      var insert = (url) => this.$emit('onSelect', url)
+      var src = this.imageByUrl
+      if (src !== '') {
+        this.imageByUrl = ''
+        insert(src)
+      }
+      // 批量选择
+      var batchSelectedAttachments = this.batchSelectedImages
+      for (const i in batchSelectedAttachments) {
+        if (batchSelectedAttachments[i]) {
+          insert(batchSelectedAttachments[i].path)
+        }
+      }
+      this.uploadVisible = false
+    },
+    loadAttachments() {
+      this.queryParam.page = this.pagination.page - 1
+      this.queryParam.size = this.pagination.size
+      this.queryParam.sort = this.pagination.sort
+      this.listLoading = true
+      attachmentApi.query(this.queryParam).then(response => {
+        this.attachments = response.data.data.content
+        this.pagination.total = response.data.data.total
+        this.listLoading = false
+      })
+    },
+    loadMediaTypes() {
+      attachmentApi.getMediaTypes().then(response => {
+        this.mediaTypes = response.data.data
+      })
+    },
+    loadTypes() {
+      attachmentApi.getTypes().then(response => {
+        this.types = response.data.data
+      })
+    },
+    handleShowDetailDrawer(attachment) {
+      this.selectAttachment = attachment
+      if (this.supportMultipleSelection) {
+        this.drawerVisible = false
+      } else {
+        this.drawerVisible = true
+      }
+    },
+    handlePaginationChange(page, size) {
+      this.$log.debug(`Current: ${page}, PageSize: ${size}`)
+      this.pagination.page = page
+      this.pagination.size = size
+      this.loadAttachments()
+    },
+    handleResetParam() {
+      this.queryParam.keyword = null
+      this.queryParam.mediaType = null
+      this.queryParam.attachmentType = null
+      this.handlePaginationChange(1, this.pagination.size)
+      this.loadMediaTypes()
+      this.loadTypes()
+    },
+    handleQuery() {
+      this.handlePaginationChange(1, this.pagination.size)
+    },
+    onUploadClose() {
+      this.$refs.upload.handleClearFileList()
+      this.handlePaginationChange(1, this.pagination.size)
+      this.loadMediaTypes()
+      this.loadTypes()
+    },
+    handleJudgeMediaType(attachment) {
+      var mediaType = attachment.mediaType
+      // 判断文件类型
+      if (mediaType) {
+        var prefix = mediaType.split('/')[0]
+
+        if (prefix === 'image') {
+          // 是图片
+          return true
+        } else {
+          // 非图片
+          return false
+        }
+      }
+      // 没有获取到文件返回false
+      return false
+    },
+    getCheckStatus(key) {
+      return this.selectedAttachmentCheckbox[key] || false
+    },
+    handleMultipleSelection() {
+      this.supportMultipleSelection = true
+      // 不允许附件详情抽屉显示
+      this.drawerVisible = false
+      this.attachments.forEach(item => {
+        this.$set(this.selectedAttachmentCheckbox, item.id, false)
+      })
+    },
+    handleCancelMultipleSelection() {
+      this.supportMultipleSelection = false
+      this.drawerVisible = false
+      this.batchSelectedAttachments = []
+      for (var key in this.selectedCheckbox) {
+        this.$set(this.selectedAttachmentCheckbox, key, false)
+      }
+    },
+    handleAttachmentSelectionChanged(e, item) {
+      var isChecked = e.target.checked || false
+      if (isChecked) {
+        this.$set(this.selectedAttachmentCheckbox, item.id, true)
+        this.batchSelectedAttachments.push(item.id)
+        this.batchSelectedImages[item.id] = item
+      } else {
+        this.$set(this.selectedAttachmentCheckbox, item.id, false)
+        // 从选中id集合中删除id
+        var index = this.batchSelectedAttachments.indexOf(item.id)
+        this.batchSelectedAttachments.splice(index, 1)
+        delete this.batchSelectedImages[item.id]
+      }
+    },
+    handleDeleteAttachmentInBatch() {
+      var that = this
+      if (this.batchSelectedAttachments.length <= 0) {
+        this.$message.success('你还未选择任何附件，请至少选择一个！')
+        return
+      }
+      this.$confirm({
+        title: '确定要批量删除选中的附件吗?',
+        content: '一旦删除不可恢复，请谨慎操作',
+        onOk() {
+          attachmentApi.deleteInBatch(that.batchSelectedAttachments).then(res => {
+            that.handleCancelMultipleSelection()
+            that.loadAttachments()
+            that.$message.success('删除成功')
+          })
+        },
+        onCancel() {
+        }
+      })
+    }
+  }
+}
+</script>
+
+<style>
+    .center-layout {
+        text-align: center;
+    }
+
+    .center-layout:after {
+        display: inline-block;
+        height: 100%;
+        vertical-align: middle;
+        content: '';
+    }
+
+    .center-layout > * {
+        display: inline-block;
+        vertical-align: middle;
+        max-height: 100%;
+    }
+
+    .image-thumb {
+        height: 15em;
+        padding: 1em;
+    }
+
+    .image-thumb img {
+        width: 100%;
+    }
+
+    <!--上传样式覆盖-->
+    .filepond--root {
+      min-height: 10em;
+    }
+
+    .filepond--drop-label {
+      height: 10em;
+    }
+
+    .attachment {
+      width: 100% !important;
+    }
+
+    @media (max-width: 1200px) {
+      .image-thumb {
+        height: 20em;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .image-thumb {
+        height: 20em;
+      }
+    }
+    @media (max-width: 480px) {
+      .image-thumb {
+        height: 10em;
+      }
+    }
+</style>
