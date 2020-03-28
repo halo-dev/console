@@ -231,7 +231,7 @@ export default {
   methods: {
     handleValidateConfirmPassword(rule,value, callback){
       if (this.installation.confirmPassword && this.installation.password !==  this.installation.confirmPassword ) {
-        callback('确认密码和密码不匹')
+        callback('确认密码和密码不匹配')
       }
       callback()
     },
