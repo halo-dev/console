@@ -114,7 +114,7 @@
                   placeholder="确定密码"
                   v-decorator="[
                     'confirmPassword',
-                    {rules: [{ required: true, message: '请确定密码' }]}
+                    {rules: [{ required: true, message: '请确定密码' },{ validator: handleValidateConfirmPassword }]}
                   ]"
                 >
                   <a-icon
@@ -229,6 +229,12 @@ export default {
     this.$set(this.installation, 'url', window.location.protocol + '//' + window.location.host)
   },
   methods: {
+    handleValidateConfirmPassword(rule,value, callback){
+      if (this.installation.confirmPassword && this.installation.password !==  this.installation.confirmPassword ) {
+        callback('确认密码和密码不匹')
+      }
+      callback()
+    },
     verifyIsInstall() {
       adminApi.isInstalled().then(response => {
         if (response.data.data) {
