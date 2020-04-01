@@ -124,6 +124,9 @@
                       autocomplete="new-password"
                     />
                   </a-form-item>
+                  <a-form-item label="两步验证">
+                    <a-switch v-model="passwordParam.twoFactorAuth" />
+                  </a-form-item>
                   <a-form-item>
                     <a-button
                       :disabled="passwordUpdateButtonDisabled"
