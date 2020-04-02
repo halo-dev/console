@@ -142,6 +142,7 @@
           <a-input
             placeholder="两步验证码"
             v-model="authcode"
+            :maxLength="6"
           >
             <a-icon
               slot="prefix"
