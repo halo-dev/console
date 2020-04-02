@@ -143,4 +143,16 @@ postApi.permalinkType = {
     text: 'ID 型'
   }
 }
+
+postApi.articleAlias = {
+  DEFAULT: {
+    type: 'DEFAULT',
+    // 以文章标题作为别名
+    text: '默认'
+  },
+  SHA256: {
+    type: 'SHA256',
+    text: 'SHA256(<文章标题>)'
+  }
+}
 export default postApi

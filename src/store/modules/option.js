@@ -11,6 +11,7 @@ const keys = [
   'attachment_upload_max_files',
   'sheet_prefix',
   'post_permalink_type',
+  'post_article_alias',
   'archives_prefix',
   'path_suffix',
   'default_editor'

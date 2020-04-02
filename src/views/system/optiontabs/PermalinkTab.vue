@@ -19,6 +19,15 @@
           >{{ permalinkType[item].text }}</a-select-option>
         </a-select>
       </a-form-item>
+      <a-form-item label="自动生成文章别名">
+        <a-select v-model="options.post_article_alias">
+          <a-select-option
+            v-for="item in Object.keys(articleAlias)"
+            :key="item"
+            :value="item"
+          >{{ articleAlias[item].text }}</a-select-option>
+        </a-select>
+      </a-form-item>
       <a-form-item label="自定义页面前缀：">
         <template slot="help">
           <span>{{ options.blog_url }}/{{ options.sheet_prefix }}/${slug}{{ options.path_suffix }}</span>
@@ -89,6 +98,7 @@ export default {
   data() {
     return {
       permalinkType: postApi.permalinkType,
+      articleAlias: postApi.articleAlias,
       wrapperCol: {
         xl: { span: 8 },
         lg: { span: 8 },

@@ -314,6 +314,7 @@ import { mapGetters } from 'vuex'
 import categoryApi from '@/api/category'
 import postApi from '@/api/post'
 import themeApi from '@/api/theme'
+import sha256 from 'crypto-js/sha256'
 export default {
   name: 'PostSettingDrawer',
   mixins: [mixin, mixinDevice],
@@ -496,6 +497,15 @@ export default {
       // Set post metas
       this.selectedPost.metas = this.selectedMetas
       this.saving = true
+
+      // Set slug
+      if (this.selectedPost.slug == null || this.selectedPost.slug.length === 0) {
+        if (this.options.post_article_alias === 'DEFAULT') {
+          // do nothing
+        } else if (this.options.post_article_alias === 'SHA256') {
+          this.selectedPost.slug = sha256(this.selectedPost.title).toString()
+        }
+      }
       if (this.selectedPost.id) {
         // Update the post
         postApi
