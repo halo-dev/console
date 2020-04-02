@@ -19,7 +19,7 @@
           >{{ permalinkType[item].text }}</a-select-option>
         </a-select>
       </a-form-item>
-      <a-form-item label="自动生成文章别名">
+      <a-form-item label="自动生成文章别名：">
         <a-select v-model="options.post_article_alias">
           <a-select-option
             v-for="item in Object.keys(articleAlias)"
