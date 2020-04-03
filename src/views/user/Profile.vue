@@ -124,59 +124,6 @@
                       autocomplete="new-password"
                     />
                   </a-form-item>
-                  <a-form-item label="两步验证：">
-                    <a-switch
-                      v-model="mfaParam.switch.checked"
-                      :loading="mfaParam.switch.loading"
-                      @change="handleMFASwitch"
-                    />
-                  </a-form-item>
-                  <a-form-item label="两步验证应用：">
-                    <a-list
-                      :loading="statisticsLoading"
-                      itemLayout="horizontal"
-                    >
-                      <a-list-item>
-                        <b>Authy</b> 超好用的两步验证免费应用
-                        <a-divider type="vertical" />
-                        <a target="_blank" href="https://authy.com/download/">
-                          IOS/Android/Windows/Mac/Linux
-                          <a-icon type="link" />
-                        </a>
-                        <a-divider type="vertical" />
-                        <a target="_blank" href="https://chrome.google.com/webstore/detail/authy/gaedmjdfmmahhbjefcbgaolhhanlaolb?hl=cn">
-                          Chrome扩展
-                          <a-icon type="link" />
-                        </a>
-                      </a-list-item>
-                      <a-list-item>
-                        <b>GoogleAuthenticator</b> Google出品 好用但是不支持备份
-                        <a target="_blank" href="https://apps.apple.com/us/app/google-authenticator/id388497605">
-                          IOS
-                          <a-icon type="link" />
-                        </a>
-                        <a-divider type="vertical" />
-                        <a target="_blank" href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=cn">
-                          Android
-                          <a-icon type="link" />
-                        </a>
-                      </a-list-item>
-                      <a-list-item>
-                        <b>MicrosoftAuthenticator</b> 界面简约 新版本有数据备份功能
-                        <a target="_blank" href="https://www.microsoft.com/zh-cn/account/authenticator">
-                          IOS/Android
-                          <a-icon type="link" />
-                        </a>
-                      </a-list-item>
-                      <a-list-item>
-                        <b>1Password</b> 老牌强大的密码管理付费应用 支持全平台
-                        <a target="_blank" href="https://1password.com/zh-cn/downloads/">
-                          IOS/Android/Windows/Mac/Linux/ChromeOS
-                          <a-icon type="link" />
-                        </a>
-                      </a-list-item>
-                    </a-list>
-                  </a-form-item>
                   <a-form-item>
                     <a-button
                       :disabled="passwordUpdateButtonDisabled"
@@ -185,6 +132,67 @@
                     >确认更改</a-button>
                   </a-form-item>
                 </a-form>
+              </a-tab-pane>
+              <a-tab-pane key="3">
+                <span slot="tab">
+                  <a-icon type="safety-certificate" />两步验证
+                </span>
+                <a-form-item label="两步验证：">
+                  <a-switch
+                    v-model="mfaParam.switch.checked"
+                    :loading="mfaParam.switch.loading"
+                    @change="handleMFASwitch"
+                  />
+                </a-form-item>
+                <a-form-item label="两步验证应用：">
+                  <a-list
+                    :loading="statisticsLoading"
+                    itemLayout="horizontal"
+                  >
+                    <a-list-item>
+                      <b>Authy</b> 功能丰富 专为两步验证码
+                      <a-divider type="vertical" />
+                      <a target="_blank" href="https://authy.com/download/">
+                        IOS/Android/Windows/Mac/Linux
+                        <a-icon type="link" />
+                      </a>
+                      <a-divider type="vertical" />
+                      <a target="_blank" href="https://chrome.google.com/webstore/detail/authy/gaedmjdfmmahhbjefcbgaolhhanlaolb?hl=cn">
+                        Chrome扩展
+                        <a-icon type="link" />
+                      </a>
+                    </a-list-item>
+                    <a-list-item>
+                      <b>GoogleAuthenticator</b> 简单易用 但不支持密钥导出备份
+                      <a-divider type="vertical" />
+                      <a target="_blank" href="https://apps.apple.com/us/app/google-authenticator/id388497605">
+                        IOS
+                        <a-icon type="link" />
+                      </a>
+                      <a-divider type="vertical" />
+                      <a target="_blank" href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=cn">
+                        Android
+                        <a-icon type="link" />
+                      </a>
+                    </a-list-item>
+                    <a-list-item>
+                      <b>MicrosoftAuthenticator</b> 使用微软全家桶的推荐
+                      <a-divider type="vertical" />
+                      <a target="_blank" href="https://www.microsoft.com/zh-cn/account/authenticator">
+                        IOS/Android
+                        <a-icon type="link" />
+                      </a>
+                    </a-list-item>
+                    <a-list-item>
+                      <b>1Password</b> 强大安全的密码管理付费应用
+                      <a-divider type="vertical" />
+                      <a target="_blank" href="https://1password.com/zh-cn/downloads/">
+                        IOS/Android/Windows/Mac/Linux/ChromeOS
+                        <a-icon type="link" />
+                      </a>
+                    </a-list-item>
+                  </a-list>
+                </a-form-item>
               </a-tab-pane>
             </a-tabs>
           </div>
@@ -235,13 +243,15 @@
 
       <div v-else>
         <p>
-          1.请扫描二维码或导入key
+          1.请扫描二维码或导入 key
           <img
             width="235"
             :src="mfaParam.qrImage"
           />
         </p>
-        <p style="font-size: 12px;">MFAKey:<br>{{ mfaParam.mfaKey }} </p>
+        <p style="font-size: 12px;">
+          MFAKey:<br>{{ mfaParam.mfaKey }}
+        </p>
         <p>
           2.验证两步验证码
           <a-form-item>
@@ -258,7 +268,7 @@
             </a-input>
           </a-form-item>
         </p>
-        <p style="font-size: 12px;">* 推荐使用Authy/微软验证器</p>
+        <p style="font-size: 12px;">* 推荐使用 Authy | 微软验证器</p>
       </div>
     </a-modal>
   </div>
