@@ -12,7 +12,7 @@
               :key="pane.key"
             >
               <span slot="tab">
-                <a-icon type="paper-clip" />{{ pane.title }}
+                <a-icon :type="pane.icon" />{{ pane.title }}
               </span>
               <component :is="pane.component"></component>
             </a-tab-pane>
