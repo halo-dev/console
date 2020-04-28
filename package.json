@@ -47,7 +47,7 @@
     "eslint-plugin-vue": "^6.2.2",
     "generate-asset-webpack-plugin": "^0.3.0",
     "less": "^3.10.0",
-    "less-loader": "^5.0.0",
+    "less-loader": "^6.0.0",
     "vue-svg-component-runtime": "^1.0.1",
     "vue-svg-icon-loader": "^2.1.1",
     "vue-template-compiler": "^2.6.11"
