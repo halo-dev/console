@@ -41,7 +41,7 @@
             slot-scope="name"
           >
             <ellipsis
-              :length="64"
+              :length=64
               tooltip
             >
               {{ name }}

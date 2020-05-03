@@ -57,4 +57,22 @@ staticApi.rename = (basePath, newName) => {
   })
 }
 
+staticApi.getContent = url => {
+  return service({
+    url: `${url}`,
+    method: 'get'
+  })
+}
+
+staticApi.save = (basePath, content) => {
+  return service({
+    url: `${baseUrl}/save`,
+    data: {
+      basePath: basePath,
+      content: content
+    },
+    method: 'put'
+  })
+}
+
 export default staticApi
