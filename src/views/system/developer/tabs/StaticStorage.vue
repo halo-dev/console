@@ -91,6 +91,14 @@
                     <a href="javascript:;">删除</a>
                   </a-popconfirm>
                 </a-menu-item>
+                <a-menu-item
+                  key="3"
+                >
+                  <a
+                    href="javascript:;"
+                    @click="handleShowRenameModal(record)"
+                  >重命名</a>
+                </a-menu-item>
               </a-menu>
             </a-dropdown>
           </span>
@@ -132,9 +140,32 @@
         </a-form-item>
       </a-form>
     </a-modal>
+    <a-modal
+      v-model="renameModal"
+      :afterClose="onRenameClose"
+      title="重命名"
+    >
+      <template slot="footer">
+        <a-button
+          key="submit"
+          type="primary"
+          @click="handleRename()"
+        >重命名</a-button>
+      </template>
+      <a-form layout="vertical">
+        <a-form-item :label="isFile?'文件名：':'文件夹名：'">
+          <a-input
+            ref="renameModalInput"
+            v-model="renameName"
+            @keyup.enter="handleRename"
+          />
+        </a-form-item>
+      </a-form>
+    </a-modal>
   </div>
 </template>
 <script>
+import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import staticApi from '@/api/static'
 const columns = [
@@ -172,7 +203,10 @@ export default {
       uploadVisible: false,
       selectedFile: {},
       createFolderModal: false,
-      createFolderName: ''
+      createFolderName: '',
+      renameModal: false,
+      renameName: '',
+      isFile: false
     }
   },
   created() {
@@ -209,6 +243,24 @@ export default {
       this.selectedFile = file
       this.createFolderModal = true
     },
+    handleShowRenameModal(file) {
+      this.selectedFile = file
+      this.renameName = file.name
+      this.isFile = file.isFile
+      this.renameModal = true
+      const that = this
+      Vue.nextTick()
+        .then(() => {
+          const inputRef = that.$refs.renameModalInput
+          const tmp = inputRef.value.split('.')
+          inputRef.focus()
+          if (tmp.length <= 1) {
+            inputRef.$el.setSelectionRange(0, inputRef.value.length)
+          } else {
+            inputRef.$el.setSelectionRange(0, inputRef.value.length - tmp.pop().length - 1)
+          }
+        })
+    },
     handleCreateFolder() {
       staticApi.createFolder(this.selectedFile.relativePath, this.createFolderName).then(response => {
         this.$message.success(`创建文件夹成功！`)
@@ -216,9 +268,20 @@ export default {
         this.loadStaticList()
       })
     },
+    handleRename() {
+      staticApi.rename(this.selectedFile.relativePath, this.renameName).then(response => {
+        this.$message.success(`重命名成功！`)
+        this.renameModal = false
+        this.loadStaticList()
+      })
+    },
     onCreateFolderClose() {
       this.selectedFile = {}
       this.createFolderName = ''
+    },
+    onRenameClose() {
+      this.selectedFile = {}
+      this.renameName = ''
     },
     onUploadClose() {
       this.$refs.upload.handleClearFileList()
