@@ -64,11 +64,11 @@ staticApi.getContent = url => {
   })
 }
 
-staticApi.save = (basePath, content) => {
+staticApi.save = (path, content) => {
   return service({
-    url: `${baseUrl}/save`,
+    url: `${baseUrl}/files`,
     data: {
-      basePath: basePath,
+      path: path,
       content: content
     },
     method: 'put'
