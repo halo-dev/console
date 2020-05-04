@@ -41,16 +41,15 @@
               :sm="24"
             >
               <a-form-item label="分类目录：">
-                <a-select
-                  v-model="queryParam.categoryId"
+                <a-tree-select
+                  v-model="treeSelectValue"
+                  style="width: 100%"
+                  :dropdown-style="{ maxHeight: '400px', overflow: 'auto' }"
+                  :tree-data="categoryTree"
                   placeholder="请选择分类"
-                  @change="handleQuery()"
-                >
-                  <a-select-option
-                    v-for="category in categories"
-                    :key="category.id"
-                  >{{ category.name }} ({{ category.postCount }})</a-select-option>
-                </a-select>
+                  tree-default-expand-all
+                  @change="onTreeSelectChange"
+                />
               </a-form-item>
             </a-col>
 
@@ -610,7 +609,8 @@ export default {
       postCommentVisible: false,
       selectedPost: {},
       selectedTagIds: [],
-      selectedCategoryIds: []
+      selectedCategoryIds: [],
+      treeSelectValue: undefined
     }
   },
   computed: {
@@ -619,6 +619,9 @@ export default {
         post.statusProperty = this.postStatus[post.status]
         return post
       })
+    },
+    categoryTree() {
+      return categoryApi.concreteTree(this.categories)
     }
   },
   created() {
@@ -791,6 +794,11 @@ export default {
     },
     onRefreshPostMetasFromSetting(metas) {
       this.selectedMetas = metas
+    },
+    onTreeSelectChange(value) {
+      let id = this.categories.filter(category => category.name == value)[0].id
+      this.queryParam.categoryId = id
+      this.handleQuery()
     }
   }
 }
