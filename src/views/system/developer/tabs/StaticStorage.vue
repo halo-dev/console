@@ -214,7 +214,6 @@ import { mapGetters } from 'vuex'
 import staticApi from '@/api/static'
 import { codemirror } from 'vue-codemirror-lite'
 const context = require.context('codemirror/mode', true, /\.js$/)
-console.log(context)
 context.keys().map(context)
 const columns = [
   {
