@@ -24,9 +24,9 @@
             >
               <a-form-item label="文章状态：">
                 <a-select
-                  v-model="queryParam.status"
+                  v-model="selectStatus"
                   placeholder="请选择文章状态"
-                  @change="handleQuery()"
+                  @change="onStatusSelectChange"
                 >
                   <a-select-option
                     v-for="status in Object.keys(postStatus)"
@@ -578,7 +578,7 @@ export default {
   mixins: [mixin, mixinDevice],
   data() {
     return {
-      postStatus: postApi.postStatus,
+      postStatus: Object.assign({}, { ALL: { text: '所有文章' } }, postApi.postStatus),
       pagination: {
         page: 1,
         size: 10,
@@ -610,7 +610,8 @@ export default {
       selectedPost: {},
       selectedTagIds: [],
       selectedCategoryIds: [],
-      treeSelectValue: undefined
+      treeSelectValue: '所有分类',
+      selectStatus: 'ALL'
     }
   },
   computed: {
@@ -621,7 +622,13 @@ export default {
       })
     },
     categoryTree() {
-      return categoryApi.concreteTree(this.categories)
+      const tree = categoryApi.concreteTree(this.categories)
+      return [{
+        key: 0,
+        title: '所有分类',
+        value: '所有分类',
+        children: tree
+      }]
     }
   },
   created() {
@@ -704,6 +711,8 @@ export default {
       this.queryParam.keyword = null
       this.queryParam.categoryId = null
       this.queryParam.status = null
+      this.selectStatus = 'ALL'
+      this.treeSelectValue = '所有分类'
       this.handleClearRowKeys()
       this.handlePaginationChange(1, this.pagination.size)
     },
@@ -796,8 +805,16 @@ export default {
       this.selectedMetas = metas
     },
     onTreeSelectChange(value) {
-      let id = this.categories.filter(category => category.name == value)[0].id
-      this.queryParam.categoryId = id
+      if (value === '所有分类') {
+        this.queryParam.categoryId = null
+      } else {
+        const id = this.categories.filter(category => category.name === value)[0].id
+        this.queryParam.categoryId = id
+      }
+      this.handleQuery()
+    },
+    onStatusSelectChange(value) {
+      this.queryParam.status = value === 'ALL' ? null : value
       this.handleQuery()
     }
   }
