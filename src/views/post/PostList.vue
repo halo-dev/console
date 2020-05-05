@@ -125,6 +125,69 @@
                 <span>永久删除</span>
               </a>
             </a-menu-item>
+            <a-sub-menu
+              key="5"
+              title="开启评论"
+              v-if="queryParam.status === 'PUBLISHED' || queryParam.status === 'INTIMATE'"
+            >
+              <a-menu-item>
+                <a
+                  href="javascript:void(0);"
+                  @click="handleDisallowComment(false)"
+                >
+                  <span>开启</span>
+                </a>
+              </a-menu-item>
+              <a-menu-item>
+                <a
+                  href="javascript:void(0);"
+                  @click="handleDisallowComment(true)"
+                >
+                  <span>关闭</span>
+                </a>
+              </a-menu-item>
+            </a-sub-menu>
+            <a-sub-menu
+              key="6"
+              title="是否置顶"
+              v-if="queryParam.status === 'PUBLISHED' || queryParam.status === 'INTIMATE'"
+            >
+              <a-menu-item>
+                <a
+                  href="javascript:void(0);"
+                  @click="handleTopPriority(1)"
+                >
+                  <span>是</span>
+                </a>
+              </a-menu-item>
+              <a-menu-item>
+                <a
+                  href="javascript:void(0);"
+                  @click="handleTopPriority(0)"
+                >
+                  <span>否</span>
+                </a>
+              </a-menu-item>
+            </a-sub-menu>
+            <a-menu-divider
+              v-if="queryParam.status === 'PUBLISHED' || queryParam.status === 'INTIMATE'"
+            />
+            <a-menu-item
+              key="7"
+              v-if="queryParam.status === 'PUBLISHED' || queryParam.status === 'INTIMATE'"
+            >
+              <a-popover placement="right">
+                <template slot="content">
+                  设置分类 & 标签 & 加密
+                </template>
+                <a
+                  href="javascript:void(0);"
+                  @click="handleShowBatchOperation"
+                >
+                  <span>其他操作</span>
+                </a>
+              </a-popover>
+            </a-menu-item>
           </a-menu>
           <a-button style="margin-left: 8px;">
             批量操作
@@ -505,6 +568,12 @@
       :id="selectedPost.id"
       @close="onPostCommentsClose"
     />
+
+    <BatchOperationDrawer
+      :postIds="selectedPostIds"
+      :visible="batchOperationVisible"
+      @close="onBatchOperationClose"
+    />
   </div>
 </template>
 
@@ -512,7 +581,7 @@
 import { mixin, mixinDevice } from '@/utils/mixin.js'
 import PostSettingDrawer from './components/PostSettingDrawer'
 import TargetCommentDrawer from '../comment/components/TargetCommentDrawer'
-import AttachmentSelectDrawer from '../attachment/components/AttachmentSelectDrawer'
+import BatchOperationDrawer from './components/BatchOperationDrawer'
 import TagSelect from './components/TagSelect'
 import CategoryTree from './components/CategoryTree'
 import categoryApi from '@/api/category'
@@ -569,11 +638,11 @@ const columns = [
 export default {
   name: 'PostList',
   components: {
-    AttachmentSelectDrawer,
     TagSelect,
     CategoryTree,
     PostSettingDrawer,
-    TargetCommentDrawer
+    TargetCommentDrawer,
+    BatchOperationDrawer
   },
   mixins: [mixin, mixinDevice],
   data() {
@@ -607,9 +676,11 @@ export default {
       postsLoading: false,
       postSettingVisible: false,
       postCommentVisible: false,
+      batchOperationVisible: false,
       selectedPost: {},
       selectedTagIds: [],
       selectedCategoryIds: [],
+      selectedPostIds: [],
       treeSelectValue: '所有分类',
       selectStatus: 'ALL'
     }
@@ -754,6 +825,28 @@ export default {
         this.loadPosts()
       })
     },
+    handleDisallowComment(disallowComment) {
+      if (this.selectedRowKeys.length <= 0) {
+        this.$message.info('请至少选择一项！')
+        return
+      }
+      postApi.updateDisallowCommentInBatch(this.selectedRowKeys, disallowComment).then(response => {
+        this.$log.debug(`postId: ${this.selectedRowKeys}, disallowComment: ${disallowComment}`)
+        this.selectedRowKeys = []
+        this.loadPosts()
+      })
+    },
+    handleTopPriority(topPriority) {
+      if (this.selectedRowKeys.length <= 0) {
+        this.$message.info('请至少选择一项！')
+        return
+      }
+      postApi.updateTopPriorityInBatch(this.selectedRowKeys, topPriority).then(response => {
+        this.$log.debug(`postId: ${this.selectedRowKeys}, topPriority: ${topPriority}`)
+        this.selectedRowKeys = []
+        this.loadPosts()
+      })
+    },
     handleShowPostSettings(post) {
       postApi.get(post.id).then(response => {
         this.selectedPost = response.data.data
@@ -768,6 +861,9 @@ export default {
         this.selectedPost = response.data.data
         this.postCommentVisible = true
       })
+    },
+    handleShowBatchOperation() {
+      this.batchOperationVisible = true
     },
     handlePreview(postId) {
       postApi.preview(postId).then(response => {
@@ -787,6 +883,13 @@ export default {
     },
     onPostCommentsClose() {
       this.postCommentVisible = false
+      this.selectedPost = {}
+      setTimeout(() => {
+        this.loadPosts()
+      }, 500)
+    },
+    onBatchOperationClose() {
+      this.batchOperationVisible = false
       this.selectedPost = {}
       setTimeout(() => {
         this.loadPosts()

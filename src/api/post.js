@@ -76,6 +76,22 @@ postApi.updateStatusInBatch = (ids, status) => {
   })
 }
 
+postApi.updateDisallowCommentInBatch = (ids, disallowComment) => {
+  return service({
+    url: `${baseUrl}/disallow_comment/${disallowComment}`,
+    data: ids,
+    method: 'put'
+  })
+}
+
+postApi.updateTopPriorityInBatch = (ids, topPriority) => {
+  return service({
+    url: `${baseUrl}/top_priority/${topPriority}`,
+    data: ids,
+    method: 'put'
+  })
+}
+
 postApi.delete = postId => {
   return service({
     url: `${baseUrl}/${postId}`,
