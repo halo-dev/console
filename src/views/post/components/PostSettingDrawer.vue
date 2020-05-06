@@ -533,7 +533,7 @@ export default {
               this.$message.success('文章发布成功！')
             }
             this.selectedPost = response.data.data
-            
+
             this.closeAndJump()
           })
           .finally(() => {
