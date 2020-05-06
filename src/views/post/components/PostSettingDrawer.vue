@@ -515,6 +515,9 @@ export default {
             }
 
             this.$emit('close')
+            if (this.saveDraftButton) {
+              this.$router.push({ name: 'PostList' })
+            }
           })
           .finally(() => {
             this.saving = false
@@ -534,6 +537,9 @@ export default {
             }
             this.selectedPost = response.data.data
             this.$emit('close')
+            if (this.saveDraftButton) {
+              this.$router.push({ name: 'PostList' })
+            }
           })
           .finally(() => {
             this.saving = false

@@ -100,7 +100,7 @@
                 href="javascript:void(0);"
                 @click="handleEditStatusMore(postStatus.RECYCLE.value)"
               >
-                <span>移到回收站</span>
+                <span>移入回收站</span>
               </a>
             </a-menu-item>
             <a-menu-item
@@ -811,6 +811,17 @@ export default {
       }
       postApi.updateStatusInBatch(this.selectedRowKeys, status).then(response => {
         this.$log.debug(`postId: ${this.selectedRowKeys}, status: ${status}`)
+        switch (status) {
+          case postApi.postStatus.PUBLISHED.value:
+            this.$message.success('发布成功！')
+            break;
+          case postApi.postStatus.DRAFT.value:
+            this.$message.success('设置草稿成功！')
+            break;
+          case postApi.postStatus.RECYCLE.value:
+            this.$message.success('移入回收站成功！')
+            break;
+        }
         this.selectedRowKeys = []
         this.loadPosts()
       })
@@ -823,6 +834,7 @@ export default {
       postApi.deleteInBatch(this.selectedRowKeys).then(response => {
         this.$log.debug(`delete: ${this.selectedRowKeys}`)
         this.selectedRowKeys = []
+        this.$message.success('永久删除成功！')
         this.loadPosts()
       })
     },
@@ -834,6 +846,11 @@ export default {
       postApi.updateDisallowCommentInBatch(this.selectedRowKeys, disallowComment).then(response => {
         this.$log.debug(`postId: ${this.selectedRowKeys}, disallowComment: ${disallowComment}`)
         this.selectedRowKeys = []
+        if (disallowComment) {
+          this.$message.success('关闭评论成功！')
+        } else {
+          this.$message.success('开启评论成功！')
+        }
         this.loadPosts()
       })
     },
@@ -845,6 +862,11 @@ export default {
       postApi.updateTopPriorityInBatch(this.selectedRowKeys, topPriority).then(response => {
         this.$log.debug(`postId: ${this.selectedRowKeys}, topPriority: ${topPriority}`)
         this.selectedRowKeys = []
+        if (topPriority === 1) {
+          this.$message.success('置顶成功！')
+        } else {
+          this.$message.success('取消置顶成功！')
+        }
         this.loadPosts()
       })
     },
