@@ -45,15 +45,15 @@
         <a-divider />
 
         <div :style="{ marginBottom: '16px' }">
-            <h3
-              class="post-setting-drawer-title"
-            >分类目录
-              <a-switch
-                checked-children="覆盖"
-                un-checked-children="不更变"
-                v-model="categorySwitch"
-                style="float: right;"/>
-            </h3>
+          <h3
+            class="post-setting-drawer-title"
+          >分类目录
+            <a-switch
+              checked-children="覆盖"
+              un-checked-children="不更变"
+              v-model="categorySwitch"
+              style="float: right;"/>
+          </h3>
           <div class="post-setting-drawer-item">
             <a-form layout="vertical">
               <a-form-item>
@@ -165,14 +165,11 @@
 </template>
 <script>
 import { mixin, mixinDevice } from '@/utils/mixin.js'
-import moment from 'moment'
 import CategoryTree from './CategoryTree'
 import CategorySelectTree from './CategorySelectTree'
 import TagSelect from './TagSelect'
-import { mapGetters } from 'vuex'
 import categoryApi from '@/api/category'
 import postApi from '@/api/post'
-import themeApi from '@/api/theme'
 export default {
   name: 'BatchOperationDrawer',
   mixins: [mixin, mixinDevice],
@@ -194,7 +191,7 @@ export default {
       topPriority: null,
       selectedCategoryIds: [],
       selectedTagIds: [],
-      password: "",
+      password: '',
       categorySwitch: false,
       tagSwitch: false,
       passwordSwitch: false

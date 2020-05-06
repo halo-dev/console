@@ -513,7 +513,7 @@ export default {
             } else {
               this.$message.success('文章更新成功！')
             }
-            
+
             // close drawer
             this.$emit('close')
             // if in "posts/write" page then push

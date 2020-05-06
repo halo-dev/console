@@ -684,7 +684,7 @@ export default {
       selectedCategoryIds: [],
       treeSelectValue: '所有分类',
       selectStatus: 'ALL',
-      selectedPosts: [],
+      selectedPosts: []
     }
   },
   computed: {
@@ -816,13 +816,13 @@ export default {
         switch (status) {
           case postApi.postStatus.PUBLISHED.value:
             this.$message.success('发布成功！')
-            break;
+            break
           case postApi.postStatus.DRAFT.value:
             this.$message.success('设置草稿成功！')
-            break;
+            break
           case postApi.postStatus.RECYCLE.value:
             this.$message.success('移入回收站成功！')
-            break;
+            break
         }
         this.selectedRowKeys = []
         this.loadPosts()
