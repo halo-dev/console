@@ -6,6 +6,7 @@
       allowClear
       mode="tags"
       placeholder="选择或输入标签"
+      :disabled="disabled"
       @change="handleChange"
     >
       <a-select-option
@@ -32,6 +33,11 @@ export default {
       type: Array,
       required: false,
       default: () => []
+    },
+    disabled: {
+      type: Boolean,
+      required: false,
+      default: false
     }
   },
   data() {

@@ -4,6 +4,7 @@
     :treeData="categoryTree"
     :defaultExpandAll="true"
     :checkedKeys="categoryIds"
+    :disabled="disabled"
     @check="onCheck"
   >
   </a-tree>
@@ -28,6 +29,11 @@ export default {
       type: Array,
       required: false,
       default: () => []
+    },
+    disabled: {
+      type: Boolean,
+      required: false,
+      default: false
     }
   },
   computed: {

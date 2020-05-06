@@ -29,6 +29,14 @@ postApi.get = postId => {
   })
 }
 
+postApi.getPosts = postIds => {
+  return service({
+    url: `${baseUrl}/posts`,
+    method: 'post',
+    data: postIds
+  })
+}
+
 postApi.create = (postToCreate, autoSave) => {
   return service({
     url: baseUrl,
@@ -88,6 +96,14 @@ postApi.updateTopPriorityInBatch = (ids, topPriority) => {
   return service({
     url: `${baseUrl}/top_priority/${topPriority}`,
     data: ids,
+    method: 'put'
+  })
+}
+
+postApi.updataSettingInBatch = settingParams => {
+  return service({
+    url: `${baseUrl}/setting`,
+    data: settingParams,
     method: 'put'
   })
 }

@@ -184,7 +184,7 @@
                   href="javascript:void(0);"
                   @click="handleShowBatchOperation"
                 >
-                  <span>其他操作</span>
+                  <span>更多操作</span>
                 </a>
               </a-popover>
             </a-menu-item>
@@ -570,7 +570,8 @@
     />
 
     <BatchOperationDrawer
-      :postIds="selectedPostIds"
+      :posts="selectedPosts"
+      :postIds="selectedRowKeys"
       :visible="batchOperationVisible"
       @close="onBatchOperationClose"
     />
@@ -680,9 +681,9 @@ export default {
       selectedPost: {},
       selectedTagIds: [],
       selectedCategoryIds: [],
-      selectedPostIds: [],
       treeSelectValue: '所有分类',
-      selectStatus: 'ALL'
+      selectStatus: 'ALL',
+      selectedPosts: [],
     }
   },
   computed: {
@@ -863,7 +864,14 @@ export default {
       })
     },
     handleShowBatchOperation() {
-      this.batchOperationVisible = true
+      if (this.selectedRowKeys.length <= 0) {
+        this.$message.info('请至少选择一项！')
+        return
+      }
+      postApi.getPosts(this.selectedRowKeys).then(response => {
+        this.selectedPosts = response.data.data
+        this.batchOperationVisible = true
+      })
     },
     handlePreview(postId) {
       postApi.preview(postId).then(response => {
