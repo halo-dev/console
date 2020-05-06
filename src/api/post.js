@@ -32,8 +32,10 @@ postApi.get = postId => {
 postApi.getPosts = postIds => {
   return service({
     url: `${baseUrl}/posts`,
-    method: 'post',
-    data: postIds
+    method: 'get',
+    params: {
+      ids: postIds + ''
+    }
   })
 }
 
