@@ -298,6 +298,9 @@ export default {
     },
     toggleCategoryForm() {
       this.categoryFormVisible = !this.categoryFormVisible
+    },
+    onClose() {
+      this.$emit('close')
     }
   }
 }

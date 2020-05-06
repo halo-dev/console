@@ -538,7 +538,7 @@ export default {
               this.$message.success('文章发布成功！')
             }
             this.selectedPost = response.data.data
-            
+
             // close drawer
             this.$emit('close')
             // if in "posts/write" page then push
