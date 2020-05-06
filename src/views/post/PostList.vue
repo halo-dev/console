@@ -898,7 +898,6 @@ export default {
     },
     onBatchOperationClose() {
       this.batchOperationVisible = false
-      this.selectedPost = {}
       setTimeout(() => {
         this.loadPosts()
       }, 500)

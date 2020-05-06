@@ -286,7 +286,7 @@ export default {
 
           this.$message.success('批量操作成功！')
 
-          this.$router.push({ name: 'PostList' })
+          this.$emit('close')
         })
         .finally(() => {
           this.saving = false
@@ -295,9 +295,6 @@ export default {
     },
     toggleCategoryForm() {
       this.categoryFormVisible = !this.categoryFormVisible
-    },
-    onClose() {
-      this.$emit('close', false)
     }
   }
 }

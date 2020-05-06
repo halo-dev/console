@@ -514,8 +514,7 @@ export default {
               this.$message.success('文章更新成功！')
             }
 
-            this.$emit('onSaved', true)
-            this.$router.push({ name: 'PostList' })
+            this.$emit('close')
           })
           .finally(() => {
             this.saving = false
@@ -533,10 +532,8 @@ export default {
             } else {
               this.$message.success('文章发布成功！')
             }
-
-            this.$emit('onSaved', true)
-            this.$router.push({ name: 'PostList' })
             this.selectedPost = response.data.data
+            this.$emit('close')
           })
           .finally(() => {
             this.saving = false
