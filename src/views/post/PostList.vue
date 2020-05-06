@@ -648,6 +648,7 @@ export default {
   mixins: [mixin, mixinDevice],
   data() {
     return {
+      // unshift an option of all post
       postStatus: Object.assign({}, { ALL: { text: '所有文章' } }, postApi.postStatus),
       pagination: {
         page: 1,
@@ -695,6 +696,7 @@ export default {
     },
     categoryTree() {
       const tree = categoryApi.concreteTree(this.categories)
+      // insert a parent node of all category
       return [{
         key: 0,
         title: '所有分类',

@@ -513,8 +513,10 @@ export default {
             } else {
               this.$message.success('文章更新成功！')
             }
-
+            
+            // close drawer
             this.$emit('close')
+            // if in "posts/write" page then push
             if (this.saveDraftButton) {
               this.$router.push({ name: 'PostList' })
             }
@@ -536,7 +538,10 @@ export default {
               this.$message.success('文章发布成功！')
             }
             this.selectedPost = response.data.data
+            
+            // close drawer
             this.$emit('close')
+            // if in "posts/write" page then push
             if (this.saveDraftButton) {
               this.$router.push({ name: 'PostList' })
             }

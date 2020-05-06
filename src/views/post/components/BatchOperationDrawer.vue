@@ -218,6 +218,7 @@ export default {
   watch: {
     posts(val) {
       this.selectedPosts = val
+      // if all posts have the same setting, then display it
       const disallowCommentEqual =
         val.every((val, i, arr) => val.disallowComment === arr[0].disallowComment)
       const topPriorityEqual =
@@ -272,6 +273,8 @@ export default {
     },
     handleSaveSettings() {
       this.saving = true
+      // construct a param by the status of switch
+      // selectedTagIds is default to be null, but we need []
       const settingParams = {
         ids: this.selectedPostIds,
         disallowComment: this.disallowComment,
