@@ -175,10 +175,16 @@ export default {
       } else {
         if (event.key === '1') {
           this.view = VIEW_TYPE.WEEK
+          this.weekData = []
+          this.initWeekData()
         } else if (event.key === '2') {
           this.view = VIEW_TYPE.MONTH
+          this.monthData = []
+          this.initMonthData()
         } else if (event.key === '3') {
           this.view = VIEW_TYPE.YEAR
+          this.yearData = []
+          this.initYearData()
         }
         this.loadData()
       }
