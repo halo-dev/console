@@ -1,7 +1,18 @@
 <template>
-  <a-card title="访客地图" :loading="loading" :body-style="{ padding: '20px 24px' }" :bordered="false">
-    <div ref="container" style="height: 308px; width: 100%;"></div>
-    <a-tooltip placement="bottomLeft" slot="extra">
+  <a-card
+    title="访客地图"
+    :loading="loading"
+    :body-style="{ padding: '20px 24px' }"
+    :bordered="false"
+  >
+    <div
+      ref="container"
+      style="height: 308px; width: 100%;"
+    ></div>
+    <a-tooltip
+      placement="bottomLeft"
+      slot="extra"
+    >
       <template slot="title">
         <span>近一年访问量的统计</span>
       </template>
@@ -36,8 +47,8 @@ export default {
       provinces: mapInfo.provinces,
       translate: mapInfo.translate,
       charts: null,
-      worldMap: true,
-      dataList: []
+      dataList: [],
+      maxVisitCount: 0
     }
   },
   created() {
@@ -46,36 +57,48 @@ export default {
   },
   methods: {
     initDataList() {
+      // initial data for echarts
       for (const country of this.countries) {
         this.dataList.push({
-          'name': country,
+          'name': country.en,
+          'name_cn': country.cn,
           'value': 0
         })
       }
       for (const province of this.provinces) {
         this.dataList.push({
           'name': province,
+          'name_cn': province,
           'value': 0
         })
       }
     },
     loadDataList() {
-      visitLogApi.getVisitsByRegion().then(response => {
+      visitLogApi.getVisitsByRegion(359).then(response => {
         const data = response.data.data
-        var countByCountry = data.countByCountry
-        const countByProvince = data.countByProvince
+        let countByCountry = data.countByCountry
+        let countByProvince = data.countByProvince
+        // preprocess geo name for echarts
+        // country name for example: we have '中国', but echarts needs 'China'
         countByCountry = countByCountry.map(item => {
           item.region = this.translate[item.region]
           return item
         })
+        // province name for example: we have '北京市', but echarts needs '北京'
+        countByProvince = countByProvince.map(item => {
+          item.region = this.processProcvinceName(item.region)
+          return item
+        })
+        // replace the data in datalist
         countByCountry.forEach(itemOne => {
-          var temp = this.dataList.find(itemTwo => itemTwo.name === itemOne.region)
+          const temp = this.dataList.find(itemTwo => itemTwo.name === itemOne.region)
           if (temp) {
             temp.value = itemOne.count
+            this.maxVisitCount = Math.max(this.maxVisitCount, temp.value)
           }
         })
         countByProvince.forEach(itemOne => {
-          var temp = this.dataList.find(itemTwo => itemTwo.name === itemOne.region)
+          const temp = this.dataList.find(itemTwo => itemTwo.name === itemOne.region)
           if (temp) {
             temp.value = itemOne.count
           }
@@ -91,21 +114,42 @@ export default {
           ]
         })
       })
+    },
+    processProcvinceName(province) {
+      if (province.endsWith('维吾尔自治区')) {
+        return province.substring(0, province.length - 6)
+      } else if (province.endsWith('回族自治区') || province.endsWith('特别行政区')) {
+        return province.substring(0, province.length - 5)
+      } else if (province.endsWith('自治区')) {
+        return province.substring(0, province.length - 3)
+      } else if (province.endsWith('省') || province.endsWith('市')) {
+        return province.substring(0, province.length - 1)
+      } else {
+        return province
+      }
+    }
+  },
+  computed: {
+    maxScalaValue() {
+      return Math.max(10, this.maxVisitCount)
     }
   },
   mounted() {
     this.charts = echarts.init(this.$refs.container)
-    const charts = this.charts
     const that = this
     this.charts.setOption({
       tooltip: {
         formatter: (params, ticket, callback) => {
-          return params.seriesName + '<br />' + params.name + '：' + (isNaN(params.value) ? 0 : params.value)
+          let hint = ''
+          if (params.name === 'China') {
+            hint = '(点击进入中国地图)'
+          }
+          return '访问量' + hint + '<br />' + params.data.name_cn + '：' + (isNaN(params.value) ? 0 : params.value)
         }
       },
       visualMap: {
         min: 0,
-        max: 100,
+        max: this.maxScalaValue,
         left: 'left',
         top: 'bottom',
         inRange: {
@@ -126,7 +170,7 @@ export default {
             icon:
               '<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M175 75C171.562 66.8945 169.25 63.2695 163 57C156.75 50.7305 150.605 45.9375 142.5 42.5C134.102 38.9258 125.672 37.5 116.492 37.5H72H28.25L49.168 12.5938C50.6914 11.0703 50.6914 11.5234 49.168 10C47.6446 8.47656 48.5234 8.47656 47 10L23 39C23 37.6133 23 40.5 23 39C23 40.3672 23 39 23 40L47 65C48.5234 66.5234 48.4766 66.5234 50 65C51.5234 63.4766 50.6914 63.7656 49.168 62.2422L28.25 41.3242H116.492C149.773 41.3242 176.844 68.3945 176.844 101.676C176.844 134.957 149.773 162.027 116.492 162.027H55.8086C53.6602 162.027 53.5 162.352 53.5 164.5C53.5 166.648 53.6602 166.5 55.8086 166.5H86H116.492C125.652 166.5 133.582 164.574 142 161C150.105 157.562 156.23 152.75 162.5 146.5C168.77 140.23 172.562 135.605 176 127.5C179.574 119.102 180.5 110.855 180.5 101.676C180.5 92.4961 178.574 83.418 175 75Z" fill="#707070"/></svg>',
             onclick: function() {
-              charts.setOption({
+              that.charts.setOption({
                 geo: {
                   map: 'world',
                   zoom: 1.25,
@@ -196,11 +240,11 @@ export default {
       ]
     })
     window.onresize = function() {
-      charts.resize()
+      that.charts.resize()
     }
     this.charts.on('click', ev => {
       if (ev.name === 'China') {
-        charts.setOption({
+        that.charts.setOption({
           geo: {
             map: 'china',
             center: [106, 38]

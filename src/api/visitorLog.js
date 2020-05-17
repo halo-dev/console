@@ -32,9 +32,12 @@ visitLogApi.getVisitsByMonth = months => {
   })
 }
 
-visitLogApi.getVisitsByRegion = () => {
+visitLogApi.getVisitsByRegion = days => {
   return service({
     url: `${baseUrl}/region`,
+    params: {
+      days: days
+    },
     method: 'get'
   })
 }

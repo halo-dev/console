@@ -1,7 +1,15 @@
 <template>
-  <a-card title="流量统计" :loading="loading" :body-style="{ padding: '20px 16px' }" :bordered="false">
+  <a-card
+    title="流量统计"
+    :loading="loading"
+    :body-style="{ padding: '20px 16px' }"
+    :bordered="false"
+  >
     <a-dropdown slot="extra">
-      <a-menu slot="overlay" @click="handleOptionClick">
+      <a-menu
+        slot="overlay"
+        @click="handleOptionClick"
+      >
         <a-menu-item key="1">近七天</a-menu-item>
         <a-menu-item key="2">近三十天</a-menu-item>
         <a-menu-item key="3">近一年</a-menu-item>
@@ -9,7 +17,10 @@
       </a-menu>
       <a-icon type="ellipsis" />
     </a-dropdown>
-    <div id="container" style="height: 308px; width: 100%;"></div>
+    <div
+      id="container"
+      style="height: 308px; width: 100%;"
+    ></div>
   </a-card>
 </template>
 <script>
@@ -20,7 +31,7 @@ import visitLogApi from '@/api/visitorLog'
 const ONE_DAY = 1000 * 60 * 60 * 24
 const WEEKDAY_ABBR = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const MONTH_ABBR = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec']
-const viewType = {
+const VIEW_TYPE = {
   WEEK: 1,
   MONTH: 2,
   YEAR: 3
@@ -54,33 +65,35 @@ export default {
       monthData: [],
       yearData: [],
       dateString: [],
-      view: viewType.WEEK
+      view: VIEW_TYPE.WEEK
     }
   },
   watch: {
     visitCountToday(newVal, oldVal) {
       const date = new Date(newVal.date)
+      // if current date is not same with server's current date (e.g. after 24PM)
       if (date.getTime() !== this.current.getTime()) {
+        // update current date and reload the chart data
         this.current = new Date()
         this.current.setHours(0, 0, 0, 0)
         this.initData()
         this.loadData()
       } else {
-        if (this.view !== viewType.YEAR && this.chartData[this.chartData.length - 1].visit !== newVal.count) {
+        // if the value sent from server is different from current chartdata, update it
+        if (this.view !== VIEW_TYPE.YEAR && this.chartData[this.chartData.length - 1].visit !== newVal.count) {
           this.chartData[this.chartData.length - 1].visit = newVal.count
           this.chart.changeData(this.chartData)
         }
       }
     },
     visitCountCurrentMonth(newVal, oldVal) {
-      console.log(newVal)
       if (this.current.getMonth() + 1 !== newVal.month) {
         this.current = new Date()
         this.current.setHours(0, 0, 0, 0)
         this.initData()
         this.loadData()
       } else {
-        if (this.view === viewType.YEAR && this.chartData[this.chartData.length - 1].visit !== newVal.count) {
+        if (this.view === VIEW_TYPE.YEAR && this.chartData[this.chartData.length - 1].visit !== newVal.count) {
           this.chartData[this.chartData.length - 1].visit = newVal.count
           this.chart.changeData(this.chartData)
         }
@@ -90,11 +103,11 @@ export default {
   computed: {
     chartData() {
       switch (this.view) {
-        case viewType.WEEK:
+        case VIEW_TYPE.WEEK:
           return this.weekData
-        case viewType.MONTH:
+        case VIEW_TYPE.MONTH:
           return this.monthData
-        case viewType.YEAR:
+        case VIEW_TYPE.YEAR:
           return this.yearData
         default:
           return []
@@ -112,29 +125,30 @@ export default {
       autoFit: true,
       height: 308
     })
-    this.chart.data(this.chartData)
-    this.chart.scale({
-      date: {
-        nice: true
-      },
-      visit: {
-        alias: '访问量',
-        nice: true,
-        min: 0
-      }
-    })
-    this.chart.axis('visit', {
-      label: {
-        formatter: val => {
-          return val
+    this.chart
+      .data(this.chartData)
+      .scale({
+        date: {
+          nice: true
+        },
+        visit: {
+          alias: '访问量',
+          nice: true,
+          min: 0
         }
-      }
-    })
-    this.chart.tooltip({
-      shared: true,
-      showCrosshairs: true,
-      title: 'dateString'
-    })
+      })
+      .axis('visit', {
+        label: {
+          formatter: val => {
+            return val
+          }
+        }
+      })
+      .tooltip({
+        shared: true,
+        showCrosshairs: true,
+        title: 'dateString'
+      })
     this.chart
       .line()
       .position('date*visit')
@@ -145,19 +159,16 @@ export default {
     this.loadData()
   },
   methods: {
-    onUpadateData() {
-      this.chart.changeData(this.visitData)
-    },
     handleOptionClick(event) {
       if (event.key === '4') {
         this.$emit('showLog')
       } else {
         if (event.key === '1') {
-          this.view = viewType.WEEK
+          this.view = VIEW_TYPE.WEEK
         } else if (event.key === '2') {
-          this.view = viewType.MONTH
+          this.view = VIEW_TYPE.MONTH
         } else if (event.key === '3') {
-          this.view = viewType.YEAR
+          this.view = VIEW_TYPE.YEAR
         }
         this.loadData()
       }
@@ -222,12 +233,12 @@ export default {
       }
     },
     loadData() {
-      if (this.view === viewType.WEEK) {
+      if (this.view === VIEW_TYPE.WEEK) {
         this.loadDataByDay(7)
-      } else if (this.view === viewType.MONTH) {
+      } else if (this.view === VIEW_TYPE.MONTH) {
         this.loadDataByDay(30)
       } else {
-        this.loadDataByMonth(12)
+        this.loadDataByMonth()
       }
     },
     loadDataByDay(interval) {
