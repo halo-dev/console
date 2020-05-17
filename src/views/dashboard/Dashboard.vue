@@ -90,6 +90,32 @@
     </a-row>
     <a-row :gutter="12">
       <a-col
+        :xl="12"
+        :lg="12"
+        :md="24"
+        :sm="24"
+        :xs="24"
+        :style="{ marginBottom: '12px' }"
+      >
+        <VisitChart
+          @showLog="handleShowVisitorLogListDrawer"
+          :visitCountToday="statisticsData.visitCountToday"
+          :visitCountCurrentMonth="statisticsData.visitCountCurrentMonth"
+        />
+      </a-col>
+      <a-col
+        :xl="12"
+        :lg="12"
+        :md="24"
+        :sm="24"
+        :xs="24"
+        :style="{ marginBottom: '12px' }"
+      >
+        <VisitorMapCard />
+      </a-col>
+    </a-row>
+    <a-row :gutter="12">
+      <a-col
         :xl="8"
         :lg="8"
         :md="12"
@@ -262,6 +288,11 @@
       :visible="logListDrawerVisible"
       @close="handleLogListClose"
     />
+
+    <VisitorLogListDrawer
+      :visible="visitorLogListDrawerVisible"
+      @close="handleVisitorLogListClose"
+    />
   </page-view>
 </template>
 
@@ -270,6 +301,9 @@ import { PageView } from '@/layouts'
 import AnalysisCard from './components/AnalysisCard'
 import RecentCommentTab from './components/RecentCommentTab'
 import LogListDrawer from './components/LogListDrawer'
+import VisitorLogListDrawer from './components/VisitorLogListDrawer'
+import VisitorMapCard from './components/VisitorMapCard'
+import VisitChart from './components/VisitChart'
 import countTo from 'vue-count-to'
 
 import postApi from '@/api/post'
@@ -283,7 +317,10 @@ export default {
     AnalysisCard,
     RecentCommentTab,
     countTo,
-    LogListDrawer
+    LogListDrawer,
+    VisitorLogListDrawer,
+    VisitorMapCard,
+    VisitChart
   },
   data() {
     return {
@@ -299,7 +336,8 @@ export default {
       journal: {
         content: ''
       },
-      interval: null
+      interval: null,
+      visitorLogListDrawerVisible: false
     }
   },
   created() {
@@ -319,6 +357,9 @@ export default {
     if (this.logListDrawerVisible) {
       this.logListDrawerVisible = false
     }
+    if (this.visitorLogListDrawerVisible) {
+      this.visitorLogListDrawerVisible = false
+    }
   },
   beforeRouteEnter(to, from, next) {
     next(vm => {
@@ -335,6 +376,9 @@ export default {
     }
     if (this.logListDrawerVisible) {
       this.logListDrawerVisible = false
+    }
+    if (this.visitorLogListDrawerVisible) {
+      this.visitorLogListDrawerVisible = false
     }
     next()
   },
@@ -379,8 +423,14 @@ export default {
         window.open(response.data, '_blank')
       })
     },
+    handleShowVisitorLogListDrawer() {
+      this.visitorLogListDrawerVisible = true
+    },
     handleLogListClose() {
       this.logListDrawerVisible = false
+    },
+    handleVisitorLogListClose() {
+      this.visitorLogListDrawerVisible = false
     }
   }
 }

@@ -9,8 +9,10 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
+    "@antv/g2": "^4.0.7",
     "ant-design-vue": "^1.5.2",
     "axios": "^0.19.2",
+    "echarts": "^4.1.0",
     "enquire.js": "^2.1.6",
     "filepond": "^4.13.0",
     "filepond-plugin-image-preview": "^4.6.1",
