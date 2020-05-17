@@ -23,6 +23,7 @@
   </a-card>
 </template>
 <script>
+import elementResizeDetectorMaker from 'element-resize-detector'
 import echarts from 'echarts'
 import mapInfo from './map/info'
 import 'echarts/map/js/world.js'
@@ -239,9 +240,6 @@ export default {
         }
       ]
     })
-    window.onresize = function() {
-      that.charts.resize()
-    }
     this.charts.on('click', ev => {
       if (ev.name === 'China') {
         that.charts.setOption({
@@ -258,6 +256,12 @@ export default {
           }
         })
       }
+    })
+    const erd = elementResizeDetectorMaker()
+    erd.listenTo(this.$refs.container, (element) => {
+      that.$nextTick(() => {
+        that.charts.resize()
+      })
     })
   }
 }

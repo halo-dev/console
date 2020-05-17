@@ -24,6 +24,7 @@
   </a-card>
 </template>
 <script>
+import elementResizeDetectorMaker from 'element-resize-detector'
 import { Chart } from '@antv/g2'
 
 import visitLogApi from '@/api/visitorLog'
@@ -155,6 +156,15 @@ export default {
     this.chart
       .point()
       .position('date*visit')
+    const that = this
+    const erd = elementResizeDetectorMaker()
+    erd.listenTo(document.querySelector('#container'), (element) => {
+      that.$nextTick(() => {
+        const e = document.createEvent('Event')
+        e.initEvent('resize', true, true)
+        window.dispatchEvent(e)
+      })
+    })
     this.chart.render()
     this.loadData()
   },
