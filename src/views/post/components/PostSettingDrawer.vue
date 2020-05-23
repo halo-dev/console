@@ -31,7 +31,7 @@
                   <span v-else-if="options.post_permalink_type === 'DAY'">{{ options.blog_url }}{{ selectedPost.createTime?selectedPost.createTime:new Date() | moment_post_day }}{{ selectedPost.slug?selectedPost.slug:'${slug}' }}{{ (options.path_suffix?options.path_suffix:'') }}</span>
                   <span v-else-if="options.post_permalink_type === 'ID'">{{ options.blog_url }}/?p={{ selectedPost.id?selectedPost.id:'${id}' }}</span>
                 </template>
-                <a-input v-model="selectedPost.slug" />
+                <a-input v-model="selectedPost.slug" :defaultValue="slugDefaultValue"/>
               </a-form-item>
 
               <a-form-item label="发表时间：">
@@ -314,6 +314,7 @@ import { mapGetters } from 'vuex'
 import categoryApi from '@/api/category'
 import postApi from '@/api/post'
 import themeApi from '@/api/theme'
+import pinyin from 'tiny-pinyin'
 export default {
   name: 'PostSettingDrawer',
   mixins: [mixin, mixinDevice],
@@ -415,6 +416,16 @@ export default {
         return moment(date, 'YYYY-MM-DD HH:mm:ss')
       }
       return moment(new Date(), 'YYYY-MM-DD HH:mm:ss')
+    },
+    slugDefaultValue() {
+      if (this.selectedPost.title) {
+        if (pinyin.isSupported()) {
+          return pinyin.convertToPinyin(this.selectedPost.title, '-', true)
+        } else {
+          console.warn('当前浏览器不支持 tiny-pinin，请使用chrome等现代浏览器.')
+        }
+      }
+      return ''
     },
     ...mapGetters(['options'])
   },

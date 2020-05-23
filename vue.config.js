@@ -7,6 +7,16 @@ function resolve(dir) {
 
 // vue.config.js
 module.exports = {
+  // devServer: {
+  //   host: '0.0.0.0',
+  //   proxy: {
+  //     '/api/': {
+  //       'target': 'http://localhost:8090/',
+  //       changeOrigin: true,
+  //       ws: true
+  //     }
+  //   }
+  // },
   publicPath: process.env.PUBLIC_PATH,
   configureWebpack: {
     plugins: [
