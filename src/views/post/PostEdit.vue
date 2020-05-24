@@ -76,6 +76,7 @@ import AttachmentDrawer from '../attachment/components/AttachmentDrawer'
 import FooterToolBar from '@/components/FooterToolbar'
 import MarkdownEditor from '@/components/editor/MarkdownEditor'
 // import RichTextEditor from '@/components/editor/RichTextEditor'
+import pinyin from 'tiny-pinyin'
 
 import postApi from '@/api/post'
 export default {
@@ -223,6 +224,10 @@ export default {
       }
     },
     handleShowPostSetting() {
+      // 如果 slug 为空，打开抽屉时设置中文拼音作为默认值
+      if (!this.postToStage.slug) {
+        this.setDefaultSlug()
+      }
       this.postSettingVisible = true
     },
     handlePreview() {
@@ -281,6 +286,15 @@ export default {
     },
     onSaved(isSaved) {
       this.isSaved = isSaved
+    },
+    setDefaultSlug() {
+      if (this.postToStage.title) {
+        if (pinyin.isSupported()) {
+          this.postToStage.slug = pinyin.convertToPinyin(this.postToStage.title, '-', true)
+        } else {
+          console.warn('当前浏览器不支持 tiny-pinin，请使用chrome等现代浏览器.')
+        }
+      }
     }
   }
 }
