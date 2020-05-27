@@ -319,7 +319,7 @@ export default {
             divided: true
           },
           {
-            label: '复制Markdown格式链接',
+            label: '复制 Markdown 格式链接',
             onClick: () => {
               const text = `![${item.name}](${encodeURI(item.path)})`
               this.$copyText(text)
@@ -335,9 +335,7 @@ export default {
           }
         ],
         event,
-        customClass: 'class-a',
-        zIndex: 3,
-        minWidth: 230
+        minWidth: 210
       })
       return false
     },
