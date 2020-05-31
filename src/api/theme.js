@@ -154,10 +154,11 @@ themeApi.fetchingReleases = url => {
 
 themeApi.fetchingBranch = (url, branchName) => {
   return service({
-    url: `${baseUrl}/fetchBranch/${branchName}`,
+    url: `${baseUrl}/fetchBranch`,
     timeout: 60000,
     params: {
-      uri: url
+      uri: url,
+      branch: branchName
     },
     method: 'get'
   })
@@ -176,10 +177,11 @@ themeApi.fetchingLatestRelease = url => {
 
 themeApi.fetchingRelease = (url, tagName) => {
   return service({
-    url: `${baseUrl}/fetchingRelease/${tagName}`,
+    url: `${baseUrl}/fetchingRelease`,
     timeout: 60000,
     params: {
-      uri: url
+      uri: url,
+      tag: tagName
     },
     method: 'get'
   })

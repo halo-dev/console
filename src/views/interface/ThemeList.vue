@@ -196,34 +196,60 @@
                 >获取</a-button>
               </a-form-item>
             </a-form>
-            <a-form
+            <a-tabs
               v-else
-              layout="vertical"
             >
-              <a-form-item label="稳定版">
-              </a-form-item>
-              <a-form-item
-                v-for="(item, index) in releases"
-                :key="index"
+              <a-tab-pane
+                tab="稳定版"
+                key="1"
               >
-                <a-button
-                  type="primary"
-                  @click="handleReleaseFetching(index)"
-                >{{ item.branch }}</a-button>
-              </a-form-item>
-
-              <a-form-item label="开发版本">
-              </a-form-item>
-              <a-form-item
-                v-for="(item, index) in branches"
-                :key="index"
+                <a-form layout="vertical">
+                  <a-form-item>
+                    <a-select
+                      style="width: 120px"
+                      @change="onSelectChange"
+                    >
+                      <a-select-option
+                        v-for="(item, index) in releases"
+                        :key="index"
+                        :value="index"
+                      >{{ item.branch }}</a-select-option>
+                    </a-select>
+                  </a-form-item>
+                  <a-form-item>
+                    <a-button
+                      type="primary"
+                      @click="handleReleaseFetching"
+                    >下载</a-button>
+                  </a-form-item>
+                </a-form>
+              </a-tab-pane>
+              <a-tab-pane
+                tab="开发版"
+                key="2"
               >
-                <a-button
-                  type="primary"
-                  @click="handleBranchFetching(index)"
-                >{{ item.branch }}</a-button>
-              </a-form-item>
-            </a-form>
+                <a-form layout="vertical">
+                  <a-form-item>
+                    <a-select
+                      style="width: 120px"
+                      @change="onSelectChange"
+                    >
+                      <a-select-option
+                        v-for="(item, index) in branches"
+                        :key="index"
+                        :value="index"
+                      >{{ item.branch }}</a-select-option>
+                    </a-select>
+                  </a-form-item>
+                  <a-form-item>
+                    <a-button
+                      type="primary"
+                      @click="handleBranchFetching"
+                    >下载</a-button>
+                  </a-form-item>
+                </a-form>
+              </a-tab-pane>
+            </a-tabs>
 
             <a-alert
               type="info"
@@ -283,6 +309,7 @@ export default {
       releases: [],
       themeSettingVisible: false,
       selectedTheme: {},
+      selectedBranch: null,
       fetchingUrl: null,
       uploadHandler: themeApi.upload,
       updateByUploadHandler: themeApi.updateByUpload,
@@ -315,7 +342,6 @@ export default {
     loadThemes() {
       this.themeLoading = true
       themeApi.listAll().then(response => {
-        console.log(response)
         this.themes = response.data.data
         this.themeLoading = false
       })
@@ -387,18 +413,18 @@ export default {
           this.fetchButtonLoading = false
         })
     },
-    handleBranchFetching(id) {
+    handleBranchFetching() {
       themeApi
-        .fetchingBranch(this.fetchingUrl, this.branches[id].branch)
+        .fetchingBranch(this.fetchingUrl, this.branches[this.selectedBranch].branch)
         .then(response => {
           this.$message.success('拉取成功')
           this.uploadThemeVisible = false
           this.loadThemes()
         })
     },
-    handleReleaseFetching(id) {
+    handleReleaseFetching() {
       themeApi
-        .fetchingRelease(this.fetchingUrl, this.releases[id].branch)
+        .fetchingRelease(this.fetchingUrl, this.releases[this.selectedBranch].branch)
         .then(response => {
           this.$message.success('拉取成功')
           this.uploadThemeVisible = false
@@ -443,6 +469,9 @@ export default {
         onCancel() {}
       })
     },
+    onSelectChange(value) {
+      this.selectedBranch = value
+    },
     onThemeUploadClose() {
       if (this.uploadThemeVisible) {
         this.$refs.upload.handleClearFileList()
@@ -452,6 +481,9 @@ export default {
       }
       if (this.fetchBranches) {
         this.fetchBranches = false
+      }
+      if (this.selectedBranch) {
+        this.selectedBranch = null
       }
       this.loadThemes()
     },
