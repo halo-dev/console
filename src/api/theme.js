@@ -130,6 +130,61 @@ themeApi.fetching = url => {
   })
 }
 
+themeApi.fetchingBranches = url => {
+  return service({
+    url: `${baseUrl}/fetchingBranches`,
+    timeout: 60000,
+    params: {
+      uri: url
+    },
+    method: 'post'
+  })
+}
+
+themeApi.fetchingReleases = url => {
+  return service({
+    url: `${baseUrl}/fetchingReleases`,
+    timeout: 60000,
+    params: {
+      uri: url
+    },
+    method: 'post'
+  })
+}
+
+themeApi.fetchingBranch = (url, branchName) => {
+  return service({
+    url: `${baseUrl}/fetchBranch/${branchName}`,
+    timeout: 60000,
+    params: {
+      uri: url
+    },
+    method: 'get'
+  })
+}
+
+themeApi.fetchingLatestRelease = url => {
+  return service({
+    url: `${baseUrl}/fetchLatestRelease`,
+    timeout: 60000,
+    params: {
+      uri: url
+    },
+    method: 'get'
+  })
+}
+
+themeApi.fetchingRelease = (url, tagName) => {
+  return service({
+    url: `${baseUrl}/fetchingRelease/${tagName}`,
+    timeout: 60000,
+    params: {
+      uri: url
+    },
+    method: 'get'
+  })
+}
+
 themeApi.getContent = path => {
   return service({
     url: `${baseUrl}/files/content`,

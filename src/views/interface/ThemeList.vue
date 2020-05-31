@@ -181,7 +181,10 @@
             tab="远程拉取"
             key="2"
           >
-            <a-form layout="vertical">
+            <a-form
+              v-if="!fetchBranches"
+              layout="vertical"
+            >
               <a-form-item label="远程地址：">
                 <a-input v-model="fetchingUrl" />
               </a-form-item>
@@ -190,9 +193,38 @@
                   type="primary"
                   @click="handleFetching"
                   :loading="fetchButtonLoading"
-                >下载</a-button>
+                >获取</a-button>
               </a-form-item>
             </a-form>
+            <a-form
+              v-else
+              layout="vertical"
+            >
+              <a-form-item label="稳定版">
+              </a-form-item>
+              <a-form-item
+                v-for="(item, index) in releases"
+                :key="index"
+              >
+                <a-button
+                  type="primary"
+                  @click="handleReleaseFetching(index)"
+                >{{ item.branch }}</a-button>
+              </a-form-item>
+
+              <a-form-item label="开发版本">
+              </a-form-item>
+              <a-form-item
+                v-for="(item, index) in branches"
+                :key="index"
+              >
+                <a-button
+                  type="primary"
+                  @click="handleBranchFetching(index)"
+                >{{ item.branch }}</a-button>
+              </a-form-item>
+            </a-form>
+
             <a-alert
               type="info"
               closable
@@ -245,7 +277,10 @@ export default {
       uploadThemeVisible: false,
       uploadNewThemeVisible: false,
       fetchButtonLoading: false,
+      fetchBranches: false,
       themes: [],
+      branches: [],
+      releases: [],
       themeSettingVisible: false,
       selectedTheme: {},
       fetchingUrl: null,
@@ -280,6 +315,7 @@ export default {
     loadThemes() {
       this.themeLoading = true
       themeApi.listAll().then(response => {
+        console.log(response)
         this.themes = response.data.data
         this.themeLoading = false
       })
@@ -316,6 +352,9 @@ export default {
       if (this.uploadNewThemeVisible) {
         this.uploadNewThemeVisible = false
       }
+      if (this.fetchBranches) {
+        this.fetchBranches = false
+      }
       this.loadThemes()
     },
     handleEditClick(theme) {
@@ -334,14 +373,36 @@ export default {
       }
       this.fetchButtonLoading = true
       themeApi
-        .fetching(this.fetchingUrl)
+        .fetchingBranches(this.fetchingUrl)
         .then(response => {
-          this.$message.success('拉取成功！')
-          this.uploadThemeVisible = false
-          this.loadThemes()
+          this.branches = response.data.data
+          this.fetchBranches = true
+        })
+      themeApi
+        .fetchingReleases(this.fetchingUrl)
+        .then(response => {
+          this.releases = response.data.data
         })
         .finally(() => {
           this.fetchButtonLoading = false
+        })
+    },
+    handleBranchFetching(id) {
+      themeApi
+        .fetchingBranch(this.fetchingUrl, this.branches[id].branch)
+        .then(response => {
+          this.$message.success('拉取成功')
+          this.uploadThemeVisible = false
+          this.loadThemes()
+        })
+    },
+    handleReleaseFetching(id) {
+      themeApi
+        .fetchingRelease(this.fetchingUrl, this.releases[id].branch)
+        .then(response => {
+          this.$message.success('拉取成功')
+          this.uploadThemeVisible = false
+          this.loadThemes()
         })
     },
     handleReload() {
@@ -388,6 +449,9 @@ export default {
       }
       if (this.uploadNewThemeVisible) {
         this.$refs.updateByupload.handleClearFileList()
+      }
+      if (this.fetchBranches) {
+        this.fetchBranches = false
       }
       this.loadThemes()
     },
