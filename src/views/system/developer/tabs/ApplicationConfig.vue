@@ -7,16 +7,12 @@
     />
     <a-form layout="vertical">
       <a-form-item>
-        <a-skeleton
-          active
-          :loading="loading"
-          :paragraph="{rows: 12}"
-        >
+        <a-spin :spinning="loading">
           <codemirror
             v-model="content"
             :options="codemirrorOptions"
           ></codemirror>
-        </a-skeleton>
+        </a-spin>
       </a-form-item>
       <a-form-item>
         <a-popconfirm

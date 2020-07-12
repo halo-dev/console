@@ -18,13 +18,12 @@
         </a-button>
         <a-button
           icon="sync"
-          @click="loadStaticList"
+          @click="handleListStatics"
           :loading="loading"
-          :disabled="loading"
         >
           刷新
         </a-button>
-      </div>g
+      </div>
       <div class="mt-4">
         <a-table
           :rowKey="record => record.id"
@@ -266,7 +265,7 @@ export default {
     }
   },
   created() {
-    this.loadStaticList()
+    this.handleListStatics()
     this.CodeMirror = require('codemirror')
     this.CodeMirror.modeURL = 'codemirror/mode/%N/%N.js'
   },
@@ -275,12 +274,12 @@ export default {
     sortedStatics() {
       const data = this.statics.slice(0)
       return data.sort(function(a, b) {
-        return b.createTime - a.createTime
+        return a.isFile - b.isFile
       })
     }
   },
   methods: {
-    loadStaticList() {
+    handleListStatics() {
       this.loading = true
       staticApi
         .list()
@@ -290,7 +289,7 @@ export default {
         .finally(() => {
           setTimeout(() => {
             this.loading = false
-          })
+          }, 200)
         })
     },
     handleDelete(path) {
@@ -300,7 +299,7 @@ export default {
           this.$message.success(`删除成功！`)
         })
         .finally(() => {
-          this.loadStaticList()
+          this.handleListStatics()
         })
     },
     handleUpload(file) {
@@ -359,7 +358,7 @@ export default {
           this.createFolderModal = false
         })
         .finally(() => {
-          this.loadStaticList()
+          this.handleListStatics()
         })
     },
     handleRename() {
@@ -370,7 +369,7 @@ export default {
           this.renameModal = false
         })
         .finally(() => {
-          this.loadStaticList()
+          this.handleListStatics()
         })
     },
     handleEditSave() {
@@ -390,7 +389,7 @@ export default {
     onUploadClose() {
       this.$refs.upload.handleClearFileList()
       this.selectedFile = {}
-      this.loadStaticList()
+      this.handleListStatics()
     },
     handleEditClose() {
       this.editModal = false

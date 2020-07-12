@@ -13,27 +13,24 @@
         align="middle"
       >
         <a-col :span="24">
-          <a-skeleton
-            active
+          <a-list
             :loading="loading"
-            :paragraph="{rows: 18}"
+            :dataSource="formattedLogsDatas"
           >
-            <a-list :dataSource="formattedLogsDatas">
-              <a-list-item
-                slot="renderItem"
-                slot-scope="item, index"
-                :key="index"
-              >
-                <a-list-item-meta :description="item.createTime | timeAgo">
-                  <span slot="title">{{ item.type }}</span>
-                </a-list-item-meta>
-                <ellipsis
-                  :length="35"
-                  tooltip
-                >{{ item.content }}</ellipsis>
-              </a-list-item>
-            </a-list>
-          </a-skeleton>
+            <a-list-item
+              slot="renderItem"
+              slot-scope="item, index"
+              :key="index"
+            >
+              <a-list-item-meta :description="item.createTime | timeAgo">
+                <span slot="title">{{ item.type }}</span>
+              </a-list-item-meta>
+              <ellipsis
+                :length="35"
+                tooltip
+              >{{ item.content }}</ellipsis>
+            </a-list-item>
+          </a-list>
 
           <div class="page-wrapper">
             <a-pagination
@@ -72,7 +69,7 @@ export default {
   mixins: [mixin, mixinDevice],
   data() {
     return {
-      logType: logApi.logType,
+      logTypes: logApi.logTypes,
       loading: true,
       logs: [],
       pagination: {
@@ -98,7 +95,7 @@ export default {
   computed: {
     formattedLogsDatas() {
       return this.logs.map(log => {
-        log.type = this.logType[log.type].text
+        log.type = this.logTypes[log.type].text
         return log
       })
     }

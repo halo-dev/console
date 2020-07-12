@@ -63,7 +63,7 @@
           <table class="w-full">
             <tbody class="ant-table-tbody">
               <tr>
-                <td>CPU 数量</td>
+                <td>CPU 核心数</td>
                 <td>{{ system.cpu.count }} 个</td>
               </tr>
               <tr>

@@ -1,6 +1,6 @@
 <template>
   <a-drawer
-    :title="selectedTheme.name + ' 主题设置'"
+    :title="`${theme.name} 主题设置`"
     width="100%"
     placement="right"
     closable
@@ -20,38 +20,32 @@
         :xs="24"
         v-if="!viewMode"
       >
-        <a-skeleton
-          active
-          :loading="settingLoading"
-          :paragraph="{rows: 10}"
-        >
-          <a-card :bordered="false">
-            <img
-              :alt="selectedTheme.name"
-              :src="selectedTheme.screenshots"
-              slot="cover"
-            >
-            <a-card-meta :description="selectedTheme.description">
-              <template slot="title">
-                <a
-                  :href="selectedTheme.author.website"
-                  target="_blank"
-                >{{ selectedTheme.author.name }}</a>
-              </template>
-              <a-avatar
-                v-if="selectedTheme.logo"
-                :src="selectedTheme.logo"
-                size="large"
-                slot="avatar"
-              />
-              <a-avatar
-                v-else
-                size="large"
-                slot="avatar"
-              >{{ selectedTheme.author.name }}</a-avatar>
-            </a-card-meta>
-          </a-card>
-        </a-skeleton>
+        <a-card :bordered="false">
+          <img
+            :alt="theme.name"
+            :src="theme.screenshots"
+            slot="cover"
+          >
+          <a-card-meta :description="theme.description">
+            <template slot="title">
+              <a
+                :href="author.website"
+                target="_blank"
+              >{{ author.name }}</a>
+            </template>
+            <a-avatar
+              v-if="theme.logo"
+              :src="theme.logo"
+              size="large"
+              slot="avatar"
+            />
+            <a-avatar
+              v-else
+              size="large"
+              slot="avatar"
+            >{{ author.name }}</a-avatar>
+          </a-card-meta>
+        </a-card>
       </a-col>
       <a-col
         :xl="formColValue"
@@ -61,19 +55,15 @@
         :xs="24"
         style="padding-bottom: 50px;"
       >
-        <a-skeleton
-          active
-          :loading="settingLoading"
-          :paragraph="{rows: 20}"
-        >
+        <a-spin :spinning="settingLoading">
           <div class="card-container">
             <a-tabs
               type="card"
               defaultActiveKey="0"
-              v-if="themeConfiguration.length>0"
+              v-if="themeConfigurations.length>0"
             >
               <a-tab-pane
-                v-for="(group, index) in themeConfiguration"
+                v-for="(group, index) in themeConfigurations"
                 :key="index.toString()"
                 :tab="group.label"
               >
@@ -175,7 +165,7 @@
               v-else
             />
           </div>
-        </a-skeleton>
+        </a-spin>
       </a-col>
 
       <a-col
@@ -212,7 +202,7 @@
     />
 
     <footer-tool-bar
-      v-if="themeConfiguration.length>0"
+      v-if="themeConfigurations.length>0"
       class="w-full"
     >
       <a-button
@@ -253,8 +243,7 @@ export default {
   data() {
     return {
       attachmentDrawerVisible: false,
-      selectedTheme: this.theme,
-      themeConfiguration: [],
+      themeConfigurations: [],
       themeSettings: [],
       settingLoading: false,
       selectedField: '',
@@ -277,12 +266,13 @@ export default {
   props: {
     theme: {
       type: Object,
-      required: true
+      required: true,
+      default: () => {}
     },
     visible: {
       type: Boolean,
       required: false,
-      default: true
+      default: false
     }
   },
   watch: {
@@ -293,19 +283,25 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['options'])
+    ...mapGetters(['options']),
+    author() {
+      if (this.theme.author) {
+        return this.theme.author
+      }
+      return {}
+    }
   },
   methods: {
     async handleFetchConfiguration() {
       this.settingLoading = true
-      await themeApi.fetchConfiguration(this.selectedTheme.id).then(response => {
-        this.themeConfiguration = response.data.data
+      await themeApi.fetchConfiguration(this.theme.id).then(response => {
+        this.themeConfigurations = response.data.data
       })
       this.handleFetchSettings()
     },
     handleFetchSettings() {
       themeApi
-        .fetchSettings(this.selectedTheme.id)
+        .fetchSettings(this.theme.id)
         .then(response => {
           this.themeSettings = response.data.data
         })
@@ -318,7 +314,7 @@ export default {
     handleSaveSettings() {
       this.saving = true
       themeApi
-        .saveSettings(this.selectedTheme.id, this.themeSettings)
+        .saveSettings(this.theme.id, this.themeSettings)
         .then(response => {
           this.$message.success('保存成功！')
           if (this.viewMode) {

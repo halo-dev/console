@@ -160,137 +160,125 @@
         align="middle"
       >
         <a-col :span="24">
-          <a-skeleton
-            active
-            :loading="drawerLoading"
-            :paragraph="{rows: 8}"
-          >
-            <div class="photo-detail-img">
-              <img
-                :src="photo.url || '/images/placeholder.jpg'"
-                @click="showThumbDrawer"
-                class="w-full"
-              >
-            </div>
-          </a-skeleton>
+          <div class="photo-detail-img">
+            <img
+              :src="photo.url || '/images/placeholder.jpg'"
+              @click="showThumbDrawer"
+              class="w-full"
+            >
+          </div>
         </a-col>
         <a-divider style="margin: 24px 0 12px 0;" />
 
         <a-col :span="24">
-          <a-skeleton
-            active
-            :loading="drawerLoading"
-            :paragraph="{rows: 8}"
-          >
-            <a-list itemLayout="horizontal">
-              <a-list-item>
-                <a-list-item-meta>
-                  <template
-                    slot="description"
-                    v-if="editable"
-                  >
-                    <a-input v-model="photo.thumbnail" />
-                  </template>
-                  <template
-                    slot="description"
-                    v-else
-                  >{{ photo.thumbnail }}</template>
-                  <span slot="title">
-                    缩略图地址：
-                  </span>
-                </a-list-item-meta>
-              </a-list-item>
-              <a-list-item>
-                <a-list-item-meta>
-                  <template
-                    slot="description"
-                    v-if="editable"
-                  >
-                    <a-input v-model="photo.name" />
-                  </template>
-                  <template
-                    slot="description"
-                    v-else
-                  >{{ photo.name }}</template>
-                  <span slot="title">
-                    图片名称：
-                  </span>
-                </a-list-item-meta>
-              </a-list-item>
-              <a-list-item>
-                <a-list-item-meta>
-                  <template
-                    slot="description"
-                    v-if="editable"
-                  >
-                    <a-date-picker
-                      v-model="photo.takeTime"
-                      style="width:100%"
-                    />
-                  </template>
-                  <span
-                    slot="description"
-                    v-else
-                  >{{ photo.takeTime | moment }}</span>
-                  <span slot="title">拍摄日期：</span>
-                </a-list-item-meta>
-              </a-list-item>
-              <a-list-item>
-                <a-list-item-meta>
-                  <template
-                    slot="description"
-                    v-if="editable"
-                  >
-                    <a-input v-model="photo.location" />
-                  </template>
-                  <span
-                    slot="description"
-                    v-else
-                  >{{ photo.location || '无' }}</span>
-                  <span slot="title">拍摄地点：</span>
-                </a-list-item-meta>
-              </a-list-item>
-              <a-list-item>
-                <a-list-item-meta>
-                  <template
-                    slot="description"
-                    v-if="editable"
-                  >
-                    <a-auto-complete
-                      :dataSource="teams"
-                      v-model="photo.team"
-                      allowClear
-                      style="width:100%"
-                    />
-                  </template>
-                  <span
-                    slot="description"
-                    v-else
-                  >{{ photo.team || '无' }}</span>
-                  <span slot="title">分组：</span>
-                </a-list-item-meta>
-              </a-list-item>
-              <a-list-item>
-                <a-list-item-meta>
-                  <template
-                    slot="description"
-                    v-if="editable"
-                  >
-                    <a-input
-                      v-model="photo.description"
-                      type="textarea"
-                      :autoSize="{ minRows: 5 }"
-                    />
-                  </template>
-                  <span
-                    slot="description"
-                    v-else
-                  >{{ photo.description || '无' }}</span>
-                  <span slot="title">描述：</span>
-                </a-list-item-meta>
-              </a-list-item>
-            </a-list>
-          </a-skeleton>
+          <a-list itemLayout="horizontal">
+            <a-list-item>
+              <a-list-item-meta>
+                <template
+                  slot="description"
+                  v-if="editable"
+                >
+                  <a-input v-model="photo.thumbnail" />
+                </template>
+                <template
+                  slot="description"
+                  v-else
+                >{{ photo.thumbnail }}</template>
+                <span slot="title">
+                  缩略图地址：
+                </span>
+              </a-list-item-meta>
+            </a-list-item>
+            <a-list-item>
+              <a-list-item-meta>
+                <template
+                  slot="description"
+                  v-if="editable"
+                >
+                  <a-input v-model="photo.name" />
+                </template>
+                <template
+                  slot="description"
+                  v-else
+                >{{ photo.name }}</template>
+                <span slot="title">
+                  图片名称：
+                </span>
+              </a-list-item-meta>
+            </a-list-item>
+            <a-list-item>
+              <a-list-item-meta>
+                <template
+                  slot="description"
+                  v-if="editable"
+                >
+                  <a-date-picker
+                    v-model="photo.takeTime"
+                    style="width:100%"
+                  />
+                </template>
+                <span
+                  slot="description"
+                  v-else
+                >{{ photo.takeTime | moment }}</span>
+                <span slot="title">拍摄日期：</span>
+              </a-list-item-meta>
+            </a-list-item>
+            <a-list-item>
+              <a-list-item-meta>
+                <template
+                  slot="description"
+                  v-if="editable"
+                >
+                  <a-input v-model="photo.location" />
+                </template>
+                <span
+                  slot="description"
+                  v-else
+                >{{ photo.location || '无' }}</span>
+                <span slot="title">拍摄地点：</span>
+              </a-list-item-meta>
+            </a-list-item>
+            <a-list-item>
+              <a-list-item-meta>
+                <template
+                  slot="description"
+                  v-if="editable"
+                >
+                  <a-auto-complete
+                    :dataSource="teams"
+                    v-model="photo.team"
+                    allowClear
+                    style="width:100%"
+                  />
+                </template>
+                <span
+                  slot="description"
+                  v-else
+                >{{ photo.team || '无' }}</span>
+                <span slot="title">分组：</span>
+              </a-list-item-meta>
+            </a-list-item>
+            <a-list-item>
+              <a-list-item-meta>
+                <template
+                  slot="description"
+                  v-if="editable"
+                >
+                  <a-input
+                    v-model="photo.description"
+                    type="textarea"
+                    :autoSize="{ minRows: 5 }"
+                  />
+                </template>
+                <span
+                  slot="description"
+                  v-else
+                >{{ photo.description || '无' }}</span>
+                <span slot="title">描述：</span>
+              </a-list-item-meta>
+            </a-list-item>
+          </a-list>
         </a-col>
       </a-row>
       <AttachmentSelectDrawer
@@ -336,7 +324,6 @@ export default {
   data() {
     return {
       drawerVisible: false,
-      drawerLoading: false,
       listLoading: true,
       thumDrawerVisible: false,
       optionFormVisible: false,

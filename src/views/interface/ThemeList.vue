@@ -106,9 +106,9 @@
       </a-col>
     </a-row>
 
-    <ThemeSetting
+    <ThemeSettingDrawer
       :theme="selectedTheme"
-      v-if="themeSettingVisible"
+      v-model="themeSettingVisible"
       @close="onThemeSettingsClose"
     />
 
@@ -289,11 +289,11 @@
 </template>
 
 <script>
-import ThemeSetting from './components/ThemeSetting'
+import ThemeSettingDrawer from './components/ThemeSettingDrawer'
 import themeApi from '@/api/theme'
 export default {
   components: {
-    ThemeSetting
+    ThemeSettingDrawer
   },
   data() {
     return {

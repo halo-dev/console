@@ -24,12 +24,8 @@
         type="flex"
         align="middle"
       >
-        <a-skeleton
-          active
-          :loading="loading"
-          :paragraph="{ rows: 18 }"
-        >
-          <a-col :span="24">
+        <a-col :span="24">
+          <a-spin :spinning="loading">
             <a-empty v-if="attachments.length==0" />
             <div
               v-else
@@ -45,8 +41,8 @@
                 loading="lazy"
               >
             </div>
-          </a-col>
-        </a-skeleton>
+          </a-spin>
+        </a-col>
       </a-row>
       <a-divider />
       <div class="page-wrapper">

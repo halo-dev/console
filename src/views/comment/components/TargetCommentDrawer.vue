@@ -11,28 +11,24 @@
       type="flex"
       align="middle"
     >
-      <a-skeleton
-        active
-        :loading="loading"
-        :paragraph="{ rows: 18 }"
-      >
-        <a-col :span="24">
-          <a-list itemLayout="horizontal">
-            <a-list-item>
-              <a-list-item-meta>
-                <template slot="description">
-                  <p
-                    v-html="description"
-                    class="comment-drawer-content"
-                  ></p>
-                </template>
-                <h3 slot="title">{{ title }}</h3>
-              </a-list-item-meta>
-            </a-list-item>
-          </a-list>
-        </a-col>
-        <a-divider />
-        <a-col :span="24">
+      <a-col :span="24">
+        <a-list itemLayout="horizontal">
+          <a-list-item>
+            <a-list-item-meta>
+              <template slot="description">
+                <p
+                  v-html="description"
+                  class="comment-drawer-content"
+                ></p>
+              </template>
+              <h3 slot="title">{{ title }}</h3>
+            </a-list-item-meta>
+          </a-list-item>
+        </a-list>
+      </a-col>
+      <a-divider />
+      <a-col :span="24">
+        <a-spin :spinning="loading">
           <a-empty v-if="comments.length == 0" />
           <TargetCommentTree
             v-else
@@ -43,8 +39,8 @@
             @delete="handleCommentDelete"
             @editStatus="handleEditStatusClick"
           />
-        </a-col>
-      </a-skeleton>
+        </a-spin>
+      </a-col>
     </a-row>
     <a-divider />
     <div class="page-wrapper">
