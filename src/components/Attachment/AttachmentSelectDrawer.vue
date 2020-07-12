@@ -139,7 +139,7 @@ export default {
   watch: {
     visible: function(newValue, oldValue) {
       if (newValue) {
-        this.loadAttachments()
+        this.handleListAttachments()
       }
     }
   },
@@ -147,7 +147,7 @@ export default {
     handleShowUploadModal() {
       this.uploadVisible = true
     },
-    loadAttachments() {
+    handleListAttachments() {
       this.loading = true
       this.queryParam.page = this.pagination.page - 1
       this.queryParam.size = this.pagination.size
@@ -176,7 +176,7 @@ export default {
     handlePaginationChange(page, pageSize) {
       this.pagination.page = page
       this.pagination.size = pageSize
-      this.loadAttachments()
+      this.handleListAttachments()
     },
     onUploadClose() {
       this.$refs.upload.handleClearFileList()

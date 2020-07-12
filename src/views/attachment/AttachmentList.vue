@@ -443,11 +443,15 @@ export default {
         title: '确定要批量删除选中的附件吗?',
         content: '一旦删除不可恢复，请谨慎操作',
         onOk() {
-          attachmentApi.deleteInBatch(that.batchSelectedAttachments).then(res => {
-            that.handleCancelMultipleSelection()
-            that.handleListAttachments()
-            that.$message.success('删除成功')
-          })
+          attachmentApi
+            .deleteInBatch(that.batchSelectedAttachments)
+            .then(res => {
+              that.handleCancelMultipleSelection()
+              that.$message.success('删除成功')
+            })
+            .finally(() => {
+              that.handleListAttachments()
+            })
         },
         onCancel() {}
       })

@@ -162,7 +162,7 @@
             <a-alert
               message="当前主题暂无设置选项"
               banner
-              v-else
+              v-if="themeConfigurations.length <=0 && !settingLoading"
             />
           </div>
         </a-spin>

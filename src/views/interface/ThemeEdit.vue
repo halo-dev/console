@@ -2,33 +2,6 @@
   <div>
     <a-row :gutter="12">
       <a-col
-        :xl="18"
-        :lg="18"
-        :md="18"
-        :sm="24"
-        :xs="24"
-        class="pb-3"
-      >
-        <a-card :bodyStyle="{ padding: '16px' }">
-          <a-form layout="vertical">
-            <a-form-item>
-              <codemirror
-                v-model="content"
-                :options="codemirrorOptions"
-              ></codemirror>
-            </a-form-item>
-            <a-form-item>
-              <a-button
-                type="primary"
-                @click="handlerSaveContent"
-                :disabled="buttonDisabled"
-                :loading="saving"
-              >保存</a-button>
-            </a-form-item>
-          </a-form>
-        </a-card>
-      </a-col>
-      <a-col
         :xl="6"
         :lg="6"
         :md="6"
@@ -63,6 +36,33 @@
               @listenToSelect="handleSelectFile"
             />
           </a-spin>
+        </a-card>
+      </a-col>
+      <a-col
+        :xl="18"
+        :lg="18"
+        :md="18"
+        :sm="24"
+        :xs="24"
+        class="pb-3"
+      >
+        <a-card :bodyStyle="{ padding: '16px' }">
+          <a-form layout="vertical">
+            <a-form-item>
+              <codemirror
+                v-model="content"
+                :options="codemirrorOptions"
+              ></codemirror>
+            </a-form-item>
+            <a-form-item>
+              <a-button
+                type="primary"
+                @click="handlerSaveContent"
+                :disabled="buttonDisabled"
+                :loading="saving"
+              >保存</a-button>
+            </a-form-item>
+          </a-form>
         </a-card>
       </a-col>
     </a-row>
@@ -142,6 +142,8 @@ export default {
         .listFiles(themeId)
         .then(response => {
           this.files = response.data.data
+          this.content = ''
+          this.file = {}
         })
         .finally(() => {
           setTimeout(() => {

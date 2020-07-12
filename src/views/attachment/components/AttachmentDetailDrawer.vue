@@ -208,8 +208,7 @@ export default {
   watch: {
     attachment: function(newValue, oldValue) {
       if (newValue) {
-        var attachment = newValue
-        this.handleJudgeMediaType(attachment)
+        this.handleJudgeMediaType(newValue)
       }
     }
   },
