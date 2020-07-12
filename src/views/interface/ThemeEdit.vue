@@ -7,7 +7,7 @@
         :md="18"
         :sm="24"
         :xs="24"
-        :style="{'padding-bottom':'12px'}"
+        class="pb-3"
       >
         <a-card :bodyStyle="{ padding: '16px' }">
           <a-form layout="vertical">
@@ -34,14 +34,15 @@
         :md="6"
         :sm="24"
         :xs="24"
-        :style="{'padding-bottom':'12px'}"
+        class="pb-3"
       >
         <a-card :bodyStyle="{ padding: '16px' }">
           <template slot="title">
             <a-select
-              style="width: 100%"
+              class="w-full"
               @change="onSelectTheme"
               v-model="selectedTheme.id"
+              :loading="themesLoading"
             >
               <a-select-option
                 v-for="(theme,index) in themes"
@@ -55,11 +56,13 @@
               </a-select-option>
             </a-select>
           </template>
-          <theme-file
-            v-if="files"
-            :files="files"
-            @listenToSelect="handleSelectFile"
-          />
+          <a-spin :spinning="filesLoading">
+            <theme-file
+              v-if="files"
+              :files="files"
+              @listenToSelect="handleSelectFile"
+            />
+          </a-spin>
         </a-card>
       </a-col>
     </a-row>
@@ -85,40 +88,66 @@ export default {
         lineNumbers: true,
         line: true
       },
-      files: null,
+      files: [],
+      filesLoading: false,
       file: {},
       content: '',
       themes: [],
+      themesLoading: false,
       selectedTheme: {},
       saving: false
     }
   },
   created() {
-    this.loadActivatedTheme()
-    this.loadFiles()
-    this.loadThemes()
+    this.handleGetActivatedTheme()
+    this.handleListThemeFiles()
+    this.handleListThemes()
   },
   methods: {
-    loadActivatedTheme() {
+    handleGetActivatedTheme() {
       themeApi.getActivatedTheme().then(response => {
         this.selectedTheme = response.data.data
       })
     },
-    loadFiles() {
-      themeApi.listFilesActivated().then(response => {
-        this.files = response.data.data
-      })
+    handleListThemeFiles() {
+      this.filesLoading = true
+      themeApi
+        .listFilesActivated()
+        .then(response => {
+          this.files = response.data.data
+        })
+        .finally(() => {
+          setTimeout(() => {
+            this.filesLoading = false
+          }, 200)
+        })
     },
-    loadThemes() {
-      themeApi.listAll().then(response => {
-        this.themes = response.data.data
-      })
+    handleListThemes() {
+      this.themesLoading = true
+      themeApi
+        .listAll()
+        .then(response => {
+          this.themes = response.data.data
+        })
+        .finally(() => {
+          setTimeout(() => {
+            this.themesLoading = false
+          }, 200)
+        })
     },
     onSelectTheme(themeId) {
-      this.files = null
-      themeApi.listFiles(themeId).then(response => {
-        this.files = response.data.data
-      })
+      this.files = []
+      this.filesLoading = true
+      themeApi
+        .listFiles(themeId)
+        .then(response => {
+          this.files = response.data.data
+        })
+        .finally(() => {
+          setTimeout(() => {
+            this.filesLoading = false
+          }, 200)
+        })
     },
     handleSelectFile(file) {
       const _this = this

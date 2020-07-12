@@ -23,7 +23,7 @@
                 >
                   <a-list-item-meta>
                     <a-avatar
-                      style="background-color: white"
+                      class="bg-white"
                       slot="avatar"
                       :src="'//cn.gravatar.com/avatar/' + item.gravatarMd5 + '&d=mm'"
                       size="large"
@@ -52,7 +52,7 @@
                 >
                   <a-list-item-meta>
                     <a-avatar
-                      style="background-color: white"
+                      class="bg-white"
                       slot="avatar"
                       :src="'//cn.gravatar.com/avatar/' + item.gravatarMd5 + '&d=mm'"
                       size="large"

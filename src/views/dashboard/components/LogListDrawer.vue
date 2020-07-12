@@ -104,40 +104,45 @@ export default {
     }
   },
   watch: {
-    visible: function(newValue, oldValue) {
-      if (newValue) {
-        this.loadSkeleton()
-        this.loadLogs()
+    visible(value) {
+      if (value) {
+        this.handleListLogs()
       }
     }
   },
   methods: {
-    loadSkeleton() {
+    handleListLogs() {
       this.loading = true
-      setTimeout(() => {
-        this.loading = false
-      }, 500)
-    },
-    loadLogs() {
       this.logQueryParam.page = this.pagination.page - 1
       this.logQueryParam.size = this.pagination.size
       this.logQueryParam.sort = this.pagination.sort
-      logApi.pageBy(this.logQueryParam).then(response => {
-        this.logs = response.data.data.content
-        this.pagination.total = response.data.data.total
-      })
+      logApi
+        .pageBy(this.logQueryParam)
+        .then(response => {
+          this.logs = response.data.data.content
+          this.pagination.total = response.data.data.total
+        })
+        .finally(() => {
+          setTimeout(() => {
+            this.loading = false
+          }, 200)
+        })
     },
     handleClearLogs() {
-      logApi.clear().then(response => {
-        this.$message.success('清除成功！')
-        this.loadLogs()
-      })
+      logApi
+        .clear()
+        .then(response => {
+          this.$message.success('清除成功！')
+        })
+        .finally(() => {
+          this.handleListLogs()
+        })
     },
     handlePaginationChange(page, pageSize) {
       this.$log.debug(`Current: ${page}, PageSize: ${pageSize}`)
       this.pagination.page = page
       this.pagination.size = pageSize
-      this.loadLogs()
+      this.handleListLogs()
     },
     onClose() {
       this.$emit('close', false)

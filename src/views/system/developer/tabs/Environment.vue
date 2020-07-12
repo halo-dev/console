@@ -7,7 +7,7 @@
         :md="24"
         :sm="24"
         :xs="24"
-        :style="{ marginBottom: '12px' }"
+        class="mb-3"
       >
         <a-card
           title="服务器"
@@ -15,7 +15,7 @@
           hoverable
           :bodyStyle="{ padding: 0 }"
         >
-          <table style="width:100%">
+          <table class="w-full">
             <tbody class="ant-table-tbody">
               <tr>
                 <td>系统</td>
@@ -52,7 +52,7 @@
         :md="24"
         :sm="24"
         :xs="24"
-        :style="{ marginBottom: '12px' }"
+        class="mb-3"
       >
         <a-card
           title="使用情况"
@@ -60,7 +60,7 @@
           hoverable
           :bodyStyle="{ padding: 0 }"
         >
-          <table style="width:100%">
+          <table class="w-full">
             <tbody class="ant-table-tbody">
               <tr>
                 <td>CPU 数量</td>
@@ -97,7 +97,7 @@
         :md="24"
         :sm="24"
         :xs="24"
-        :style="{ marginBottom: '12px' }"
+        class="mb-3"
       >
         <a-card
           title="环境"
@@ -105,7 +105,7 @@
           hoverable
           :bodyStyle="{ padding: 0 }"
         >
-          <table style="width:100%">
+          <table class="w-full">
             <tbody class="ant-table-tbody">
               <tr>
                 <td>Java 名称</td>
@@ -137,7 +137,7 @@
         :md="24"
         :sm="24"
         :xs="24"
-        :style="{ marginBottom: '12px' }"
+        class="mb-3"
       >
         <a-card
           title="应用"
@@ -145,7 +145,7 @@
           hoverable
           :bodyStyle="{ padding: 0 }"
         >
-          <table style="width:100%">
+          <table class="w-full">
             <tbody class="ant-table-tbody">
               <tr>
                 <td>端口</td>

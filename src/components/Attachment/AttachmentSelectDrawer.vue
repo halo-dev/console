@@ -26,7 +26,7 @@
       >
         <a-skeleton
           active
-          :loading="skeletonLoading"
+          :loading="loading"
           :paragraph="{ rows: 18 }"
         >
           <a-col :span="24">
@@ -61,7 +61,7 @@
       <div class="bottom-control">
         <a-button
           type="dashed"
-          style="marginRight: 8px"
+          class="mr-2"
           v-if="isChooseAvatar"
           @click="handleSelectGravatar"
         >使用 Gravatar</a-button>
@@ -123,7 +123,7 @@ export default {
   data() {
     return {
       uploadVisible: false,
-      skeletonLoading: true,
+      loading: true,
       pagination: {
         page: 1,
         size: 12,
@@ -143,29 +143,30 @@ export default {
   watch: {
     visible: function(newValue, oldValue) {
       if (newValue) {
-        this.loadSkeleton()
         this.loadAttachments()
       }
     }
   },
   methods: {
-    loadSkeleton() {
-      this.skeletonLoading = true
-      setTimeout(() => {
-        this.skeletonLoading = false
-      }, 500)
-    },
     handleShowUploadModal() {
       this.uploadVisible = true
     },
     loadAttachments() {
+      this.loading = true
       this.queryParam.page = this.pagination.page - 1
       this.queryParam.size = this.pagination.size
       this.queryParam.sort = this.pagination.sort
-      attachmentApi.query(this.queryParam).then(response => {
-        this.attachments = response.data.data.content
-        this.pagination.total = response.data.data.total
-      })
+      attachmentApi
+        .query(this.queryParam)
+        .then(response => {
+          this.attachments = response.data.data.content
+          this.pagination.total = response.data.data.total
+        })
+        .finally(() => {
+          setTimeout(() => {
+            this.loading = false
+          }, 200)
+        })
     },
     handleQuery() {
       this.handlePaginationChange(1, this.pagination.size)
@@ -183,7 +184,6 @@ export default {
     },
     onUploadClose() {
       this.$refs.upload.handleClearFileList()
-      this.loadSkeleton()
       this.handlePaginationChange(1, this.pagination.size)
     },
     handleJudgeMediaType(attachment) {

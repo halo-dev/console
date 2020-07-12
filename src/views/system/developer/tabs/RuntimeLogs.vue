@@ -15,7 +15,7 @@
     <a-form-item>
       <a-select
         defaultValue="200"
-        style="margin-right: 8px;width: 100px"
+        class="mr-2 w-full"
         @change="handleLinesChange"
       >
         <a-select-option value="200">200 行</a-select-option>
@@ -25,7 +25,7 @@
       </a-select>
       <a-button
         type="primary"
-        style="margin-right: 8px;"
+        class="mr-2"
         @click="loadLogs()"
       >刷新</a-button>
       <a-button
@@ -68,10 +68,16 @@ export default {
   methods: {
     loadLogs() {
       this.loading = true
-      adminApi.getLogFiles(this.logLines).then(response => {
-        this.logContent = response.data.data
-        this.loading = false
-      })
+      adminApi
+        .getLogFiles(this.logLines)
+        .then(response => {
+          this.logContent = response.data.data
+        })
+        .finally(() => {
+          setTimeout(() => {
+            this.loading = false
+          }, 200)
+        })
     },
     handleDownloadLogFile() {
       const hide = this.$message.loading('下载中...', 0)

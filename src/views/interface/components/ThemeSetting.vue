@@ -213,20 +213,20 @@
 
     <footer-tool-bar
       v-if="themeConfiguration.length>0"
-      :style="{ width : '100%'}"
+      class="w-full"
     >
       <a-button
         v-if="!this.isMobile() && theme.activated && viewMode"
         type="primary"
         @click="toggleViewMode"
-        style="marginRight: 8px"
+        class="mr-2"
         ghost
       >普通模式</a-button>
       <a-button
         v-else-if="!this.isMobile() && theme.activated && !viewMode"
         type="dashed"
         @click="toggleViewMode"
-        style="marginRight: 8px"
+        class="mr-2"
       >预览模式</a-button>
       <a-button
         type="primary"
@@ -256,7 +256,7 @@ export default {
       selectedTheme: this.theme,
       themeConfiguration: [],
       themeSettings: [],
-      settingLoading: true,
+      settingLoading: false,
       selectedField: '',
       wrapperCol: {
         xl: { span: 12 },
@@ -285,14 +285,10 @@ export default {
       default: true
     }
   },
-  created() {
-    this.loadSkeleton()
-    this.initData()
-  },
   watch: {
-    visible: function(newValue, oldValue) {
-      if (newValue) {
-        this.loadSkeleton()
+    visible(value) {
+      if (value) {
+        this.handleFetchConfiguration()
       }
     }
   },
@@ -300,24 +296,24 @@ export default {
     ...mapGetters(['options'])
   },
   methods: {
-    loadSkeleton() {
+    async handleFetchConfiguration() {
       this.settingLoading = true
-      setTimeout(() => {
-        this.settingLoading = false
-      }, 500)
-    },
-    initData() {
-      this.settingLoading = true
-
-      themeApi.fetchConfiguration(this.selectedTheme.id).then(response => {
+      await themeApi.fetchConfiguration(this.selectedTheme.id).then(response => {
         this.themeConfiguration = response.data.data
-        themeApi.fetchSettings(this.selectedTheme.id).then(response => {
+      })
+      this.handleFetchSettings()
+    },
+    handleFetchSettings() {
+      themeApi
+        .fetchSettings(this.selectedTheme.id)
+        .then(response => {
           this.themeSettings = response.data.data
+        })
+        .finally(() => {
           setTimeout(() => {
             this.settingLoading = false
-          }, 300)
+          }, 200)
         })
-      })
     },
     handleSaveSettings() {
       this.saving = true

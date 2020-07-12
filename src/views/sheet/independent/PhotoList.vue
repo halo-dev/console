@@ -7,7 +7,7 @@
     >
       <a-col
         :span="24"
-        style="padding-bottom: 12px;"
+        class="pb-3"
       >
         <a-card
           :bordered="false"
@@ -48,21 +48,16 @@
                   <span class="table-page-search-submitButtons">
                     <a-button
                       type="primary"
+                      class="mr-2"
                       @click="handleQuery()"
                     >查询</a-button>
-                    <a-button
-                      style="margin-left: 8px;"
-                      @click="resetParam()"
-                    >重置</a-button>
+                    <a-button @click="resetParam()">重置</a-button>
                   </span>
                 </a-col>
               </a-row>
             </a-form>
           </div>
-          <div
-            class="table-operator"
-            style="margin-bottom: 0;"
-          >
+          <div class="table-operator mb-0">
             <a-button
               type="primary"
               icon="plus"
@@ -93,7 +88,7 @@
                   loading="lazy"
                 >
               </div>
-              <a-card-meta style="padding: 0.8rem;">
+              <a-card-meta class="p-3">
                 <ellipsis
                   :length="isMobile()?12:16"
                   tooltip
@@ -128,7 +123,7 @@
     <a-modal
       v-model="optionFormVisible"
       title="页面设置"
-      :afterClose="onOptionFormClose"
+      :afterClose="() => optionFormVisible = false"
     >
       <template slot="footer">
         <a-button
@@ -174,7 +169,7 @@
               <img
                 :src="photo.url || '/images/placeholder.jpg'"
                 @click="showThumbDrawer"
-                style="width: 100%;"
+                class="w-full"
               >
             </div>
           </a-skeleton>
@@ -307,13 +302,13 @@
       <div class="bottom-control">
         <a-button
           type="dashed"
-          style="marginRight: 8px"
-          @click="handleEditClick"
+          class="mr-2"
+          @click="editable = true"
           v-if="!editable"
         >编辑</a-button>
         <a-button
           type="primary"
-          style="marginRight: 8px"
+          class="mr-2"
           @click="handleCreateOrUpdate"
           v-else
         >保存</a-button>
@@ -366,24 +361,30 @@ export default {
     }
   },
   created() {
-    this.loadPhotos()
-    this.loadTeams()
-    this.loadFormOptions()
+    this.hanldeListPhotos()
+    this.hanldeListPhotoTeams()
+    this.hanldeListOptions()
   },
   methods: {
     ...mapActions(['loadOptions']),
-    loadPhotos() {
+    hanldeListPhotos() {
       this.listLoading = true
       this.queryParam.page = this.pagination.page - 1
       this.queryParam.size = this.pagination.size
       this.queryParam.sort = this.pagination.sort
-      photoApi.query(this.queryParam).then(response => {
-        this.photos = response.data.data.content
-        this.pagination.total = response.data.data.total
-        this.listLoading = false
-      })
+      photoApi
+        .query(this.queryParam)
+        .then(response => {
+          this.photos = response.data.data.content
+          this.pagination.total = response.data.data.total
+        })
+        .finally(() => {
+          setTimeout(() => {
+            this.listLoading = false
+          }, 200)
+        })
     },
-    loadFormOptions() {
+    hanldeListOptions() {
       optionApi.listAll().then(response => {
         this.options = response.data.data
       })
@@ -391,25 +392,33 @@ export default {
     handleQuery() {
       this.handlePaginationChange(1, this.pagination.size)
     },
-    loadTeams() {
+    hanldeListPhotoTeams() {
       photoApi.listTeams().then(response => {
         this.teams = response.data.data
       })
     },
     handleCreateOrUpdate() {
       if (this.photo.id) {
-        photoApi.update(this.photo.id, this.photo).then(response => {
-          this.$message.success('照片更新成功！')
-          this.loadPhotos()
-          this.loadTeams()
-        })
+        photoApi
+          .update(this.photo.id, this.photo)
+          .then(response => {
+            this.$message.success('照片更新成功！')
+          })
+          .finally(() => {
+            this.hanldeListPhotos()
+            this.hanldeListPhotoTeams()
+          })
       } else {
-        photoApi.create(this.photo).then(response => {
-          this.$message.success('照片添加成功！')
-          this.loadPhotos()
-          this.loadTeams()
-          this.photo = response.data.data
-        })
+        photoApi
+          .create(this.photo)
+          .then(response => {
+            this.photo = response.data.data
+            this.$message.success('照片添加成功！')
+          })
+          .finally(() => {
+            this.hanldeListPhotos()
+            this.hanldeListPhotoTeams()
+          })
       }
       this.editable = false
     },
@@ -421,22 +430,23 @@ export default {
       this.$log.debug(`Current: ${page}, PageSize: ${size}`)
       this.pagination.page = page
       this.pagination.size = size
-      this.loadPhotos()
+      this.hanldeListPhotos()
     },
     handleAddClick() {
       this.editable = true
       this.drawerVisible = true
     },
-    handleEditClick() {
-      this.editable = true
-    },
     handleDeletePhoto() {
-      photoApi.delete(this.photo.id).then(response => {
-        this.$message.success('删除成功！')
-        this.onDrawerClose()
-        this.loadPhotos()
-        this.loadTeams()
-      })
+      photoApi
+        .delete(this.photo.id)
+        .then(response => {
+          this.$message.success('删除成功！')
+          this.onDrawerClose()
+        })
+        .finally(() => {
+          this.hanldeListPhotos()
+          this.hanldeListPhotoTeams()
+        })
     },
     showThumbDrawer() {
       this.thumDrawerVisible = true
@@ -450,7 +460,7 @@ export default {
       this.queryParam.keyword = null
       this.queryParam.team = null
       this.handlePaginationChange(1, this.pagination.size)
-      this.loadTeams()
+      this.hanldeListPhotoTeams()
     },
     onDrawerClose() {
       this.drawerVisible = false
@@ -458,15 +468,16 @@ export default {
       this.editable = false
     },
     handleSaveOptions() {
-      optionApi.save(this.options).then(response => {
-        this.loadFormOptions()
-        this.loadOptions()
-        this.$message.success('保存成功！')
-        this.optionFormVisible = false
-      })
-    },
-    onOptionFormClose() {
-      this.optionFormVisible = false
+      optionApi
+        .save(this.options)
+        .then(response => {
+          this.$message.success('保存成功！')
+          this.optionFormVisible = false
+        })
+        .finally(() => {
+          this.hanldeListOptions()
+          this.loadOptions()
+        })
     }
   }
 }
