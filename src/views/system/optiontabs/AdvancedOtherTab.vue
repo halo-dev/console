@@ -14,11 +14,13 @@
         <a-switch v-model="options.global_absolute_path_enabled" />
       </a-form-model-item>
       <a-form-model-item>
-        <a-button
+        <ReactiveButton
           type="primary"
           @click="handleSaveOptions"
           :loading="saving"
-        >保存</a-button>
+          text="保存"
+          loadedText="保存成功"
+        ></ReactiveButton>
       </a-form-model-item>
     </a-form-model>
   </div>

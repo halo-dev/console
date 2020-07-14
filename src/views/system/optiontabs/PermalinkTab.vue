@@ -71,11 +71,13 @@
         <a-input v-model="options.path_suffix" />
       </a-form-model-item>
       <a-form-model-item>
-        <a-button
+        <ReactiveButton
           type="primary"
           @click="handleSaveOptions"
           :loading="saving"
-        >保存</a-button>
+          text="保存"
+          loadedText="保存成功"
+        ></ReactiveButton>
       </a-form-model-item>
     </a-form-model>
   </div>

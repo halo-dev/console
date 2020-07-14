@@ -220,11 +220,13 @@
         @click="toggleViewMode"
         class="mr-2"
       >预览模式</a-button>
-      <a-button
+      <ReactiveButton
         type="primary"
         @click="handleSaveSettings"
         :loading="saving"
-      >保存</a-button>
+        text="保存"
+        loadedText="保存成功"
+      ></ReactiveButton>
     </footer-tool-bar>
   </a-drawer>
 </template>
@@ -311,7 +313,6 @@ export default {
       themeApi
         .saveSettings(this.theme.id, this.themeSettings)
         .then(response => {
-          this.$message.success('保存成功！')
           if (this.viewMode) {
             document.getElementById('themeViewIframe').contentWindow.location.reload(true)
           }

@@ -144,7 +144,13 @@
         okText="确定"
         cancelText="取消"
       >
-        <a-button type="danger">删除</a-button>
+        <ReactiveButton
+          type="danger"
+          @callback="handleDeletedCallback"
+          :loading="deleting"
+          text="删除"
+          loadedText="删除成功"
+        ></ReactiveButton>
       </a-popconfirm>
     </div>
   </a-drawer>
@@ -173,6 +179,7 @@ export default {
       videoPreviewVisible: false,
       nonsupportPreviewVisible: false,
       player: {},
+      deleting: false,
       videoOptions: {
         lang: 'zh-cn',
         video: {
@@ -214,11 +221,16 @@ export default {
   },
   methods: {
     handleDeleteAttachment() {
-      attachmentApi.delete(this.attachment.id).then(response => {
-        this.$message.success('删除成功！')
-        this.$emit('delete', this.attachment)
-        this.onClose()
+      this.deleting = true
+      attachmentApi.delete(this.attachment.id).finally(() => {
+        setTimeout(() => {
+          this.deleting = false
+        }, 400)
       })
+    },
+    handleDeletedCallback() {
+      this.$emit('delete', this.attachment)
+      this.onClose()
     },
     doUpdateAttachment() {
       if (!this.attachment.name) {

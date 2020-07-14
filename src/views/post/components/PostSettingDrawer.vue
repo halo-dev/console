@@ -284,17 +284,23 @@
         type="dashed"
         @click="advancedVisible = true"
       >高级</a-button>
-      <a-button
+      <ReactiveButton
+        type="danger"
+        v-if="saveDraftButton"
         class="mr-2"
         @click="handleDraftClick"
-        v-if="saveDraftButton"
+        @callback="handleSavedCallback"
         :loading="draftSaving"
-      >保存草稿</a-button>
-      <a-button
+        text="保存草稿"
+        loadedText="保存成功"
+      ></ReactiveButton>
+      <ReactiveButton
         @click="handlePublishClick"
-        type="primary"
+        @callback="handleSavedCallback"
         :loading="saving"
-      > {{ selectedPost.id?'保存':'发布' }} </a-button>
+        :text="`${selectedPost.id?'保存':'发布'}`"
+        :loadedText="`${selectedPost.id?'保存':'发布'}成功`"
+      ></ReactiveButton>
     </div>
   </a-drawer>
 </template>
@@ -489,41 +495,17 @@ export default {
       }
       if (this.selectedPost.id) {
         // Update the post
-        postApi
-          .update(this.selectedPost.id, this.selectedPost, false)
-          .then(response => {
-            this.$log.debug('Updated post', response.data.data)
-
-            if (this.selectedPost.status === 'DRAFT') {
-              this.$message.success('草稿保存成功！')
-            } else {
-              this.$message.success('文章更新成功！')
-            }
-
-            this.$emit('onSaved', true)
-            this.$router.push({ name: 'PostList' })
-          })
-          .finally(() => {
-            setTimeout(() => {
-              this.saving = false
-              this.draftSaving = false
-            }, 400)
-          })
+        postApi.update(this.selectedPost.id, this.selectedPost, false).finally(() => {
+          setTimeout(() => {
+            this.saving = false
+            this.draftSaving = false
+          }, 400)
+        })
       } else {
         // Create the post
         postApi
           .create(this.selectedPost, false)
           .then(response => {
-            this.$log.debug('Created post', response.data.data)
-
-            if (this.selectedPost.status === 'DRAFT') {
-              this.$message.success('草稿保存成功！')
-            } else {
-              this.$message.success('文章发布成功！')
-            }
-
-            this.$emit('onSaved', true)
-            this.$router.push({ name: 'PostList' })
             this.selectedPost = response.data.data
           })
           .finally(() => {
@@ -533,6 +515,10 @@ export default {
             }, 400)
           })
       }
+    },
+    handleSavedCallback() {
+      this.$emit('onSaved', true)
+      this.$router.push({ name: 'PostList' })
     },
     onClose() {
       this.$emit('close', false)

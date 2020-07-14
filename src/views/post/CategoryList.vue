@@ -69,18 +69,24 @@
               />
             </a-form-model-item>
             <a-form-model-item>
-              <a-button
+              <ReactiveButton
+                v-if="!isUpdateMode"
                 type="primary"
                 @click="handleCreateOrUpdateCategory"
-                v-if="!isUpdateMode"
+                @callback="handleSavedCallback"
                 :loading="form.saving"
-              >保存</a-button>
+                text="保存"
+                loadedText="保存成功"
+              ></ReactiveButton>
               <a-button-group v-else>
-                <a-button
+                <ReactiveButton
                   type="primary"
                   @click="handleCreateOrUpdateCategory"
+                  @callback="handleSavedCallback"
                   :loading="form.saving"
-                >更新</a-button>
+                  text="更新"
+                  loadedText="更新成功"
+                ></ReactiveButton>
                 <a-button
                   type="dashed"
                   @click="form.model = {}"
@@ -359,34 +365,25 @@ export default {
         if (valid) {
           _this.form.saving = true
           if (_this.isUpdateMode) {
-            categoryApi
-              .update(_this.form.model.id, _this.form.model)
-              .then(response => {
-                _this.$message.success('更新成功！')
-                _this.form.model = {}
-              })
-              .finally(() => {
-                setTimeout(() => {
-                  _this.form.saving = false
-                }, 400)
-                _this.handleListCategories()
-              })
+            categoryApi.update(_this.form.model.id, _this.form.model).finally(() => {
+              setTimeout(() => {
+                _this.form.saving = false
+              }, 400)
+            })
           } else {
-            categoryApi
-              .create(this.form.model)
-              .then(response => {
-                _this.$message.success('保存成功！')
-                _this.form.model = {}
-              })
-              .finally(() => {
-                setTimeout(() => {
-                  _this.form.saving = false
-                }, 400)
-                _this.handleListCategories()
-              })
+            categoryApi.create(this.form.model).finally(() => {
+              setTimeout(() => {
+                _this.form.saving = false
+              }, 400)
+            })
           }
         }
       })
+    },
+    handleSavedCallback() {
+      const _this = this
+      _this.form.model = {}
+      _this.handleListCategories()
     },
     handleCreateMenuByCategory(category) {
       const menu = {

@@ -195,19 +195,14 @@ export default {
     },
     onSaveOptions() {
       this.saving = true
-      optionApi
-        .save(this.options)
-        .then(response => {
-          this.$message.success('保存成功！')
-        })
-        .finally(() => {
-          setTimeout(() => {
-            this.saving = false
-          }, 400)
-          this.hanldeListOptions()
-          this.refreshOptionsCache()
-          this.refreshUserCache()
-        })
+      optionApi.save(this.options).finally(() => {
+        setTimeout(() => {
+          this.saving = false
+        }, 400)
+        this.hanldeListOptions()
+        this.refreshOptionsCache()
+        this.refreshUserCache()
+      })
     }
   }
 }

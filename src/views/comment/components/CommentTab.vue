@@ -402,13 +402,14 @@
       destroyOnClose
     >
       <template slot="footer">
-        <a-button
-          key="submit"
+        <ReactiveButton
           type="primary"
           @click="handleCreateClick"
-        >
-          回复
-        </a-button>
+          @callback="handleRepliedCallback"
+          :loading="replying"
+          text="回复"
+          loadedText="回复成功"
+        ></ReactiveButton>
       </template>
       <a-form layout="vertical">
         <a-form-item>
@@ -553,7 +554,8 @@ export default {
       replyComment: {},
       loading: false,
       commentStatus: commentApi.commentStatus,
-      commentDetailVisible: false
+      commentDetailVisible: false,
+      replying: false
     }
   },
   created() {
@@ -632,17 +634,18 @@ export default {
         })
         return
       }
-      commentApi
-        .create(this.type, this.replyComment)
-        .then(response => {
-          this.$message.success('回复成功！')
-          this.replyComment = {}
-          this.selectedComment = {}
-          this.replyCommentVisible = false
-        })
-        .finally(() => {
-          this.handleListComments()
-        })
+      this.replying = true
+      commentApi.create(this.type, this.replyComment).finally(() => {
+        setTimeout(() => {
+          this.replying = false
+        }, 400)
+      })
+    },
+    handleRepliedCallback() {
+      this.replyComment = {}
+      this.selectedComment = {}
+      this.replyCommentVisible = false
+      this.handleListComments()
     },
     handlePaginationChange(page, pageSize) {
       this.$log.debug(`Current: ${page}, PageSize: ${pageSize}`)

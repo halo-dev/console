@@ -38,11 +38,13 @@
             <a-input v-model="options.email_from_name" />
           </a-form-model-item>
           <a-form-model-item>
-            <a-button
+            <ReactiveButton
               type="primary"
               @click="handleSaveOptions"
               :loading="saving"
-            >保存</a-button>
+              text="保存"
+              loadedText="保存成功"
+            ></ReactiveButton>
           </a-form-model-item>
         </a-form-model>
       </a-tab-pane>
@@ -68,11 +70,13 @@
             />
           </a-form-model-item>
           <a-form-model-item>
-            <a-button
+            <ReactiveButton
               type="primary"
               @click="handleTestMailClick"
               :loading="sending"
-            >发送</a-button>
+              text="发送"
+              loadedText="发送成功"
+            ></ReactiveButton>
           </a-form-model-item>
         </a-form-model>
       </a-tab-pane>

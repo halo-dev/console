@@ -209,11 +209,14 @@
           type="dashed"
           @click="attachmentDrawerVisible = true"
         >附件库</a-button>
-        <a-button
-          key="submit"
+        <ReactiveButton
           type="primary"
           @click="createOrUpdateJournal"
-        >发布</a-button>
+          @callback="handleSavedCallback"
+          :loading="saving"
+          text="发布"
+          loadedText="发布成功"
+        ></ReactiveButton>
       </template>
       <a-form layout="vertical">
         <a-form-item>
@@ -283,7 +286,8 @@ export default {
       journal: {},
       isPublic: true,
       replyComment: {},
-      options: []
+      options: [],
+      saving: false
     }
   },
   created() {
@@ -355,29 +359,25 @@ export default {
         })
         return
       }
-
+      this.saving = true
       if (this.journal.id) {
-        journalApi
-          .update(this.journal.id, this.journal)
-          .then(response => {
-            this.$message.success('更新成功！')
-            this.isPublic = true
-          })
-          .finally(() => {
-            this.hanldeListJournals()
-          })
+        journalApi.update(this.journal.id, this.journal).finally(() => {
+          setTimeout(() => {
+            this.saving = false
+          }, 400)
+        })
       } else {
-        journalApi
-          .create(this.journal)
-          .then(response => {
-            this.$message.success('发表成功！')
-            this.isPublic = true
-          })
-          .finally(() => {
-            this.hanldeListJournals()
-          })
+        journalApi.create(this.journal).finally(() => {
+          setTimeout(() => {
+            this.saving = false
+          }, 400)
+        })
       }
+    },
+    handleSavedCallback() {
+      this.isPublic = true
       this.visible = false
+      this.hanldeListJournals()
     },
     handlePaginationChange(page, pageSize) {
       this.$log.debug(`Current: ${page}, PageSize: ${pageSize}`)
