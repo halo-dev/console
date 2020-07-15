@@ -214,8 +214,10 @@
           @click="createOrUpdateJournal"
           @callback="handleSavedCallback"
           :loading="saving"
+          :errored="errored"
           text="发布"
           loadedText="发布成功"
+          erroredText="发布失败"
         ></ReactiveButton>
       </template>
       <a-form layout="vertical">
@@ -287,7 +289,8 @@ export default {
       isPublic: true,
       replyComment: {},
       options: [],
-      saving: false
+      saving: false,
+      errored: false
     }
   },
   created() {
@@ -361,23 +364,37 @@ export default {
       }
       this.saving = true
       if (this.journal.id) {
-        journalApi.update(this.journal.id, this.journal).finally(() => {
-          setTimeout(() => {
-            this.saving = false
-          }, 400)
-        })
+        journalApi
+          .update(this.journal.id, this.journal)
+          .catch(() => {
+            this.errored = true
+          })
+          .finally(() => {
+            setTimeout(() => {
+              this.saving = false
+            }, 400)
+          })
       } else {
-        journalApi.create(this.journal).finally(() => {
-          setTimeout(() => {
-            this.saving = false
-          }, 400)
-        })
+        journalApi
+          .create(this.journal)
+          .catch(() => {
+            this.errored = true
+          })
+          .finally(() => {
+            setTimeout(() => {
+              this.saving = false
+            }, 400)
+          })
       }
     },
     handleSavedCallback() {
-      this.isPublic = true
-      this.visible = false
-      this.hanldeListJournals()
+      if (this.errored) {
+        this.errored = false
+      } else {
+        this.isPublic = true
+        this.visible = false
+        this.hanldeListJournals()
+      }
     },
     handlePaginationChange(page, pageSize) {
       this.$log.debug(`Current: ${page}, PageSize: ${pageSize}`)

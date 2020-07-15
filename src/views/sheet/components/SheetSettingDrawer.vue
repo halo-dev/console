@@ -204,15 +204,19 @@
         @click="handleDraftClick"
         @callback="handleSavedCallback"
         :loading="draftSaving"
+        :errored="draftSavedErrored"
         text="保存草稿"
         loadedText="保存成功"
+        erroredText="保存失败"
       ></ReactiveButton>
       <ReactiveButton
         @click="handlePublishClick"
         @callback="handleSavedCallback"
         :loading="saving"
+        :errored="savedErrored"
         :text="`${selectedSheet.id?'保存':'发布'}`"
         :loadedText="`${selectedSheet.id?'保存':'发布'}成功`"
+        :erroredText="`${selectedSheet.id?'保存':'发布'}失败`"
       ></ReactiveButton>
     </div>
   </a-drawer>
@@ -234,7 +238,9 @@ export default {
       selectedSheet: this.sheet,
       customTpls: [],
       saving: false,
-      draftSaving: false
+      savedErrored: false,
+      draftSaving: false,
+      draftSavedErrored: false
     }
   },
   props: {
@@ -354,15 +360,31 @@ export default {
         this.saving = true
       }
       if (this.selectedSheet.id) {
-        sheetApi.update(this.selectedSheet.id, this.selectedSheet, false).finally(() => {
-          setTimeout(() => {
-            this.saving = false
-            this.draftSaving = false
-          }, 400)
-        })
+        sheetApi
+          .update(this.selectedSheet.id, this.selectedSheet, false)
+          .catch(() => {
+            if (this.selectedSheet.status === 'DRAFT') {
+              this.draftSavedErrored = true
+            } else {
+              this.savedErrored = true
+            }
+          })
+          .finally(() => {
+            setTimeout(() => {
+              this.saving = false
+              this.draftSaving = false
+            }, 400)
+          })
       } else {
         sheetApi
           .create(this.selectedSheet, false)
+          .catch(() => {
+            if (this.selectedSheet.status === 'DRAFT') {
+              this.draftSavedErrored = true
+            } else {
+              this.savedErrored = true
+            }
+          })
           .then(response => {
             this.selectedSheet = response.data.data
           })
@@ -375,8 +397,13 @@ export default {
       }
     },
     handleSavedCallback() {
-      this.$emit('onSaved', true)
-      this.$router.push({ name: 'SheetList', query: { activeKey: 'custom' } })
+      if (this.draftSavedErrored || this.savedErrored) {
+        this.draftSavedErrored = false
+        this.savedErrored = false
+      } else {
+        this.$emit('onSaved', true)
+        this.$router.push({ name: 'SheetList', query: { activeKey: 'custom' } })
+      }
     },
     onClose() {
       this.$emit('close', false)

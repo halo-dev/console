@@ -91,8 +91,10 @@
                 @click="handleCreateOrUpdateMenu"
                 @callback="handleSavedCallback"
                 :loading="form.saving"
+                :errored="form.errored"
                 text="保存"
                 loadedText="保存成功"
+                erroredText="保存失败"
               ></ReactiveButton>
               <a-button-group v-else>
                 <ReactiveButton
@@ -100,8 +102,10 @@
                   @click="handleCreateOrUpdateMenu"
                   @callback="handleSavedCallback"
                   :loading="form.saving"
+                  :errored="form.errored"
                   text="更新"
                   loadedText="更新成功"
+                  erroredText="更新失败"
                 ></ReactiveButton>
                 <a-button
                   type="dashed"
@@ -272,6 +276,7 @@ export default {
           target: '_self'
         },
         saving: false,
+        errored: false,
         rules: {
           name: [
             { required: true, message: '* 菜单名称不能为空', trigger: ['change', 'blur'] },
@@ -342,26 +347,40 @@ export default {
         if (valid) {
           _this.form.saving = true
           if (_this.isUpdateMode) {
-            menuApi.update(_this.form.model.id, _this.form.model).finally(() => {
-              setTimeout(() => {
-                _this.form.saving = false
-              }, 400)
-            })
+            menuApi
+              .update(_this.form.model.id, _this.form.model)
+              .catch(() => {
+                _this.form.errored = true
+              })
+              .finally(() => {
+                setTimeout(() => {
+                  _this.form.saving = false
+                }, 400)
+              })
           } else {
-            menuApi.create(_this.form.model).finally(() => {
-              setTimeout(() => {
-                _this.form.saving = false
-              }, 400)
-            })
+            menuApi
+              .create(_this.form.model)
+              .catch(() => {
+                _this.form.errored = true
+              })
+              .finally(() => {
+                setTimeout(() => {
+                  _this.form.saving = false
+                }, 400)
+              })
           }
         }
       })
     },
     handleSavedCallback() {
       const _this = this
-      _this.form.model = { target: '_self' }
-      _this.handleListMenus()
-      _this.handleListTeams()
+      if (_this.form.errored) {
+        _this.form.errored = false
+      } else {
+        _this.form.model = { target: '_self' }
+        _this.handleListMenus()
+        _this.handleListTeams()
+      }
     }
   }
 }

@@ -291,15 +291,19 @@
         @click="handleDraftClick"
         @callback="handleSavedCallback"
         :loading="draftSaving"
+        :errored="draftSavedErrored"
         text="保存草稿"
         loadedText="保存成功"
+        erroredText="保存失败"
       ></ReactiveButton>
       <ReactiveButton
         @click="handlePublishClick"
         @callback="handleSavedCallback"
         :loading="saving"
+        :errored="savedErrored"
         :text="`${selectedPost.id?'保存':'发布'}`"
         :loadedText="`${selectedPost.id?'保存':'发布'}成功`"
+        :erroredText="`${selectedPost.id?'保存':'发布'}失败`"
       ></ReactiveButton>
     </div>
   </a-drawer>
@@ -334,7 +338,9 @@ export default {
       categoryToCreate: {},
       customTpls: [],
       saving: false,
-      draftSaving: false
+      savedErrored: false,
+      draftSaving: false,
+      draftSavedErrored: false
     }
   },
   props: {
@@ -495,16 +501,32 @@ export default {
       }
       if (this.selectedPost.id) {
         // Update the post
-        postApi.update(this.selectedPost.id, this.selectedPost, false).finally(() => {
-          setTimeout(() => {
-            this.saving = false
-            this.draftSaving = false
-          }, 400)
-        })
+        postApi
+          .update(this.selectedPost.id, this.selectedPost, false)
+          .catch(() => {
+            if (this.selectedPost.status === 'DRAFT') {
+              this.draftSavedErrored = true
+            } else {
+              this.savedErrored = true
+            }
+          })
+          .finally(() => {
+            setTimeout(() => {
+              this.saving = false
+              this.draftSaving = false
+            }, 400)
+          })
       } else {
         // Create the post
         postApi
           .create(this.selectedPost, false)
+          .catch(() => {
+            if (this.selectedPost.status === 'DRAFT') {
+              this.draftSavedErrored = true
+            } else {
+              this.savedErrored = true
+            }
+          })
           .then(response => {
             this.selectedPost = response.data.data
           })
@@ -517,8 +539,13 @@ export default {
       }
     },
     handleSavedCallback() {
-      this.$emit('onSaved', true)
-      this.$router.push({ name: 'PostList' })
+      if (this.draftSavedErrored || this.savedErrored) {
+        this.draftSavedErrored = false
+        this.savedErrored = false
+      } else {
+        this.$emit('onSaved', true)
+        this.$router.push({ name: 'PostList' })
+      }
     },
     onClose() {
       this.$emit('close', false)

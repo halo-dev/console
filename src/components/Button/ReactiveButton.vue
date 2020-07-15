@@ -1,10 +1,10 @@
 <template>
   <a-button
-    :type="type"
+    :type="computedType"
     @click="handleClick"
     :icon="computedIcon"
     :loading="loading"
-  >{{ !loaded?text:loadedText }}</a-button>
+  >{{ computedText }}</a-button>
 </template>
 <script>
 export default {
@@ -22,6 +22,10 @@ export default {
       type: Boolean,
       default: false
     },
+    errored: {
+      type: Boolean,
+      default: false
+    },
     text: {
       type: String,
       default: ''
@@ -29,27 +33,51 @@ export default {
     loadedText: {
       type: String,
       default: ''
+    },
+    erroredText: {
+      type: String,
+      default: ''
     }
   },
   data() {
     return {
-      loaded: false
+      loaded: false,
+      hasError: false
     }
   },
   watch: {
     loading(value) {
       if (!value) {
         this.loaded = true
+        if (this.errored) {
+          this.hasError = true
+        }
         setTimeout(() => {
           this.loaded = false
+          this.hasError = false
           this.$emit('callback')
-        }, 600)
+        }, 800)
       }
     }
   },
   computed: {
+    computedType() {
+      if (this.loaded) {
+        return this.hasError ? 'danger' : this.type
+      }
+      return this.type
+    },
     computedIcon() {
-      return !this.loaded ? this.icon : 'check-circle'
+      if (this.loaded) {
+        return this.hasError ? 'close-circle' : 'check-circle'
+      }
+      return this.icon
+    },
+    computedText() {
+      if (this.loaded) {
+        return this.hasError ? this.erroredText : this.loadedText
+      }
+      return this.text
     }
   },
   methods: {

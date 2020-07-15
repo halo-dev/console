@@ -83,8 +83,10 @@
                 @click="handleCreateOrUpdateLink"
                 @callback="handleSavedCallback"
                 :loading="form.saving"
+                :errored="form.errored"
                 text="保存"
                 loadedText="保存成功"
+                erroredText="保存失败"
               ></ReactiveButton>
               <a-button-group v-else>
                 <ReactiveButton
@@ -92,8 +94,10 @@
                   @click="handleCreateOrUpdateLink"
                   @callback="handleSavedCallback"
                   :loading="form.saving"
+                  :errored="form.errored"
                   text="更新"
                   loadedText="更新成功"
+                  erroredText="更新失败"
                 ></ReactiveButton>
                 <a-button
                   type="dashed"
@@ -304,6 +308,7 @@ export default {
       form: {
         model: {},
         saving: false,
+        errored: false,
         rules: {
           name: [
             { required: true, message: '* 友情链接名称不能为空', trigger: ['change', 'blur'] },
@@ -389,26 +394,40 @@ export default {
         if (valid) {
           _this.form.saving = true
           if (_this.isUpdateMode) {
-            linkApi.update(_this.form.model.id, _this.form.model).finally(() => {
-              setTimeout(() => {
-                _this.form.saving = false
-              }, 400)
-            })
+            linkApi
+              .update(_this.form.model.id, _this.form.model)
+              .catch(() => {
+                this.form.errored = true
+              })
+              .finally(() => {
+                setTimeout(() => {
+                  _this.form.saving = false
+                }, 400)
+              })
           } else {
-            linkApi.create(_this.form.model).finally(() => {
-              setTimeout(() => {
-                _this.form.saving = false
-              }, 400)
-            })
+            linkApi
+              .create(_this.form.model)
+              .catch(() => {
+                this.form.errored = true
+              })
+              .finally(() => {
+                setTimeout(() => {
+                  _this.form.saving = false
+                }, 400)
+              })
           }
         }
       })
     },
     handleSavedCallback() {
       const _this = this
-      _this.form.model = {}
-      _this.handleListLinks()
-      _this.handleListLinkTeams()
+      if (_this.form.errored) {
+        _this.form.errored = false
+      } else {
+        _this.form.model = {}
+        _this.handleListLinks()
+        _this.handleListLinkTeams()
+      }
     },
     handleSaveOptions() {
       optionApi

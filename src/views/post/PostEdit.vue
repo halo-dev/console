@@ -47,9 +47,12 @@
         type="danger"
         class="mr-2"
         @click="handleSaveDraft(false)"
+        @callback="draftSavederrored = false"
         :loading="draftSaving"
+        :errored="draftSavederrored"
         text="保存草稿"
         loadedText="保存成功"
+        erroredText="保存失败"
       ></ReactiveButton>
       <a-button
         @click="handlePreview"
@@ -100,7 +103,8 @@ export default {
       isSaved: false,
       contentChanges: 0,
       draftSaving: false,
-      previewSaving: false
+      previewSaving: false,
+      draftSavederrored: false
     }
   },
   beforeRouteEnter(to, from, next) {
@@ -190,14 +194,22 @@ export default {
       if (this.postToStage.id) {
         // Update the post
         if (draftOnly) {
-          postApi.updateDraft(this.postToStage.id, this.postToStage.originalContent).finally(() => {
-            setTimeout(() => {
-              this.draftSaving = false
-            }, 400)
-          })
+          postApi
+            .updateDraft(this.postToStage.id, this.postToStage.originalContent)
+            .catch(() => {
+              this.draftSavederrored = true
+            })
+            .finally(() => {
+              setTimeout(() => {
+                this.draftSaving = false
+              }, 400)
+            })
         } else {
           postApi
             .update(this.postToStage.id, this.postToStage, false)
+            .catch(() => {
+              this.draftSavederrored = true
+            })
             .then(response => {
               this.postToStage = response.data.data
             })
@@ -211,6 +223,9 @@ export default {
         // Create the post
         postApi
           .create(this.postToStage, false)
+          .catch(() => {
+            this.draftSavederrored = true
+          })
           .then(response => {
             this.postToStage = response.data.data
           })

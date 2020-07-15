@@ -14,25 +14,30 @@
     </template>
     <a-form-model
       ref="journalForm"
-      :model="journal"
-      :rules="rules"
+      :model="form.model"
+      :rules="form.rules"
       layout="vertical"
     >
       <a-form-model-item prop="sourceContent">
         <a-input
           type="textarea"
           :autoSize="{ minRows: 8 }"
-          v-model="journal.sourceContent"
+          v-model="form.model.sourceContent"
           placeholder="写点什么吧..."
         />
       </a-form-model-item>
       <a-form-model-item>
         <ReactiveButton
           @click="handleCreateJournalClick"
-          @callback="journal = {}"
-          :loading="saving"
+          @callback="() => {
+            if(!form.errored) form.model = {}
+            form.errored = false
+          }"
+          :loading="form.saving"
+          :errored="form.errored"
           text="发布"
           loadedText="发布成功"
+          erroredText="发布失败"
         ></ReactiveButton>
       </a-form-model-item>
     </a-form-model>
@@ -44,13 +49,14 @@ export default {
   name: 'JournalPublishCard',
   data() {
     return {
-      journal: {
-        sourceContent: ''
-      },
-      rules: {
-        sourceContent: [{ required: true, message: '* 内容不能为空', trigger: ['change', 'blur'] }]
-      },
-      saving: false
+      form: {
+        model: {},
+        rules: {
+          sourceContent: [{ required: true, message: '* 内容不能为空', trigger: ['change', 'blur'] }]
+        },
+        saving: false,
+        errored: false
+      }
     }
   },
   methods: {
@@ -58,12 +64,17 @@ export default {
       const _this = this
       _this.$refs.journalForm.validate(valid => {
         if (valid) {
-          _this.saving = true
-          journalApi.create(_this.journal).finally(() => {
-            setTimeout(() => {
-              _this.saving = false
-            }, 400)
-          })
+          _this.form.saving = true
+          journalApi
+            .create(_this.form.model)
+            .catch(() => {
+              this.form.errored = true
+            })
+            .finally(() => {
+              setTimeout(() => {
+                _this.form.saving = false
+              }, 400)
+            })
         }
       })
     }

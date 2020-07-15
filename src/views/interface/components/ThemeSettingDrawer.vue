@@ -223,9 +223,12 @@
       <ReactiveButton
         type="primary"
         @click="handleSaveSettings"
+        @callback="saveErrored=false"
         :loading="saving"
+        :errored="saveErrored"
         text="保存"
         loadedText="保存成功"
+        erroredText="保存失败"
       ></ReactiveButton>
     </footer-tool-bar>
   </a-drawer>
@@ -260,7 +263,8 @@ export default {
       viewMode: false,
       formColValue: 12,
       clientHeight: document.documentElement.clientHeight,
-      saving: false
+      saving: false,
+      saveErrored: false
     }
   },
   model: {
@@ -316,6 +320,9 @@ export default {
           if (this.viewMode) {
             document.getElementById('themeViewIframe').contentWindow.location.reload(true)
           }
+        })
+        .catch(() => {
+          this.saveErrored = true
         })
         .finally(() => {
           setTimeout(() => {

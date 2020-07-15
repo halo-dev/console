@@ -148,8 +148,10 @@
           type="danger"
           @callback="handleDeletedCallback"
           :loading="deleting"
+          :errored="deleteErrored"
           text="删除"
           loadedText="删除成功"
+          erroredText="删除失败"
         ></ReactiveButton>
       </a-popconfirm>
     </div>
@@ -180,6 +182,7 @@ export default {
       nonsupportPreviewVisible: false,
       player: {},
       deleting: false,
+      deleteErrored: false,
       videoOptions: {
         lang: 'zh-cn',
         video: {
@@ -222,14 +225,20 @@ export default {
   methods: {
     handleDeleteAttachment() {
       this.deleting = true
-      attachmentApi.delete(this.attachment.id).finally(() => {
-        setTimeout(() => {
-          this.deleting = false
-        }, 400)
-      })
+      attachmentApi
+        .delete(this.attachment.id)
+        .catch(() => {
+          this.deleteErrored = true
+        })
+        .finally(() => {
+          setTimeout(() => {
+            this.deleting = false
+          }, 400)
+        })
     },
     handleDeletedCallback() {
       this.$emit('delete', this.attachment)
+      this.deleteErrored = false
       this.onClose()
     },
     doUpdateAttachment() {

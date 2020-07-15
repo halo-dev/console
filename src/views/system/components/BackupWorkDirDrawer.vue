@@ -61,10 +61,12 @@
         class="mr-2"
         icon="download"
         @click="handleBackupClick"
-        @callback="handleListBackups"
+        @callback="handleBackupedCallback"
         :loading="backuping"
+        :errored="backupErrored"
         text="备份"
         loadedText="备份成功"
+        erroredText="备份失败"
       ></ReactiveButton>
       <a-button
         type="dashed"
@@ -85,6 +87,7 @@ export default {
     return {
       backuping: false,
       loading: false,
+      backupErrored: false,
       backups: []
     }
   },
@@ -120,11 +123,23 @@ export default {
     },
     handleBackupClick() {
       this.backuping = true
-      backupApi.backupWorkDir().finally(() => {
-        setTimeout(() => {
-          this.backuping = false
-        }, 400)
-      })
+      backupApi
+        .backupWorkDir()
+        .catch(() => {
+          this.backupErrored = true
+        })
+        .finally(() => {
+          setTimeout(() => {
+            this.backuping = false
+          }, 400)
+        })
+    },
+    handleBackupedCallback() {
+      if (this.backupErrored) {
+        this.backupErrored = false
+      } else {
+        this.handleListBackups()
+      }
     },
     handleBackupDeleteClick(backup) {
       backup.deleting = true

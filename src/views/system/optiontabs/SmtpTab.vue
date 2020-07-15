@@ -41,9 +41,12 @@
             <ReactiveButton
               type="primary"
               @click="handleSaveOptions"
+              @callback="$emit('callback')"
               :loading="saving"
+              :errored="errored"
               text="保存"
               loadedText="保存成功"
+              erroredText="保存失败"
             ></ReactiveButton>
           </a-form-model-item>
         </a-form-model>
@@ -73,9 +76,12 @@
             <ReactiveButton
               type="primary"
               @click="handleTestMailClick"
+              @callback="sendErrored=false"
               :loading="sending"
+              :errored="sendErrored"
               text="发送"
               loadedText="发送成功"
+              erroredText="发送失败"
             ></ReactiveButton>
           </a-form-model-item>
         </a-form-model>
@@ -95,6 +101,10 @@ export default {
     saving: {
       type: Boolean,
       default: false
+    },
+    errored: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -107,6 +117,7 @@ export default {
       },
       mailParam: {},
       sending: false,
+      sendErrored: false,
       rules: {}
     }
   },
@@ -196,6 +207,9 @@ export default {
         .testMail(this.mailParam)
         .then(response => {
           this.$message.info(response.data.message)
+        })
+        .catch(() => {
+          this.sendErrored = true
         })
         .finally(() => {
           setTimeout(() => {

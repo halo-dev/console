@@ -57,10 +57,13 @@
             <a-form-item>
               <ReactiveButton
                 @click="handlerSaveContent"
+                @callback="saveErrored=false"
                 :loading="saving"
+                :errored="saveErrored"
                 :disabled="buttonDisabled"
                 text="保存"
                 loadedText="保存成功"
+                erroredText="保存失败"
               ></ReactiveButton>
             </a-form-item>
           </a-form>
@@ -96,7 +99,8 @@ export default {
       themes: [],
       themesLoading: false,
       selectedTheme: {},
-      saving: false
+      saving: false,
+      saveErrored: false
     }
   },
   created() {
@@ -185,11 +189,16 @@ export default {
     },
     handlerSaveContent() {
       this.saving = true
-      themeApi.saveContent(this.selectedTheme.id, this.file.path, this.content).finally(() => {
-        setTimeout(() => {
-          this.saving = false
-        }, 400)
-      })
+      themeApi
+        .saveContent(this.selectedTheme.id, this.file.path, this.content)
+        .catch(() => {
+          this.saveErrored = true
+        })
+        .finally(() => {
+          setTimeout(() => {
+            this.saving = false
+          }, 400)
+        })
     }
   }
 }

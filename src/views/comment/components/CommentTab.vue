@@ -407,8 +407,10 @@
           @click="handleCreateClick"
           @callback="handleRepliedCallback"
           :loading="replying"
+          :errored="replyErrored"
           text="回复"
           loadedText="回复成功"
+          erroredText="回复失败"
         ></ReactiveButton>
       </template>
       <a-form layout="vertical">
@@ -555,7 +557,8 @@ export default {
       loading: false,
       commentStatus: commentApi.commentStatus,
       commentDetailVisible: false,
-      replying: false
+      replying: false,
+      replyErrored: false
     }
   },
   created() {
@@ -635,17 +638,26 @@ export default {
         return
       }
       this.replying = true
-      commentApi.create(this.type, this.replyComment).finally(() => {
-        setTimeout(() => {
-          this.replying = false
-        }, 400)
-      })
+      commentApi
+        .create(this.type, this.replyComment)
+        .catch(() => {
+          this.replyErrored = true
+        })
+        .finally(() => {
+          setTimeout(() => {
+            this.replying = false
+          }, 400)
+        })
     },
     handleRepliedCallback() {
-      this.replyComment = {}
-      this.selectedComment = {}
-      this.replyCommentVisible = false
-      this.handleListComments()
+      if (this.replyErrored) {
+        this.replyErrored = false
+      } else {
+        this.replyComment = {}
+        this.selectedComment = {}
+        this.replyCommentVisible = false
+        this.handleListComments()
+      }
     },
     handlePaginationChange(page, pageSize) {
       this.$log.debug(`Current: ${page}, PageSize: ${pageSize}`)

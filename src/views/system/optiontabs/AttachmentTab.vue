@@ -376,9 +376,12 @@
         <ReactiveButton
           type="primary"
           @click="handleSaveOptions"
+          @callback="$emit('callback')"
           :loading="saving"
+          :errored="errored"
           text="保存"
           loadedText="保存成功"
+          erroredText="保存失败"
         ></ReactiveButton>
       </a-form-model-item>
     </a-form-model>
@@ -446,6 +449,10 @@ export default {
       required: true
     },
     saving: {
+      type: Boolean,
+      default: false
+    },
+    errored: {
       type: Boolean,
       default: false
     }

@@ -55,8 +55,10 @@
                 @click="handleCreateOrUpdateTag"
                 @callback="handleSavedCallback"
                 :loading="form.saving"
+                :errored="form.errored"
                 text="保存"
                 loadedText="保存成功"
+                erroredText="保存失败"
               ></ReactiveButton>
               <a-button-group v-else>
                 <ReactiveButton
@@ -64,8 +66,10 @@
                   @click="handleCreateOrUpdateTag"
                   @callback="handleSavedCallback"
                   :loading="form.saving"
+                  :errored="form.errored"
                   text="更新"
                   loadedText="更新成功"
+                  erroredText="更新失败"
                 ></ReactiveButton>
                 <a-button
                   type="dashed"
@@ -143,6 +147,7 @@ export default {
       form: {
         model: {},
         saving: false,
+        errored: false,
         rules: {
           name: [
             { required: true, message: '* 标签名称不能为空', trigger: ['change', 'blur'] },
@@ -197,25 +202,39 @@ export default {
         if (valid) {
           this.form.saving = true
           if (_this.isUpdateMode) {
-            tagApi.update(_this.form.model.id, _this.form.model).finally(() => {
-              setTimeout(() => {
-                _this.form.saving = false
-              }, 400)
-            })
+            tagApi
+              .update(_this.form.model.id, _this.form.model)
+              .catch(() => {
+                this.form.errored = true
+              })
+              .finally(() => {
+                setTimeout(() => {
+                  _this.form.saving = false
+                }, 400)
+              })
           } else {
-            tagApi.create(_this.form.model).finally(() => {
-              setTimeout(() => {
-                _this.form.saving = false
-              }, 400)
-            })
+            tagApi
+              .create(_this.form.model)
+              .catch(() => {
+                this.form.errored = true
+              })
+              .finally(() => {
+                setTimeout(() => {
+                  _this.form.saving = false
+                }, 400)
+              })
           }
         }
       })
     },
     handleSavedCallback() {
       const _this = this
-      _this.form.model = {}
-      _this.handleListTags()
+      if (_this.form.errored) {
+        _this.form.errored = false
+      } else {
+        _this.form.model = {}
+        _this.handleListTags()
+      }
     },
     handleSelectThumbnail(data) {
       this.$set(this.form.model, 'thumbnail', encodeURI(data.path))

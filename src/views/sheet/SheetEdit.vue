@@ -42,9 +42,12 @@
         type="danger"
         class="mr-2"
         @click="handleSaveDraft(false)"
+        @callback="draftSavederrored = false"
         :loading="draftSaving"
+        :errored="draftSavederrored"
         text="保存草稿"
         loadedText="保存成功"
+        erroredText="保存失败"
       ></ReactiveButton>
       <a-button
         @click="handlePreview"
@@ -93,6 +96,7 @@ export default {
       isSaved: false,
       contentChanges: 0,
       draftSaving: false,
+      draftSavederrored: false,
       previewSaving: false
     }
   },
@@ -180,14 +184,22 @@ export default {
       this.draftSaving = true
       if (this.sheetToStage.id) {
         if (draftOnly) {
-          sheetApi.updateDraft(this.sheetToStage.id, this.sheetToStage.originalContent).finally(() => {
-            setTimeout(() => {
-              this.draftSaving = false
-            }, 400)
-          })
+          sheetApi
+            .updateDraft(this.sheetToStage.id, this.sheetToStage.originalContent)
+            .catch(() => {
+              this.draftSavederrored = true
+            })
+            .finally(() => {
+              setTimeout(() => {
+                this.draftSaving = false
+              }, 400)
+            })
         } else {
           sheetApi
             .update(this.sheetToStage.id, this.sheetToStage, false)
+            .catch(() => {
+              this.draftSavederrored = true
+            })
             .then(response => {
               this.sheetToStage = response.data.data
             })
@@ -200,6 +212,9 @@ export default {
       } else {
         sheetApi
           .create(this.sheetToStage, false)
+          .catch(() => {
+            this.draftSavederrored = true
+          })
           .then(response => {
             this.sheetToStage = response.data.data
           })
