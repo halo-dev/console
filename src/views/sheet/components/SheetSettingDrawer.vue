@@ -295,7 +295,7 @@ export default {
       const blogUrl = this.options.blog_url
       const sheetPrefix = this.options.sheet_prefix
       const pathSuffix = this.options.path_suffix ? this.options.path_suffix : ''
-      return `${blogUrl}/${sheetPrefix}/${this.selectedSheet.slug ? this.selectedSheet.slug : '{slug'}${pathSuffix}`
+      return `${blogUrl}/${sheetPrefix}/${this.selectedSheet.slug ? this.selectedSheet.slug : '{slug}'}${pathSuffix}`
     }
   },
   methods: {

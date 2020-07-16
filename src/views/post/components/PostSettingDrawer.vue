@@ -20,13 +20,10 @@
             >
               <a-input v-model="selectedPost.title" />
             </a-form-item>
-            <a-form-item label="文章别名：">
-              <template slot="help">
-                <span v-if="options.post_permalink_type === 'DEFAULT'">{{ options.blog_url }}/{{ options.archives_prefix }}/{{ selectedPost.slug?selectedPost.slug:'${slug}' }}{{ (options.path_suffix?options.path_suffix:'') }}</span>
-                <span v-else-if="options.post_permalink_type === 'DATE'">{{ options.blog_url }}{{ selectedPost.createTime?selectedPost.createTime:new Date() | moment_post_date }}{{ selectedPost.slug?selectedPost.slug:'${slug}' }}{{ (options.path_suffix?options.path_suffix:'') }}</span>
-                <span v-else-if="options.post_permalink_type === 'DAY'">{{ options.blog_url }}{{ selectedPost.createTime?selectedPost.createTime:new Date() | moment_post_day }}{{ selectedPost.slug?selectedPost.slug:'${slug}' }}{{ (options.path_suffix?options.path_suffix:'') }}</span>
-                <span v-else-if="options.post_permalink_type === 'ID'">{{ options.blog_url }}/?p={{ selectedPost.id?selectedPost.id:'${id}' }}</span>
-              </template>
+            <a-form-item
+              label="文章别名："
+              :help="fullPath"
+            >
               <a-input v-model="selectedPost.slug" />
             </a-form-item>
 
@@ -318,6 +315,7 @@ import { mapGetters } from 'vuex'
 import categoryApi from '@/api/category'
 import postApi from '@/api/post'
 import themeApi from '@/api/theme'
+import { datetimeFormat } from '@/utils/util'
 export default {
   name: 'PostSettingDrawer',
   mixins: [mixin, mixinDevice],
@@ -400,9 +398,8 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['options']),
     selectedMetas() {
-      // 不能将selectedMetas直接定义在data里
-      // 还没有获取到值就渲染视图,可以直接使用metas
       return this.metas
     },
     pickerDefaultValue() {
@@ -412,7 +409,32 @@ export default {
       }
       return moment(new Date(), 'YYYY-MM-DD HH:mm:ss')
     },
-    ...mapGetters(['options'])
+    fullPath() {
+      const permalinkType = this.options.post_permalink_type
+      const blogUrl = this.options.blog_url
+      const archivesPrefix = this.options.archives_prefix
+      const pathSuffix = this.options.path_suffix ? this.options.path_suffix : ''
+      switch (permalinkType) {
+        case 'DEFAULT':
+          return `${blogUrl}/${archivesPrefix}/${
+            this.selectedPost.slug ? this.selectedPost.slug : '{slug}'
+          }${pathSuffix}`
+        case 'DATE':
+          return `${blogUrl}${datetimeFormat(
+            this.selectedPost.createTime ? this.selectedPost.createTime : new Date(),
+            '/YYYY/MM/'
+          )}${this.selectedPost.slug ? this.selectedPost.slug : '{slug}'}${pathSuffix}`
+        case 'DAY':
+          return `${blogUrl}${datetimeFormat(
+            this.selectedPost.createTime ? this.selectedPost.createTime : new Date(),
+            '/YYYY/MM/DD/'
+          )}${this.selectedPost.slug ? this.selectedPost.slug : '{slug}'}${pathSuffix}`
+        case 'ID':
+          return `${blogUrl}/?p=${this.selectedPost.id ? this.selectedPost.id : '{id}'}`
+        default:
+          return ''
+      }
+    }
   },
   methods: {
     handleAfterVisibleChanged(visible) {
