@@ -8,6 +8,7 @@
       <a-tooltip
         slot="action"
         title="内容将保存到页面/所有页面/日志页面"
+        class="cursor-pointer"
       >
         <a-icon type="info-circle-o" />
       </a-tooltip>
@@ -81,8 +82,3 @@ export default {
   }
 }
 </script>
-<style>
-  .anticon{
-    cursor: pointer;
-  }
-</style>
