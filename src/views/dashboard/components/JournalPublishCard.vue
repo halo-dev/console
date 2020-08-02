@@ -52,7 +52,7 @@ export default {
       form: {
         model: {},
         rules: {
-          sourceContent: [{ required: true, message: '* 内容不能为空', trigger: ['change', 'blur'] }]
+          sourceContent: [{ required: true, message: '* 内容不能为空', trigger: ['change'] }]
         },
         saving: false,
         errored: false
@@ -81,3 +81,8 @@ export default {
   }
 }
 </script>
+<style>
+  .anticon{
+    cursor: pointer;
+  }
+</style>
