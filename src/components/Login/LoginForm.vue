@@ -120,7 +120,7 @@ export default {
             _this.handleLogin()
           } else {
             adminApi
-              .loginPreCheck(this.form.model.username, this.form.model.password)
+              .loginPreCheck(_this.form.model.username, _this.form.model.password)
               .then((response) => {
                 const data = response.data.data
                 if (data && data.needMFACode) {
@@ -160,5 +160,3 @@ export default {
   }
 }
 </script>
-<style lang="less" scoped>
-</style>
