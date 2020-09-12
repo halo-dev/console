@@ -33,7 +33,7 @@
       @close="sheetSettingVisible = false"
       @onRefreshSheet="onRefreshSheetFromSetting"
       @onRefreshSheetMetas="onRefreshSheetMetasFromSetting"
-      @onSaved="onSaved"
+      @onSaved="handleRestoreSavedStatus"
     />
 
     <AttachmentDrawer v-model="attachmentDrawerVisible" />
@@ -92,7 +92,6 @@ export default {
       sheetSettingVisible: false,
       sheetToStage: {},
       selectedMetas: [],
-      isSaved: false,
       contentChanges: 0,
       draftSaving: false,
       draftSavederrored: false,
@@ -132,8 +131,6 @@ export default {
       this.attachmentDrawerVisible = false
     }
     if (this.contentChanges <= 1) {
-      next()
-    } else if (this.isSaved) {
       next()
     } else {
       this.$confirm({
@@ -270,7 +267,6 @@ export default {
     },
     handleRestoreSavedStatus() {
       this.contentChanges = 0
-      this.isSaved = false
     },
     onContentChange(val) {
       this.sheetToStage.originalContent = val
@@ -280,9 +276,6 @@ export default {
     },
     onRefreshSheetMetasFromSetting(metas) {
       this.selectedMetas = metas
-    },
-    onSaved(isSaved) {
-      this.isSaved = isSaved
     }
   }
 }
