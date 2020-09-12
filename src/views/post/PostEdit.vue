@@ -3,11 +3,7 @@
     <a-row :gutter="12">
       <a-col :span="24">
         <div class="mb-4">
-          <a-input
-            v-model="postToStage.title"
-            size="large"
-            placeholder="请输入文章标题"
-          />
+          <a-input v-model="postToStage.title" size="large" placeholder="请输入文章标题" />
         </div>
 
         <div id="editor">
@@ -42,7 +38,9 @@
 
     <AttachmentDrawer v-model="attachmentDrawerVisible" />
 
-    <footer-tool-bar :style="{ width: isSideMenu() && isDesktop() ? `calc(100% - ${sidebarOpened ? 256 : 80}px)` : '100%'}">
+    <footer-tool-bar
+      :style="{ width: isSideMenu() && isDesktop() ? `calc(100% - ${sidebarOpened ? 256 : 80}px)` : '100%' }"
+    >
       <a-space>
         <ReactiveButton
           type="danger"
@@ -54,18 +52,9 @@
           loadedText="保存成功"
           erroredText="保存失败"
         ></ReactiveButton>
-        <a-button
-          @click="handlePreview"
-          :loading="previewSaving"
-        >预览</a-button>
-        <a-button
-          type="primary"
-          @click="postSettingVisible = true"
-        >发布</a-button>
-        <a-button
-          type="dashed"
-          @click="attachmentDrawerVisible = true"
-        >附件库</a-button>
+        <a-button @click="handlePreview" :loading="previewSaving">预览</a-button>
+        <a-button type="primary" @click="postSettingVisible = true">发布</a-button>
+        <a-button type="dashed" @click="attachmentDrawerVisible = true">附件库</a-button>
       </a-space>
     </footer-tool-bar>
   </div>
@@ -109,9 +98,9 @@ export default {
   beforeRouteEnter(to, from, next) {
     // Get post id from query
     const postId = to.query.postId
-    next((vm) => {
+    next(vm => {
       if (postId) {
-        postApi.get(postId).then((response) => {
+        postApi.get(postId).then(response => {
           const post = response.data.data
           vm.postToStage = post
           vm.selectedTagIds = post.tagIds
@@ -147,7 +136,7 @@ export default {
     } else {
       this.$confirm({
         title: '当前页面数据未保存，确定要离开吗？',
-        content: (h) => <div style="color:red;">如果离开当面页面，你的数据很可能会丢失！</div>,
+        content: h => <div style="color:red;">如果离开当面页面，你的数据很可能会丢失！</div>,
         onOk() {
           next()
         },
@@ -195,6 +184,9 @@ export default {
         if (draftOnly) {
           postApi
             .updateDraft(this.postToStage.id, this.postToStage.originalContent)
+            .then(response => {
+              this.handleRestoreSavedStatus()
+            })
             .catch(() => {
               this.draftSavederrored = true
             })
@@ -206,11 +198,12 @@ export default {
         } else {
           postApi
             .update(this.postToStage.id, this.postToStage, false)
+            .then(response => {
+              this.postToStage = response.data.data
+              this.handleRestoreSavedStatus()
+            })
             .catch(() => {
               this.draftSavederrored = true
-            })
-            .then((response) => {
-              this.postToStage = response.data.data
             })
             .finally(() => {
               setTimeout(() => {
@@ -222,11 +215,12 @@ export default {
         // Create the post
         postApi
           .create(this.postToStage, false)
+          .then(response => {
+            this.postToStage = response.data.data
+            this.handleRestoreSavedStatus()
+          })
           .catch(() => {
             this.draftSavederrored = true
-          })
-          .then((response) => {
-            this.postToStage = response.data.data
           })
           .finally(() => {
             setTimeout(() => {
@@ -243,12 +237,13 @@ export default {
       this.previewSaving = true
       if (this.postToStage.id) {
         // Update the post
-        postApi.update(this.postToStage.id, this.postToStage, false).then((response) => {
+        postApi.update(this.postToStage.id, this.postToStage, false).then(response => {
           this.$log.debug('Updated post', response.data.data)
           postApi
             .preview(this.postToStage.id)
-            .then((response) => {
+            .then(response => {
               window.open(response.data, '_blank')
+              this.handleRestoreSavedStatus()
             })
             .finally(() => {
               setTimeout(() => {
@@ -258,13 +253,14 @@ export default {
         })
       } else {
         // Create the post
-        postApi.create(this.postToStage, false).then((response) => {
+        postApi.create(this.postToStage, false).then(response => {
           this.$log.debug('Created post', response.data.data)
           this.postToStage = response.data.data
           postApi
             .preview(this.postToStage.id)
-            .then((response) => {
+            .then(response => {
               window.open(response.data, '_blank')
+              this.handleRestoreSavedStatus()
             })
             .finally(() => {
               setTimeout(() => {
@@ -273,6 +269,10 @@ export default {
             })
         })
       }
+    },
+    handleRestoreSavedStatus() {
+      this.contentChanges = 0
+      this.isSaved = false
     },
     onContentChange(val) {
       this.postToStage.originalContent = val
