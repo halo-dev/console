@@ -74,16 +74,28 @@
         key="smtptest"
       >
         <a-form-model
+          ref="smtpTestForm"
+          :model="mailParam"
+          :rules="testRules"
           layout="vertical"
           :wrapperCol="wrapperCol"
         >
-          <a-form-model-item label="收件人：">
+          <a-form-model-item
+            label="收件人地址："
+            prop="to"
+          >
             <a-input v-model="mailParam.to" />
           </a-form-model-item>
-          <a-form-model-item label="主题：">
+          <a-form-model-item
+            label="主题："
+            prop="subject"
+          >
             <a-input v-model="mailParam.subject" />
           </a-form-model-item>
-          <a-form-model-item label="内容：">
+          <a-form-model-item
+            label="内容："
+            prop="content"
+          >
             <a-input
               type="textarea"
               :autoSize="{ minRows: 5 }"
@@ -135,7 +147,12 @@ export default {
       },
       mailParam: {},
       sending: false,
-      sendErrored: false
+      sendErrored: false,
+      testRules: {
+        to: [{ required: true, message: '* 收件人地址不能为空', trigger: ['change'] }],
+        subject: [{ required: true, message: '* 主题不能为空', trigger: ['change'] }],
+        content: [{ required: true, message: '* 内容不能为空', trigger: ['change'] }]
+      }
     }
   },
   watch: {
@@ -169,41 +186,25 @@ export default {
       })
     },
     handleTestMailClick() {
-      if (!this.mailParam.to) {
-        this.$notification['error']({
-          message: '提示',
-          description: '收件人不能为空！'
-        })
-        return
-      }
-      if (!this.mailParam.subject) {
-        this.$notification['error']({
-          message: '提示',
-          description: '主题不能为空！'
-        })
-        return
-      }
-      if (!this.mailParam.content) {
-        this.$notification['error']({
-          message: '提示',
-          description: '内容不能为空！'
-        })
-        return
-      }
-      this.sending = true
-      mailApi
-        .testMail(this.mailParam)
-        .then((response) => {
-          this.$message.info(response.data.message)
-        })
-        .catch(() => {
-          this.sendErrored = true
-        })
-        .finally(() => {
-          setTimeout(() => {
-            this.sending = false
-          }, 400)
-        })
+      const _this = this
+      _this.$refs.smtpTestForm.validate((valid) => {
+        if (valid) {
+          this.sending = true
+          mailApi
+            .testMail(this.mailParam)
+            .then((response) => {
+              this.$message.info(response.data.message)
+            })
+            .catch(() => {
+              this.sendErrored = true
+            })
+            .finally(() => {
+              setTimeout(() => {
+                this.sending = false
+              }, 400)
+            })
+        }
+      })
     }
   }
 }
