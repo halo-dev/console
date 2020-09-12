@@ -15,26 +15,44 @@
           <a-form-model-item label="是否启用：">
             <a-switch v-model="options.email_enabled" />
           </a-form-model-item>
-          <a-form-model-item label="SMTP 地址：">
+          <a-form-model-item
+            label="SMTP 地址："
+            prop="email_host"
+          >
             <a-input v-model="options.email_host" />
           </a-form-model-item>
-          <a-form-model-item label="发送协议：">
+          <a-form-model-item
+            label="发送协议："
+            prop="email_protocol"
+          >
             <a-input v-model="options.email_protocol" />
           </a-form-model-item>
-          <a-form-model-item label="SSL 端口：">
+          <a-form-model-item
+            label="SSL 端口："
+            prop="email_ssl_port"
+          >
             <a-input v-model="options.email_ssl_port" />
           </a-form-model-item>
-          <a-form-model-item label="邮箱账号：">
+          <a-form-model-item
+            label="邮箱账号："
+            prop="email_username"
+          >
             <a-input v-model="options.email_username" />
           </a-form-model-item>
-          <a-form-model-item label="邮箱密码：">
+          <a-form-model-item
+            label="邮箱密码："
+            prop="email_password"
+          >
             <a-input-password
               v-model="options.email_password"
               placeholder="部分邮箱可能是授权码"
               autocomplete="new-password"
             />
           </a-form-model-item>
-          <a-form-model-item label="发件人：">
+          <a-form-model-item
+            label="发件人："
+            prop="email_from_name"
+          >
             <a-input v-model="options.email_from_name" />
           </a-form-model-item>
           <a-form-model-item>
@@ -117,8 +135,7 @@ export default {
       },
       mailParam: {},
       sending: false,
-      sendErrored: false,
-      rules: {}
+      sendErrored: false
     }
   },
   watch: {
@@ -126,57 +143,28 @@ export default {
       this.$emit('onChange', val)
     }
   },
+  computed: {
+    rules() {
+      const required = this.options.email_enabled
+      return {
+        email_host: [{ required: required, message: '* SMTP 地址不能为空', trigger: ['change'] }],
+        email_protocol: [{ required: required, message: '* 发送协议不能为空', trigger: ['change'] }],
+        email_ssl_port: [{ required: required, message: '* SSL 端口不能为空', trigger: ['change'] }],
+        email_username: [
+          { required: required, message: '* 邮箱账号不能为空', trigger: ['change'] },
+          { type: 'email', message: '* 邮箱账号格式不正确', trigger: ['change'] }
+        ],
+        email_password: [{ required: required, message: '* 邮箱密码不能为空', trigger: ['change'] }],
+        email_from_name: [{ required: required, message: '* 发件人不能为空', trigger: ['change'] }]
+      }
+    }
+  },
   methods: {
     handleSaveOptions() {
-      // SMTP 配置验证
-      if (this.options.email_enabled) {
-        if (!this.options.email_host) {
-          this.$notification['error']({
-            message: '提示',
-            description: 'SMTP 地址不能为空！'
-          })
-          return
-        }
-        if (!this.options.email_protocol) {
-          this.$notification['error']({
-            message: '提示',
-            description: '发送协议不能为空！'
-          })
-          return
-        }
-        if (!this.options.email_ssl_port) {
-          this.$notification['error']({
-            message: '提示',
-            description: 'SSL 端口不能为空！'
-          })
-          return
-        }
-        if (!this.options.email_username) {
-          this.$notification['error']({
-            message: '提示',
-            description: '邮箱账号不能为空！'
-          })
-          return
-        }
-        if (!this.options.email_password) {
-          this.$notification['error']({
-            message: '提示',
-            description: '邮箱密码不能为空！'
-          })
-          return
-        }
-        if (!this.options.email_from_name) {
-          this.$notification['error']({
-            message: '提示',
-            description: '发件人不能为空！'
-          })
-          return
-        }
-      }
       const _this = this
-      _this.$refs.smtpOptionsForm.validate(valid => {
+      _this.$refs.smtpOptionsForm.validate((valid) => {
         if (valid) {
-          this.$emit('onSave')
+          _this.$emit('onSave')
         }
       })
     },
@@ -205,7 +193,7 @@ export default {
       this.sending = true
       mailApi
         .testMail(this.mailParam)
-        .then(response => {
+        .then((response) => {
           this.$message.info(response.data.message)
         })
         .catch(() => {
