@@ -26,7 +26,7 @@
                   :alt="item.name"
                   :src="item.screenshots || '/images/placeholder.jpg'"
                   loading="lazy"
-                >
+                />
               </div>
               <template
                 class="ant-card-actions"
@@ -102,6 +102,37 @@
               </template>
             </a-card>
           </a-list-item>
+
+          <!-- Add card -->
+          <a-list-item>
+            <a-card title="More Actions">
+              <!-- <template slot="title">
+                <h1 style="color: red">
+                  Actions
+                </h1>
+              </template>-->
+              <div class="more-actions-container">
+                <a-button
+                  block
+                  type="primary"
+                  shape="circle"
+                  icon="plus"
+                  size="large"
+                  @click="uploadThemeVisible = true"
+                ></a-button>
+                <a-button
+                  ghost
+                  class="ml-2"
+                  type="primary"
+                  shape="circle"
+                  icon="reload"
+                  size="large"
+                  :loading="themeLoading"
+                  @click="handleReload"
+                ></a-button>
+              </div>
+            </a-card>
+          </a-list-item>
         </a-list>
       </a-col>
     </a-row>
@@ -112,35 +143,6 @@
       @close="onThemeSettingsClose"
     />
 
-    <div style="position: fixed;bottom: 30px;right: 30px;">
-      <a-dropdown
-        placement="topLeft"
-        :trigger="['click']"
-      >
-        <a-button
-          type="primary"
-          shape="circle"
-          icon="plus"
-          size="large"
-        ></a-button>
-        <a-menu slot="overlay">
-          <a-menu-item>
-            <a
-              rel="noopener noreferrer"
-              href="javascript:void(0);"
-              @click="uploadThemeVisible = true"
-            >安装主题</a>
-          </a-menu-item>
-          <a-menu-item>
-            <a
-              rel="noopener noreferrer"
-              href="javascript:void(0);"
-              @click="handleReload"
-            >刷新列表</a>
-          </a-menu-item>
-        </a-menu>
-      </a-dropdown>
-    </div>
     <a-modal
       title="安装主题"
       v-model="uploadThemeVisible"
@@ -162,8 +164,7 @@
               label="点击选择主题包或将主题包拖拽到此处<br>仅支持 ZIP 格式的文件"
               :uploadHandler="uploadHandler"
               @success="handleUploadSuccess"
-            >
-            </FilePondUpload>
+            ></FilePondUpload>
             <a-alert
               type="info"
               closable
@@ -255,7 +256,7 @@
             >
               <template slot="message">
                 远程地址即主题仓库地址，使用这种方式安装的一般为开发版本，请谨慎使用。
-                <br>更多主题请访问：
+                <br />更多主题请访问：
                 <a
                   target="_blank"
                   href="https://halo.run/p/themes"
@@ -282,8 +283,7 @@
         :filed="prepareUpdateTheme.id"
         :multiple="false"
         @success="handleUploadSuccess"
-      >
-      </FilePondUpload>
+      ></FilePondUpload>
     </a-modal>
   </div>
 </template>
@@ -291,9 +291,10 @@
 <script>
 import ThemeSettingDrawer from './components/ThemeSettingDrawer'
 import themeApi from '@/api/theme'
+
 export default {
   components: {
-    ThemeSettingDrawer
+    ThemeSettingDrawer,
   },
   data() {
     return {
@@ -311,16 +312,16 @@ export default {
       fetchingUrl: null,
       uploadHandler: themeApi.upload,
       updateByUploadHandler: themeApi.updateByUpload,
-      prepareUpdateTheme: {}
+      prepareUpdateTheme: {},
     }
   },
   computed: {
     sortedThemes() {
       const data = this.themes.slice(0)
-      return data.sort(function(a, b) {
+      return data.sort((a, b) => {
         return b.activated - a.activated
       })
-    }
+    },
   },
   created() {
     this.handleListThemes()
@@ -341,7 +342,7 @@ export default {
       this.themeLoading = true
       themeApi
         .listAll()
-        .then(response => {
+        .then((response) => {
           this.themes = response.data.data
         })
         .finally(() => {
@@ -359,7 +360,7 @@ export default {
       const hide = this.$message.loading('更新中...', 0)
       themeApi
         .update(themeId)
-        .then(response => {
+        .then((response) => {
           this.$message.success('更新成功！')
         })
         .finally(() => {
@@ -370,7 +371,7 @@ export default {
     handleDeleteTheme(themeId) {
       themeApi
         .delete(themeId)
-        .then(response => {
+        .then((response) => {
           this.$message.success('删除成功！')
         })
         .finally(() => {
@@ -396,18 +397,18 @@ export default {
       if (!this.fetchingUrl) {
         this.$notification['error']({
           message: '提示',
-          description: '远程地址不能为空！'
+          description: '远程地址不能为空！',
         })
         return
       }
       this.fetchButtonLoading = true
-      themeApi.fetchingBranches(this.fetchingUrl).then(response => {
+      themeApi.fetchingBranches(this.fetchingUrl).then((response) => {
         this.branches = response.data.data
         this.fetchBranches = true
       })
       themeApi
         .fetchingReleases(this.fetchingUrl)
-        .then(response => {
+        .then((response) => {
           this.releases = response.data.data
         })
         .finally(() => {
@@ -419,7 +420,7 @@ export default {
     handleBranchFetching() {
       themeApi
         .fetchingBranch(this.fetchingUrl, this.branches[this.selectedBranch].branch)
-        .then(response => {
+        .then((response) => {
           this.$message.success('拉取成功')
           this.uploadThemeVisible = false
         })
@@ -430,7 +431,7 @@ export default {
     handleReleaseFetching() {
       themeApi
         .fetchingRelease(this.fetchingUrl, this.releases[this.selectedBranch].branch)
-        .then(response => {
+        .then((response) => {
           this.$message.success('拉取成功')
           this.uploadThemeVisible = false
         })
@@ -460,7 +461,7 @@ export default {
         onOk() {
           _this.handleDeleteTheme(item.id)
         },
-        onCancel() {}
+        onCancel() {},
       })
     },
     handleConfirmUpdate(item) {
@@ -472,7 +473,7 @@ export default {
         onOk() {
           that.handleUpdateTheme(item.id)
         },
-        onCancel() {}
+        onCancel() {},
       })
     },
     onSelectChange(value) {
@@ -496,7 +497,16 @@ export default {
     onThemeSettingsClose() {
       this.themeSettingVisible = false
       this.selectedTheme = {}
-    }
-  }
+    },
+  },
 }
 </script>
+
+<style lang="less" scoped>
+.more-actions-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px;
+}
+</style>
