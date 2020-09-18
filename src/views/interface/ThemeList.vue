@@ -6,134 +6,124 @@
       align="middle"
     >
       <a-col :span="24">
-        <a-list
-          :grid="{ gutter: 12, xs: 1, sm: 1, md: 2, lg: 4, xl: 4, xxl: 4 }"
-          :dataSource="sortedThemes"
-          :loading="themeLoading"
+        <a-page-header
+          :ghost="false"
+          title="主题列表"
+          sub-title="Themes"
+          @back="() => $router.go(-1)"
         >
-          <a-list-item
-            slot="renderItem"
-            slot-scope="item, index"
-            :key="index"
+          <template slot="extra">
+            <a-button
+              key="1"
+              icon="reload"
+              :loading="themeLoading"
+              @click="handleReload"
+            >刷新</a-button>
+            <a-button
+              key="2"
+              type="primary"
+              icon="plus"
+              @click="uploadThemeVisible = true"
+            >添加</a-button>
+          </template>
+          <a-list
+            :grid="{ gutter: 12, xs: 1, sm: 1, md: 2, lg: 4, xl: 4, xxl: 4 }"
+            :dataSource="sortedThemes"
+            :loading="themeLoading"
           >
-            <a-card
-              hoverable
-              :title="item.name"
-              :bodyStyle="{ padding: 0 }"
+            <a-list-item
+              slot="renderItem"
+              slot-scope="item, index"
+              :key="index"
             >
-              <div class="theme-screenshot">
-                <img
-                  :alt="item.name"
-                  :src="item.screenshots || '/images/placeholder.jpg'"
-                  loading="lazy"
-                />
-              </div>
-              <template
-                class="ant-card-actions"
-                slot="actions"
+              <a-card
+                hoverable
+                :title="item.name"
+                :bodyStyle="{ padding: 0 }"
               >
-                <div v-if="item.activated">
-                  <a-icon
-                    type="unlock"
-                    theme="twoTone"
-                    style="margin-right:3px"
-                  />已启用
+                <div class="theme-screenshot">
+                  <img
+                    :alt="item.name"
+                    :src="item.screenshots || '/images/placeholder.jpg'"
+                    loading="lazy"
+                  />
                 </div>
-                <div
-                  v-else
-                  @click="handleActiveTheme(item)"
+                <template
+                  class="ant-card-actions"
+                  slot="actions"
                 >
-                  <a-icon
-                    type="lock"
-                    style="margin-right:3px"
-                  />启用
-                </div>
-                <div @click="handleShowThemeSetting(item)">
-                  <a-icon
-                    type="setting"
-                    style="margin-right:3px"
-                  />设置
-                </div>
-                <a-dropdown
-                  placement="topCenter"
-                  :trigger="['click']"
-                >
-                  <a
-                    class="ant-dropdown-link"
-                    href="#"
+                  <div v-if="item.activated">
+                    <a-icon
+                      type="unlock"
+                      theme="twoTone"
+                      style="margin-right:3px"
+                    />已启用
+                  </div>
+                  <div
+                    v-else
+                    @click="handleActiveTheme(item)"
                   >
                     <a-icon
-                      type="ellipsis"
+                      type="lock"
                       style="margin-right:3px"
-                    />更多
-                  </a>
-                  <a-menu slot="overlay">
-                    <a-menu-item
-                      :key="1"
-                      :disabled="item.activated"
-                      @click="handleConfirmDelete(item)"
+                    />启用
+                  </div>
+                  <div @click="handleShowThemeSetting(item)">
+                    <a-icon
+                      type="setting"
+                      style="margin-right:3px"
+                    />设置
+                  </div>
+                  <a-dropdown
+                    placement="topCenter"
+                    :trigger="['click']"
+                  >
+                    <a
+                      class="ant-dropdown-link"
+                      href="#"
                     >
                       <a-icon
-                        type="delete"
+                        type="ellipsis"
                         style="margin-right:3px"
-                      />删除
-                    </a-menu-item>
-                    <a-menu-item
-                      :key="2"
-                      v-if="item.repo"
-                      @click="handleConfirmUpdate(item)"
-                    >
-                      <a-icon
-                        type="cloud"
-                        style="margin-right:3px"
-                      />在线更新
-                    </a-menu-item>
-                    <a-menu-item
-                      :key="3"
-                      @click="handleShowUpdateNewThemeModal(item)"
-                    >
-                      <a-icon
-                        type="file"
-                        style="margin-right:3px"
-                      />从主题包更新
-                    </a-menu-item>
-                  </a-menu>
-                </a-dropdown>
-              </template>
-            </a-card>
-          </a-list-item>
-
-          <!-- Add card -->
-          <a-list-item>
-            <a-card title="More Actions">
-              <!-- <template slot="title">
-                <h1 style="color: red">
-                  Actions
-                </h1>
-              </template>-->
-              <div class="more-actions-container">
-                <a-button
-                  block
-                  type="primary"
-                  shape="circle"
-                  icon="plus"
-                  size="large"
-                  @click="uploadThemeVisible = true"
-                ></a-button>
-                <a-button
-                  ghost
-                  class="ml-2"
-                  type="primary"
-                  shape="circle"
-                  icon="reload"
-                  size="large"
-                  :loading="themeLoading"
-                  @click="handleReload"
-                ></a-button>
-              </div>
-            </a-card>
-          </a-list-item>
-        </a-list>
+                      />更多
+                    </a>
+                    <a-menu slot="overlay">
+                      <a-menu-item
+                        :key="1"
+                        :disabled="item.activated"
+                        @click="handleConfirmDelete(item)"
+                      >
+                        <a-icon
+                          type="delete"
+                          style="margin-right:3px"
+                        />删除
+                      </a-menu-item>
+                      <a-menu-item
+                        :key="2"
+                        v-if="item.repo"
+                        @click="handleConfirmUpdate(item)"
+                      >
+                        <a-icon
+                          type="cloud"
+                          style="margin-right:3px"
+                        />在线更新
+                      </a-menu-item>
+                      <a-menu-item
+                        :key="3"
+                        @click="handleShowUpdateNewThemeModal(item)"
+                      >
+                        <a-icon
+                          type="file"
+                          style="margin-right:3px"
+                        />从主题包更新
+                      </a-menu-item>
+                    </a-menu>
+                  </a-dropdown>
+                </template>
+              </a-card>
+            </a-list-item>
+          </a-list>
+        </a-page-header>
       </a-col>
     </a-row>
 
@@ -327,6 +317,7 @@ export default {
     this.handleListThemes()
   },
   destroyed: function() {
+    this.$log.debug('Theme list destroyed.')
     if (this.themeSettingVisible) {
       this.themeSettingVisible = false
     }
