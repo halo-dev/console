@@ -1,129 +1,129 @@
 <template>
-  <div>
+  <page-view
+    :title="activatedTheme?activatedTheme.name:'无'"
+    subTitle="当前启用"
+  >
+    <template slot="extra">
+      <a-button
+        key="2"
+        icon="reload"
+        :loading="themeLoading"
+        @click="handleReload"
+      >
+        刷新
+      </a-button>
+      <a-button
+        key="1"
+        type="primary"
+        icon="plus"
+        @click="uploadThemeVisible = true"
+      >
+        安装
+      </a-button>
+    </template>
     <a-row
       :gutter="12"
       type="flex"
       align="middle"
     >
       <a-col :span="24">
-        <a-page-header
-          :ghost="false"
-          title="主题列表"
-          sub-title="Themes"
-          @back="() => $router.go(-1)"
+        <a-list
+          :grid="{ gutter: 12, xs: 1, sm: 1, md: 2, lg: 4, xl: 4, xxl: 4 }"
+          :dataSource="sortedThemes"
+          :loading="themeLoading"
         >
-          <template slot="extra">
-            <a-button
-              key="1"
-              icon="reload"
-              :loading="themeLoading"
-              @click="handleReload"
-            >刷新</a-button>
-            <a-button
-              key="2"
-              type="primary"
-              icon="plus"
-              @click="uploadThemeVisible = true"
-            >添加</a-button>
-          </template>
-          <a-list
-            :grid="{ gutter: 12, xs: 1, sm: 1, md: 2, lg: 4, xl: 4, xxl: 4 }"
-            :dataSource="sortedThemes"
-            :loading="themeLoading"
+          <a-list-item
+            slot="renderItem"
+            slot-scope="item, index"
+            :key="index"
           >
-            <a-list-item
-              slot="renderItem"
-              slot-scope="item, index"
-              :key="index"
+            <a-card
+              hoverable
+              :title="item.name"
+              :bodyStyle="{ padding: 0 }"
             >
-              <a-card
-                hoverable
-                :title="item.name"
-                :bodyStyle="{ padding: 0 }"
+              <div class="theme-screenshot">
+                <img
+                  :alt="item.name"
+                  :src="item.screenshots || '/images/placeholder.jpg'"
+                  loading="lazy"
+                />
+              </div>
+              <template
+                class="ant-card-actions"
+                slot="actions"
               >
-                <div class="theme-screenshot">
-                  <img
-                    :alt="item.name"
-                    :src="item.screenshots || '/images/placeholder.jpg'"
-                    loading="lazy"
-                  />
+                <div v-if="item.activated">
+                  <a-icon
+                    type="unlock"
+                    theme="twoTone"
+                    style="margin-right:3px"
+                  />已启用
                 </div>
-                <template
-                  class="ant-card-actions"
-                  slot="actions"
+                <div
+                  v-else
+                  @click="handleActiveTheme(item)"
                 >
-                  <div v-if="item.activated">
-                    <a-icon
-                      type="unlock"
-                      theme="twoTone"
-                      style="margin-right:3px"
-                    />已启用
-                  </div>
-                  <div
-                    v-else
-                    @click="handleActiveTheme(item)"
+                  <a-icon
+                    type="lock"
+                    style="margin-right:3px"
+                  />启用
+                </div>
+                <div @click="handleShowThemeSetting(item)">
+                  <a-icon
+                    type="setting"
+                    style="margin-right:3px"
+                  />设置
+                </div>
+                <a-dropdown
+                  placement="topCenter"
+                  :trigger="['click']"
+                >
+                  <a
+                    class="ant-dropdown-link"
+                    href="#"
                   >
                     <a-icon
-                      type="lock"
+                      type="ellipsis"
                       style="margin-right:3px"
-                    />启用
-                  </div>
-                  <div @click="handleShowThemeSetting(item)">
-                    <a-icon
-                      type="setting"
-                      style="margin-right:3px"
-                    />设置
-                  </div>
-                  <a-dropdown
-                    placement="topCenter"
-                    :trigger="['click']"
-                  >
-                    <a
-                      class="ant-dropdown-link"
-                      href="#"
+                    />更多
+                  </a>
+                  <a-menu slot="overlay">
+                    <a-menu-item
+                      :key="1"
+                      :disabled="item.activated"
+                      @click="handleConfirmDelete(item)"
                     >
                       <a-icon
-                        type="ellipsis"
+                        type="delete"
                         style="margin-right:3px"
-                      />更多
-                    </a>
-                    <a-menu slot="overlay">
-                      <a-menu-item
-                        :key="1"
-                        :disabled="item.activated"
-                        @click="handleConfirmDelete(item)"
-                      >
-                        <a-icon
-                          type="delete"
-                          style="margin-right:3px"
-                        />删除
-                      </a-menu-item>
-                      <a-menu-item
-                        :key="2"
-                        v-if="item.repo"
-                        @click="handleConfirmUpdate(item)"
-                      >
-                        <a-icon
-                          type="cloud"
-                          style="margin-right:3px"
-                        />在线更新
-                      </a-menu-item>
-                      <a-menu-item
-                        :key="3"
-                        @click="handleShowUpdateNewThemeModal(item)"
-                      >
-                        <a-icon
-                          type="file"
-                          style="margin-right:3px"
-                        />从主题包更新
-                      </a-menu-item>
-                    </a-menu>
-                  </a-dropdown>
-                </template>
-              </a-card>
-            </a-list-item>
-          </a-list>
-        </a-page-header>
+                      />删除
+                    </a-menu-item>
+                    <a-menu-item
+                      :key="2"
+                      v-if="item.repo"
+                      @click="handleConfirmUpdate(item)"
+                    >
+                      <a-icon
+                        type="cloud"
+                        style="margin-right:3px"
+                      />在线更新
+                    </a-menu-item>
+                    <a-menu-item
+                      :key="3"
+                      @click="handleShowUpdateNewThemeModal(item)"
+                    >
+                      <a-icon
+                        type="file"
+                        style="margin-right:3px"
+                      />从主题包更新
+                    </a-menu-item>
+                  </a-menu>
+                </a-dropdown>
+              </template>
+            </a-card>
+          </a-list-item>
+        </a-list>
       </a-col>
     </a-row>
 
@@ -275,15 +275,17 @@
         @success="handleUploadSuccess"
       ></FilePondUpload>
     </a-modal>
-  </div>
+  </page-view>
 </template>
 
 <script>
 import ThemeSettingDrawer from './components/ThemeSettingDrawer'
+import { PageView } from '@/layouts'
 import themeApi from '@/api/theme'
 
 export default {
   components: {
+    PageView,
     ThemeSettingDrawer,
   },
   data() {
@@ -303,6 +305,7 @@ export default {
       uploadHandler: themeApi.upload,
       updateByUploadHandler: themeApi.updateByUpload,
       prepareUpdateTheme: {},
+      activatedTheme: null,
     }
   },
   computed: {
@@ -315,6 +318,7 @@ export default {
   },
   created() {
     this.handleListThemes()
+    this.handleGetActivatedTheme()
   },
   destroyed: function() {
     this.$log.debug('Theme list destroyed.')
@@ -329,6 +333,11 @@ export default {
     next()
   },
   methods: {
+    handleGetActivatedTheme() {
+      themeApi.getActivatedTheme().then((response) => {
+        this.activatedTheme = response.data.data
+      })
+    },
     handleListThemes() {
       this.themeLoading = true
       themeApi
@@ -343,9 +352,14 @@ export default {
         })
     },
     handleActiveTheme(theme) {
-      themeApi.active(theme.id).finally(() => {
-        this.handleListThemes()
-      })
+      themeApi
+        .active(theme.id)
+        .finally(() => {
+          this.handleListThemes()
+        })
+        .finally(() => {
+          this.handleGetActivatedTheme()
+        })
     },
     handleUpdateTheme(themeId) {
       const hide = this.$message.loading('更新中...', 0)
@@ -492,12 +506,3 @@ export default {
   },
 }
 </script>
-
-<style lang="less" scoped>
-.more-actions-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100px;
-}
-</style>
