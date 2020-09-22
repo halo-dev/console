@@ -55,7 +55,7 @@
             slot-scope="text, record"
           >
             <a
-              href="javascript:;"
+              href="javascript:void(0);"
               v-if="!record.isFile"
               @click="handleUpload(record)"
             >上传</a>
@@ -76,7 +76,7 @@
                   v-if="!record.isFile"
                 >
                   <a
-                    href="javascript:;"
+                    href="javascript:void(0);"
                     @click="handleShowCreateFolderModal(record)"
                   >创建文件夹</a>
                 </a-menu-item>
@@ -87,12 +87,12 @@
                     cancelText="取消"
                     @confirm="handleDelete(record.relativePath)"
                   >
-                    <a href="javascript:;">删除</a>
+                    <a href="javascript:void(0);">删除</a>
                   </a-popconfirm>
                 </a-menu-item>
                 <a-menu-item key="3">
                   <a
-                    href="javascript:;"
+                    href="javascript:void(0);"
                     @click="handleShowRenameModal(record)"
                   >重命名</a>
                 </a-menu-item>
@@ -101,7 +101,7 @@
                   v-if="record.isFile"
                 >
                   <a
-                    href="javascript:;"
+                    href="javascript:void(0);"
                     @click="handleShowEditModal(record)"
                   >编辑</a>
                 </a-menu-item>
@@ -126,26 +126,38 @@
       ></FilePondUpload>
     </a-modal>
     <a-modal
-      v-model="createFolderModal"
-      :afterClose="onCreateFolderClose"
+      v-model="directoryForm.visible"
+      :afterClose="onDirectoryFormModalClose"
       title="创建文件夹"
     >
       <template slot="footer">
-        <a-button
-          key="submit"
-          type="primary"
-          @click="handleCreateFolder()"
-        >创建</a-button>
+        <ReactiveButton
+          @click="handleCreateDirectory"
+          @callback="handleCreateDirectoryCallback"
+          :loading="directoryForm.saving"
+          :errored="directoryForm.saveErrored"
+          text="创建"
+          loadedText="创建成功"
+          erroredText="创建失败"
+        ></ReactiveButton>
       </template>
-      <a-form layout="vertical">
-        <a-form-item label="文件夹名：">
+      <a-form-model
+        ref="directoryForm"
+        :model="directoryForm.model"
+        :rules="directoryForm.rules"
+        layout="vertical"
+      >
+        <a-form-model-item
+          prop="name"
+          label="文件夹名："
+        >
           <a-input
             ref="createFoldeInput"
-            v-model="createFolderName"
-            @keyup.enter="handleCreateFolder"
+            v-model="directoryForm.model.name"
+            @keyup.enter="handleCreateDirectory"
           />
-        </a-form-item>
-      </a-form>
+        </a-form-model-item>
+      </a-form-model>
     </a-modal>
     <a-modal
       v-model="renameModal"
@@ -216,29 +228,29 @@ const columns = [
   {
     title: '文件名',
     dataIndex: 'name',
-    scopedSlots: { customRender: 'name' }
+    scopedSlots: { customRender: 'name' },
   },
   {
     title: '文件类型',
     dataIndex: 'mimeType',
-    scopedSlots: { customRender: 'mimeType' }
+    scopedSlots: { customRender: 'mimeType' },
   },
   {
     title: '上传时间',
     dataIndex: 'createTime',
     width: '200px',
-    scopedSlots: { customRender: 'createTime' }
+    scopedSlots: { customRender: 'createTime' },
   },
   {
     title: '操作',
     dataIndex: 'action',
     width: '120px',
-    scopedSlots: { customRender: 'action' }
-  }
+    scopedSlots: { customRender: 'action' },
+  },
 ]
 export default {
   components: {
-    codemirror
+    codemirror,
   },
   name: 'StaticStorage',
   data() {
@@ -249,22 +261,32 @@ export default {
       uploadHandler: staticApi.upload,
       uploadVisible: false,
       selectedFile: {},
-      createFolderModal: false,
-      createFolderName: '',
       renameModal: false,
       renameName: '',
       renameFile: false,
       codemirrorOptions: {
         tabSize: 4,
         lineNumbers: true,
-        line: true
+        line: true,
       },
       editModal: false,
       editContent: '',
-      CodeMirror: null
+      CodeMirror: null,
+
+      directoryForm: {
+        model: {
+          name: null,
+        },
+        visible: false,
+        saving: false,
+        saveErrored: false,
+        rules: {
+          name: [{ required: true, message: '* 文件夹名不能为空', trigger: ['change'] }],
+        },
+      },
     }
   },
-  created() {
+  beforeMount() {
     this.handleListStatics()
     this.CodeMirror = require('codemirror')
     this.CodeMirror.modeURL = 'codemirror/mode/%N/%N.js'
@@ -276,14 +298,14 @@ export default {
       return data.sort(function(a, b) {
         return a.isFile - b.isFile
       })
-    }
+    },
   },
   methods: {
     handleListStatics() {
       this.loading = true
       staticApi
         .list()
-        .then(response => {
+        .then((response) => {
           this.statics = response.data.data
         })
         .finally(() => {
@@ -295,7 +317,7 @@ export default {
     handleDelete(path) {
       staticApi
         .delete(path)
-        .then(response => {
+        .then((response) => {
           this.$message.success(`删除成功！`)
         })
         .finally(() => {
@@ -308,7 +330,7 @@ export default {
     },
     handleShowCreateFolderModal(file) {
       this.selectedFile = file
-      this.createFolderModal = true
+      this.directoryForm.visible = true
       const that = this
       Vue.nextTick().then(() => {
         that.$refs.createFoldeInput.focus()
@@ -335,7 +357,7 @@ export default {
       this.selectedFile = file
       const arr = file.name.split('.')
       const postfix = arr[arr.length - 1]
-      staticApi.getContent(this.options.blog_url + file.relativePath).then(response => {
+      staticApi.getContent(this.options.blog_url + file.relativePath).then((response) => {
         this.editContent = response.data
         const info = this.CodeMirror.findModeByExtension(postfix)
         if (info === undefined) {
@@ -350,21 +372,37 @@ export default {
         }
       })
     },
-    handleCreateFolder() {
-      staticApi
-        .createFolder(this.selectedFile.relativePath, this.createFolderName)
-        .then(response => {
-          this.$message.success(`创建文件夹成功！`)
-          this.createFolderModal = false
-        })
-        .finally(() => {
-          this.handleListStatics()
-        })
+    handleCreateDirectory() {
+      const _this = this
+      _this.$refs.directoryForm.validate((valid) => {
+        if (valid) {
+          this.directoryForm.saving = true
+          staticApi
+            .createFolder(_this.selectedFile.relativePath, _this.directoryForm.model.name)
+            .catch(() => {
+              _this.directoryForm.saveErrored = true
+            })
+            .finally(() => {
+              setTimeout(() => {
+                this.directoryForm.saving = false
+              }, 400)
+            })
+        }
+      })
+    },
+    handleCreateDirectoryCallback() {
+      if (this.directoryForm.saveErrored) {
+        this.directoryForm.saveErrored = false
+      } else {
+        this.directoryForm.model = {}
+        this.directoryForm.visible = false
+        this.handleListStatics()
+      }
     },
     handleRename() {
       staticApi
         .rename(this.selectedFile.relativePath, this.renameName)
-        .then(response => {
+        .then((response) => {
           this.$message.success(`重命名成功！`)
           this.renameModal = false
         })
@@ -373,14 +411,14 @@ export default {
         })
     },
     handleEditSave() {
-      staticApi.save(this.selectedFile.relativePath, this.$refs.editor.editor.getValue()).then(response => {
+      staticApi.save(this.selectedFile.relativePath, this.$refs.editor.editor.getValue()).then((response) => {
         this.$message.success(`文件保存成功！`)
         this.editModal = false
       })
     },
-    onCreateFolderClose() {
+    onDirectoryFormModalClose() {
       this.selectedFile = {}
-      this.createFolderName = ''
+      this.directoryForm.model.name = null
     },
     onRenameClose() {
       this.selectedFile = {}
@@ -395,7 +433,7 @@ export default {
       this.editModal = false
       this.selectedFile = {}
       this.editContent = ''
-    }
-  }
+    },
+  },
 }
 </script>
