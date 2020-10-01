@@ -132,7 +132,7 @@ postApi.permalinkType = {
   },
   YEAR: {
     type: 'YEAR',
-    text: '年型'
+    text: '年份型'
   },
   DATE: {
     type: 'DATE',
