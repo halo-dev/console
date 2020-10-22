@@ -2,228 +2,122 @@
   <page-view>
     <a-row :gutter="12">
       <a-col
-        :xl="10"
-        :lg="10"
-        :md="10"
+        :xl="6"
+        :lg="6"
+        :md="6"
         :sm="24"
         :xs="24"
         class="mb-3"
       >
         <a-card
-          :title="title"
           :bodyStyle="{ padding: '16px' }"
+          title="分组"
         >
-          <a-form-model
-            ref="menuForm"
-            :model="form.model"
-            :rules="form.rules"
-            layout="horizontal"
+          <template slot="extra">
+            <a-button>
+              设为默认
+            </a-button>
+          </template>
+          <div class="menu-teams">
+            <a-spin :spinning="teams.loading">
+              <a-menu
+                class="w-full"
+                mode="inline"
+                v-model="selectedTeam"
+                v-if="teams.data.length>0"
+                @select="handleSelectedTeam"
+              >
+                <a-menu-item
+                  v-for="(team) in teams.data"
+                  :key="team"
+                >
+                  {{ team===''?'未分组':team }}
+                </a-menu-item>
+              </a-menu>
+            </a-spin>
+          </div>
+          <a-popover
+            v-model="teams.form.visible"
+            title="新增分组"
+            trigger="click"
+            placement="bottom"
+            @visibleChange="handleTeamFormVisibleChange"
           >
-            <a-form-model-item
-              label="名称："
-              help="* 页面上所显示的名称"
-              prop="name"
-            >
-              <a-input v-model="form.model.name" />
-            </a-form-model-item>
-            <a-form-model-item
-              label="地址："
-              help="* 菜单的地址"
-              prop="url"
-            >
-              <a-input v-model="form.model.url" />
-            </a-form-model-item>
-            <a-form-model-item
-              label="上级菜单："
-              prop="parentId"
-            >
-              <menu-select-tree
-                :menus="table.data"
-                v-model="form.model.parentId"
-              />
-            </a-form-model-item>
-            <a-form-model-item
-              label="排序编号："
-              prop="priority"
-            >
-              <a-input-number
-                v-model="form.model.priority"
-                :min="0"
-                style="width:100%"
-              />
-            </a-form-model-item>
-            <a-form-model-item
-              v-show="form.moreField"
-              label="图标："
-              help="* 请根据主题的支持选填"
-              prop="icon"
-            >
-              <a-input v-model="form.model.icon" />
-            </a-form-model-item>
-            <a-form-model-item
-              v-show="form.moreField"
-              label="分组："
-              prop="team"
-            >
-              <a-auto-complete
-                :dataSource="computedTeams"
-                v-model="form.model.team"
-                allowClear
-              />
-            </a-form-model-item>
-            <a-form-model-item
-              v-show="form.moreField"
-              label="打开方式："
-              prop="target"
-            >
-              <a-select
-                defaultValue="_self"
-                v-model="form.model.target"
+            <template slot="content">
+              <a-form-model
+                ref="teamForm"
+                :model="teams.form.model"
+                :rules="teams.form.rules"
+                @keyup.enter.native="handleCreateTeam"
               >
-                <a-select-option value="_self">当前窗口</a-select-option>
-                <a-select-option value="_blank">新窗口</a-select-option>
-              </a-select>
-            </a-form-model-item>
-            <a-form-model-item>
-              <ReactiveButton
-                v-if="!isUpdateMode"
-                type="primary"
-                @click="handleCreateOrUpdateMenu"
-                @callback="handleSavedCallback"
-                :loading="form.saving"
-                :errored="form.errored"
-                text="保存"
-                loadedText="保存成功"
-                erroredText="保存失败"
-              ></ReactiveButton>
-              <a-button-group v-else>
-                <ReactiveButton
-                  type="primary"
-                  @click="handleCreateOrUpdateMenu"
-                  @callback="handleSavedCallback"
-                  :loading="form.saving"
-                  :errored="form.errored"
-                  text="更新"
-                  loadedText="更新成功"
-                  erroredText="更新失败"
-                ></ReactiveButton>
-                <a-button
-                  type="dashed"
-                  @click="form.model = {}"
-                  v-if="isUpdateMode"
-                >返回添加</a-button>
-              </a-button-group>
-              <a
-                class="ml-2"
-                @click="form.moreField = !form.moreField"
-              >
-                更多选项
-                <a-icon :type="form.moreField ? 'up' : 'down'" />
-              </a>
-            </a-form-model-item>
-          </a-form-model>
+                <a-form-model-item prop="team">
+                  <a-input
+                    v-model="teams.form.model.team"
+                    ref="teamInput"
+                  />
+                </a-form-model-item>
+                <a-form-model-item style="margin-bottom:0">
+                  <a-button
+                    type="primary"
+                    @click="handleCreateTeam"
+                  >
+                    新增
+                  </a-button>
+                </a-form-model-item>
+              </a-form-model>
+            </template>
+            <a-button
+              type="primary"
+              block
+              class="mt-3"
+            >
+              新增分组
+            </a-button>
+          </a-popover>
         </a-card>
       </a-col>
       <a-col
-        :xl="14"
-        :lg="14"
-        :md="14"
+        :xl="18"
+        :lg="18"
+        :md="18"
         :sm="24"
         :xs="24"
         class="pb-3"
       >
         <a-card
-          title="所有菜单"
+          :title="menuListTitle"
           :bodyStyle="{ padding: '16px' }"
         >
-          <!-- Mobile -->
-          <a-list
-            v-if="isMobile()"
-            itemLayout="vertical"
-            size="large"
-            :pagination="false"
-            :dataSource="table.data"
-            :loading="table.loading"
-          >
-            <a-list-item
-              slot="renderItem"
-              slot-scope="item, index"
-              :key="index"
-            >
-              <template slot="actions">
-                <a-dropdown
-                  placement="topLeft"
-                  :trigger="['click']"
-                >
-                  <span>
-                    <a-icon type="bars" />
-                  </span>
-                  <a-menu slot="overlay">
-                    <a-menu-item>
-                      <a
-                        href="javascript:;"
-                        @click="form.model = item"
-                      >编辑</a>
-                    </a-menu-item>
-                    <a-menu-item>
-                      <a-popconfirm
-                        :title="'你确定要删除【' + item.name + '】菜单？'"
-                        @confirm="handleDeleteMenu(item.id)"
-                        okText="确定"
-                        cancelText="取消"
-                      >
-                        <a href="javascript:;">删除</a>
-                      </a-popconfirm>
-                    </a-menu-item>
-                  </a-menu>
-                </a-dropdown>
-              </template>
-              <template slot="extra">
-                <span>
-                  {{ item.team }}
-                </span>
-              </template>
-              <a-list-item-meta>
-                <template slot="description">
-                  {{ item.url }}
-                </template>
-                <span
-                  slot="title"
-                  style="max-width: 300px;display: block;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"
-                >
-                  {{ item.name }}
-                </span>
-              </a-list-item-meta>
-            </a-list-item>
-          </a-list>
-          <!-- Desktop -->
-          <a-table
-            v-else
-            :columns="table.columns"
-            :dataSource="table.data"
-            :loading="table.loading"
-            :rowKey="menu => menu.id"
-            :scrollToFirstRowOnChange="true"
-          >
-            <span
-              slot="action"
-              slot-scope="text, record"
-            >
-              <a
-                href="javascript:;"
-                @click="form.model = record"
-              >编辑</a>
-              <a-divider type="vertical" />
-              <a-popconfirm
-                :title="'你确定要删除【' + record.name + '】菜单？'"
-                @confirm="handleDeleteMenu(record.id)"
-                okText="确定"
-                cancelText="取消"
+          <template slot="extra">
+            <a-space>
+              <ReactiveButton
+                @click="handleUpdateBatch"
+                @callback="formBatch.errored=false"
+                :loading="formBatch.saving"
+                :errored="formBatch.errored"
+                text="保存"
+                loadedText="保存成功"
+                erroredText="保存失败"
+                :disabled="table.data.length<=0"
+              ></ReactiveButton>
+              <a-button
+                type="primary"
+                @click="handleOpenCreateMenuForm()"
               >
-                <a href="javascript:;">删除</a>
-              </a-popconfirm>
-            </span>
-          </a-table>
+                新增
+              </a-button>
+            </a-space>
+          </template>
+          <a-spin :spinning="table.loading">
+            <MenuForm
+              v-if="form.visible"
+              :menu="form.model"
+              @succeed="handleCreateMenuSucceed()"
+              @cancel="handleCloseCreateMenuForm()"
+            />
+            <a-empty v-if="table.data.length===0 && !table.loading && !form.visible" />
+            <MenuTreeNode v-model="table.data" />
+          </a-spin>
         </a-card>
       </a-col>
     </a-row>
@@ -231,97 +125,98 @@
 </template>
 
 <script>
-import { mixin, mixinDevice } from '@/utils/mixin.js'
-import MenuSelectTree from './components/MenuSelectTree'
+// components
 import { PageView } from '@/layouts'
+import draggable from 'vuedraggable'
+import MenuTreeNode from './components/MenuTreeNode'
+import MenuForm from './components/MenuForm'
+
+import { deepClone } from '@/utils/util'
+
+// apis
 import menuApi from '@/api/menu'
-const columns = [
-  {
-    title: '名称',
-    dataIndex: 'name',
-    ellipsis: true,
-    scopedSlots: { customRender: 'name' },
-  },
-  {
-    title: '地址',
-    ellipsis: true,
-    dataIndex: 'url',
-  },
-  {
-    title: '分组',
-    ellipsis: true,
-    dataIndex: 'team',
-  },
-  {
-    title: '排序',
-    dataIndex: 'priority',
-  },
-  {
-    title: '操作',
-    key: 'action',
-    scopedSlots: { customRender: 'action' },
-  },
-]
 export default {
-  components: { MenuSelectTree, PageView },
-  mixins: [mixin, mixinDevice],
+  components: { PageView, draggable, MenuTreeNode, MenuForm },
   data() {
     return {
       table: {
-        columns,
         data: [],
         loading: false,
       },
       form: {
-        model: {
-          target: '_self',
-        },
+        visible: false,
+        model: {},
+      },
+      formBatch: {
         saving: false,
         errored: false,
-        rules: {
-          name: [
-            { required: true, message: '* 菜单名称不能为空', trigger: ['change'] },
-            { max: 50, message: '* 菜单名称的字符长度不能超过 50', trigger: ['change'] },
-          ],
-          url: [
-            { required: true, message: '* 菜单地址不能为空', trigger: ['change'] },
-            { max: 1023, message: '* 菜单地址的字符长度不能超过 1023', trigger: ['change'] },
-          ],
-          icon: [{ max: 50, message: '* 菜单图标的字符长度不能超过 50', trigger: ['change'] }],
-          team: [{ max: 255, message: '* 菜单分组的字符长度不能超过 255', trigger: ['change'] }],
-        },
-        moreField: false,
       },
       teams: {
         data: [],
+        loading: false,
+        selected: null,
+        form: {
+          visible: false,
+          model: {
+            team: null,
+          },
+          rules: {
+            team: [{ required: true, message: '分组名称不能为空', trigger: ['change'] }],
+          },
+        },
       },
     }
   },
   computed: {
-    title() {
-      if (this.isUpdateMode) {
-        return '修改菜单'
-      }
-      return '添加菜单'
-    },
-    isUpdateMode() {
-      return !!this.form.model.id
-    },
     computedTeams() {
       return this.teams.data.filter((item) => {
         return item !== ''
       })
     },
+    computedMenusMoved() {
+      const menus = deepClone(this.table.data)
+      return this.handleMenuMoved(0, menus)
+    },
+    computedMenusWithoutLevel() {
+      return this.handleGetMenusWithoutLevel(this.computedMenusMoved, [])
+    },
+    selectedTeam: {
+      get() {
+        return [this.teams.selected]
+      },
+      set(value) {
+        this.teams.selected = value[0]
+      },
+    },
+    menuListTitle() {
+      return this.teams.selected === '' ? '未分组' : this.teams.selected
+    },
   },
   created() {
-    this.handleListMenus()
     this.handleListTeams()
   },
   methods: {
+    handleListTeams() {
+      this.teams.loading = true
+      menuApi
+        .listTeams()
+        .then((response) => {
+          this.teams.data = response.data.data
+          if (!this.teams.selected) {
+            this.teams.selected = this.teams.data[0]
+          }
+          this.handleListMenus()
+        })
+        .finally(() => {
+          setTimeout(() => {
+            this.teams.loading = false
+          }, 200)
+        })
+    },
     handleListMenus() {
       this.table.loading = true
       menuApi
-        .listTree()
+        .listTreeByTeam(this.teams.selected)
         .then((response) => {
           this.table.data = response.data.data
         })
@@ -331,10 +226,31 @@ export default {
           }, 200)
         })
     },
-    handleListTeams() {
-      menuApi.listTeams().then((response) => {
-        this.teams.data = response.data.data
-      })
+    handleMenuMoved(pid, menus) {
+      for (let i = 0; i < menus.length; i++) {
+        menus[i].priority = i
+        menus[i].parentId = pid
+        menus[i].team = this.teams.selected
+        if (menus[i].children && menus[i].children.length > 0) {
+          this.handleMenuMoved(menus[i].id, menus[i].children)
+        }
+      }
+      return menus
+    },
+    handleGetMenusWithoutLevel(menus, result) {
+      for (var i = 0; i < menus.length; i++) {
+        result.push(menus[i])
+        var children = menus[i].children
+        if (children.length > 0) {
+          this.handleGetMenusWithoutLevel(children, result)
+        }
+      }
+      return result
+    },
+    handleSelectedTeam({ item, key, selectedKeys }) {
+      this.teams.selected = key
+      this.handleCloseCreateMenuForm()
+      this.handleListMenus()
     },
     handleDeleteMenu(id) {
       menuApi
@@ -343,50 +259,58 @@ export default {
           this.$message.success('删除成功！')
         })
         .finally(() => {
-          this.handleListMenus()
           this.handleListTeams()
         })
     },
-    handleCreateOrUpdateMenu() {
+    handleUpdateBatch() {
+      this.formBatch.saving = true
+      menuApi
+        .updateBatch(this.computedMenusWithoutLevel)
+        .catch(() => {
+          this.formBatch.errored = true
+        })
+        .finally(() => {
+          setTimeout(() => {
+            this.formBatch.saving = false
+            this.handleListMenus()
+          }, 400)
+        })
+    },
+    handleTeamFormVisibleChange(visible) {
+      if (visible) {
+        this.teams.form.model.team = null
+        this.$nextTick(() => {
+          this.$refs.teamInput.focus()
+        })
+      }
+    },
+    handleCreateTeam() {
       const _this = this
-      _this.$refs.menuForm.validate((valid) => {
+      _this.$refs.teamForm.validate((valid) => {
         if (valid) {
-          _this.form.saving = true
-          if (_this.isUpdateMode) {
-            menuApi
-              .update(_this.form.model.id, _this.form.model)
-              .catch(() => {
-                _this.form.errored = true
-              })
-              .finally(() => {
-                setTimeout(() => {
-                  _this.form.saving = false
-                }, 400)
-              })
-          } else {
-            menuApi
-              .create(_this.form.model)
-              .catch(() => {
-                _this.form.errored = true
-              })
-              .finally(() => {
-                setTimeout(() => {
-                  _this.form.saving = false
-                }, 400)
-              })
+          if (!_this.teams.data.includes(_this.teams.form.model.team)) {
+            _this.teams.data.push(_this.teams.form.model.team)
           }
+          _this.teams.selected = _this.teams.form.model.team
+          _this.teams.form.visible = false
+          _this.handleListMenus()
         }
       })
     },
-    handleSavedCallback() {
-      const _this = this
-      if (_this.form.errored) {
-        _this.form.errored = false
-      } else {
-        _this.form.model = { target: '_self' }
-        _this.handleListMenus()
-        _this.handleListTeams()
+    handleOpenCreateMenuForm() {
+      this.form.visible = true
+      this.form.model = {
+        team: this.teams.selected,
+        target: '_self',
       }
+    },
+    handleCloseCreateMenuForm() {
+      this.form.visible = false
+      this.form.model = {}
+    },
+    handleCreateMenuSucceed() {
+      this.handleCloseCreateMenuForm()
+      this.handleListMenus()
     },
   },
 }
