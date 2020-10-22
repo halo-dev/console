@@ -20,6 +20,7 @@
           </template>
           <div class="menu-teams">
             <a-spin :spinning="teams.loading">
+              <a-empty v-if="teams.data.length===0 && !teams.loading" />
               <a-menu
                 class="w-full"
                 mode="inline"
@@ -103,6 +104,7 @@
               <a-button
                 type="primary"
                 @click="handleOpenCreateMenuForm()"
+                :disabled="form.visible"
               >
                 新增
               </a-button>
@@ -116,7 +118,10 @@
               @cancel="handleCloseCreateMenuForm()"
             />
             <a-empty v-if="table.data.length===0 && !table.loading && !form.visible" />
-            <MenuTreeNode v-model="table.data" />
+            <MenuTreeNode
+              v-model="table.data"
+              @reload="handleListMenus"
+            />
           </a-spin>
         </a-card>
       </a-col>
