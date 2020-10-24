@@ -114,6 +114,17 @@
             >
               取消
             </a-button>
+            <a-button
+              type="primary"
+              icon="plus-circle"
+              @click="() => (groupState.visible = true)"
+            >
+              新建分组
+            </a-button>
+            <a-button-group style="float: right;">
+              <a-button :type="viewModeButtonType(viewMode.flat)" icon="appstore" style="margin:0" @click="handleSwitchView(viewMode.flat)"/>
+              <a-button :type="viewModeButtonType(viewMode.group)" icon="folder" style="margin:0" @click="handleSwitchView(viewMode.group)"/>
+            </a-button-group>
           </div>
         </a-card>
       </a-col>
@@ -133,6 +144,7 @@
               hoverable
               @click="handleShowDetailDrawer(item)"
               @contextmenu.prevent="handleContextMenu($event, item)"
+              v-if="!item.isGroup"
             >
               <div class="attach-thumb">
                 <span v-show="!handleJudgeMediaType(item)">当前格式不支持预览</span>
@@ -156,6 +168,22 @@
                 @click="handleAttachmentSelectionChanged($event, item)"
                 v-show="supportMultipleSelection"
               ></a-checkbox>
+            </a-card>
+            <a-card
+              :bodyStyle="{ padding: 0 }"
+              hoverable
+              v-else
+            >
+              <div class="attach-thumb">
+                <a-icon type="folder-open" />
+              </div>
+              <a-card-meta class="p-3">
+                <ellipsis
+                  :length="isMobile() ? 12 : 16"
+                  tooltip
+                  slot="description"
+                >{{ item.name }}</ellipsis>
+              </a-card-meta>
             </a-card>
           </a-list-item>
         </a-list>
@@ -186,6 +214,31 @@
         :uploadHandler="uploadHandler"
       ></FilePondUpload>
     </a-modal>
+    <a-modal
+      title="新建分组"
+      :visible="groupState.visible"
+      :confirm-loading="groupState.confirmLoading"
+      @ok="handleCreateGroup"
+      @cancel="() => (groupState.visible=false)"
+    >
+      <a-form-model
+        ref="groupForm"
+        :model="groupState.groupForm"
+        :rules="groupState.rules"
+      >
+        <a-form-model-item ref="name" prop="name">
+          <a-input
+            placeholder="分组名称"
+            v-model="groupState.groupForm.name"
+            @blur="
+              () => {
+                $refs.name.onFieldBlur();
+              }
+            "
+          />
+        </a-form-model-item>
+      </a-form-model>
+    </a-modal>
     <AttachmentDetailDrawer
       v-model="drawerVisible"
       v-if="selectAttachment"
@@ -201,6 +254,7 @@ import { mixin, mixinDevice } from '@/utils/mixin.js'
 import { PageView } from '@/layouts'
 import AttachmentDetailDrawer from './components/AttachmentDetailDrawer'
 import attachmentApi from '@/api/attachment'
+import attachmentGroupApi from '@/api/attachmentGroup'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -214,11 +268,28 @@ export default {
       attachmentType: attachmentApi.type,
       listLoading: true,
       uploadVisible: false,
+      viewMode: {
+        actived: 'flat',
+        flat: 'flat',
+        group: 'group'
+      },
+      groupState: {
+        visible: false,
+        confirmLoading: false,
+        groupForm: {},
+        rules: {
+          name: [
+            { required: true, message: '请输入分组名称', trigger: 'blur' },
+            { max: 100, message: '字符长度必须在小于100', trigger: 'blur' }
+          ]
+        }
+      },
       supportMultipleSelection: false,
       selectedAttachmentCheckbox: {},
       batchSelectedAttachments: [],
       selectAttachment: {},
       attachments: [],
+      attachmentGroups: [],
       mediaTypes: [],
       mediaTypesLoading: false,
       types: [],
@@ -244,14 +315,27 @@ export default {
   },
   computed: {
     formattedDatas() {
-      return this.attachments.map(attachment => {
-        attachment.typeProperty = this.attachmentType[attachment.type]
-        return attachment
+      var dataSource = []
+      this.attachmentGroups.forEach(attachmentGroup => {
+        attachmentGroup.isGroup = true
+        dataSource.push(attachmentGroup)
       })
+
+      this.attachments.forEach(attachment => {
+        attachment.isGroup = false
+        attachment.typeProperty = this.attachmentType[attachment.type]
+        dataSource.push(attachment)
+      })
+      return dataSource
     },
     selectedAttachmentStyle() {
       return {
         border: `2px solid ${this.color()}`
+      }
+    },
+    viewModeButtonType() {
+      return function(value) {
+        return this.viewMode.actived === value ? 'primary' : 'default'
       }
     }
   },
@@ -273,6 +357,13 @@ export default {
   },
   methods: {
     ...mapGetters(['color']),
+    handleListAttachmentsByViewMode() {
+      if (this.viewMode.actived === this.viewMode.flat) {
+        this.handleListAttachments()
+      } else if (this.viewMode.actived === this.viewMode.group) {
+        this.handleListAttachmentsWithGroup()
+      }
+    },
     handleListAttachments() {
       this.listLoading = true
       this.queryParam.page = this.pagination.page - 1
@@ -289,6 +380,14 @@ export default {
             this.listLoading = false
           }, 200)
         })
+    },
+    handleListAttachmentsWithGroup() {
+      attachmentGroupApi.listBy().then(res => {
+        const data = res.data.data
+        this.attachments = data.attachments
+        this.attachmentGroups = data.groups
+        this.$log.debug('附件列表:', data)
+      })
     },
     handleListMediaTypes() {
       this.mediaTypesLoading = true
@@ -458,6 +557,17 @@ export default {
         },
         onCancel() {}
       })
+    },
+    handleCreateGroup() {
+      this.$refs.groupForm.validate(valid => {
+        if (valid) {
+          this.$log.debug('创建附件分组', this.groupState.groupForm)
+        }
+      })
+    },
+    handleSwitchView(viewMode) {
+      this.viewMode.actived = viewMode
+      this.handleListAttachmentsByViewMode()
     }
   }
 }
