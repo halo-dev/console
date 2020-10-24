@@ -11,4 +11,12 @@ attachmentGroupApi.listBy = params => {
     method: 'get'
   })
 }
+
+attachmentGroupApi.create = params => {
+  return service({
+    url: baseUrl,
+    data: params,
+    method: 'post'
+  })
+}
 export default attachmentGroupApi

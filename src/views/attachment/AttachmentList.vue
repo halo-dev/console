@@ -122,8 +122,18 @@
               新建分组
             </a-button>
             <a-button-group style="float: right;">
-              <a-button :type="viewModeButtonType(viewMode.flat)" icon="appstore" style="margin:0" @click="handleSwitchView(viewMode.flat)"/>
-              <a-button :type="viewModeButtonType(viewMode.group)" icon="folder" style="margin:0" @click="handleSwitchView(viewMode.group)"/>
+              <a-button
+                :type="viewModeButtonType(viewMode.flat)"
+                icon="appstore"
+                style="margin:0"
+                @click="handleSwitchView(viewMode.flat)"
+              />
+              <a-button
+                :type="viewModeButtonType(viewMode.group)"
+                icon="folder"
+                style="margin:0"
+                @click="handleSwitchView(viewMode.group)"
+              />
             </a-button-group>
           </div>
         </a-card>
@@ -174,10 +184,8 @@
               hoverable
               v-else
             >
-              <div class="attach-thumb">
-                <a-icon type="folder-open" />
-              </div>
-              <a-card-meta class="p-3">
+              <a-icon type="folder-open" :style="{ width: '100%',height:'100%', fontSize: '105px', color: '#08c' }" />
+              <a-card-meta class="p-3" style="text-align:center">
                 <ellipsis
                   :length="isMobile() ? 12 : 16"
                   tooltip
@@ -358,6 +366,8 @@ export default {
   methods: {
     ...mapGetters(['color']),
     handleListAttachmentsByViewMode() {
+      this.attachments = []
+      this.attachmentGroups = []
       if (this.viewMode.actived === this.viewMode.flat) {
         this.handleListAttachments()
       } else if (this.viewMode.actived === this.viewMode.group) {
@@ -373,6 +383,7 @@ export default {
         .query(this.queryParam)
         .then(response => {
           this.attachments = response.data.data.content
+          this.$log.debug('文章', this.attachments)
           this.pagination.total = response.data.data.total
         })
         .finally(() => {
@@ -559,9 +570,18 @@ export default {
       })
     },
     handleCreateGroup() {
+      this.groupState.confirmLoading = true
       this.$refs.groupForm.validate(valid => {
         if (valid) {
-          this.$log.debug('创建附件分组', this.groupState.groupForm)
+          attachmentGroupApi.create(this.groupState.groupForm).then(res => {
+            this.$message.success('添加成功')
+          })
+            .finally(() => {
+              setTimeout(() => {
+                this.groupState.confirmLoading = false
+                this.groupState.visible = false
+              }, 200)
+            })
         }
       })
     },
