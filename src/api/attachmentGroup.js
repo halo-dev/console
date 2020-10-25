@@ -6,8 +6,7 @@ const attachmentGroupApi = {}
 
 attachmentGroupApi.listBy = params => {
   return service({
-    url: baseUrl,
-    params: params,
+    url: `${baseUrl}/${params}`,
     method: 'get'
   })
 }

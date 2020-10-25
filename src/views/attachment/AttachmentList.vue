@@ -139,6 +139,16 @@
         </a-card>
       </a-col>
       <a-col :span="24">
+        <a-breadcrumb style="margin-bottom: 10px">
+          <a-breadcrumb-item
+            v-for="item in groupState.history"
+            :key="item.id"
+          >
+            <span v-if="item.id === currentGroupId">{{ item.name }}</span>
+            <a @click="handleBackToGroup(item)" href="#" v-else>{{ item.name }}</a>
+          </a-breadcrumb-item>
+        </a-breadcrumb>
+
         <a-list
           :grid="{ gutter: 12, xs: 2, sm: 2, md: 4, lg: 6, xl: 6, xxl: 6 }"
           :dataSource="formattedDatas"
@@ -182,6 +192,7 @@
             <a-card
               :bodyStyle="{ padding: 0 }"
               hoverable
+              @click="handleNavigateToGroup(item)"
               v-else
             >
               <a-icon type="folder-open" :style="{ width: '100%',height:'100%', fontSize: '105px', color: '#08c' }" />
@@ -283,6 +294,10 @@ export default {
       },
       groupState: {
         visible: false,
+        history: [{
+          id: 0,
+          name: '全部文件'
+        }],
         confirmLoading: false,
         groupForm: {},
         rules: {
@@ -345,6 +360,10 @@ export default {
       return function(value) {
         return this.viewMode.actived === value ? 'primary' : 'default'
       }
+    },
+    currentGroupId() {
+      const group = this.groupState.history[this.groupState.history.length - 1]
+      return group.id
     }
   },
   created() {
@@ -383,7 +402,7 @@ export default {
         .query(this.queryParam)
         .then(response => {
           this.attachments = response.data.data.content
-          this.$log.debug('文章', this.attachments)
+          this.$log.debug('附件', this.attachments)
           this.pagination.total = response.data.data.total
         })
         .finally(() => {
@@ -393,11 +412,11 @@ export default {
         })
     },
     handleListAttachmentsWithGroup() {
-      attachmentGroupApi.listBy().then(res => {
+      attachmentGroupApi.listBy(this.currentGroupId).then(res => {
         const data = res.data.data
         this.attachments = data.attachments
         this.attachmentGroups = data.groups
-        this.$log.debug('附件列表:', data)
+        this.$log.debug('附件和分组列表:', data)
       })
     },
     handleListMediaTypes() {
@@ -573,8 +592,11 @@ export default {
       this.groupState.confirmLoading = true
       this.$refs.groupForm.validate(valid => {
         if (valid) {
+          // 设置parentId
+          this.groupState.groupForm.parentId = this.groupState.currentGroupId
           attachmentGroupApi.create(this.groupState.groupForm).then(res => {
             this.$message.success('添加成功')
+            this.handleListAttachmentsByViewMode()
           })
             .finally(() => {
               setTimeout(() => {
@@ -587,6 +609,21 @@ export default {
     },
     handleSwitchView(viewMode) {
       this.viewMode.actived = viewMode
+      this.handleListAttachmentsByViewMode()
+    },
+    handleNavigateToGroup(group) {
+      this.groupState.history.push({
+        id: group.id,
+        name: group.name
+      })
+      this.handleListAttachmentsByViewMode()
+    },
+    handleBackToGroup(group) {
+      const { history } = this.groupState
+      const index = history.indexOf(group)
+      // 保留当前层
+      history.splice(index + 1, history.length - 1)
+      // 改变状态重新获取数据
       this.handleListAttachmentsByViewMode()
     }
   }
