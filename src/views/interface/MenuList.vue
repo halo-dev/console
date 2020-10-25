@@ -85,10 +85,25 @@
         :xs="24"
         class="pb-3"
       >
-        <a-card
-          :title="menuListTitle"
-          :bodyStyle="{ padding: '16px' }"
-        >
+        <a-card :bodyStyle="{ padding: '16px' }">
+          <template slot="title">
+            <span>
+              {{ menuListTitle }}
+            </span>
+            <a href="#">
+              <a-icon type="edit" />
+            </a>
+            <!-- <a-form layout="inline">
+              <a-form-item>
+                <a-input v-model="selectedTeam" />
+              </a-form-item>
+              <a-form-item>
+                <a-button type="primary">
+                  修改
+                </a-button>
+              </a-form-item>
+            </a-form> -->
+          </template>
           <template slot="extra">
             <a-space>
               <ReactiveButton
@@ -120,6 +135,7 @@
             <a-empty v-if="table.data.length===0 && !table.loading && !form.visible" />
             <MenuTreeNode
               v-model="table.data"
+              :excludedTeams="excludedTeams"
               @reload="handleListMenus"
             />
           </a-spin>
@@ -195,6 +211,11 @@ export default {
     },
     menuListTitle() {
       return this.teams.selected === '' ? '未分组' : this.teams.selected
+    },
+    excludedTeams() {
+      return this.teams.data.filter((item) => {
+        return item !== this.teams.selected
+      })
     },
   },
   created() {

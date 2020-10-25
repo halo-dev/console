@@ -16,27 +16,77 @@
           :key="item.id"
           v-for="(item) in realValue"
         >
-          <a-list-item>
-            <a-list-item-meta :description="item.url">
+          <a-list-item class="cursor-pointer menu-item">
+            <a-list-item-meta>
+              <span
+                slot="description"
+                class="inline-block"
+              >
+                <a
+                  :href="item.url"
+                  target="_blank"
+                  class="ant-anchor-link-title"
+                > {{ item.url }} </a>
+              </span>
               <span
                 slot="title"
-                class="title cursor-move inline-block font-bold"
-              >{{ item.name + (item.formVisible?'（正在编辑）':'') }}</span>
+                class="title text-base cursor-move inline-block font-bold"
+              >{{ item.name }}
+                <a-tooltip title="外部链接">
+                  <a-icon
+                    v-if="item.target==='_blank'"
+                    type="link"
+                  />
+                </a-tooltip>
+                {{ item.formVisible?'（正在编辑）':'' }}
+              </span>
             </a-list-item-meta>
             <template slot="actions">
-              <span @click="handleDelete(item.id)">
-                删除
-              </span>
+              <a-popconfirm
+                title="确定删除此菜单？"
+                placement="bottom"
+                @confirm="handleDelete(item.id)"
+              >
+                <a href="javascript:void(0);">删除</a>
+              </a-popconfirm>
             </template>
             <template slot="actions">
-              <span @click="handleOpenEditForm(item)">
+              <a
+                href="javascript:void(0);"
+                @click="handleOpenEditForm(item)"
+              >
                 编辑
-              </span>
+              </a>
             </template>
-            <template slot="actions">
-              <span>
-                更多
-              </span>
+            <template
+              slot="actions"
+              v-if="excludedTeams && excludedTeams.length>0"
+            >
+              <a-dropdown :trigger="['click']">
+                <a
+                  class="ant-dropdown-link"
+                  @click="e => e.preventDefault()"
+                >
+                  更多
+                  <a-icon type="down" />
+                </a>
+                <a-menu slot="overlay">
+                  <a-sub-menu title="移动到分组">
+                    <a-menu-item
+                      v-for="(team,index) in excludedTeams"
+                      :key="index"
+                      @click="handleMoveMenu(item,team)"
+                    >{{ team===''?'未分组':team }}</a-menu-item>
+                  </a-sub-menu>
+                  <a-sub-menu title="复制到分组">
+                    <a-menu-item
+                      v-for="(team,index) in excludedTeams"
+                      :key="index"
+                      @click="handleCopyMenu(item,team)"
+                    >{{ team===''?'未分组':team }}</a-menu-item>
+                  </a-sub-menu>
+                </a-menu>
+              </a-dropdown>
             </template>
           </a-list-item>
           <MenuForm
@@ -51,6 +101,7 @@
           >
             <MenuTreeNode
               :list="item.children"
+              :excludedTeams="excludedTeams"
               @reload="onReloadEmit"
             />
           </div>
@@ -66,6 +117,7 @@ import MenuForm from './MenuForm'
 
 // apis
 import menuApi from '@/api/menu'
+import { deepClone } from '@/utils/util'
 export default {
   name: 'MenuTreeNode',
   components: {
@@ -79,6 +131,11 @@ export default {
       default: null,
     },
     list: {
+      required: false,
+      type: Array,
+      default: null,
+    },
+    excludedTeams: {
       required: false,
       type: Array,
       default: null,
@@ -126,6 +183,25 @@ export default {
     handleCloseCreateMenuForm(item) {
       this.$set(item, 'formVisible', false)
     },
+    handleCopyMenu(item, team) {
+      const menu = deepClone(item)
+      menu.team = team
+      menu.parentId = 0
+      menu.priority = 0
+      menu.id = null
+      menuApi.create(menu).then((response) => {
+        this.$emit('reload')
+      })
+    },
+    handleMoveMenu(item, team) {
+      const menu = deepClone(item)
+      menu.team = team
+      menu.parentId = 0
+      menu.priority = 0
+      menuApi.update(menu.id, menu).then((response) => {
+        this.$emit('reload')
+      })
+    },
     onReloadEmit() {
       this.$emit('reload')
     },
@@ -136,6 +212,11 @@ export default {
 .ghost {
   opacity: 0.8;
   background: #c8ebfb;
-  padding: 0 10px;
+}
+::v-deep .ant-list-item-action {
+  display: none;
+}
+::v-deep .menu-item:hover .ant-list-item-action {
+  display: block;
 }
 </style>

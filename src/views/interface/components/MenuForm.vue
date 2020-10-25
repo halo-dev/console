@@ -65,16 +65,10 @@
             label="打开方式"
             prop="target"
           >
-            <a-select
-              defaultValue="_self"
+            <a-radio-group
               v-model="menuModel.target"
-            >
-              <a-select-option
-                v-for="(target,index) in targets"
-                :key="index"
-                :value="target.value"
-              >{{ target.label }}</a-select-option>
-            </a-select>
+              :options="targets"
+            />
           </a-form-model-item>
         </a-col>
         <a-col
