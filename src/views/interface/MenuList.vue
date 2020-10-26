@@ -90,19 +90,6 @@
             <span>
               {{ menuListTitle }}
             </span>
-            <a href="#">
-              <a-icon type="edit" />
-            </a>
-            <!-- <a-form layout="inline">
-              <a-form-item>
-                <a-input v-model="selectedTeam" />
-              </a-form-item>
-              <a-form-item>
-                <a-button type="primary">
-                  修改
-                </a-button>
-              </a-form-item>
-            </a-form> -->
           </template>
           <template slot="extra">
             <a-space>
@@ -111,18 +98,35 @@
                 @callback="formBatch.errored=false"
                 :loading="formBatch.saving"
                 :errored="formBatch.errored"
-                text="保存"
+                text="保存排序"
                 loadedText="保存成功"
                 erroredText="保存失败"
                 :disabled="table.data.length<=0"
               ></ReactiveButton>
               <a-button
-                type="primary"
                 @click="handleOpenCreateMenuForm()"
                 :disabled="form.visible"
+                type="primary"
+                ghost
               >
                 新增
               </a-button>
+              <a-dropdown :trigger="['click']">
+                <a-menu slot="overlay">
+                  <a-menu-item
+                    key="1"
+                    @click="menuInternalLinkSelector.visible = true"
+                  >
+                    从系统预设链接添加
+                  </a-menu-item>
+                  <a-menu-item key="3">
+                    删除当前组
+                  </a-menu-item>
+                </a-menu>
+                <a-button> 其他
+                  <a-icon type="down" />
+                </a-button>
+              </a-dropdown>
             </a-space>
           </template>
           <a-spin :spinning="table.loading">
@@ -142,6 +146,7 @@
         </a-card>
       </a-col>
     </a-row>
+    <MenuInternalLinkSelector v-model="menuInternalLinkSelector.visible" />
   </page-view>
 </template>
 
@@ -151,13 +156,14 @@ import { PageView } from '@/layouts'
 import draggable from 'vuedraggable'
 import MenuTreeNode from './components/MenuTreeNode'
 import MenuForm from './components/MenuForm'
+import MenuInternalLinkSelector from './components/MenuInternalLinkSelector'
 
 import { deepClone } from '@/utils/util'
 
 // apis
 import menuApi from '@/api/menu'
 export default {
-  components: { PageView, draggable, MenuTreeNode, MenuForm },
+  components: { PageView, draggable, MenuTreeNode, MenuForm, MenuInternalLinkSelector },
   data() {
     return {
       table: {
@@ -185,6 +191,9 @@ export default {
             team: [{ required: true, message: '分组名称不能为空', trigger: ['change'] }],
           },
         },
+      },
+      menuInternalLinkSelector: {
+        visible: false,
       },
     }
   },
