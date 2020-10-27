@@ -146,7 +146,7 @@
       />
     </div>
     <a-modal title="上传附件" v-model="uploadVisible" :footer="null" :afterClose="onUploadClose" destroyOnClose>
-      <FilePondUpload ref="upload" :uploadHandler="uploadHandler"></FilePondUpload>
+      <FilePondUpload ref="upload" :uploadHandler="uploadHandler" @success="handleUploadSuccess"></FilePondUpload>
     </a-modal>
     <a-modal
       title="新建分组"
@@ -224,6 +224,7 @@ export default {
       selectedAttachmentCheckbox: {},
       batchSelectedAttachments: [],
       selectAttachment: {},
+      uploadedAttachmentIds: [],
       attachments: [],
       attachmentGroups: [],
       mediaTypes: [],
@@ -424,9 +425,13 @@ export default {
     handleQuery() {
       this.handlePaginationChange(1, this.pagination.size)
     },
+    handleUploadSuccess(res) {
+      const id = res.data.data.id
+      this.uploadedAttachmentIds.push(id)
+    },
     onUploadClose() {
       this.$refs.upload.handleClearFileList()
-      this.handlePaginationChange(1, this.pagination.size)
+      this.handleMoveUploadedAttachmentsToCurrentGroup()
       this.handleListMediaTypes()
       this.handleListTypes()
     },
@@ -500,6 +505,20 @@ export default {
         },
         onCancel() {}
       })
+    },
+    handleMoveUploadedAttachmentsToCurrentGroup() {
+      if (this.currentGroupId === 0) {
+        this.uploadedAttachmentIds = []
+        this.handleListAttachmentsByViewMode()
+        return
+      }
+      attachmentApi
+        .updateGroupInBatch(this.currentGroupId, this.uploadedAttachmentIds)
+        .then(res => {
+          this.$log.debug('move uploaded attachments to current group successfully:', res)
+          this.handleListAttachmentsByViewMode()
+        })
+        .finally(() => (this.uploadedAttachmentIds = []))
     },
     handleCreateGroup() {
       this.groupState.confirmLoading = true
