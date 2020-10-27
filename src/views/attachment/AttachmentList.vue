@@ -503,14 +503,16 @@ export default {
         title: '确定要批量删除选中的附件吗?',
         content: '一旦删除不可恢复，请谨慎操作',
         onOk() {
-          attachmentApi
-            .deleteInBatch(attachmentIds)
-            .then(res => {
+          var deleteAttachments = attachmentApi.deleteInBatch(attachmentIds)
+          var deleteGroups = attachmentGroupApi.deleteInBatch(groupIds)
+          // 异步编排
+          Promise.all([deleteAttachments, deleteGroups])
+            .then(values => {
               that.handleCancelMultipleSelection()
               that.$message.success('删除成功')
             })
             .finally(() => {
-              that.handleListAttachments()
+              that.handleListAttachmentsByViewMode()
             })
         },
         onCancel() {}
@@ -542,6 +544,7 @@ export default {
             .then(res => {
               this.$message.success('添加成功')
               this.viewMode.actived = this.viewMode.group
+              this.groupState.groupForm = {}
               this.handleListAttachmentsByViewMode()
             })
             .finally(() => {

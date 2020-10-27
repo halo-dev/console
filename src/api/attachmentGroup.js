@@ -18,4 +18,12 @@ attachmentGroupApi.create = params => {
     method: 'post'
   })
 }
+
+attachmentGroupApi.deleteInBatch = params => {
+  return service({
+    url: baseUrl,
+    data: params,
+    method: 'delete'
+  })
+}
 export default attachmentGroupApi
