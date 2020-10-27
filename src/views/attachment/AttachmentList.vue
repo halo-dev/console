@@ -109,7 +109,15 @@
                 <span v-show="!handleJudgeMediaType(item)">当前格式不支持预览</span>
                 <img :src="item.thumbPath" v-show="handleJudgeMediaType(item)" loading="lazy" />
               </div>
-              <a-card-meta class="p-3">
+              <a-input
+                v-if="getRenameVisible(item)"
+                ref="input"
+                type="text"
+                v-model="rename.name"
+                @blur="handleRename"
+                @keyup.enter="handleRename"
+              />
+              <a-card-meta class="p-3" v-else>
                 <ellipsis :length="isMobile() ? 12 : 16" tooltip slot="description">{{ item.name }}</ellipsis>
               </a-card-meta>
               <a-checkbox
@@ -217,6 +225,7 @@ export default {
         flat: 'flat',
         group: 'group'
       },
+      rename: {},
       groupState: {
         visible: false,
         history: [
@@ -373,6 +382,10 @@ export default {
         })
     },
     handleShowDetailDrawer(attachment) {
+      // 如果是重命名则点击item不显示drawer
+      if (this.rename) {
+        return
+      }
       this.selectAttachment = attachment
       if (this.supportMultipleSelection) {
         this.drawerVisible = false
@@ -380,13 +393,20 @@ export default {
         this.drawerVisible = true
       }
     },
-    handleRename(item) {
-      if (item.isGroup) {
+    getRenameVisible(item) {
+      return this.rename === item
+    },
+    handleRename() {
+      const { id, name, isGroup } = this.rename
+      if (isGroup) {
         this.groupState.visible = true
-        this.groupState.groupForm.id = item.id
-        this.groupState.groupForm.name = item.name
+        this.groupState.groupForm.id = id
+        this.groupState.groupForm.name = name
       } else {
-        console.log('重命名文件')
+        attachmentApi.update(id, { name: name }).then(response => {
+          this.$log.debug('Updated attachment', response.data.data)
+          this.$message.success('重命名成功')
+        })
       }
     },
     handleContextMenu(event, item) {
@@ -394,7 +414,7 @@ export default {
         {
           label: '重命名',
           onClick: () => {
-            this.handleRename(item)
+            this.rename = item
           },
           divided: true
         }
