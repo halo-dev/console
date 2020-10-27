@@ -120,7 +120,14 @@
                 v-show="supportMultipleSelection"
               ></a-checkbox>
             </a-card>
-            <a-card :bodyStyle="{ padding: 0 }" hoverable @click="handleNavigateToGroup(item)" v-else>
+
+            <a-card
+              :bodyStyle="{ padding: 0 }"
+              hoverable
+              @click="handleNavigateToGroup(item)"
+              @contextmenu.prevent="handleContextMenu($event, item)"
+              v-else
+            >
               <div class="attach-group">
                 <img src="/images/folder.png" width="56%" />
               </div>
@@ -373,42 +380,61 @@ export default {
         this.drawerVisible = true
       }
     },
+    handleRename(item) {
+      if (item.isGroup) {
+        this.groupState.visible = true
+        this.groupState.groupForm.id = item.id
+        this.groupState.groupForm.name = item.name
+      } else {
+        console.log('重命名文件')
+      }
+    },
     handleContextMenu(event, item) {
-      this.$contextmenu({
-        items: [
-          {
-            label: `${this.handleJudgeMediaType(item) ? '复制图片链接' : '复制文件链接'}`,
-            onClick: () => {
-              const text = `${encodeURI(item.path)}`
-              this.$copyText(text)
-                .then(message => {
-                  this.$log.debug('copy', message)
-                  this.$message.success('复制成功！')
-                })
-                .catch(err => {
-                  this.$log.debug('copy.err', err)
-                  this.$message.error('复制失败！')
-                })
-            },
-            divided: true
+      const menuItems = [
+        {
+          label: '重命名',
+          onClick: () => {
+            this.handleRename(item)
           },
-          {
-            disabled: !this.handleJudgeMediaType(item),
-            label: '复制 Markdown 格式链接',
-            onClick: () => {
-              const text = `![${item.name}](${encodeURI(item.path)})`
-              this.$copyText(text)
-                .then(message => {
-                  this.$log.debug('copy', message)
-                  this.$message.success('复制成功！')
-                })
-                .catch(err => {
-                  this.$log.debug('copy.err', err)
-                  this.$message.error('复制失败！')
-                })
-            }
+          divided: true
+        }
+      ]
+      if (!item.isGroup) {
+        menuItems.push({
+          label: `${this.handleJudgeMediaType(item) ? '复制图片链接' : '复制文件链接'}`,
+          onClick: () => {
+            const text = `${encodeURI(item.path)}`
+            this.$copyText(text)
+              .then(message => {
+                this.$log.debug('copy', message)
+                this.$message.success('复制成功！')
+              })
+              .catch(err => {
+                this.$log.debug('copy.err', err)
+                this.$message.error('复制失败！')
+              })
+          },
+          divided: true
+        })
+        menuItems.push({
+          disabled: !this.handleJudgeMediaType(item),
+          label: '复制 Markdown 格式链接',
+          onClick: () => {
+            const text = `![${item.name}](${encodeURI(item.path)})`
+            this.$copyText(text)
+              .then(message => {
+                this.$log.debug('copy', message)
+                this.$message.success('复制成功！')
+              })
+              .catch(err => {
+                this.$log.debug('copy.err', err)
+                this.$message.error('复制失败！')
+              })
           }
-        ],
+        })
+      }
+      this.$contextmenu({
+        items: menuItems,
         event,
         minWidth: 210
       })
@@ -536,25 +562,45 @@ export default {
       this.groupState.confirmLoading = true
       this.$refs.groupForm.validate(valid => {
         if (valid) {
-          const { groupForm } = this.groupState
-          // 设置parentId
-          groupForm.parentId = this.currentGroupId
-          attachmentGroupApi
-            .create(groupForm)
-            .then(res => {
-              this.$message.success('添加成功')
-              this.viewMode.actived = this.viewMode.group
-              this.groupState.groupForm = {}
-              this.handleListAttachmentsByViewMode()
-            })
-            .finally(() => {
-              setTimeout(() => {
-                this.groupState.confirmLoading = false
-                this.groupState.visible = false
-              }, 200)
-            })
+          this.handleCreateOrUpdateGroup()
         }
       })
+    },
+    handleCreateOrUpdateGroup() {
+      const { groupForm } = this.groupState
+      if (groupForm.id) {
+        attachmentGroupApi
+          .updateById(groupForm.id, { name: groupForm.name })
+          .then(res => {
+            this.$message.success('更新成功')
+            this.viewMode.actived = this.viewMode.group
+            this.groupState.groupForm = {}
+            this.handleListAttachmentsByViewMode()
+          })
+          .finally(() => {
+            setTimeout(() => {
+              this.groupState.confirmLoading = false
+              this.groupState.visible = false
+            }, 200)
+          })
+      } else {
+        // 设置parentId
+        groupForm.parentId = this.currentGroupId
+        attachmentGroupApi
+          .create(groupForm)
+          .then(res => {
+            this.$message.success('添加成功')
+            this.viewMode.actived = this.viewMode.group
+            this.groupState.groupForm = {}
+            this.handleListAttachmentsByViewMode()
+          })
+          .finally(() => {
+            setTimeout(() => {
+              this.groupState.confirmLoading = false
+              this.groupState.visible = false
+            }, 200)
+          })
+      }
     },
     handleSwitchView(viewMode) {
       this.viewMode.actived = viewMode

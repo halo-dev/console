@@ -26,4 +26,12 @@ attachmentGroupApi.deleteInBatch = params => {
     method: 'delete'
   })
 }
+
+attachmentGroupApi.updateById = (id, params) => {
+  return service({
+    url: `${baseUrl}/${id}`,
+    data: params,
+    method: 'put'
+  })
+}
 export default attachmentGroupApi
