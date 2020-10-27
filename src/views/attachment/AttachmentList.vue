@@ -392,7 +392,7 @@ export default {
     },
     handleShowDetailDrawer(attachment) {
       // 如果是重命名则点击item不显示drawer
-      if (this.rename) {
+      if (this.rename.id) {
         return
       }
       this.selectAttachment = attachment
@@ -648,7 +648,7 @@ export default {
       this.handleListAttachmentsByViewMode()
     },
     handleNavigateToGroup(group) {
-      if (this.supportMultipleSelection || this.rename) {
+      if (this.supportMultipleSelection || this.rename.id) {
         return
       }
       this.groupState.history.push({
