@@ -115,7 +115,7 @@
                 type="text"
                 v-model="rename.name"
                 @blur="handleRename"
-                @keyup.enter="handleRename"
+                @keyup.enter.native="$event.target.blur"
               />
               <a-card-meta class="p-3" v-else>
                 <ellipsis :length="isMobile() ? 12 : 16" tooltip slot="description">{{ item.name }}</ellipsis>
@@ -139,7 +139,16 @@
               <div class="attach-group">
                 <img src="/images/folder.png" width="56%" />
               </div>
-              <a-card-meta class="p-3" style="text-align: center">
+              <a-input
+                v-if="getRenameVisible(item)"
+                ref="input"
+                type="text"
+                v-model="rename.name"
+                @blur="handleRename"
+                @keyup.enter.native="$event.target.blur"
+                @keyup.enter="handleRename"
+              />
+              <a-card-meta class="p-3" style="text-align: center" v-else>
                 <ellipsis :length="isMobile() ? 12 : 16" tooltip slot="description">{{ item.name }}</ellipsis>
               </a-card-meta>
               <a-checkbox
@@ -398,14 +407,21 @@ export default {
     },
     handleRename() {
       const { id, name, isGroup } = this.rename
+      if (!name || !name.trim()) {
+        this.$message.warn('名称不能为空')
+        return
+      }
+
       if (isGroup) {
-        this.groupState.visible = true
-        this.groupState.groupForm.id = id
-        this.groupState.groupForm.name = name
+        attachmentGroupApi.updateById(id, { name: name }).then(res => {
+          this.$message.success('重命名成功')
+          this.rename = {}
+        })
       } else {
         attachmentApi.update(id, { name: name }).then(response => {
           this.$log.debug('Updated attachment', response.data.data)
           this.$message.success('重命名成功')
+          this.rename = {}
         })
       }
     },
@@ -582,7 +598,9 @@ export default {
       this.groupState.confirmLoading = true
       this.$refs.groupForm.validate(valid => {
         if (valid) {
-          this.handleCreateOrUpdateGroup()
+          const { groupForm } = this.groupState
+          attachmentGroupApi
+            .create(groupForm)
             .then(res => {
               this.$message.success('保存成功')
               this.viewMode.actived = this.viewMode.group
@@ -598,22 +616,12 @@ export default {
         }
       })
     },
-    handleCreateOrUpdateGroup() {
-      const { groupForm } = this.groupState
-      if (groupForm.id) {
-        return attachmentGroupApi.updateById(groupForm.id, { name: groupForm.name })
-      } else {
-        // 设置parentId
-        groupForm.parentId = this.currentGroupId
-        return attachmentGroupApi.create(groupForm)
-      }
-    },
     handleSwitchView(viewMode) {
       this.viewMode.actived = viewMode
       this.handleListAttachmentsByViewMode()
     },
     handleNavigateToGroup(group) {
-      if (this.supportMultipleSelection) {
+      if (this.supportMultipleSelection || this.rename) {
         return
       }
       this.groupState.history.push({
