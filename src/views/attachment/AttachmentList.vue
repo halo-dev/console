@@ -166,7 +166,7 @@
       title="新建分组"
       :visible="groupState.visible"
       :confirm-loading="groupState.confirmLoading"
-      @ok="handleCreateGroup"
+      @ok="handleGroupModalOk"
       @cancel="() => (groupState.visible = false)"
     >
       <a-form-model ref="groupForm" :model="groupState.groupForm" :rules="groupState.rules">
@@ -558,48 +558,34 @@ export default {
         })
         .finally(() => (this.uploadedAttachmentIds = []))
     },
-    handleCreateGroup() {
+    handleGroupModalOk() {
       this.groupState.confirmLoading = true
       this.$refs.groupForm.validate(valid => {
         if (valid) {
           this.handleCreateOrUpdateGroup()
+            .then(res => {
+              this.$message.success('保存成功')
+              this.viewMode.actived = this.viewMode.group
+              this.groupState.groupForm = {}
+              this.handleListAttachmentsByViewMode()
+            })
+            .finally(() => {
+              setTimeout(() => {
+                this.groupState.confirmLoading = false
+                this.groupState.visible = false
+              }, 200)
+            })
         }
       })
     },
     handleCreateOrUpdateGroup() {
       const { groupForm } = this.groupState
       if (groupForm.id) {
-        attachmentGroupApi
-          .updateById(groupForm.id, { name: groupForm.name })
-          .then(res => {
-            this.$message.success('更新成功')
-            this.viewMode.actived = this.viewMode.group
-            this.groupState.groupForm = {}
-            this.handleListAttachmentsByViewMode()
-          })
-          .finally(() => {
-            setTimeout(() => {
-              this.groupState.confirmLoading = false
-              this.groupState.visible = false
-            }, 200)
-          })
+        return attachmentGroupApi.updateById(groupForm.id, { name: groupForm.name })
       } else {
         // 设置parentId
         groupForm.parentId = this.currentGroupId
-        attachmentGroupApi
-          .create(groupForm)
-          .then(res => {
-            this.$message.success('添加成功')
-            this.viewMode.actived = this.viewMode.group
-            this.groupState.groupForm = {}
-            this.handleListAttachmentsByViewMode()
-          })
-          .finally(() => {
-            setTimeout(() => {
-              this.groupState.confirmLoading = false
-              this.groupState.visible = false
-            }, 200)
-          })
+        return attachmentGroupApi.create(groupForm)
       }
     },
     handleSwitchView(viewMode) {
