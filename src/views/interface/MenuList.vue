@@ -146,7 +146,11 @@
         </a-card>
       </a-col>
     </a-row>
-    <MenuInternalLinkSelector v-model="menuInternalLinkSelector.visible" />
+    <MenuInternalLinkSelector
+      v-model="menuInternalLinkSelector.visible"
+      :team="teams.selected"
+      @reload="handleListMenus"
+    />
   </page-view>
 </template>
 

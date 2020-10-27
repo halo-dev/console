@@ -36,6 +36,14 @@ menuApi.create = menu => {
   })
 }
 
+menuApi.createBatch = menus => {
+  return service({
+    url: `${baseUrl}/batch`,
+    data: menus,
+    method: 'post'
+  })
+}
+
 menuApi.updateBatch = menus => {
   return service({
     url: `${baseUrl}/batch`,

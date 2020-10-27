@@ -2,11 +2,24 @@
   <a-modal
     v-model="visible"
     title="从系统预设链接添加菜单"
-    okText="添加"
     :width="1024"
     :bodyStyle="{ padding: '0 24px 24px' }"
   >
-    <a-row :gutter="16">
+    <template slot="footer">
+      <a-button @click="handleCancel">
+        取消
+      </a-button>
+      <ReactiveButton
+        @click="handleCreateBatch"
+        @callback="handleCreateBatchCallback"
+        :loading="saving"
+        :errored="saveErrored"
+        text="添加"
+        loadedText="添加成功"
+        erroredText="添加失败"
+      ></ReactiveButton>
+    </template>
+    <a-row :gutter="24">
       <a-col :span="12">
         <div class="custom-tab-wrapper">
           <a-tabs default-active-key="1">
@@ -63,7 +76,25 @@
               key="3"
               tab="独立页面"
             >
-              // TODO
+              <a-list item-layout="horizontal">
+                <a-list-item
+                  v-for="(sheet,index) in sheet.independents"
+                  :key="index"
+                >
+                  <a-list-item-meta>
+                    <span slot="title">{{ sheet.title }}</span>
+                    <span slot="description">{{ sheet.fullPath }}</span>
+                  </a-list-item-meta>
+                  <template slot="actions">
+                    <a href="javascript:void(0);">
+                      <a-icon
+                        type="plus-circle"
+                        @click="handleInsertPre(sheet.title,sheet.fullPath)"
+                      />
+                    </a>
+                  </template>
+                </a-list-item>
+              </a-list>
             </a-tab-pane>
             <a-tab-pane
               key="4"
@@ -81,23 +112,35 @@
         </div>
       </a-col>
       <a-col :span="12">
-        备选
-        <a-list item-layout="horizontal">
-          <a-list-item
-            v-for="(menu,index) in menus"
-            :key="index"
-          >
-            <a-list-item-meta>
-              <span slot="title">{{ menu.name }}</span>
-              <span slot="description">{{ menu.url }}</span>
-            </a-list-item-meta>
-            <template slot="actions">
-              <a href="javascript:void(0);">
-                <a-icon type="close-circle" />
-              </a>
-            </template>
-          </a-list-item>
-        </a-list>
+        <div class="custom-tab-wrapper">
+          <a-tabs default-active-key="1">
+            <a-tab-pane
+              key="1"
+              tab="备选"
+              force-render
+            >
+              <a-list item-layout="horizontal">
+                <a-list-item
+                  v-for="(menu,index) in menus"
+                  :key="index"
+                >
+                  <a-list-item-meta>
+                    <span slot="title">{{ menu.name }}</span>
+                    <span slot="description">{{ menu.url }}</span>
+                  </a-list-item-meta>
+                  <template slot="actions">
+                    <a
+                      href="javascript:void(0);"
+                      @click="handleRemovePre(index)"
+                    >
+                      <a-icon type="close-circle" />
+                    </a>
+                  </template>
+                </a-list-item>
+              </a-list>
+            </a-tab-pane>
+          </a-tabs>
+        </div>
       </a-col>
     </a-row>
   </a-modal>
@@ -105,6 +148,8 @@
 <script>
 import categoryApi from '@/api/category'
 import tagApi from '@/api/tag'
+import menuApi from '@/api/menu'
+import sheetApi from '@/api/sheet'
 export default {
   name: 'MenuInternalLinkSelector',
   props: {
@@ -112,13 +157,22 @@ export default {
       type: Boolean,
       default: false,
     },
+    team: {
+      type: String,
+      default: '',
+    },
   },
   data() {
     return {
-      data: [],
       categories: [],
       tags: [],
       menus: [],
+      sheet: {
+        independents: [],
+        customs: [],
+      },
+      saving: false,
+      saveErrored: false,
     }
   },
   computed: {
@@ -136,6 +190,7 @@ export default {
       if (value) {
         this.handleListCategories()
         this.handleListTags()
+        this.handleListIndependentSheets()
       }
     },
   },
@@ -150,11 +205,45 @@ export default {
         this.tags = response.data.data
       })
     },
+    handleListIndependentSheets() {
+      sheetApi.listIndependent().then((response) => {
+        this.sheet.independents = response.data.data
+      })
+    },
     handleInsertPre(name, url) {
       this.menus.push({
         name: name,
         url: url,
+        team: this.team,
       })
+    },
+    handleRemovePre(index) {
+      this.menus.splice(index, 1)
+    },
+    handleCancel() {
+      this.menus = []
+      this.visible = false
+      this.$emit('reload')
+    },
+    handleCreateBatch() {
+      this.saving = true
+      menuApi
+        .createBatch(this.menus)
+        .catch(() => {
+          this.saveErrored = false
+        })
+        .finally(() => {
+          setTimeout(() => {
+            this.saving = false
+          }, 400)
+        })
+    },
+    handleCreateBatchCallback() {
+      if (this.saveErrored) {
+        this.saveErrored = false
+      } else {
+        this.handleCancel()
+      }
     },
   },
 }

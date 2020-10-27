@@ -30,7 +30,7 @@
               </span>
               <span
                 slot="title"
-                class="title text-base cursor-move inline-block font-bold"
+                class="title cursor-move inline-block font-bold"
               >{{ item.name }}
                 <a-tooltip title="外部链接">
                   <a-icon
@@ -164,14 +164,9 @@ export default {
       this.$emit('input', value)
     },
     handleDelete(id) {
-      menuApi
-        .delete(id)
-        .then((response) => {
-          this.$message.success('删除成功！')
-        })
-        .finally(() => {
-          this.onReloadEmit()
-        })
+      menuApi.delete(id).finally(() => {
+        this.onReloadEmit()
+      })
     },
     handleOpenEditForm(item) {
       this.$set(item, 'formVisible', true)
