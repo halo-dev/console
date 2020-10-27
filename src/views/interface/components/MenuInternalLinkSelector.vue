@@ -78,18 +78,18 @@
             >
               <a-list item-layout="horizontal">
                 <a-list-item
-                  v-for="(sheet,index) in sheet.independents"
+                  v-for="(item,index) in sheet.independents"
                   :key="index"
                 >
                   <a-list-item-meta>
-                    <span slot="title">{{ sheet.title }}</span>
-                    <span slot="description">{{ sheet.fullPath }}</span>
+                    <span slot="title">{{ item.title }}</span>
+                    <span slot="description">{{ item.fullPath }}</span>
                   </a-list-item-meta>
                   <template slot="actions">
                     <a href="javascript:void(0);">
                       <a-icon
                         type="plus-circle"
-                        @click="handleInsertPre(sheet.title,sheet.fullPath)"
+                        @click="handleInsertPre(item.title,item.fullPath)"
                       />
                     </a>
                   </template>
