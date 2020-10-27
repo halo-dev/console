@@ -139,7 +139,7 @@
         </a-list>
       </a-col>
     </a-row>
-    <div class="page-wrapper">
+    <div class="page-wrapper" v-show="viewMode.actived == viewMode.flat">
       <a-pagination
         class="pagination"
         :current="pagination.page"
