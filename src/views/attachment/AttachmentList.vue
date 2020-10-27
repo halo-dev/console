@@ -115,7 +115,7 @@
               <a-checkbox
                 class="select-attachment-checkbox"
                 :style="getCheckStatus(item.id) ? selectedAttachmentStyle : ''"
-                :checked="getCheckStatus(item.id)"
+                :checked="getCheckStatus(item)"
                 @click="handleAttachmentSelectionChanged($event, item)"
                 v-show="supportMultipleSelection"
               ></a-checkbox>
@@ -127,6 +127,13 @@
               <a-card-meta class="p-3" style="text-align: center">
                 <ellipsis :length="isMobile() ? 12 : 16" tooltip slot="description">{{ item.name }}</ellipsis>
               </a-card-meta>
+              <a-checkbox
+                class="select-attachment-checkbox"
+                :style="getCheckStatus(item.id) ? selectedAttachmentStyle : ''"
+                :checked="getCheckStatus(item)"
+                @click="handleAttachmentSelectionChanged($event, item)"
+                v-show="supportMultipleSelection"
+              ></a-checkbox>
             </a-card>
           </a-list-item>
         </a-list>
@@ -221,8 +228,7 @@ export default {
         }
       },
       supportMultipleSelection: false,
-      selectedAttachmentCheckbox: {},
-      batchSelectedAttachments: [],
+      selected: [],
       selectAttachment: {},
       uploadedAttachmentIds: [],
       attachments: [],
@@ -453,48 +459,52 @@ export default {
       return false
     },
     getCheckStatus(key) {
-      return this.selectedAttachmentCheckbox[key] || false
+      return this.selected.indexOf(key) > -1
     },
     handleMultipleSelection() {
       this.supportMultipleSelection = true
       // 不允许附件详情抽屉显示
       this.drawerVisible = false
-      this.attachments.forEach(item => {
-        this.$set(this.selectedAttachmentCheckbox, item.id, false)
-      })
     },
     handleCancelMultipleSelection() {
       this.supportMultipleSelection = false
       this.drawerVisible = false
-      this.batchSelectedAttachments = []
-      for (var key in this.selectedCheckbox) {
-        this.$set(this.selectedAttachmentCheckbox, key, false)
-      }
+      this.selected = []
     },
     handleAttachmentSelectionChanged(e, item) {
       var isChecked = e.target.checked || false
+      // 设置对象类型是分组还是附件
       if (isChecked) {
-        this.$set(this.selectedAttachmentCheckbox, item.id, true)
-        this.batchSelectedAttachments.push(item.id)
+        this.selected.push(item)
       } else {
-        this.$set(this.selectedAttachmentCheckbox, item.id, false)
         // 从选中id集合中删除id
-        var index = this.batchSelectedAttachments.indexOf(item.id)
-        this.batchSelectedAttachments.splice(index, 1)
+        var index = this.selected.indexOf(item)
+        this.selected.splice(index, 1)
       }
     },
     handleDeleteAttachmentInBatch() {
       var that = this
-      if (this.batchSelectedAttachments.length <= 0) {
+      if (this.selected.length <= 0) {
         this.$message.warn('你还未选择任何附件，请至少选择一个！')
         return
       }
+      const attachmentIds = []
+      const groupIds = []
+      this.selected.forEach(item => {
+        if (item.isGroup) {
+          groupIds.push(item.id)
+        } else {
+          attachmentIds.push(item.id)
+        }
+      })
+      this.$log.debug('batch delete attachments:', attachmentIds)
+      this.$log.debug('batch delete attachment groups:', groupIds)
       this.$confirm({
         title: '确定要批量删除选中的附件吗?',
         content: '一旦删除不可恢复，请谨慎操作',
         onOk() {
           attachmentApi
-            .deleteInBatch(that.batchSelectedAttachments)
+            .deleteInBatch(attachmentIds)
             .then(res => {
               that.handleCancelMultipleSelection()
               that.$message.success('删除成功')
@@ -548,6 +558,9 @@ export default {
       this.handleListAttachmentsByViewMode()
     },
     handleNavigateToGroup(group) {
+      if (this.supportMultipleSelection) {
+        return
+      }
       this.groupState.history.push({
         id: group.id,
         name: group.name
