@@ -433,6 +433,13 @@ export default {
             this.rename = item
           },
           divided: true
+        },
+        {
+          label: '删除',
+          onClick: () => {
+            this.handleDeleteAttachmentOrGroupBy(item)
+          },
+          divided: true
         }
       ]
       if (!item.isGroup) {
@@ -543,6 +550,26 @@ export default {
         var index = this.selected.indexOf(item)
         this.selected.splice(index, 1)
       }
+    },
+    handleDeleteAttachmentOrGroupBy(item) {
+      var that = this
+      this.$confirm({
+        title: '确定要批量删除选中的附件吗?',
+        content: '一旦删除不可恢复，请谨慎操作',
+        onOk() {
+          var deletePromise
+          if (item.isGroup) {
+            deletePromise = attachmentGroupApi.deleteInBatch([item.id])
+          } else {
+            deletePromise = attachmentApi.delete(item.id)
+          }
+          deletePromise.then(res => {
+            that.$message.success('删除成功')
+            that.handleListAttachmentsByViewMode()
+          })
+        },
+        onCancel() {}
+      })
     },
     handleDeleteAttachmentInBatch() {
       var that = this
