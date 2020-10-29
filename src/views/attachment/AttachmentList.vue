@@ -63,6 +63,9 @@
             >
               删除
             </a-button>
+            <a-button icon="move" v-show="supportMultipleSelection" @click="groupTreeModalVisible = true">
+              移动到
+            </a-button>
             <a-button icon="close" v-show="supportMultipleSelection" @click="handleCancelMultipleSelection">
               取消
             </a-button>
@@ -209,8 +212,9 @@
     />
     <AttachmentGroupTreeModal
       :visible="groupTreeModalVisible"
-      @cancel="groupTreeModalVisible = false"
-      :excludeItem="moveSelected"
+      @cancel="() => (groupTreeModalVisible = false)"
+      :currentItems="selected"
+      @ok="handleBatchMoveAttachmentAndGroup"
     />
   </page-view>
 </template>
@@ -243,7 +247,6 @@ export default {
         group: 'group'
       },
       rename: {},
-      moveSelected: {},
       groupState: {
         visible: false,
         history: [
@@ -437,6 +440,38 @@ export default {
         })
       }
     },
+    handleBatchMoveAttachmentAndGroup(targetGroupId) {
+      this.$log.debug('被移动的item:', this.selected)
+      const attachmentIds = []
+      const groupIds = []
+      this.selected.forEach(item => {
+        if (item.isGroup) {
+          groupIds.push(item.id)
+        } else {
+          attachmentIds.push(item.id)
+        }
+      })
+      this.$log.debug('被移动的分组:', groupIds)
+      this.$log.debug('被移动的附件:', attachmentIds)
+      const tasks = []
+      if (attachmentIds.length > 0) {
+        const attachmentPromise = attachmentApi.batchMoveTo(attachmentIds, targetGroupId)
+        tasks.push(attachmentPromise)
+      }
+
+      if (groupIds.length > 0) {
+        const groupPromise = attachmentGroupApi.batchMoveTo(groupIds, targetGroupId)
+        tasks.push(groupPromise)
+      }
+      Promise.all(tasks)
+        .then(() => {
+          this.selected = []
+          this.handleListAttachmentsByViewMode()
+          this.supportMultipleSelection = false
+          this.$message.success('移动成功')
+        })
+        .finally(() => (this.groupTreeModalVisible = false))
+    },
     handleContextMenu(event, item) {
       const menuItems = [
         {
@@ -449,7 +484,7 @@ export default {
         {
           label: '移动到',
           onClick: () => {
-            this.moveSelected = item
+            this.selected.push(item)
             this.groupTreeModalVisible = true
           },
           divided: true

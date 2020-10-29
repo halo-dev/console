@@ -1,5 +1,12 @@
 <template>
-  <a-modal :title="title" :visible="visible" @ok="handleOk" @cancel="handleCancel">
+  <a-modal
+    :title="title"
+    :visible="visible"
+    @ok="handleOk"
+    @cancel="handleCancel"
+    destroyOnClose
+    :afterClose="handleOnClose"
+  >
     <a-directory-tree
       :load-data="onLoadData"
       :tree-data="treeData"
@@ -25,9 +32,9 @@ export default {
       type: String,
       default: '移动到'
     },
-    excludeItem: {
-      type: Object,
-      default: () => {}
+    currentItems: {
+      type: Array,
+      required: true
     }
   },
   data() {
@@ -44,12 +51,14 @@ export default {
       }
     }
   },
-  created() {
+  mounted() {
     this.handleOnLaunch()
   },
   computed: {
-    excludeKey() {
-      return this.excludeItem.isGroup ? this.excludeItem.parentId : this.excludeItem.groupId
+    excludeKeys() {
+      return this.currentItems.map(item => {
+        return item.isGroup ? item.parentId : item.groupId
+      })
     }
   },
   methods: {
@@ -78,7 +87,7 @@ export default {
       })
     },
     handleSelect(selectedKeys) {
-      if (this.excludeKey === selectedKeys[0]) {
+      if (this.excludeKeys.includes(selectedKeys[0])) {
         this.tips = {
           visible: true,
           message: '已经在该目录下'
@@ -87,6 +96,10 @@ export default {
       }
       this.tips.visible = false
       this.selectedKeys = selectedKeys
+    },
+    handleOnClose() {
+      // modal关闭时重新拉取树结构,否则会导致数据不同步
+      this.handleOnLaunch()
     },
     handleOk() {
       if (this.selectedKeys.length === 0) {

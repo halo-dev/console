@@ -54,6 +54,14 @@ attachmentApi.updateGroupInBatch = (groupId, attachmentIds) => {
   })
 }
 
+attachmentApi.batchMoveTo = (source, targetGroupId) => {
+  return service({
+    url: `${baseUrl}/move/${targetGroupId}`,
+    method: 'put',
+    data: source
+  })
+}
+
 attachmentApi.getMediaTypes = () => {
   return service({
     url: `${baseUrl}/media_types`,
