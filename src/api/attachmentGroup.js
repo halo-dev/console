@@ -11,6 +11,13 @@ attachmentGroupApi.listBy = params => {
   })
 }
 
+attachmentGroupApi.listByParentId = parentId => {
+  return service({
+    url: `${baseUrl}/parent/${parentId}`,
+    method: 'get'
+  })
+}
+
 attachmentGroupApi.create = params => {
   return service({
     url: baseUrl,
@@ -31,6 +38,14 @@ attachmentGroupApi.updateById = (id, params) => {
   return service({
     url: `${baseUrl}/${id}`,
     data: params,
+    method: 'put'
+  })
+}
+
+attachmentGroupApi.batchMoveTo = (source, target) => {
+  return service({
+    url: `${baseUrl}/move/${target}`,
+    data: source,
     method: 'put'
   })
 }

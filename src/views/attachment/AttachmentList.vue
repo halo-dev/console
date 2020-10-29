@@ -207,6 +207,11 @@
       :addToPhoto="true"
       @delete="handleListAttachments()"
     />
+    <AttachmentGroupTreeModal
+      :visible="groupTreeModalVisible"
+      @cancel="groupTreeModalVisible = false"
+      :excludeItem="moveSelected"
+    />
   </page-view>
 </template>
 
@@ -214,6 +219,7 @@
 import { mixin, mixinDevice } from '@/utils/mixin.js'
 import { PageView } from '@/layouts'
 import AttachmentDetailDrawer from './components/AttachmentDetailDrawer'
+import AttachmentGroupTreeModal from './components/AttachmentGroupTreeModal'
 import attachmentApi from '@/api/attachment'
 import attachmentGroupApi from '@/api/attachmentGroup'
 import { mapGetters } from 'vuex'
@@ -221,7 +227,8 @@ import { mapGetters } from 'vuex'
 export default {
   components: {
     PageView,
-    AttachmentDetailDrawer
+    AttachmentDetailDrawer,
+    AttachmentGroupTreeModal
   },
   mixins: [mixin, mixinDevice],
   data() {
@@ -229,12 +236,14 @@ export default {
       attachmentType: attachmentApi.type,
       listLoading: true,
       uploadVisible: false,
+      groupTreeModalVisible: false,
       viewMode: {
         actived: 'flat',
         flat: 'flat',
         group: 'group'
       },
       rename: {},
+      moveSelected: {},
       groupState: {
         visible: false,
         history: [
@@ -291,6 +300,9 @@ export default {
 
       this.attachments.forEach(attachment => {
         attachment.isGroup = false
+        if (attachment.groupId == null) {
+          attachment.groupId = 0
+        }
         attachment.typeProperty = this.attachmentType[attachment.type]
         dataSource.push(attachment)
       })
@@ -431,6 +443,14 @@ export default {
           label: '重命名',
           onClick: () => {
             this.rename = item
+          },
+          divided: true
+        },
+        {
+          label: '移动到',
+          onClick: () => {
+            this.moveSelected = item
+            this.groupTreeModalVisible = true
           },
           divided: true
         },
