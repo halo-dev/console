@@ -59,6 +59,14 @@ menuApi.delete = menuId => {
   })
 }
 
+menuApi.deleteBatch = menuIds => {
+  return service({
+    url: `${baseUrl}/batch`,
+    data: menuIds,
+    method: 'delete'
+  })
+}
+
 menuApi.get = menuId => {
   return service({
     url: `${baseUrl}/${menuId}`,

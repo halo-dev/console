@@ -98,7 +98,7 @@
                 @callback="formBatch.errored=false"
                 :loading="formBatch.saving"
                 :errored="formBatch.errored"
-                text="保存排序"
+                text="保存"
                 loadedText="保存成功"
                 erroredText="保存失败"
                 :disabled="table.data.length<=0"
@@ -113,13 +113,10 @@
               </a-button>
               <a-dropdown :trigger="['click']">
                 <a-menu slot="overlay">
-                  <a-menu-item
-                    key="1"
-                    @click="menuInternalLinkSelector.visible = true"
-                  >
+                  <a-menu-item @click="menuInternalLinkSelector.visible = true">
                     从系统预设链接添加
                   </a-menu-item>
-                  <a-menu-item key="3">
+                  <a-menu-item @click="handleDeleteBatch">
                     删除当前组
                   </a-menu-item>
                 </a-menu>
@@ -214,6 +211,11 @@ export default {
     computedMenusWithoutLevel() {
       return this.handleGetMenusWithoutLevel(this.computedMenusMoved, [])
     },
+    computedMenuIds() {
+      return this.computedMenusWithoutLevel.map((menu) => {
+        return menu.id
+      })
+    },
     selectedTeam: {
       get() {
         return [this.teams.selected]
@@ -235,13 +237,13 @@ export default {
     this.handleListTeams()
   },
   methods: {
-    handleListTeams() {
+    handleListTeams(autoSelectTeam = false) {
       this.teams.loading = true
       menuApi
         .listTeams()
         .then((response) => {
           this.teams.data = response.data.data
-          if (!this.teams.selected) {
+          if (!this.teams.selected || autoSelectTeam) {
             this.teams.selected = this.teams.data[0]
           }
           this.handleListMenus()
@@ -291,16 +293,6 @@ export default {
       this.handleCloseCreateMenuForm()
       this.handleListMenus()
     },
-    handleDeleteMenu(id) {
-      menuApi
-        .delete(id)
-        .then((response) => {
-          this.$message.success('删除成功！')
-        })
-        .finally(() => {
-          this.handleListTeams()
-        })
-    },
     handleUpdateBatch() {
       this.formBatch.saving = true
       menuApi
@@ -314,6 +306,18 @@ export default {
             this.handleListMenus()
           }, 400)
         })
+    },
+    handleDeleteBatch() {
+      const _this = this
+      _this.$confirm({
+        title: '提示',
+        content: '确定要删除当前分组以及所有菜单？',
+        onOk() {
+          menuApi.deleteBatch(_this.computedMenuIds).finally(() => {
+            _this.handleListTeams(true)
+          })
+        },
+      })
     },
     handleTeamFormVisibleChange(visible) {
       if (visible) {

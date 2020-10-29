@@ -42,13 +42,10 @@
               </span>
             </a-list-item-meta>
             <template slot="actions">
-              <a-popconfirm
-                title="确定删除此菜单？"
-                placement="bottom"
-                @confirm="handleDelete(item.id)"
-              >
-                <a href="javascript:void(0);">删除</a>
-              </a-popconfirm>
+              <a
+                href="javascript:void(0);"
+                @click="handleDelete(item.id)"
+              >删除</a>
             </template>
             <template slot="actions">
               <a
@@ -164,8 +161,15 @@ export default {
       this.$emit('input', value)
     },
     handleDelete(id) {
-      menuApi.delete(id).finally(() => {
-        this.onReloadEmit()
+      const _this = this
+      _this.$confirm({
+        title: '提示',
+        content: '确定要删除当前菜单？',
+        onOk() {
+          menuApi.delete(id).finally(() => {
+            _this.onReloadEmit()
+          })
+        },
       })
     },
     handleOpenEditForm(item) {
