@@ -193,6 +193,7 @@
         <a-form-model-item ref="name" prop="name">
           <a-input
             placeholder="分组名称"
+            @keyup.enter="handleGroupModalOk"
             v-model="groupState.groupForm.name"
             @blur="
               () => {
@@ -677,10 +678,11 @@ export default {
         .finally(() => (this.uploadedAttachmentIds = []))
     },
     handleGroupModalOk() {
-      this.groupState.confirmLoading = true
       this.$refs.groupForm.validate(valid => {
         if (valid) {
+          this.groupState.confirmLoading = true
           const { groupForm } = this.groupState
+          groupForm.parentId = this.currentGroupId
           attachmentGroupApi
             .create(groupForm)
             .then(res => {
