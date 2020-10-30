@@ -14,9 +14,16 @@
           title="分组"
         >
           <template slot="extra">
-            <a-button>
-              设为默认
-            </a-button>
+            <ReactiveButton
+              type="default"
+              @click="handleSetDefaultTeam"
+              @callback="handleSetDefaultTeamCallback"
+              :loading="teams.default.saving"
+              :errored="teams.default.errored"
+              text="设为默认"
+              loadedText="设置成功"
+              erroredText="设置失败"
+            ></ReactiveButton>
           </template>
           <div class="menu-teams">
             <a-spin :spinning="teams.loading">
@@ -32,7 +39,7 @@
                   v-for="(team) in teams.data"
                   :key="team"
                 >
-                  {{ team===''?'未分组':team }}
+                  {{ team===''?'未分组':team }}{{ defaultMenuTeam===team?'（默认）':'' }}
                 </a-menu-item>
               </a-menu>
             </a-spin>
@@ -43,6 +50,7 @@
             trigger="click"
             placement="bottom"
             @visibleChange="handleTeamFormVisibleChange"
+            destroyTooltipOnHide
           >
             <template slot="content">
               <a-form-model
@@ -54,7 +62,7 @@
                 <a-form-model-item prop="team">
                   <a-input
                     v-model="teams.form.model.team"
-                    ref="teamInput"
+                    autoFocus
                   />
                 </a-form-model-item>
                 <a-form-model-item style="margin-bottom:0">
@@ -160,9 +168,11 @@ import MenuForm from './components/MenuForm'
 import MenuInternalLinkSelector from './components/MenuInternalLinkSelector'
 
 import { deepClone } from '@/utils/util'
+import { mapActions, mapGetters } from 'vuex'
 
 // apis
 import menuApi from '@/api/menu'
+import optionApi from '@/api/option'
 export default {
   components: { PageView, draggable, MenuTreeNode, MenuForm, MenuInternalLinkSelector },
   data() {
@@ -192,6 +202,10 @@ export default {
             team: [{ required: true, message: '分组名称不能为空', trigger: ['change'] }],
           },
         },
+        default: {
+          saving: false,
+          errored: false,
+        },
       },
       menuInternalLinkSelector: {
         visible: false,
@@ -199,6 +213,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['options']),
     computedTeams() {
       return this.teams.data.filter((item) => {
         return item !== ''
@@ -232,11 +247,15 @@ export default {
         return item !== this.teams.selected
       })
     },
+    defaultMenuTeam() {
+      return this.options.default_menu_team ? this.options.default_menu_team : ''
+    },
   },
   created() {
     this.handleListTeams()
   },
   methods: {
+    ...mapActions(['refreshOptionsCache']),
     handleListTeams(autoSelectTeam = false) {
       this.teams.loading = true
       menuApi
@@ -322,9 +341,6 @@ export default {
     handleTeamFormVisibleChange(visible) {
       if (visible) {
         this.teams.form.model.team = null
-        this.$nextTick(() => {
-          this.$refs.teamInput.focus()
-        })
       }
     },
     handleCreateTeam() {
@@ -354,6 +370,28 @@ export default {
     handleCreateMenuSucceed() {
       this.handleCloseCreateMenuForm()
       this.handleListMenus()
+    },
+    handleSetDefaultTeam() {
+      this.teams.default.saving = true
+      optionApi
+        .save({
+          default_menu_team: this.teams.selected,
+        })
+        .catch(() => {
+          this.teams.default.errored = true
+        })
+        .finally(() => {
+          setTimeout(() => {
+            this.teams.default.saving = false
+          }, 400)
+        })
+    },
+    handleSetDefaultTeamCallback() {
+      if (this.teams.default.errored) {
+        this.teams.default.errored = false
+      } else {
+        this.refreshOptionsCache()
+      }
     },
   },
 }

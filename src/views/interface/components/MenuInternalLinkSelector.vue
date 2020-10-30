@@ -17,6 +17,7 @@
         text="添加"
         loadedText="添加成功"
         erroredText="添加失败"
+        :disabled="menus && menus.length <= 0"
       ></ReactiveButton>
     </template>
     <a-row :gutter="24">
