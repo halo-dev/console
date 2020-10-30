@@ -476,6 +476,13 @@ export default {
     handleContextMenu(event, item) {
       const menuItems = [
         {
+          label: '刷新',
+          onClick: () => {
+            this.handleListAttachmentsByViewMode()
+          },
+          divided: true
+        },
+        {
           label: '重命名',
           onClick: () => {
             this.rename = item
