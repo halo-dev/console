@@ -98,6 +98,16 @@
             <span>
               {{ menuListTitle }}
             </span>
+            <a-tooltip
+              slot="action"
+              title="分组下的菜单为空时，该分组也不会保存"
+              v-if="list.data.length <= 0"
+            >
+              <a-icon
+                type="info-circle-o"
+                class="cursor-pointer"
+              />
+            </a-tooltip>
           </template>
           <template slot="extra">
             <a-space>
@@ -109,7 +119,7 @@
                 text="保存"
                 loadedText="保存成功"
                 erroredText="保存失败"
-                :disabled="table.data.length<=0"
+                :disabled="list.data.length<=0"
               ></ReactiveButton>
               <a-button
                 @click="handleOpenCreateMenuForm()"
@@ -134,16 +144,16 @@
               </a-dropdown>
             </a-space>
           </template>
-          <a-spin :spinning="table.loading">
+          <a-spin :spinning="list.loading">
             <MenuForm
               v-if="form.visible"
               :menu="form.model"
               @succeed="handleCreateMenuSucceed()"
               @cancel="handleCloseCreateMenuForm()"
             />
-            <a-empty v-if="table.data.length===0 && !table.loading && !form.visible" />
+            <a-empty v-if="list.data.length===0 && !list.loading && !form.visible" />
             <MenuTreeNode
-              v-model="table.data"
+              v-model="list.data"
               :excludedTeams="excludedTeams"
               @reload="handleListMenus"
             />
@@ -177,7 +187,7 @@ export default {
   components: { PageView, draggable, MenuTreeNode, MenuForm, MenuInternalLinkSelector },
   data() {
     return {
-      table: {
+      list: {
         data: [],
         loading: false,
       },
@@ -220,7 +230,7 @@ export default {
       })
     },
     computedMenusMoved() {
-      const menus = deepClone(this.table.data)
+      const menus = deepClone(this.list.data)
       return this.handleMenuMoved(0, menus)
     },
     computedMenusWithoutLevel() {
@@ -274,15 +284,15 @@ export default {
         })
     },
     handleListMenus() {
-      this.table.loading = true
+      this.list.loading = true
       menuApi
         .listTreeByTeam(this.teams.selected)
         .then((response) => {
-          this.table.data = response.data.data
+          this.list.data = response.data.data
         })
         .finally(() => {
           setTimeout(() => {
-            this.table.loading = false
+            this.list.loading = false
           }, 200)
         })
     },

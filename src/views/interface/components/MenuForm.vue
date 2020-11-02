@@ -21,7 +21,10 @@
             prop="name"
             help="* 页面上所显示的名称"
           >
-            <a-input v-model="menuModel.name" />
+            <a-input
+              v-model="menuModel.name"
+              autoFocus
+            />
           </a-form-model-item>
         </a-col>
         <a-col
