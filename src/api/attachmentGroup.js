@@ -44,7 +44,7 @@ attachmentGroupApi.updateById = (id, params) => {
 
 attachmentGroupApi.batchMoveTo = (source, target) => {
   return service({
-    url: `${baseUrl}/move/${target}`,
+    url: `${baseUrl}/groups/${target}/move`,
     data: source,
     method: 'put'
   })
