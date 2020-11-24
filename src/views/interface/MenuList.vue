@@ -96,7 +96,7 @@
         <a-card
           :bodyStyle="{ padding: '16px' }"
           ref="mheader"
-          :class="{ headerFixed: headerIsFixed }"
+          :class="{ 'card-header-fixed': headerIsFixed }"
           :headStyle="headStyle"
         >
           <template slot="title">
@@ -194,15 +194,15 @@ export default {
     return {
       list: {
         data: [],
-        loading: false
+        loading: false,
       },
       form: {
         visible: false,
-        model: {}
+        model: {},
       },
       formBatch: {
         saving: false,
-        errored: false
+        errored: false,
       },
       teams: {
         data: [],
@@ -211,28 +211,28 @@ export default {
         form: {
           visible: false,
           model: {
-            team: null
+            team: null,
           },
           rules: {
-            team: [{ required: true, message: '分组名称不能为空', trigger: ['change'] }]
-          }
+            team: [{ required: true, message: '分组名称不能为空', trigger: ['change'] }],
+          },
         },
         default: {
           saving: false,
-          errored: false
-        }
+          errored: false,
+        },
       },
       menuInternalLinkSelector: {
-        visible: false
+        visible: false,
       },
       headerIsFixed: false,
-      headStyle: {}
+      headStyle: {},
     }
   },
   computed: {
     ...mapGetters(['options']),
     computedTeams() {
-      return this.teams.data.filter(item => {
+      return this.teams.data.filter((item) => {
         return item !== ''
       })
     },
@@ -244,7 +244,7 @@ export default {
       return this.handleGetMenusWithoutLevel(this.computedMenusMoved, [])
     },
     computedMenuIds() {
-      return this.computedMenusWithoutLevel.map(menu => {
+      return this.computedMenusWithoutLevel.map((menu) => {
         return menu.id
       })
     },
@@ -254,13 +254,13 @@ export default {
       },
       set(value) {
         this.teams.selected = value[0]
-      }
+      },
     },
     menuListTitle() {
       return this.teams.selected === '' ? '未分组' : this.teams.selected
     },
     excludedTeams() {
-      return this.teams.data.filter(item => {
+      return this.teams.data.filter((item) => {
         return item !== this.teams.selected
       })
     },
@@ -269,7 +269,7 @@ export default {
     },
     mHeaderFromTopAbs() {
       return Math.floor(Math.abs(this.mHeaderFromTop))
-    }
+    },
   },
   created() {
     this.handleListTeams()
@@ -283,7 +283,7 @@ export default {
       this.teams.loading = true
       menuApi
         .listTeams()
-        .then(response => {
+        .then((response) => {
           this.teams.data = response.data.data
           if (!this.teams.selected || autoSelectTeam) {
             this.teams.selected = this.teams.data[0]
@@ -300,7 +300,7 @@ export default {
       this.list.loading = true
       menuApi
         .listTreeByTeam(this.teams.selected)
-        .then(response => {
+        .then((response) => {
           this.list.data = response.data.data
         })
         .finally(() => {
@@ -358,7 +358,7 @@ export default {
           menuApi.deleteBatch(_this.computedMenuIds).finally(() => {
             _this.handleListTeams(true)
           })
-        }
+        },
       })
     },
     handleTeamFormVisibleChange(visible) {
@@ -368,7 +368,7 @@ export default {
     },
     handleCreateTeam() {
       const _this = this
-      _this.$refs.teamForm.validate(valid => {
+      _this.$refs.teamForm.validate((valid) => {
         if (valid) {
           if (!_this.teams.data.includes(_this.teams.form.model.team)) {
             _this.teams.data.push(_this.teams.form.model.team)
@@ -383,7 +383,7 @@ export default {
       this.form.visible = true
       this.form.model = {
         team: this.teams.selected,
-        target: '_self'
+        target: '_self',
       }
     },
     handleCloseCreateMenuForm() {
@@ -398,7 +398,7 @@ export default {
       this.teams.default.saving = true
       optionApi
         .save({
-          default_menu_team: this.teams.selected
+          default_menu_team: this.teams.selected,
         })
         .catch(() => {
           this.teams.default.errored = true
@@ -422,15 +422,7 @@ export default {
         this.headerIsFixed = this.$refs.mheader.$el.getBoundingClientRect().top < 0
         this.$set(this.headStyle, 'width', this.$refs.mheader.$el.offsetWidth + 'px')
       }
-    }
-  }
+    },
+  },
 }
 </script>
-<style>
-.headerFixed .ant-card-head {
-  position: fixed;
-  background: white;
-  z-index: 999;
-  top: 0;
-}
-</style>
