@@ -34,6 +34,13 @@
               <a-input v-model="form.model.slug" />
             </a-form-model-item>
             <a-form-model-item
+              label="密码："
+              help="* 分类密码"
+              prop="password"
+            >
+              <a-input-password v-model="form.model.password" autocomplete="new-password" />
+            </a-form-model-item>
+            <a-form-model-item
               label="上级目录："
               prop="parentId"
             >
