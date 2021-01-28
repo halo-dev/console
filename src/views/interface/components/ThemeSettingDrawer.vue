@@ -203,7 +203,7 @@
       title="选择附件"
     />
 
-    <footer-tool-bar
+    <FooterToolbar
       v-if="themeConfigurations.length>0"
       class="w-full"
     >
@@ -230,13 +230,12 @@
           erroredText="保存失败"
         ></ReactiveButton>
       </a-space>
-    </footer-tool-bar>
+    </FooterToolbar>
   </a-drawer>
 </template>
 <script>
 import { mixin, mixinDevice } from '@/mixins/mixin.js'
 import { mapGetters } from 'vuex'
-import FooterToolBar from '@/components/FooterToolbar'
 import Verte from 'verte'
 import 'verte/dist/verte.css'
 import themeApi from '@/api/theme'
@@ -244,8 +243,7 @@ export default {
   name: 'ThemeSetting',
   mixins: [mixin, mixinDevice],
   components: {
-    FooterToolBar,
-    Verte
+    Verte,
   },
   data() {
     return {
@@ -258,30 +256,30 @@ export default {
         xl: { span: 12 },
         lg: { span: 12 },
         sm: { span: 24 },
-        xs: { span: 24 }
+        xs: { span: 24 },
       },
       viewMode: false,
       formColValue: 12,
       clientHeight: document.documentElement.clientHeight,
       saving: false,
-      saveErrored: false
+      saveErrored: false,
     }
   },
   model: {
     prop: 'visible',
-    event: 'close'
+    event: 'close',
   },
   props: {
     theme: {
       type: Object,
       required: true,
-      default: () => {}
+      default: () => {},
     },
     visible: {
       type: Boolean,
       required: false,
-      default: false
-    }
+      default: false,
+    },
   },
   computed: {
     ...mapGetters(['options']),
@@ -290,12 +288,12 @@ export default {
         return this.theme.author
       }
       return {}
-    }
+    },
   },
   methods: {
     async handleFetchConfiguration() {
       this.settingLoading = true
-      await themeApi.fetchConfiguration(this.theme.id).then(response => {
+      await themeApi.fetchConfiguration(this.theme.id).then((response) => {
         this.themeConfigurations = response.data.data
       })
       this.handleFetchSettings()
@@ -303,7 +301,7 @@ export default {
     handleFetchSettings() {
       themeApi
         .fetchSettings(this.theme.id)
-        .then(response => {
+        .then((response) => {
           this.themeSettings = response.data.data
         })
         .finally(() => {
@@ -316,7 +314,7 @@ export default {
       this.saving = true
       themeApi
         .saveSettings(this.theme.id, this.themeSettings)
-        .then(response => {
+        .then((response) => {
           if (this.viewMode) {
             document.getElementById('themeViewIframe').contentWindow.location.reload(true)
           }
@@ -359,7 +357,7 @@ export default {
           xl: { span: 24 },
           lg: { span: 24 },
           sm: { span: 24 },
-          xs: { span: 24 }
+          xs: { span: 24 },
         }
       } else {
         this.formColValue = 12
@@ -367,10 +365,10 @@ export default {
           xl: { span: 12 },
           lg: { span: 12 },
           sm: { span: 24 },
-          xs: { span: 24 }
+          xs: { span: 24 },
         }
       }
-    }
-  }
+    },
+  },
 }
 </script>

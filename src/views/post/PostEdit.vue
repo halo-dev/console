@@ -29,31 +29,28 @@
         >附件库</a-button>
       </a-space>
     </template>
-    <a-row :gutter="12">
-      <a-col :span="24">
-        <div class="mb-4">
-          <a-input
-            v-model="postToStage.title"
-            size="large"
-            placeholder="请输入文章标题"
-          />
-        </div>
 
-        <div id="editor">
-          <MarkdownEditor
-            :originalContent="postToStage.originalContent"
-            @onSaveDraft="handleSaveDraft(true)"
-            @onContentChange="onContentChange"
-          />
+    <div class="mb-4">
+      <a-input
+        v-model="postToStage.title"
+        size="large"
+        placeholder="请输入文章标题"
+      />
+    </div>
 
-          <!-- <RichTextEditor
+    <div id="editor">
+      <MarkdownEditor
+        :originalContent="postToStage.originalContent"
+        @onSaveDraft="handleSaveDraft(true)"
+        @onContentChange="onContentChange"
+      />
+
+      <!-- <RichTextEditor
             v-else
             :originalContent="postToStage.originalContent"
             @onContentChange="onContentChange"
           /> -->
-        </div>
-      </a-col>
-    </a-row>
+    </div>
 
     <PostSettingDrawer
       :post="postToStage"
@@ -69,7 +66,8 @@
       @onSaved="handleRestoreSavedStatus"
     />
 
-    <AttachmentDrawer v-model="attachmentDrawerVisible" />
+    <AttachmentSelectModal :visible.sync="attachmentDrawerVisible"/>
+    <!-- <AttachmentDrawer v-model="attachmentDrawerVisible" /> -->
   </page-view>
 </template>
 

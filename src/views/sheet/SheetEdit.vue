@@ -29,31 +29,28 @@
         >附件库</a-button>
       </a-space>
     </template>
-    <a-row :gutter="12">
-      <a-col :span="24">
-        <div class="mb-4">
-          <a-input
-            v-model="sheetToStage.title"
-            size="large"
-            placeholder="请输入页面标题"
-          />
-        </div>
 
-        <div id="editor">
-          <MarkdownEditor
-            :originalContent="sheetToStage.originalContent"
-            @onSaveDraft="handleSaveDraft(true)"
-            @onContentChange="onContentChange"
-          />
+    <div class="mb-4">
+      <a-input
+        v-model="sheetToStage.title"
+        size="large"
+        placeholder="请输入页面标题"
+      />
+    </div>
 
-          <!-- <RichTextEditor
+    <div id="editor">
+      <MarkdownEditor
+        :originalContent="sheetToStage.originalContent"
+        @onSaveDraft="handleSaveDraft(true)"
+        @onContentChange="onContentChange"
+      />
+
+      <!-- <RichTextEditor
             v-else
             :originalContent="sheetToStage.originalContent"
             @onContentChange="onContentChange"
           /> -->
-        </div>
-      </a-col>
-    </a-row>
+    </div>
 
     <SheetSettingDrawer
       :sheet="sheetToStage"
@@ -76,7 +73,6 @@ import { datetimeFormat } from '@/utils/datetime'
 import { PageView } from '@/layouts'
 import SheetSettingDrawer from './components/SheetSettingDrawer'
 import AttachmentDrawer from '../attachment/components/AttachmentDrawer'
-import FooterToolBar from '@/components/FooterToolbar'
 import MarkdownEditor from '@/components/Editor/MarkdownEditor'
 // import RichTextEditor from '@/components/editor/RichTextEditor'
 
@@ -84,7 +80,6 @@ import sheetApi from '@/api/sheet'
 export default {
   components: {
     PageView,
-    FooterToolBar,
     AttachmentDrawer,
     SheetSettingDrawer,
     MarkdownEditor,
