@@ -189,6 +189,14 @@
         </div>
         <a-divider class="divider-transparent" />
       </div>
+      <div class="bottom-control">
+        <a-space>
+          <a-button
+            type="primary"
+            @click="advancedVisible = false"
+          >返回</a-button>
+        </a-space>
+      </div>
     </a-drawer>
 
     <div class="bottom-control">
@@ -223,7 +231,7 @@
 </template>
 <script>
 // libs
-import { mixin, mixinDevice } from '@/utils/mixin.js'
+import { mixin, mixinDevice } from '@/mixins/mixin.js'
 import { datetimeFormat } from '@/utils/datetime'
 import { mapGetters } from 'vuex'
 import pinyin from 'tiny-pinyin'

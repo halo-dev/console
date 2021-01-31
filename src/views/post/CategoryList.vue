@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <page-view>
     <a-row :gutter="12">
       <a-col
         :xl="10"
@@ -232,11 +232,12 @@
       @listenToSelect="handleSelectThumbnail"
       title="选择封面图"
     />
-  </div>
+  </page-view>
 </template>
 
 <script>
-import { mixin, mixinDevice } from '@/utils/mixin.js'
+import { PageView } from '@/layouts'
+import { mixin, mixinDevice } from '@/mixins/mixin.js'
 import CategorySelectTree from './components/CategorySelectTree'
 import categoryApi from '@/api/category'
 
@@ -269,7 +270,7 @@ const columns = [
 ]
 
 export default {
-  components: { CategorySelectTree },
+  components: { PageView, CategorySelectTree },
   mixins: [mixin, mixinDevice],
   data() {
     return {
