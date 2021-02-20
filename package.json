@@ -20,7 +20,7 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
-    "ant-design-vue": "^1.7.2",
+    "ant-design-vue": "^1.7.3",
     "axios": "^0.21.1",
     "dayjs": "^1.10.4",
     "enquire.js": "^2.1.6",
