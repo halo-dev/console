@@ -156,8 +156,8 @@
               <FilePondUpload
                 ref="upload"
                 name="file"
-                accept="application/json"
-                label="拖拽或点击选择数据文件，请确认是否为 Halo 后台导出的文件。"
+                :accepts="['application/json']"
+                label="拖拽或点击选择数据文件<br>请确认是否为 Halo 后台导出的文件。"
                 :multiple="false"
                 :uploadHandler="onImportUpload"
                 :loadOptions="false"
@@ -272,11 +272,10 @@ export default {
   methods: {
     ...mapActions(['installCleanToken']),
     async handleVerifyIsInstall() {
-      await adminApi.isInstalled().then((response) => {
-        if (response.data.data) {
-          this.$router.push({ name: 'Login' })
-        }
-      })
+      const response = await adminApi.isInstalled()
+      if (response.data.data) {
+        this.$router.push({ name: 'Login' })
+      }
     },
     handleInstall() {
       this.$refs.installationForm.validate((valid) => {
