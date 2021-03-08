@@ -32,13 +32,13 @@
               />
             </a-form-item>
             <a-form-item label="开启评论：">
-              <a-radio-group v-model="selectedPost.disallowComment" :defaultValue="false">
+              <a-radio-group v-model:value="selectedPost.disallowComment" :defaultValue="false">
                 <a-radio :value="false">开启</a-radio>
                 <a-radio :value="true">关闭</a-radio>
               </a-radio-group>
             </a-form-item>
             <a-form-item label="是否置顶：">
-              <a-radio-group v-model="selectedPost.topPriority" :defaultValue="0">
+              <a-radio-group v-model:value="selectedPost.topPriority" :defaultValue="0">
                 <a-radio :value="1">是</a-radio>
                 <a-radio :value="0">否</a-radio>
               </a-radio-group>
@@ -184,14 +184,22 @@
             <a-form-item v-for="(meta, index) in selectedMetas" :key="index" :prop="'metas.' + index + '.value'">
               <a-row :gutter="5">
                 <a-col :span="12">
-                  <a-input v-model="meta.key"><i slot="addonBefore">K</i></a-input>
+                  <a-input v-model="meta.key">
+                    <template #addonBefore>
+                      <i>K</i>
+                    </template>
+                  </a-input>
                 </a-col>
                 <a-col :span="12">
                   <a-input v-model="meta.value">
-                    <i slot="addonBefore">V</i>
-                    <a href="javascript:void(0);" slot="addonAfter" @click.prevent="handleRemovePostMeta(meta)">
-                      <a-icon type="close" />
-                    </a>
+                    <template #addonBefore>
+                      <i>V</i>
+                    </template>
+                    <template #addonAfter>
+                      <a href="javascript:void(0);" @click.prevent="handleRemovePostMeta(meta)">
+                        <a-icon type="close" />
+                      </a>
+                    </template>
                   </a-input>
                 </a-col>
               </a-row>

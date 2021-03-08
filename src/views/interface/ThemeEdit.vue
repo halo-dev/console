@@ -3,7 +3,7 @@
     <a-row :gutter="12">
       <a-col :xl="6" :lg="6" :md="6" :sm="24" :xs="24" class="pb-3">
         <a-card :bodyStyle="{ padding: '16px' }">
-          <template slot="title">
+          <template #title>
             <a-select class="w-full" @change="onSelectTheme" v-model="selectedTheme.id" :loading="themesLoading">
               <a-select-option v-for="(theme, index) in themes" :key="index" :value="theme.id"
                 >{{ theme.name }}

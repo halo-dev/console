@@ -23,68 +23,86 @@
         <a-list itemLayout="horizontal">
           <a-list-item>
             <a-list-item-meta>
-              <template slot="description" v-if="editable">
+              <template #description v-if="editable">
                 <a-input ref="nameInput" v-model="attachment.name" @blur="doUpdateAttachment" />
               </template>
-              <template slot="description" v-else>{{ attachment.name }}</template>
-              <span slot="title">
-                附件名：
-                <a href="javascript:void(0);">
-                  <a-icon type="edit" @click="handleEditName" />
-                </a>
-              </span>
+              <template #description v-else>{{ attachment.name }}</template>
+              <template #title>
+                <span>
+                  附件名：
+                  <a href="javascript:void(0);">
+                    <a-icon type="edit" @click="handleEditName" />
+                  </a>
+                </span>
+              </template>
             </a-list-item-meta>
           </a-list-item>
           <a-list-item>
             <a-list-item-meta :description="attachment.mediaType">
-              <span slot="title">附件类型：</span>
+              <template #title>
+                <span>附件类型：</span>
+              </template>
             </a-list-item-meta>
           </a-list-item>
           <a-list-item>
             <a-list-item-meta :description="attachment.typeProperty">
-              <span slot="title">存储位置：</span>
+              <template #title>
+                <span>存储位置：</span>
+              </template>
             </a-list-item-meta>
           </a-list-item>
           <a-list-item>
             <a-list-item-meta>
-              <template slot="description">
+              <template #description>
                 {{ attachment.size | fileSizeFormat }}
               </template>
-              <span slot="title">附件大小：</span>
+              <template #title>
+                <span>附件大小：</span>
+              </template>
             </a-list-item-meta>
           </a-list-item>
           <a-list-item v-if="photoPreviewVisible">
             <a-list-item-meta :description="attachment.height + 'x' + attachment.width">
-              <span slot="title">图片尺寸：</span>
+              <template #title>
+                <span>图片尺寸：</span>
+              </template>
             </a-list-item-meta>
           </a-list-item>
           <a-list-item>
             <a-list-item-meta>
-              <template slot="description">
+              <template #description>
                 {{ attachment.createTime | moment }}
               </template>
-              <span slot="title">上传日期：</span>
+              <template #title>
+                <span>上传日期：</span>
+              </template>
             </a-list-item-meta>
           </a-list-item>
           <a-list-item>
             <a-list-item-meta :description="attachment.path">
-              <span slot="title">
-                普通链接：
-                <a href="javascript:void(0);" @click="handleCopyNormalLink">
-                  <a-icon type="copy" />
-                </a>
-              </span>
+              <template #title>
+                <span>
+                  普通链接：
+                  <a href="javascript:void(0);" @click="handleCopyNormalLink">
+                    <a-icon type="copy" />
+                  </a>
+                </span>
+              </template>
             </a-list-item-meta>
           </a-list-item>
           <a-list-item v-if="photoPreviewVisible">
             <a-list-item-meta>
-              <span slot="description">![{{ attachment.name }}]({{ attachment.path }})</span>
-              <span slot="title">
-                Markdown 格式：
-                <a href="javascript:void(0);" @click="handleCopyMarkdownLink">
-                  <a-icon type="copy" />
-                </a>
-              </span>
+              <template #description>
+                <span>![{{ attachment.name }}]({{ attachment.path }})</span>
+              </template>
+              <template #title>
+                <span>
+                  Markdown 格式：
+                  <a href="javascript:void(0);" @click="handleCopyMarkdownLink">
+                    <a-icon type="copy" />
+                  </a>
+                </span>
+              </template>
             </a-list-item-meta>
           </a-list-item>
         </a-list>

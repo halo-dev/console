@@ -17,24 +17,31 @@
         />
         <a-divider>历史文件</a-divider>
         <a-list itemLayout="vertical" size="small" :dataSource="files" :loading="loading">
-          <a-list-item slot="renderItem" slot-scope="file">
-            <a-button
-              slot="extra"
-              type="link"
-              style="color: red"
-              icon="delete"
-              :loading="file.deleting"
-              @click="handleFileDeleteClick(file)"
-              >删除</a-button
-            >
-            <a-list-item-meta>
-              <a slot="title" href="javascript:void(0)" @click="handleDownloadMarkdownPackage(file)">
-                <a-icon type="schedule" style="color: #52c41a" />
-                {{ file.filename }}
-              </a>
-              <p slot="description">{{ file.updateTime | timeAgo }}/{{ file.fileSize | fileSizeFormat }}</p>
-            </a-list-item-meta>
-          </a-list-item>
+          <template #renderItem="{ item }">
+            <a-list-item>
+              <template #extra>
+                <a-button
+                  type="link"
+                  style="color: red"
+                  icon="delete"
+                  :loading="item.deleting"
+                  @click="handleFileDeleteClick(item)"
+                  >删除</a-button
+                >
+              </template>
+              <a-list-item-meta>
+                <template #title>
+                  <a href="javascript:void(0)" @click="handleDownloadMarkdownPackage(item)">
+                    <a-icon type="schedule" style="color: #52c41a" />
+                    {{ item.filename }}
+                  </a>
+                </template>
+                <template #description>
+                  <p>{{ item.updateTime | timeAgo }}/{{ item.fileSize | fileSizeFormat }}</p>
+                </template>
+              </a-list-item-meta>
+            </a-list-item>
+          </template>
         </a-list>
       </a-col>
     </a-row>

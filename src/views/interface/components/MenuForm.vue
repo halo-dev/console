@@ -25,7 +25,7 @@
         </a-col>
         <a-col :xl="8" :lg="8" :md="12" :sm="12" :xs="12">
           <a-form-item label="打开方式" prop="target">
-            <a-radio-group v-model="menuModel.target" :options="targets" />
+            <a-radio-group v-model:value="menuModel.target" :options="targets" />
           </a-form-item>
         </a-col>
         <a-col :xl="8" :lg="8" :md="12" :sm="12" :xs="12">

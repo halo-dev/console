@@ -1,6 +1,6 @@
 <template>
   <page-view affix :title="postToStage.title ? postToStage.title : '新文章'">
-    <template slot="extra">
+    <template #extra>
       <a-space>
         <ReactiveButton
           type="danger"

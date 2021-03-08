@@ -43,13 +43,7 @@
         </a-form>
       </a-tab-pane>
       <a-tab-pane tab="发送测试" key="smtptest">
-        <a-form
-          ref="smtpTestForm"
-          :model="mailParam"
-          :rules="testRules"
-          layout="vertical"
-          :wrapperCol="wrapperCol"
-        >
+        <a-form ref="smtpTestForm" :model="mailParam" :rules="testRules" layout="vertical" :wrapperCol="wrapperCol">
           <a-form-item label="收件人地址：" prop="to">
             <a-input v-model="mailParam.to" />
           </a-form-item>

@@ -1,6 +1,6 @@
 <template>
   <page-view affix :title="activatedTheme ? activatedTheme.name : '无'" subTitle="当前启用">
-    <template slot="extra">
+    <template #extra>
       <a-button icon="reload" :loading="list.loading" @click="handleRefreshThemesCache">
         刷新
       </a-button>
@@ -15,34 +15,40 @@
           :dataSource="sortedThemes"
           :loading="list.loading"
         >
-          <a-list-item slot="renderItem" slot-scope="item, index" :key="index">
-            <a-card hoverable :title="item.name" :bodyStyle="{ padding: 0 }">
-              <div class="theme-screenshot">
-                <img :alt="item.name" :src="item.screenshots || '/images/placeholder.jpg'" loading="lazy" />
-              </div>
-              <template class="ant-card-actions" slot="actions">
-                <div v-if="item.activated"><a-icon type="unlock" theme="twoTone" style="margin-right:3px" />已启用</div>
-                <div v-else @click="handleActiveTheme(item)"><a-icon type="lock" style="margin-right:3px" />启用</div>
-                <div @click="handleOpenThemeSettingDrawer(item)">
-                  <a-icon type="setting" style="margin-right:3px" />设置
+          <template #renderItem="{ item }">
+            <a-list-item>
+              <a-card hoverable :title="item.name" :bodyStyle="{ padding: 0 }">
+                <div class="theme-screenshot">
+                  <img :alt="item.name" :src="item.screenshots || '/images/placeholder.jpg'" loading="lazy" />
                 </div>
-                <a-dropdown placement="topCenter" :trigger="['click']">
-                  <a class="ant-dropdown-link" href="#"> <a-icon type="ellipsis" style="margin-right:3px" />更多 </a>
-                  <a-menu slot="overlay">
-                    <a-menu-item :key="1" :disabled="item.activated" @click="handleOpenThemeDeleteModal(item)">
-                      <a-icon type="delete" style="margin-right:3px" />删除
-                    </a-menu-item>
-                    <a-menu-item :key="2" v-if="item.repo" @click="handleConfirmRemoteUpdate(item)">
-                      <a-icon type="cloud" style="margin-right:3px" />在线更新
-                    </a-menu-item>
-                    <a-menu-item :key="3" @click="handleOpenLocalUpdateModal(item)">
-                      <a-icon type="file" style="margin-right:3px" />从主题包更新
-                    </a-menu-item>
-                  </a-menu>
-                </a-dropdown>
-              </template>
-            </a-card>
-          </a-list-item>
+                <template class="ant-card-actions" #actions>
+                  <div v-if="item.activated">
+                    <a-icon type="unlock" theme="twoTone" style="margin-right:3px" />已启用
+                  </div>
+                  <div v-else @click="handleActiveTheme(item)"><a-icon type="lock" style="margin-right:3px" />启用</div>
+                  <div @click="handleOpenThemeSettingDrawer(item)">
+                    <a-icon type="setting" style="margin-right:3px" />设置
+                  </div>
+                  <a-dropdown placement="topCenter" :trigger="['click']">
+                    <a class="ant-dropdown-link" href="#"> <a-icon type="ellipsis" style="margin-right:3px" />更多 </a>
+                    <template #overlay>
+                      <a-menu>
+                        <a-menu-item :key="1" :disabled="item.activated" @click="handleOpenThemeDeleteModal(item)">
+                          <a-icon type="delete" style="margin-right:3px" />删除
+                        </a-menu-item>
+                        <a-menu-item :key="2" v-if="item.repo" @click="handleConfirmRemoteUpdate(item)">
+                          <a-icon type="cloud" style="margin-right:3px" />在线更新
+                        </a-menu-item>
+                        <a-menu-item :key="3" @click="handleOpenLocalUpdateModal(item)">
+                          <a-icon type="file" style="margin-right:3px" />从主题包更新
+                        </a-menu-item>
+                      </a-menu>
+                    </template>
+                  </a-dropdown>
+                </template>
+              </a-card>
+            </a-list-item>
+          </template>
         </a-list>
       </a-col>
     </a-row>
@@ -73,7 +79,7 @@
               @success="handleUploadSucceed"
             ></FilePondUpload>
             <a-alert type="info" closable>
-              <template slot="message">
+              <template #message>
                 更多主题请访问：
                 <a target="_blank" href="https://halo.run/themes.html">https://halo.run/themes</a>
               </template>
@@ -103,7 +109,7 @@
               </a-form-item>
             </a-form>
             <a-alert type="info" closable>
-              <template slot="message">
+              <template #message>
                 目前仅支持远程 Git 仓库和 ZIP 下载链接。更多主题请访问：
                 <a target="_blank" href="https://halo.run/themes.html">https://halo.run/themes</a>
               </template>
@@ -138,7 +144,7 @@
       destroyOnClose
       :afterClose="onThemeDeleteModalClose"
     >
-      <template slot="footer">
+      <template #footer>
         <a-button @click="themeDeleteModal.visible = false">
           取消
         </a-button>
@@ -153,7 +159,7 @@
         ></ReactiveButton>
       </template>
       <p>确定删除【{{ themeDeleteModal.selected.name }}】主题？</p>
-      <a-checkbox v-model="themeDeleteModal.deleteSettings">
+      <a-checkbox v-model:checked="themeDeleteModal.deleteSettings">
         同时删除主题配置
       </a-checkbox>
     </a-modal>

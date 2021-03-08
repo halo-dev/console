@@ -13,10 +13,12 @@
         <a-list itemLayout="horizontal">
           <a-list-item>
             <a-list-item-meta>
-              <template slot="description">
+              <template #description>
                 <p v-html="description" class="comment-drawer-content"></p>
               </template>
-              <h3 slot="title">{{ title }}</h3>
+              <template #title>
+                <h3>{{ title }}</h3>
+              </template>
             </a-list-item-meta>
           </a-list-item>
         </a-list>
@@ -52,7 +54,7 @@
       <a-button type="primary" @click="handleCommentReply({})">评论</a-button>
     </div>
     <a-modal :title="replyModalTitle" v-model="replyModal.visible" @close="onReplyModalClose" destroyOnClose>
-      <template slot="footer">
+      <template #footer>
         <ReactiveButton
           type="primary"
           @click="handleReplyClick"

@@ -3,7 +3,7 @@
     <a-row :gutter="12">
       <a-col :xl="6" :lg="6" :md="6" :sm="24" :xs="24" class="mb-3">
         <a-card :bodyStyle="{ padding: '16px' }" title="分组">
-          <template slot="extra">
+          <template #extra>
             <ReactiveButton
               type="default"
               @click="handleSetDefaultTeam"
@@ -39,7 +39,7 @@
             @visibleChange="handleTeamFormVisibleChange"
             destroyTooltipOnHide
           >
-            <template slot="content">
+            <template #content>
               <a-form
                 ref="teamForm"
                 :model="teams.form.model"
@@ -64,19 +64,17 @@
       </a-col>
       <a-col :xl="18" :lg="18" :md="18" :sm="24" :xs="24" class="pb-3">
         <a-card :bodyStyle="{ padding: '16px' }">
-          <template slot="title">
+          <template #title>
             <span>
               {{ menuListTitle }}
             </span>
-            <a-tooltip
-              slot="action"
-              title="分组下的菜单为空时，该分组也不会保存"
-              v-if="list.data.length <= 0 && !list.loading"
-            >
+          </template>
+          <template #action>
+            <a-tooltip title="分组下的菜单为空时，该分组也不会保存" v-if="list.data.length <= 0 && !list.loading">
               <a-icon type="info-circle-o" class="cursor-pointer" />
             </a-tooltip>
           </template>
-          <template slot="extra">
+          <template #extra>
             <a-space>
               <ReactiveButton
                 @click="handleUpdateBatch"
@@ -95,14 +93,16 @@
                 取消新增
               </a-button>
               <a-dropdown :trigger="['click']">
-                <a-menu slot="overlay">
-                  <a-menu-item @click="menuInternalLinkSelector.visible = true">
-                    从系统预设链接添加
-                  </a-menu-item>
-                  <a-menu-item @click="handleDeleteBatch">
-                    删除当前组
-                  </a-menu-item>
-                </a-menu>
+                <template #overlay>
+                  <a-menu>
+                    <a-menu-item @click="menuInternalLinkSelector.visible = true">
+                      从系统预设链接添加
+                    </a-menu-item>
+                    <a-menu-item @click="handleDeleteBatch">
+                      删除当前组
+                    </a-menu-item>
+                  </a-menu>
+                </template>
                 <a-button>
                   其他
                   <a-icon type="down" />

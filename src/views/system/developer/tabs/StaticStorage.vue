@@ -74,7 +74,7 @@
       ></FilePondUpload>
     </a-modal>
     <a-modal v-model="directoryForm.visible" :afterClose="onDirectoryFormModalClose" title="创建文件夹">
-      <template slot="footer">
+      <template #footer>
         <ReactiveButton
           @click="handleCreateDirectory"
           @callback="handleCreateDirectoryCallback"
@@ -92,7 +92,7 @@
       </a-form>
     </a-modal>
     <a-modal v-model="renameForm.visible" :afterClose="onRenameModalClose" title="重命名">
-      <template slot="footer">
+      <template #footer>
         <ReactiveButton
           @click="handleRenameDirectoryOrFile"
           @callback="handleRenameDirectoryOrFileCallback"
@@ -118,7 +118,7 @@
       :keyboard="false"
       :closable="false"
     >
-      <template slot="footer">
+      <template #footer>
         <a-popconfirm
           title="未保存的内容将会丢失，确定要退出吗？"
           okText="确定"

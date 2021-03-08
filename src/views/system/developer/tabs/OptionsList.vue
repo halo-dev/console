@@ -47,7 +47,7 @@
           </span>
           <span slot="createTime" slot-scope="createTime">
             <a-tooltip placement="top">
-              <template slot="title">
+              <template #title>
                 {{ createTime | moment }}
               </template>
               {{ createTime | timeAgo }}
@@ -55,7 +55,7 @@
           </span>
           <span slot="updateTime" slot-scope="updateTime">
             <a-tooltip placement="top">
-              <template slot="title">
+              <template #title>
                 {{ updateTime | moment }}
               </template>
               {{ updateTime | timeAgo }}
@@ -90,7 +90,7 @@
       </div>
     </a-card>
     <a-modal v-model="form.visible" :title="formTitle" :afterClose="onFormClose">
-      <template slot="footer">
+      <template #footer>
         <ReactiveButton
           @click="handleSaveOrUpdate"
           @callback="handleSaveOrUpdateCallback"

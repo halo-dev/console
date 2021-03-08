@@ -3,40 +3,48 @@
     <a-row :gutter="12">
       <a-col :xl="6" :lg="6" :md="12" :sm="12" :xs="12" class="mb-3">
         <analysis-card title="文章" :number="statisticsData.postCount">
-          <router-link :to="{ name: 'PostWrite' }" slot="action">
-            <a-icon v-if="statisticsLoading" type="loading" />
-            <a-icon v-else type="plus" />
-          </router-link>
+          <template #action>
+            <router-link :to="{ name: 'PostWrite' }">
+              <a-icon v-if="statisticsLoading" type="loading" />
+              <a-icon v-else type="plus" />
+            </router-link>
+          </template>
         </analysis-card>
       </a-col>
       <a-col :xl="6" :lg="6" :md="12" :sm="12" :xs="12" class="mb-3">
         <analysis-card title="评论" :number="statisticsData.commentCount">
-          <router-link :to="{ name: 'Comments' }" slot="action">
-            <a-icon v-if="statisticsLoading" type="loading" />
-            <a-icon v-else type="unordered-list" />
-          </router-link>
+          <template #action>
+            <router-link :to="{ name: 'Comments' }">
+              <a-icon v-if="statisticsLoading" type="loading" />
+              <a-icon v-else type="unordered-list" />
+            </router-link>
+          </template>
         </analysis-card>
       </a-col>
       <a-col :xl="6" :lg="6" :md="12" :sm="12" :xs="12" class="mb-3">
         <analysis-card title="阅读量" :number="statisticsData.visitCount">
-          <a-tooltip slot="action">
-            <template slot="title"> 文章阅读共 {{ statisticsData.visitCount }} 次 </template>
-            <a href="javascript:void(0);">
-              <a-icon v-if="statisticsLoading" type="loading" />
-              <a-icon v-else type="info-circle-o" />
-            </a>
-          </a-tooltip>
+          <template #action>
+            <a-tooltip>
+              <template #title> 文章阅读共 {{ statisticsData.visitCount }} 次 </template>
+              <a href="javascript:void(0);">
+                <a-icon v-if="statisticsLoading" type="loading" />
+                <a-icon v-else type="info-circle-o" />
+              </a>
+            </a-tooltip>
+          </template>
         </analysis-card>
       </a-col>
       <a-col :xl="6" :lg="6" :md="12" :sm="12" :xs="12" class="mb-3">
         <analysis-card title="建立天数" :number="statisticsData.establishDays">
-          <a-tooltip slot="action">
-            <template slot="title">博客建立于 {{ statisticsData.birthday | moment }}</template>
-            <a href="javascript:void(0);">
-              <a-icon v-if="statisticsLoading" type="loading" />
-              <a-icon v-else type="info-circle-o" />
-            </a>
-          </a-tooltip>
+          <template #action>
+            <a-tooltip>
+              <template #title>博客建立于 {{ statisticsData.birthday | moment }}</template>
+              <a href="javascript:void(0);">
+                <a-icon v-if="statisticsLoading" type="loading" />
+                <a-icon v-else type="info-circle-o" />
+              </a>
+            </a-tooltip>
+          </template>
         </analysis-card>
       </a-col>
     </a-row>
@@ -47,28 +55,30 @@
             <a-tabs type="card">
               <a-tab-pane key="1" tab="最近文章">
                 <a-list :loading="activityLoading" :dataSource="latestPosts">
-                  <a-list-item slot="renderItem" slot-scope="item, index" :key="index">
-                    <a-list-item-meta>
-                      <a
-                        v-if="item.status == 'PUBLISHED' || item.status == 'INTIMATE'"
-                        slot="title"
-                        :href="item.fullPath"
-                        target="_blank"
-                        >{{ item.title }}</a
-                      >
-                      <a
-                        v-else-if="item.status == 'DRAFT'"
-                        slot="title"
-                        href="javascript:void(0)"
-                        @click="handlePostPreview(item.id)"
-                        >{{ item.title }}</a
-                      >
-                      <a v-else-if="item.status == 'RECYCLE'" slot="title" href="javascript:void(0);" disabled>
-                        {{ item.title }}
-                      </a>
-                    </a-list-item-meta>
-                    <div>{{ item.createTime | timeAgo }}</div>
-                  </a-list-item>
+                  <template #renderItem="{ item }">
+                    <a-list-item>
+                      <a-list-item-meta>
+                        <template #title>
+                          <a
+                            v-if="item.status == 'PUBLISHED' || item.status == 'INTIMATE'"
+                            :href="item.fullPath"
+                            target="_blank"
+                            >{{ item.title }}</a
+                          >
+                          <a
+                            v-else-if="item.status == 'DRAFT'"
+                            href="javascript:void(0)"
+                            @click="handlePostPreview(item.id)"
+                            >{{ item.title }}</a
+                          >
+                          <a v-else-if="item.status == 'RECYCLE'" href="javascript:void(0);" disabled>
+                            {{ item.title }}
+                          </a>
+                        </template>
+                      </a-list-item-meta>
+                      <div>{{ item.createTime | timeAgo }}</div>
+                    </a-list-item>
+                  </template>
                 </a-list>
               </a-tab-pane>
               <a-tab-pane key="2" tab="最近评论">
@@ -98,21 +108,27 @@
       </a-col>
       <a-col :xl="8" :lg="8" :md="12" :sm="24" :xs="24" class="mb-3">
         <a-card :bordered="false" :bodyStyle="{ padding: '16px' }">
-          <template slot="title">
+          <template #title>
             操作记录
-            <a-tooltip slot="action" title="更多">
+          </template>
+          <template #action>
+            <a-tooltip title="更多">
               <a href="javascript:void(0);" @click="logListDrawerVisible = true">
                 <a-icon type="ellipsis" />
               </a>
             </a-tooltip>
           </template>
           <a-list :dataSource="formattedLogDatas" :loading="logLoading">
-            <a-list-item slot="renderItem" slot-scope="item, index" :key="index">
-              <a-list-item-meta :description="item.createTime | timeAgo">
-                <span slot="title">{{ item.type }}</span>
-              </a-list-item-meta>
-              <ellipsis :length="35" tooltip>{{ item.content }}</ellipsis>
-            </a-list-item>
+            <template #renderItem="{ item }">
+              <a-list-item>
+                <a-list-item-meta :description="item.createTime | timeAgo">
+                  <template #title>
+                    <span>{{ item.type }}</span>
+                  </template>
+                </a-list-item-meta>
+                <ellipsis :length="35" tooltip>{{ item.content }}</ellipsis>
+              </a-list-item>
+            </template>
           </a-list>
         </a-card>
       </a-col>

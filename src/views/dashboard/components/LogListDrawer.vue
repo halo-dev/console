@@ -12,12 +12,16 @@
       <a-row type="flex" align="middle">
         <a-col :span="24">
           <a-list :loading="loading" :dataSource="formattedLogsDatas">
-            <a-list-item slot="renderItem" slot-scope="item, index" :key="index">
-              <a-list-item-meta :description="item.createTime | timeAgo">
-                <span slot="title">{{ item.type }}</span>
-              </a-list-item-meta>
-              <ellipsis :length="35" tooltip>{{ item.content }}</ellipsis>
-            </a-list-item>
+            <template #renderItem="{ item }">
+              <a-list-item>
+                <a-list-item-meta :description="item.createTime | timeAgo">
+                  <template #title>
+                    <span>{{ item.type }}</span>
+                  </template>
+                </a-list-item-meta>
+                <ellipsis :length="35" tooltip>{{ item.content }}</ellipsis>
+              </a-list-item>
+            </template>
           </a-list>
 
           <div class="page-wrapper">

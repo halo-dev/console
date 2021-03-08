@@ -9,16 +9,20 @@
       </a-form-item>
       <a-form-item label="Logo：" prop="blog_logo">
         <a-input v-model="options.blog_logo">
-          <a href="javascript:void(0);" slot="addonAfter" @click="handleShowLogoSelector">
-            <a-icon type="picture" />
-          </a>
+          <template #addonAfter>
+            <a href="javascript:void(0);" @click="handleShowLogoSelector">
+              <a-icon type="picture" />
+            </a>
+          </template>
         </a-input>
       </a-form-item>
       <a-form-item label="Favicon：" prop="blog_favicon">
         <a-input v-model="options.blog_favicon">
-          <a href="javascript:void(0);" slot="addonAfter" @click="handleShowFaviconSelector">
-            <a-icon type="picture" />
-          </a>
+          <template #addonAfter>
+            <a href="javascript:void(0);" @click="handleShowFaviconSelector">
+              <a-icon type="picture" />
+            </a>
+          </template>
         </a-input>
       </a-form-item>
       <a-form-item label="页脚信息：" prop="blog_footer_info">

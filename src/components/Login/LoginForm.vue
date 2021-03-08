@@ -1,37 +1,28 @@
 <template>
   <div>
     <a-form ref="loginForm" :model="form.model" :rules="form.rules" layout="vertical" @keyup.enter.native="handleLogin">
-      <a-form-item
-        v-if="!form.needAuthCode"
-        class="animated fadeInUp"
-        :style="{ 'animation-delay': '0.1s' }"
-        prop="username"
-      >
+      <a-form-item v-if="!form.needAuthCode" prop="username">
         <a-input placeholder="用户名/邮箱" v-model="form.model.username">
-          <a-icon slot="prefix" type="user" style="color: rgba(0,0,0,.25)" />
+          <template #prefix>
+            <UserOutlined :style="{ color: 'rgba(0,0,0,.25)' }" />
+          </template>
         </a-input>
       </a-form-item>
-      <a-form-item
-        v-if="!form.needAuthCode"
-        class="animated fadeInUp"
-        :style="{ 'animation-delay': '0.2s' }"
-        prop="password"
-      >
+      <a-form-item v-if="!form.needAuthCode" prop="password">
         <a-input v-model="form.model.password" type="password" placeholder="密码">
-          <a-icon slot="prefix" type="lock" style="color: rgba(0,0,0,.25)" />
+          <template #prefix>
+            <LockOutlined :style="{ color: 'rgba(0,0,0,.25)' }" />
+          </template>
         </a-input>
       </a-form-item>
-      <a-form-item
-        v-if="form.needAuthCode"
-        class="animated fadeInUp"
-        :style="{ 'animation-delay': '0.1s' }"
-        prop="authcode"
-      >
+      <a-form-item v-if="form.needAuthCode" prop="authcode">
         <a-input placeholder="两步验证码" v-model="form.model.authcode" :maxLength="6">
-          <a-icon slot="prefix" type="safety-certificate" style="color: rgba(0,0,0,.25)" />
+          <template #prefix>
+            <SafetyCertificateOutlined :style="{ color: 'rgba(0,0,0,.25)' }" />
+          </template>
         </a-input>
       </a-form-item>
-      <a-form-item class="animated fadeInUp" :style="{ 'animation-delay': '0.3s' }">
+      <a-form-item>
         <a-button
           :loading="form.logging"
           type="primary"
@@ -46,8 +37,14 @@
 <script>
 import adminApi from '@/api/admin'
 import { mapActions } from 'vuex'
+import { UserOutlined, LockOutlined, SafetyCertificateOutlined } from '@ant-design/icons-vue'
 export default {
   name: 'LoginForm',
+  components: {
+    UserOutlined,
+    LockOutlined,
+    SafetyCertificateOutlined
+  },
   data() {
     const authcodeValidate = (rule, value, callback) => {
       if (!value && this.form.needAuthCode) {

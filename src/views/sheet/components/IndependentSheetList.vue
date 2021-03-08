@@ -9,33 +9,36 @@
       :dataSource="independentSheets"
       :loading="loading"
     >
-      <a-list-item slot="renderItem" slot-scope="item, index" :key="index">
-        <template slot="actions">
-          <span>
-            <router-link :to="{ name: item.routeName }">
-              <a-icon type="edit" />
-            </router-link>
-          </span>
-        </template>
-        <template slot="extra">
-          <span v-if="item.available">可用</span>
-          <span v-else
-            >不可用
-            <a-tooltip slot="action" title="当前主题没有对应模板">
-              <a-icon type="info-circle-o" />
-            </a-tooltip>
-          </span>
-        </template>
-        <a-list-item-meta>
-          <span
-            slot="title"
-            style="max-width: 300px;display: block;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"
-          >
-            <a :href="item.fullPath" target="_blank" v-if="item.available">{{ item.title }}</a>
-            <a :href="item.fullPath" target="_blank" disabled v-else>{{ item.title }}</a>
-          </span>
-        </a-list-item-meta>
-      </a-list-item>
+      <template #renderItem="{ item }">
+        <a-list-item>
+          <template #actions>
+            <span>
+              <router-link :to="{ name: item.routeName }">
+                <a-icon type="edit" />
+              </router-link>
+            </span>
+          </template>
+          <template #extra>
+            <span v-if="item.available">可用</span>
+            <span v-else
+              >不可用
+              <a-tooltip title="当前主题没有对应模板">
+                <a-icon type="info-circle-o" />
+              </a-tooltip>
+            </span>
+          </template>
+          <a-list-item-meta>
+            <template #title>
+              <span
+                style="max-width: 300px;display: block;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"
+              >
+                <a :href="item.fullPath" target="_blank" v-if="item.available">{{ item.title }}</a>
+                <a :href="item.fullPath" target="_blank" disabled v-else>{{ item.title }}</a>
+              </span>
+            </template>
+          </a-list-item-meta>
+        </a-list-item>
+      </template>
     </a-list>
 
     <!-- Desktop -->

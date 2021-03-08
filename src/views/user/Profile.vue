@@ -43,7 +43,9 @@
           <div class="card-container">
             <a-tabs type="card">
               <a-tab-pane key="1">
-                <span slot="tab"> <a-icon type="idcard" />基本资料 </span>
+                <template #tab>
+                  <span> <a-icon type="idcard" />基本资料 </span>
+                </template>
                 <a-form ref="userForm" :model="userForm.model" :rules="userForm.rules" layout="vertical">
                   <a-form-item label="用户名：" prop="username">
                     <a-input v-model="userForm.model.username" />
@@ -72,13 +74,10 @@
                 </a-form>
               </a-tab-pane>
               <a-tab-pane key="2">
-                <span slot="tab"> <a-icon type="lock" />密码 </span>
-                <a-form
-                  ref="passwordForm"
-                  :model="passwordForm.model"
-                  :rules="passwordForm.rules"
-                  layout="vertical"
-                >
+                <template #tab>
+                  <span> <a-icon type="lock" />密码 </span>
+                </template>
+                <a-form ref="passwordForm" :model="passwordForm.model" :rules="passwordForm.rules" layout="vertical">
                   <a-form-item label="原密码：" prop="oldPassword">
                     <a-input-password v-model="passwordForm.model.oldPassword" autocomplete="new-password" />
                   </a-form-item>
@@ -103,7 +102,9 @@
                 </a-form>
               </a-tab-pane>
               <a-tab-pane key="3">
-                <span slot="tab"> <a-icon type="safety-certificate" />两步验证 </span>
+                <template #tab>
+                  <span> <a-icon type="safety-certificate" />两步验证 </span>
+                </template>
                 <a-form layout="vertical">
                   <a-form-item label="两步验证：">
                     <a-switch
@@ -191,7 +192,7 @@
       :destroyOnClose="true"
       :width="400"
     >
-      <template slot="footer">
+      <template #footer>
         <a-button key="back" @click="handleCloseMFAuthModal">
           取消
         </a-button>
@@ -214,7 +215,7 @@
           </a-input>
         </a-form-item>
         <a-form-item v-if="!mfaUsed" label="1. 请扫描二维码或导入 key" :help="`MFAKey:${mfaParam.mfaKey}`">
-          <template slot="extra">
+          <template #extra>
             <span class="text-red-600"
               >* 建议保存此二维码或 MFAKey，验证设备丢失将无法找回，只能通过重置密码关闭二步验证。</span
             >

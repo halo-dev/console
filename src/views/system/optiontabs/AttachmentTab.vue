@@ -1,12 +1,6 @@
 <template>
   <div>
-    <a-form
-      ref="attachmentOptionsForm"
-      :model="options"
-      :rules="rules"
-      layout="vertical"
-      :wrapperCol="wrapperCol"
-    >
+    <a-form ref="attachmentOptionsForm" :model="options" :rules="rules" layout="vertical" :wrapperCol="wrapperCol">
       <a-form-item label="上传图片时预览：">
         <a-switch v-model="options.attachment_upload_image_preview_enable" />
       </a-form-item>

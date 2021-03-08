@@ -1,17 +1,19 @@
 <template>
   <div>
     <a-comment>
-      <template slot="actions">
+      <template #actions>
         <a-dropdown :trigger="['click']" v-if="comment.status === 'AUDITING'">
           <span href="javascript:void(0);">通过</span>
-          <a-menu slot="overlay">
-            <a-menu-item key="1">
-              <span href="javascript:void(0);" @click="handleEditStatusClick('PUBLISHED')">通过</span>
-            </a-menu-item>
-            <a-menu-item key="2">
-              <span href="javascript:void(0);">通过并回复</span>
-            </a-menu-item>
-          </a-menu>
+          <template #overlay>
+            <a-menu>
+              <a-menu-item key="1">
+                <span href="javascript:void(0);" @click="handleEditStatusClick('PUBLISHED')">通过</span>
+              </a-menu-item>
+              <a-menu-item key="2">
+                <span href="javascript:void(0);">通过并回复</span>
+              </a-menu-item>
+            </a-menu>
+          </template>
         </a-dropdown>
 
         <span v-else-if="comment.status === 'PUBLISHED'" @click="handleReplyClick">回复</span>
@@ -40,16 +42,26 @@
           <span>删除</span>
         </a-popconfirm>
       </template>
-      <a slot="author" :href="comment.authorUrl" target="_blank">
-        <a-icon type="user" v-if="comment.isAdmin" style="margin-right: 3px;" />
-        {{ comment.author }}
-      </a>
-      <a-avatar size="large" slot="avatar" :src="avatar" :alt="comment.author" />
-      <p slot="content" v-html="content"></p>
-      <a-tooltip slot="datetime">
-        <span slot="title">{{ comment.createTime | moment }}</span>
-        <span>{{ comment.createTime | timeAgo }}</span>
-      </a-tooltip>
+      <template #author>
+        <a :href="comment.authorUrl" target="_blank">
+          <a-icon type="user" v-if="comment.isAdmin" style="margin-right: 3px;" />
+          {{ comment.author }}
+        </a>
+      </template>
+      <template #avatar>
+        <a-avatar size="large" :src="avatar" :alt="comment.author" />
+      </template>
+      <template #content>
+        <p v-html="content"></p>
+      </template>
+      <template #datetime>
+        <a-tooltip>
+          <template #title>
+            <span>{{ comment.createTime | moment }}</span>
+          </template>
+          <span>{{ comment.createTime | timeAgo }}</span>
+        </a-tooltip>
+      </template>
       <template v-if="comment.children">
         <TargetCommentTree
           v-for="(child, index) in comment.children"

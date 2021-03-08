@@ -12,13 +12,17 @@
     <a-row :gutter="12" type="flex">
       <a-col :xl="12" :lg="12" :md="12" :sm="24" :xs="24" v-if="!viewMode">
         <a-card :bordered="false">
-          <img :alt="theme.name" :src="theme.screenshots" slot="cover" />
+          <template #cover>
+            <img :alt="theme.name" :src="theme.screenshots" />
+          </template>
           <a-card-meta :description="theme.description">
-            <template slot="title">
+            <template #title>
               <a :href="author.website" target="_blank">{{ author.name }}</a>
             </template>
-            <a-avatar v-if="theme.logo" :src="theme.logo" size="large" slot="avatar" />
-            <a-avatar v-else size="large" slot="avatar">{{ author.name }}</a-avatar>
+            <template #avatar>
+              <a-avatar v-if="theme.logo" :src="theme.logo" size="large" />
+              <a-avatar v-else size="large">{{ author.name }}</a-avatar>
+            </template>
           </a-card-meta>
         </a-card>
       </a-col>
@@ -29,7 +33,9 @@
               <a-tab-pane v-for="(group, index) in themeConfigurations" :key="index.toString()" :tab="group.label">
                 <a-form layout="vertical" :wrapperCol="wrapperCol">
                   <a-form-item v-for="(item, index1) in group.items" :label="item.label + '：'" :key="index1">
-                    <p v-if="item.description && item.description != ''" slot="help" v-html="item.description"></p>
+                    <template #help>
+                      <p v-if="item.description && item.description != ''" v-html="item.description"></p>
+                    </template>
                     <a-input
                       v-model="themeSettings[item.name]"
                       :defaultValue="item.defaultValue"
@@ -46,7 +52,7 @@
                     <a-radio-group
                       v-decorator="['radio-group']"
                       :defaultValue="item.defaultValue"
-                      v-model="themeSettings[item.name]"
+                      v-model:value="themeSettings[item.name]"
                       v-else-if="item.type == 'RADIO'"
                     >
                       <a-radio v-for="(option, index2) in item.options" :key="index2" :value="option.value">{{
@@ -75,9 +81,11 @@
                       :defaultValue="item.defaultValue"
                       v-else-if="item.type == 'ATTACHMENT'"
                     >
-                      <a href="javascript:void(0);" slot="addonAfter" @click="handleShowSelectAttachment(item.name)">
-                        <a-icon type="picture" />
-                      </a>
+                      <template #addonAfter>
+                        <a href="javascript:void(0);" @click="handleShowSelectAttachment(item.name)">
+                          <a-icon type="picture" />
+                        </a>
+                      </template>
                     </a-input>
                     <a-input-number
                       v-model="themeSettings[item.name]"

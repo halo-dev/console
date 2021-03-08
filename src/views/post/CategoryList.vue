@@ -15,9 +15,11 @@
             </a-form-item>
             <a-form-item label="封面图：" help="* 在分类页面可展示，需要主题支持" prop="thumbnail">
               <a-input v-model="form.model.thumbnail">
-                <a href="javascript:void(0);" slot="addonAfter" @click="thumbnailDrawer.visible = true">
-                  <a-icon type="picture" />
-                </a>
+                <template #addonAfter>
+                  <a href="javascript:void(0);" @click="thumbnailDrawer.visible = true">
+                    <a-icon type="picture" />
+                  </a>
+                </template>
               </a-input>
             </a-form-item>
             <a-form-item label="密码：" help="* 分类密码" prop="password">
@@ -66,48 +68,55 @@
             :dataSource="table.data"
             :loading="table.loading"
           >
-            <a-list-item slot="renderItem" slot-scope="item, index" :key="index">
-              <template slot="actions">
-                <span>
-                  <a-icon type="form" />
-                  {{ item.postCount }}
-                </span>
-                <a-dropdown placement="topLeft" :trigger="['click']">
+            <template #renderItem="{ item }">
+              <a-list-item>
+                <template #actions>
                   <span>
-                    <a-icon type="bars" />
+                    <a-icon type="form" />
+                    {{ item.postCount }}
                   </span>
-                  <a-menu slot="overlay">
-                    <a-menu-item>
-                      <a href="javascript:void(0);" @click="form.model = item">编辑</a>
-                    </a-menu-item>
-                    <a-menu-item>
-                      <a-popconfirm
-                        :title="'你确定要删除【' + item.name + '】分类？'"
-                        @confirm="handleDeleteCategory(item.id)"
-                        okText="确定"
-                        cancelText="取消"
-                      >
-                        <a href="javascript:void(0);">删除</a>
-                      </a-popconfirm>
-                    </a-menu-item>
-                  </a-menu>
-                </a-dropdown>
-              </template>
-              <a-list-item-meta>
-                <template slot="description">
-                  {{ item.slug }}
+                  <a-dropdown placement="topLeft" :trigger="['click']">
+                    <span>
+                      <a-icon type="bars" />
+                    </span>
+                    <template #overlay>
+                      <a-menu>
+                        <a-menu-item>
+                          <a href="javascript:void(0);" @click="form.model = item">编辑</a>
+                        </a-menu-item>
+                        <a-menu-item>
+                          <a-popconfirm
+                            :title="'你确定要删除【' + item.name + '】分类？'"
+                            @confirm="handleDeleteCategory(item.id)"
+                            okText="确定"
+                            cancelText="取消"
+                          >
+                            <a href="javascript:void(0);">删除</a>
+                          </a-popconfirm>
+                        </a-menu-item>
+                      </a-menu>
+                    </template>
+                  </a-dropdown>
                 </template>
-                <span
-                  slot="title"
-                  style="max-width: 300px;display: block;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"
-                >
-                  {{ item.name }}{{ item.password ? '（加密）' : '' }}
+                <a-list-item-meta>
+                  <template #description>
+                    <template>
+                      {{ item.slug }}
+                    </template>
+                  </template>
+                  <template #title>
+                    <span
+                      style="max-width: 300px;display: block;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"
+                    >
+                      {{ item.name }}{{ item.password ? '（加密）' : '' }}
+                    </span>
+                  </template>
+                </a-list-item-meta>
+                <span>
+                  {{ item.description }}
                 </span>
-              </a-list-item-meta>
-              <span>
-                {{ item.description }}
-              </span>
-            </a-list-item>
+              </a-list-item>
+            </template>
           </a-list>
           <!-- Desktop -->
           <a-table

@@ -1,44 +1,46 @@
 <template>
   <div class="container-wrapper">
-    <div class="halo-logo animated fadeInUp">
+    <div class="halo-logo ">
       <span
         >Halo
         <small v-if="apiForm.visible">API 设置</small>
       </span>
     </div>
-    <div v-show="!apiForm.visible" class="login-form animated">
+    <div v-show="!apiForm.visible" class="login-form">
       <LoginForm @success="onLoginSucceed" />
       <a-row>
         <a-col :span="24">
           <router-link :to="{ name: 'ResetPassword' }">
-            <a class="tip animated fadeInRight" v-if="resetPasswordButtonVisible" href="javascript:void(0);">
+            <a class="tip" v-if="resetPasswordButtonVisible" href="javascript:void(0);">
               找回密码
             </a>
           </router-link>
-          <a @click="handleToggleShowApiForm" class="tip animated fadeInUp" :style="{ 'animation-delay': '0.4s' }">
-            <a-icon type="setting" />
+          <a @click="handleToggleShowApiForm" class="tip">
+            <SettingOutlined />
           </a>
         </a-col>
       </a-row>
     </div>
-    <div v-show="apiForm.visible" class="api-form animated">
+    <div v-show="apiForm.visible" class="api-form">
       <a-form layout="vertical">
-        <a-form-item class="animated fadeInUp" :style="{ 'animation-delay': '0.1s' }">
+        <a-form-item>
           <a-tooltip placement="top" title="如果 Admin 不是独立部署，请不要更改此 API" trigger="click">
             <a-input placeholder="API 地址" v-model="apiForm.apiUrl">
-              <a-icon slot="prefix" type="api" style="color: rgba(0,0,0,.25)" />
+              <template #prefix>
+                <ApiOutlined :style="{ color: 'rgba(0,0,0,.25)' }" />
+              </template>
             </a-input>
           </a-tooltip>
         </a-form-item>
-        <a-form-item class="animated fadeInUp" :style="{ 'animation-delay': '0.2s' }">
+        <a-form-item>
           <a-button :block="true" @click="handleRestoreApiUrl">恢复默认</a-button>
         </a-form-item>
-        <a-form-item class="animated fadeInUp" :style="{ 'animation-delay': '0.3s' }">
+        <a-form-item>
           <a-button type="primary" :block="true" @click="handleModifyApiUrl">保存设置</a-button>
         </a-form-item>
         <a-row>
-          <a @click="handleToggleShowApiForm" class="tip animated fadeInUp" :style="{ 'animation-delay': '0.4s' }">
-            <a-icon type="rollback" />
+          <a @click="handleToggleShowApiForm" class="tip">
+            <RollbackOutlined />
           </a>
         </a-row>
       </a-form>
@@ -49,11 +51,15 @@
 <script>
 import adminApi from '@/api/admin'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
+import { ApiOutlined, RollbackOutlined, SettingOutlined } from '@ant-design/icons-vue'
 
 import LoginForm from '@/components/Login/LoginForm'
 export default {
   components: {
-    LoginForm
+    LoginForm,
+    ApiOutlined,
+    RollbackOutlined,
+    SettingOutlined
   },
   data() {
     return {

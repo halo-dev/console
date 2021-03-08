@@ -17,24 +17,31 @@
         />
         <a-divider>历史备份</a-divider>
         <a-list itemLayout="vertical" size="small" :dataSource="backups" :loading="loading">
-          <a-list-item slot="renderItem" slot-scope="backup">
-            <a-button
-              slot="extra"
-              type="link"
-              style="color: red"
-              icon="delete"
-              :loading="backup.deleting"
-              @click="handleBackupDeleteClick(backup)"
-              >删除</a-button
-            >
-            <a-list-item-meta>
-              <a slot="title" href="javascript:void(0)" @click="handleDownloadBackupPackage(backup)">
-                <a-icon type="schedule" style="color: #52c41a" />
-                {{ backup.filename }}
-              </a>
-              <p slot="description">{{ backup.updateTime | timeAgo }}/{{ backup.fileSize | fileSizeFormat }}</p>
-            </a-list-item-meta>
-          </a-list-item>
+          <template #renderItem="{ item }">
+            <a-list-item>
+              <template #extra>
+                <a-button
+                  type="link"
+                  style="color: red"
+                  icon="delete"
+                  :loading="item.deleting"
+                  @click="handleBackupDeleteClick(item)"
+                  >删除</a-button
+                >
+              </template>
+              <a-list-item-meta>
+                <template #title>
+                  <a href="javascript:void(0)" @click="handleDownloadBackupPackage(item)">
+                    <a-icon type="schedule" style="color: #52c41a" />
+                    {{ item.filename }}
+                  </a>
+                </template>
+                <template #description>
+                  <p>{{ item.updateTime | timeAgo }}/{{ item.fileSize | fileSizeFormat }}</p>
+                </template>
+              </a-list-item-meta>
+            </a-list-item>
+          </template>
         </a-list>
       </a-col>
     </a-row>

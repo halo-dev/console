@@ -71,7 +71,7 @@
       <a-button type="primary" shape="circle" icon="setting" size="large" @click="optionFormVisible = true"></a-button>
     </div>
     <a-modal v-model="optionFormVisible" title="页面设置" :afterClose="() => (optionFormVisible = false)">
-      <template slot="footer">
+      <template #footer>
         <a-button key="submit" type="primary" @click="handleSaveOptions()">保存</a-button>
       </template>
       <a-form layout="vertical">

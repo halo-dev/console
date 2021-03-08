@@ -5,7 +5,9 @@
         <div class="card-container">
           <a-tabs v-model="activeKey" type="card">
             <a-tab-pane v-for="pane in panes" :key="pane.key">
-              <span slot="tab"> <a-icon :type="pane.icon" />{{ pane.title }} </span>
+              <template #tab>
+                <span> <a-icon :type="pane.icon" />{{ pane.title }} </span>
+              </template>
               <component :is="pane.component"></component>
             </a-tab-pane>
           </a-tabs>

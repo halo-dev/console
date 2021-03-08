@@ -15,52 +15,54 @@
         <div :key="item.id" v-for="item in realValue">
           <a-list-item class="cursor-pointer menu-item">
             <a-list-item-meta>
-              <span slot="title" class="inline-block font-bold cursor-move title"
-                >{{ item.name }}
-                <a-tooltip title="外部链接" v-if="item.target === '_blank'">
-                  <a-icon type="link" />
-                </a-tooltip>
-                {{ item.formVisible ? '（正在编辑）' : '' }}
-              </span>
-              <span slot="description" class="inline-block">
-                <a :href="item.url" target="_blank" class="ant-anchor-link-title"> {{ item.url }} </a>
-              </span>
+              <template #title>
+                <span class="inline-block font-bold cursor-move title"
+                  >{{ item.name }}
+                  <a-tooltip title="外部链接" v-if="item.target === '_blank'">
+                    <a-icon type="link" />
+                  </a-tooltip>
+                  {{ item.formVisible ? '（正在编辑）' : '' }}
+                </span>
+              </template>
+              <template #description>
+                <span class="inline-block">
+                  <a :href="item.url" target="_blank" class="ant-anchor-link-title"> {{ item.url }} </a>
+                </span>
+              </template>
             </a-list-item-meta>
-            <template slot="actions">
+            <template #actions>
               <a v-if="!item.formVisible" href="javascript:void(0);" @click="handleOpenEditForm(item)">
                 编辑
               </a>
               <a v-else href="javascript:void(0);" @click="handleCloseCreateMenuForm(item)">
                 取消编辑
               </a>
-            </template>
-            <template slot="actions">
               <a href="javascript:void(0);" @click="handleDelete(item.id)">删除</a>
-            </template>
-            <template slot="actions" v-if="excludedTeams && excludedTeams.length > 0">
-              <a-dropdown :trigger="['click']">
+              <a-dropdown :trigger="['click']" v-if="excludedTeams && excludedTeams.length > 0">
                 <a class="ant-dropdown-link" @click="e => e.preventDefault()">
                   更多
                   <a-icon type="down" />
                 </a>
-                <a-menu slot="overlay">
-                  <a-sub-menu title="移动到分组">
-                    <a-menu-item
-                      v-for="(team, index) in excludedTeams"
-                      :key="index"
-                      @click="handleMoveMenu(item, team)"
-                      >{{ team === '' ? '未分组' : team }}</a-menu-item
-                    >
-                  </a-sub-menu>
-                  <a-sub-menu title="复制到分组">
-                    <a-menu-item
-                      v-for="(team, index) in excludedTeams"
-                      :key="index"
-                      @click="handleCopyMenu(item, team)"
-                      >{{ team === '' ? '未分组' : team }}</a-menu-item
-                    >
-                  </a-sub-menu>
-                </a-menu>
+                <template #overlay>
+                  <a-menu>
+                    <a-sub-menu title="移动到分组">
+                      <a-menu-item
+                        v-for="(team, index) in excludedTeams"
+                        :key="index"
+                        @click="handleMoveMenu(item, team)"
+                        >{{ team === '' ? '未分组' : team }}</a-menu-item
+                      >
+                    </a-sub-menu>
+                    <a-sub-menu title="复制到分组">
+                      <a-menu-item
+                        v-for="(team, index) in excludedTeams"
+                        :key="index"
+                        @click="handleCopyMenu(item, team)"
+                        >{{ team === '' ? '未分组' : team }}</a-menu-item
+                      >
+                    </a-sub-menu>
+                  </a-menu>
+                </template>
               </a-dropdown>
             </template>
           </a-list-item>

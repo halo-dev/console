@@ -8,15 +8,7 @@
               <a-input v-model="form.model.name" />
             </a-form-item>
             <a-form-item label="网站地址：" help="* 需要加上 http://" prop="url">
-              <a-input v-model="form.model.url">
-                <!-- <a
-                  href="javascript:void(0);"
-                  slot="addonAfter"
-                  @click="handleParseUrl"
-                >
-                  <a-icon type="sync" />
-                </a> -->
-              </a-input>
+              <a-input v-model="form.model.url" />
             </a-form-item>
             <a-form-item label="Logo：" prop="logo">
               <a-input v-model="form.model.logo" />
@@ -69,47 +61,52 @@
             :dataSource="table.data"
             :loading="table.loading"
           >
-            <a-list-item slot="renderItem" slot-scope="item, index" :key="index">
-              <template slot="actions">
-                <a-dropdown placement="topLeft" :trigger="['click']">
-                  <span>
-                    <a-icon type="bars" />
-                  </span>
-                  <a-menu slot="overlay">
-                    <a-menu-item>
-                      <a href="javascript:void(0);" @click="form.model = item">编辑</a>
-                    </a-menu-item>
-                    <a-menu-item>
-                      <a-popconfirm
-                        :title="'你确定要删除【' + item.name + '】链接？'"
-                        @confirm="handleDeleteLink(item.id)"
-                        okText="确定"
-                        cancelText="取消"
-                      >
-                        <a href="javascript:;">删除</a>
-                      </a-popconfirm>
-                    </a-menu-item>
-                  </a-menu>
-                </a-dropdown>
-              </template>
-              <template slot="extra">
-                <span>
-                  {{ item.team }}
-                </span>
-              </template>
-              <a-list-item-meta>
-                <template slot="description">
-                  {{ item.description }}
+            <template #renderItem="{ item }">
+              <a-list-item>
+                <template #actions>
+                  <a-dropdown placement="topLeft" :trigger="['click']">
+                    <span>
+                      <a-icon type="bars" />
+                    </span>
+                    <template #overlay>
+                      <a-menu>
+                        <a-menu-item>
+                          <a href="javascript:void(0);" @click="form.model = item">编辑</a>
+                        </a-menu-item>
+                        <a-menu-item>
+                          <a-popconfirm
+                            :title="'你确定要删除【' + item.name + '】链接？'"
+                            @confirm="handleDeleteLink(item.id)"
+                            okText="确定"
+                            cancelText="取消"
+                          >
+                            <a href="javascript:;">删除</a>
+                          </a-popconfirm>
+                        </a-menu-item>
+                      </a-menu>
+                    </template>
+                  </a-dropdown>
                 </template>
-                <span
-                  slot="title"
-                  style="max-width: 300px;display: block;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"
-                >
-                  {{ item.name }}
-                </span>
-              </a-list-item-meta>
-              <a :href="item.url" target="_blank">{{ item.url }}</a>
-            </a-list-item>
+                <template #extra>
+                  <span>
+                    {{ item.team }}
+                  </span>
+                </template>
+                <a-list-item-meta>
+                  <template #description>
+                    {{ item.description }}
+                  </template>
+                  <template #title>
+                    <span
+                      style="max-width: 300px;display: block;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"
+                    >
+                      {{ item.name }}
+                    </span>
+                  </template>
+                </a-list-item-meta>
+                <a :href="item.url" target="_blank">{{ item.url }}</a>
+              </a-list-item>
+            </template>
           </a-list>
           <!-- Desktop -->
           <a-table
@@ -150,7 +147,7 @@
       ></a-button>
     </div>
     <a-modal v-model="optionsModal.visible" title="页面设置" :afterClose="() => (optionsModal.visible = false)">
-      <template slot="footer">
+      <template #footer>
         <a-button key="submit" type="primary" @click="handleSaveOptions()">保存</a-button>
       </template>
       <a-form layout="vertical">

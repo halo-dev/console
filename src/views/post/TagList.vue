@@ -12,9 +12,11 @@
             </a-form-item>
             <a-form-item label="封面图：" help="* 在标签页面可展示，需要主题支持" prop="thumbnail">
               <a-input v-model="form.model.thumbnail">
-                <a href="javascript:void(0);" slot="addonAfter" @click="thumbnailDrawer.visible = true">
-                  <a-icon type="picture" />
-                </a>
+                <template #addonAfter>
+                  <a href="javascript:void(0);" @click="thumbnailDrawer.visible = true">
+                    <a-icon type="picture" />
+                  </a>
+                </template>
               </a-input>
             </a-form-item>
             <a-form-item>
@@ -60,7 +62,7 @@
           <a-spin :spinning="list.loading">
             <a-empty v-if="list.data.length == 0" />
             <a-tooltip placement="topLeft" v-for="tag in list.data" :key="tag.id" v-else>
-              <template slot="title">
+              <template #title>
                 <span>{{ tag.postCount }} 篇文章</span>
               </template>
               <a-tag color="blue" style="margin-bottom: 8px;cursor:pointer;" @click="form.model = tag">{{

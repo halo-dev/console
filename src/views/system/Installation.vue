@@ -13,7 +13,7 @@
             <a-alert :message="`欢迎使用 Halo，您正在安装的是 Halo ${app_version}。`" type="success" show-icon />
             <!-- Blogger info -->
             <div class="mt-5 mb-5">
-              <a-radio-group v-model="installationMode">
+              <a-radio-group v-model:value="installationMode">
                 <a-radio-button value="new">
                   全新安装
                 </a-radio-button>

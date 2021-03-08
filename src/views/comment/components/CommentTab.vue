@@ -33,23 +33,25 @@
 
       <div class="table-operator">
         <a-dropdown v-show="queryParam.status != null && queryParam.status != '' && !isMobile()">
-          <a-menu slot="overlay">
-            <a-menu-item key="1" v-if="queryParam.status === 'AUDITING'">
-              <a href="javascript:void(0);" @click="handleEditStatusMore(commentStatus.PUBLISHED.value)">
-                通过
-              </a>
-            </a-menu-item>
-            <a-menu-item key="2" v-if="queryParam.status === 'PUBLISHED' || queryParam.status === 'AUDITING'">
-              <a href="javascript:void(0);" @click="handleEditStatusMore(commentStatus.RECYCLE.value)">
-                移到回收站
-              </a>
-            </a-menu-item>
-            <a-menu-item key="3" v-if="queryParam.status === 'RECYCLE'">
-              <a href="javascript:void(0);" @click="handleDeleteMore">
-                永久删除
-              </a>
-            </a-menu-item>
-          </a-menu>
+          <template #overlay>
+            <a-menu>
+              <a-menu-item key="1" v-if="queryParam.status === 'AUDITING'">
+                <a href="javascript:void(0);" @click="handleEditStatusMore(commentStatus.PUBLISHED.value)">
+                  通过
+                </a>
+              </a-menu-item>
+              <a-menu-item key="2" v-if="queryParam.status === 'PUBLISHED' || queryParam.status === 'AUDITING'">
+                <a href="javascript:void(0);" @click="handleEditStatusMore(commentStatus.RECYCLE.value)">
+                  移到回收站
+                </a>
+              </a-menu-item>
+              <a-menu-item key="3" v-if="queryParam.status === 'RECYCLE'">
+                <a href="javascript:void(0);" @click="handleDeleteMore">
+                  永久删除
+                </a>
+              </a-menu-item>
+            </a-menu>
+          </template>
           <a-button>
             批量操作
             <a-icon type="down" />
@@ -66,89 +68,94 @@
           :dataSource="formattedComments"
           :loading="loading"
         >
-          <a-list-item slot="renderItem" slot-scope="item, index" :key="index">
-            <template slot="actions">
-              <a-dropdown placement="topLeft" :trigger="['click']">
-                <span>
-                  <a-icon type="bars" />
-                </span>
-                <a-menu slot="overlay">
-                  <a-menu-item v-if="item.status === 'AUDITING'">
-                    <a href="javascript:;" @click="handleEditStatusClick(item.id, 'PUBLISHED')">通过</a>
-                  </a-menu-item>
-                  <a-menu-item v-if="item.status === 'AUDITING'">
-                    <a href="javascript:;" @click="handleReplyAndPassClick(item)">通过并回复</a>
-                  </a-menu-item>
-                  <a-menu-item v-else-if="item.status === 'PUBLISHED'">
-                    <a href="javascript:;" @click="handleReplyClick(item)">回复</a>
-                  </a-menu-item>
-                  <a-menu-item v-else-if="item.status === 'RECYCLE'">
-                    <a-popconfirm
-                      :title="'你确定要还原该评论？'"
-                      @confirm="handleEditStatusClick(item.id, 'PUBLISHED')"
-                      okText="确定"
-                      cancelText="取消"
-                    >
-                      <a href="javascript:;">还原</a>
-                    </a-popconfirm>
-                  </a-menu-item>
-                  <a-menu-item v-if="item.status === 'PUBLISHED' || item.status === 'AUDITING'">
-                    <a-popconfirm
-                      :title="'你确定要将该评论移到回收站？'"
-                      @confirm="handleEditStatusClick(item.id, 'RECYCLE')"
-                      okText="确定"
-                      cancelText="取消"
-                    >
-                      <a href="javascript:;">回收站</a>
-                    </a-popconfirm>
-                  </a-menu-item>
-                  <a-menu-item v-else-if="item.status === 'RECYCLE'">
-                    <a-popconfirm
-                      :title="'你确定要永久删除该评论？'"
-                      @confirm="handleDeleteClick(item.id)"
-                      okText="确定"
-                      cancelText="取消"
-                    >
-                      <a href="javascript:;">删除</a>
-                    </a-popconfirm>
-                  </a-menu-item>
-                </a-menu>
-              </a-dropdown>
-            </template>
-            <template slot="extra">
-              <span>
-                <a-badge :status="item.statusProperty.status" :text="item.statusProperty.text" />
-              </span>
-            </template>
-            <a-list-item-meta>
-              <template slot="description">
-                发表在
-                <a v-if="type === 'posts'" :href="item.post.fullPath" target="_blank">《{{ item.post.title }}》</a>
-                <a v-if="type === 'sheets'" :href="item.sheet.fullPath" target="_blank">《{{ item.sheet.title }}》</a>
+          <template #renderItem="{ item }">
+            <a-list-item>
+              <template #actions>
+                <a-dropdown placement="topLeft" :trigger="['click']">
+                  <span>
+                    <a-icon type="bars" />
+                  </span>
+                  <template #overlay>
+                    <a-menu>
+                      <a-menu-item v-if="item.status === 'AUDITING'">
+                        <a href="javascript:;" @click="handleEditStatusClick(item.id, 'PUBLISHED')">通过</a>
+                      </a-menu-item>
+                      <a-menu-item v-if="item.status === 'AUDITING'">
+                        <a href="javascript:;" @click="handleReplyAndPassClick(item)">通过并回复</a>
+                      </a-menu-item>
+                      <a-menu-item v-else-if="item.status === 'PUBLISHED'">
+                        <a href="javascript:;" @click="handleReplyClick(item)">回复</a>
+                      </a-menu-item>
+                      <a-menu-item v-else-if="item.status === 'RECYCLE'">
+                        <a-popconfirm
+                          :title="'你确定要还原该评论？'"
+                          @confirm="handleEditStatusClick(item.id, 'PUBLISHED')"
+                          okText="确定"
+                          cancelText="取消"
+                        >
+                          <a href="javascript:;">还原</a>
+                        </a-popconfirm>
+                      </a-menu-item>
+                      <a-menu-item v-if="item.status === 'PUBLISHED' || item.status === 'AUDITING'">
+                        <a-popconfirm
+                          :title="'你确定要将该评论移到回收站？'"
+                          @confirm="handleEditStatusClick(item.id, 'RECYCLE')"
+                          okText="确定"
+                          cancelText="取消"
+                        >
+                          <a href="javascript:;">回收站</a>
+                        </a-popconfirm>
+                      </a-menu-item>
+                      <a-menu-item v-else-if="item.status === 'RECYCLE'">
+                        <a-popconfirm
+                          :title="'你确定要永久删除该评论？'"
+                          @confirm="handleDeleteClick(item.id)"
+                          okText="确定"
+                          cancelText="取消"
+                        >
+                          <a href="javascript:;">删除</a>
+                        </a-popconfirm>
+                      </a-menu-item>
+                    </a-menu>
+                  </template>
+                </a-dropdown>
               </template>
-              <a-avatar slot="avatar" size="large" :src="'//cn.gravatar.com/avatar/' + item.gravatarMd5 + '&d=mm'" />
-              <span
-                slot="title"
-                style="max-width: 300px;display: block;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"
-                v-if="item.authorUrl"
-              >
-                <a-icon type="user" v-if="item.isAdmin" style="margin-right: 3px;" />&nbsp;
-                <a :href="item.authorUrl" target="_blank">{{ item.author }}</a>
-                &nbsp;<small style="color:rgba(0, 0, 0, 0.45)">{{ item.createTime | timeAgo }}</small>
-              </span>
-              <span
-                slot="title"
-                style="max-width: 300px;display: block;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"
-                v-else
-              >
-                <a-icon type="user" v-if="item.isAdmin" style="margin-right: 3px;" />&nbsp;{{ item.author }}&nbsp;<small
-                  style="color:rgba(0, 0, 0, 0.45)"
-                  >{{ item.createTime | timeAgo }}</small
-                >
-              </span>
-            </a-list-item-meta>
-            <p v-html="item.content"></p>
-          </a-list-item>
+              <template #extra>
+                <span>
+                  <a-badge :status="item.statusProperty.status" :text="item.statusProperty.text" />
+                </span>
+              </template>
+              <a-list-item-meta>
+                <template #description>
+                  发表在
+                  <a v-if="type === 'posts'" :href="item.post.fullPath" target="_blank">《{{ item.post.title }}》</a>
+                  <a v-if="type === 'sheets'" :href="item.sheet.fullPath" target="_blank">《{{ item.sheet.title }}》</a>
+                </template>
+                <template #avatar>
+                  <a-avatar size="large" :src="'//cn.gravatar.com/avatar/' + item.gravatarMd5 + '&d=mm'" />
+                </template>
+                <template #title v-if="item.authorUrl">
+                  <span
+                    style="max-width: 300px;display: block;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"
+                  >
+                    <a-icon type="user" v-if="item.isAdmin" style="margin-right: 3px;" />&nbsp;
+                    <a :href="item.authorUrl" target="_blank">{{ item.author }}</a>
+                    &nbsp;<small style="color:rgba(0, 0, 0, 0.45)">{{ item.createTime | timeAgo }}</small>
+                  </span>
+                </template>
+                <template #title v-else>
+                  <span
+                    style="max-width: 300px;display: block;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"
+                  >
+                    <a-icon type="user" v-if="item.isAdmin" style="margin-right: 3px;" />&nbsp;{{
+                      item.author
+                    }}&nbsp;<small style="color:rgba(0, 0, 0, 0.45)">{{ item.createTime | timeAgo }}</small>
+                  </span>
+                </template>
+              </a-list-item-meta>
+              <p v-html="item.content"></p>
+            </a-list-item>
+          </template>
         </a-list>
         <!-- Desktop -->
         <a-table
@@ -182,7 +189,7 @@
           }}</a>
           <span slot="createTime" slot-scope="createTime">
             <a-tooltip placement="top">
-              <template slot="title">
+              <template #title>
                 {{ createTime | moment }}
               </template>
               {{ createTime | timeAgo }}
@@ -261,7 +268,7 @@
       @close="onReplyClose"
       destroyOnClose
     >
-      <template slot="footer">
+      <template #footer>
         <ReactiveButton
           type="primary"
           @click="handleCreateClick"

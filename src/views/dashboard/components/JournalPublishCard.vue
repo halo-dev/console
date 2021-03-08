@@ -1,8 +1,10 @@
 <template>
   <a-card :bordered="false" :bodyStyle="{ padding: '16px' }">
-    <template slot="title">
+    <template #title>
       速记
-      <a-tooltip slot="action" title="内容将保存到页面/所有页面/日志页面">
+    </template>
+    <template #action>
+      <a-tooltip title="内容将保存到页面/所有页面/日志页面">
         <a-icon type="info-circle-o" class="cursor-pointer" />
       </a-tooltip>
     </template>

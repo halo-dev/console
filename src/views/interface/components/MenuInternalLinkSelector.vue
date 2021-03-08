@@ -1,6 +1,6 @@
 <template>
   <a-modal v-model="visible" title="从系统预设链接添加菜单" :width="1024" :bodyStyle="{ padding: '0 24px 24px' }">
-    <template slot="footer">
+    <template #footer>
       <a-button @click="handleCancel">
         取消
       </a-button>
@@ -24,10 +24,14 @@
                 <a-list item-layout="horizontal">
                   <a-list-item v-for="(category, index) in categories" :key="index">
                     <a-list-item-meta>
-                      <span slot="title">{{ category.name }}</span>
-                      <span slot="description">{{ category.fullPath }}</span>
+                      <template #title>
+                        <span>{{ category.name }}</span>
+                      </template>
+                      <template #description>
+                        <span>{{ category.fullPath }}</span>
+                      </template>
                     </a-list-item-meta>
-                    <template slot="actions">
+                    <template #actions>
                       <a href="javascript:void(0);" class="text-base">
                         <a-icon type="plus-circle" @click="handleInsertPre(category.name, category.fullPath)" />
                       </a>
@@ -39,10 +43,14 @@
                 <a-list item-layout="horizontal">
                   <a-list-item v-for="(tag, index) in tags" :key="index">
                     <a-list-item-meta>
-                      <span slot="title">{{ tag.name }}</span>
-                      <span slot="description">{{ tag.fullPath }}</span>
+                      <template #title>
+                        <span>{{ tag.name }}</span>
+                      </template>
+                      <template #description>
+                        <span>{{ tag.fullPath }}</span>
+                      </template>
                     </a-list-item-meta>
-                    <template slot="actions">
+                    <template #actions>
                       <a href="javascript:void(0);" class="text-base">
                         <a-icon type="plus-circle" @click="handleInsertPre(tag.name, tag.fullPath)" />
                       </a>
@@ -54,10 +62,14 @@
                 <a-list item-layout="horizontal">
                   <a-list-item v-for="(item, index) in sheet.independents" :key="index">
                     <a-list-item-meta>
-                      <span slot="title">{{ item.title }}</span>
-                      <span slot="description">{{ item.fullPath }}</span>
+                      <template #title>
+                        <span>{{ item.title }}</span>
+                      </template>
+                      <template #description>
+                        <span>{{ item.fullPath }}</span>
+                      </template>
                     </a-list-item-meta>
-                    <template slot="actions">
+                    <template #actions>
                       <a href="javascript:void(0);" class="text-base">
                         <a-icon type="plus-circle" @click="handleInsertPre(item.title, item.fullPath)" />
                       </a>
@@ -69,10 +81,14 @@
                 <a-list item-layout="horizontal">
                   <a-list-item v-for="(item, index) in sheet.customs.data" :key="index">
                     <a-list-item-meta>
-                      <span slot="title">{{ item.title }}</span>
-                      <span slot="description">{{ item.fullPath }}</span>
+                      <template #title>
+                        <span>{{ item.title }}</span>
+                      </template>
+                      <template #description>
+                        <span>{{ item.fullPath }}</span>
+                      </template>
                     </a-list-item-meta>
-                    <template slot="actions">
+                    <template #actions>
                       <a href="javascript:void(0);" class="text-base">
                         <a-icon type="plus-circle" @click="handleInsertPre(item.title, item.fullPath)" />
                       </a>
@@ -97,10 +113,14 @@
                 <a-list item-layout="horizontal">
                   <a-list-item v-for="(item, index) in otherInternalLinks" :key="index">
                     <a-list-item-meta>
-                      <span slot="title">{{ item.name }}</span>
-                      <span slot="description">{{ item.url }}</span>
+                      <template #title>
+                        <span>{{ item.name }}</span>
+                      </template>
+                      <template #description>
+                        <span>{{ item.url }}</span>
+                      </template>
                     </a-list-item-meta>
-                    <template slot="actions">
+                    <template #actions>
                       <a href="javascript:void(0);" class="text-base">
                         <a-icon type="plus-circle" @click="handleInsertPre(item.name, item.url)" />
                       </a>
@@ -119,10 +139,14 @@
               <a-list item-layout="horizontal">
                 <a-list-item v-for="(menu, index) in menus" :key="index">
                   <a-list-item-meta>
-                    <span slot="title">{{ menu.name }}</span>
-                    <span slot="description">{{ menu.url }}</span>
+                    <template #title>
+                      <span>{{ menu.name }}</span>
+                    </template>
+                    <template #description>
+                      <span>{{ menu.url }}</span>
+                    </template>
                   </a-list-item-meta>
-                  <template slot="actions">
+                  <template #actions>
                     <a href="javascript:void(0);" class="text-base" @click="handleRemovePre(index)">
                       <a-icon type="close-circle" />
                     </a>

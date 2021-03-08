@@ -75,29 +75,33 @@
           :dataSource="formattedDatas"
           :loading="listLoading"
         >
-          <a-list-item slot="renderItem" slot-scope="item, index" :key="index">
-            <a-card
-              :bodyStyle="{ padding: 0 }"
-              hoverable
-              @click="handleShowDetailDrawer(item)"
-              @contextmenu.prevent="handleContextMenu($event, item)"
-            >
-              <div class="attach-thumb">
-                <span v-show="!handleJudgeMediaType(item)">当前格式不支持预览</span>
-                <img :src="item.thumbPath" v-show="handleJudgeMediaType(item)" loading="lazy" />
-              </div>
-              <a-card-meta class="p-3">
-                <ellipsis :length="isMobile() ? 12 : 16" tooltip slot="description">{{ item.name }}</ellipsis>
-              </a-card-meta>
-              <a-checkbox
-                class="select-attachment-checkbox"
-                :style="getCheckStatus(item.id) ? selectedAttachmentStyle : ''"
-                :checked="getCheckStatus(item.id)"
-                @click="handleAttachmentSelectionChanged($event, item)"
-                v-show="supportMultipleSelection"
-              ></a-checkbox>
-            </a-card>
-          </a-list-item>
+          <template #renderItem="{ item }">
+            <a-list-item>
+              <a-card
+                :bodyStyle="{ padding: 0 }"
+                hoverable
+                @click="handleShowDetailDrawer(item)"
+                @contextmenu.prevent="handleContextMenu($event, item)"
+              >
+                <div class="attach-thumb">
+                  <span v-show="!handleJudgeMediaType(item)">当前格式不支持预览</span>
+                  <img :src="item.thumbPath" v-show="handleJudgeMediaType(item)" loading="lazy" />
+                </div>
+                <a-card-meta class="p-3">
+                  <template #description>
+                    <ellipsis :length="isMobile() ? 12 : 16" tooltip>{{ item.name }}</ellipsis>
+                  </template>
+                </a-card-meta>
+                <a-checkbox
+                  class="select-attachment-checkbox"
+                  :style="getCheckStatus(item.id) ? selectedAttachmentStyle : ''"
+                  :checked="getCheckStatus(item.id)"
+                  @click="handleAttachmentSelectionChanged($event, item)"
+                  v-show="supportMultipleSelection"
+                ></a-checkbox>
+              </a-card>
+            </a-list-item>
+          </template>
         </a-list>
       </a-col>
     </a-row>

@@ -6,7 +6,7 @@
           <h3 class="setting-drawer-index-title">整体风格设置</h3>
           <div class="setting-drawer-index-blockChecbox">
             <a-tooltip>
-              <template slot="title">暗色菜单风格</template>
+              <template #title>暗色菜单风格</template>
               <div class="setting-drawer-index-item" @click="handleMenuTheme('dark')">
                 <img src="/images/dark.svg" alt="dark" />
                 <div class="setting-drawer-index-selectIcon" v-if="navTheme === 'dark'">
@@ -16,7 +16,7 @@
             </a-tooltip>
 
             <a-tooltip>
-              <template slot="title">亮色菜单风格</template>
+              <template #title>亮色菜单风格</template>
               <div class="setting-drawer-index-item" @click="handleMenuTheme('light')">
                 <img src="/images/dark.svg" alt="light" />
                 <div class="setting-drawer-index-selectIcon" v-if="navTheme !== 'dark'">
@@ -31,7 +31,7 @@
           <h3 class="setting-drawer-index-title">主题色</h3>
           <div class="h-5">
             <a-tooltip class="setting-drawer-theme-color-colorBlock" v-for="(item, index) in colorList" :key="index">
-              <template slot="title">{{ item.key }}</template>
+              <template #title>{{ item.key }}</template>
               <a-tag :color="item.color" @click="changeColor(item.color)">
                 <a-icon type="check" v-if="item.color === primaryColor"></a-icon>
               </a-tag>
@@ -62,55 +62,69 @@
         <div class="mt-6">
           <a-list :split="false">
             <a-list-item>
-              <a-tooltip slot="actions">
-                <template slot="title">
-                  该设定仅 [顶部栏导航] 时有效
-                </template>
-                <a-select
-                  size="small"
-                  style="width: 80px;"
-                  :defaultValue="contentWidth"
-                  @change="handleContentWidthChange"
-                >
-                  <a-select-option value="Fixed">固定</a-select-option>
-                  <a-select-option value="Fluid" v-if="layoutMode != 'sidemenu'">流式</a-select-option>
-                </a-select>
-              </a-tooltip>
-              <a-list-item-meta>
-                <div slot="title">内容区域宽度</div>
-              </a-list-item-meta>
-            </a-list-item>
-            <a-list-item>
-              <a-switch slot="actions" size="small" :defaultChecked="fixedHeader" @change="handleFixedHeader" />
-              <a-list-item-meta>
-                <div slot="title">固定 Header</div>
-              </a-list-item-meta>
-            </a-list-item>
-            <a-list-item>
-              <a-switch
-                slot="actions"
-                size="small"
-                :disabled="!fixedHeader"
-                :defaultChecked="autoHideHeader"
-                @change="handleFixedHeaderHidden"
-              />
-              <a-list-item-meta>
-                <a-tooltip slot="title" placement="left">
-                  <template slot="title">固定 Header 时可配置</template>
-                  <div :style="{ opacity: !fixedHeader ? '0.5' : '1' }">下滑时隐藏 Header</div>
+              <template #actions>
+                <a-tooltip>
+                  <template #title>
+                    该设定仅 [顶部栏导航] 时有效
+                  </template>
+                  <a-select
+                    size="small"
+                    style="width: 80px;"
+                    :defaultValue="contentWidth"
+                    @change="handleContentWidthChange"
+                  >
+                    <a-select-option value="Fixed">固定</a-select-option>
+                    <a-select-option value="Fluid" v-if="layoutMode != 'sidemenu'">流式</a-select-option>
+                  </a-select>
                 </a-tooltip>
+              </template>
+              <a-list-item-meta>
+                <template #title>
+                  <div>内容区域宽度</div>
+                </template>
               </a-list-item-meta>
             </a-list-item>
             <a-list-item>
-              <a-switch
-                slot="actions"
-                size="small"
-                :disabled="layoutMode === 'topmenu'"
-                :defaultChecked="fixSiderbar"
-                @change="handleFixSiderbar"
-              />
+              <template #actions>
+                <a-switch size="small" :defaultChecked="fixedHeader" @change="handleFixedHeader" />
+              </template>
               <a-list-item-meta>
-                <div slot="title" :style="{ opacity: layoutMode === 'topmenu' ? '0.5' : '1' }">固定侧边菜单</div>
+                <template #title>
+                  <div>固定 Header</div>
+                </template>
+              </a-list-item-meta>
+            </a-list-item>
+            <a-list-item>
+              <template #actions>
+                <a-switch
+                  size="small"
+                  :disabled="!fixedHeader"
+                  :defaultChecked="autoHideHeader"
+                  @change="handleFixedHeaderHidden"
+                />
+              </template>
+              <a-list-item-meta>
+                <template #title>
+                  <a-tooltip placement="left">
+                    <template #title>固定 Header 时可配置</template>
+                    <div :style="{ opacity: !fixedHeader ? '0.5' : '1' }">下滑时隐藏 Header</div>
+                  </a-tooltip>
+                </template>
+              </a-list-item-meta>
+            </a-list-item>
+            <a-list-item>
+              <template #actions>
+                <a-switch
+                  size="small"
+                  :disabled="layoutMode === 'topmenu'"
+                  :defaultChecked="fixSiderbar"
+                  @change="handleFixSiderbar"
+                />
+              </template>
+              <a-list-item-meta>
+                <template #title>
+                  <div :style="{ opacity: layoutMode === 'topmenu' ? '0.5' : '1' }">固定侧边菜单</div>
+                </template>
               </a-list-item-meta>
             </a-list-item>
           </a-list>

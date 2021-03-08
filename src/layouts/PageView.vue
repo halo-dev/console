@@ -4,8 +4,12 @@
       <div class="page-header" v-if="!$route.meta.hiddenHeaderContent">
         <div class="page-header-index-wide">
           <a-page-header :title="title" :sub-title="subTitle" :breadcrumb="{ props: { routes: breadList } }">
-            <slot name="extra" slot="extra"> </slot>
-            <slot name="footer" slot="footer"> </slot>
+            <template #extra>
+              <slot name="extra"> </slot>
+            </template>
+            <template #footer>
+              <slot name="footer"> </slot>
+            </template>
           </a-page-header>
         </div>
       </div>
@@ -13,8 +17,12 @@
     <div class="page-header" v-if="!$route.meta.hiddenHeaderContent && !affix">
       <div class="page-header-index-wide">
         <a-page-header :title="title" :sub-title="subTitle" :breadcrumb="{ props: { routes: breadList } }">
-          <slot name="extra" slot="extra"> </slot>
-          <slot name="footer" slot="footer"> </slot>
+          <template #extra>
+            <slot name="extra"> </slot>
+          </template>
+          <template #footer>
+            <slot name="footer"> </slot>
+          </template>
         </a-page-header>
       </div>
     </div>

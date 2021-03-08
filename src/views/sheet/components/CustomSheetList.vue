@@ -9,91 +9,98 @@
       :dataSource="formattedSheets"
       :loading="loading"
     >
-      <a-list-item slot="renderItem" slot-scope="item, index" :key="index">
-        <template slot="actions">
-          <span>
-            <a-icon type="eye" />
-            {{ item.visits }}
-          </span>
-          <span @click="handleShowSheetComments(item)">
-            <a-icon type="message" />
-            {{ item.commentCount }}
-          </span>
-          <a-dropdown placement="topLeft" :trigger="['click']">
+      <template #renderItem="{ item }">
+        <a-list-item>
+          <template #actions>
             <span>
-              <a-icon type="bars" />
+              <a-icon type="eye" />
+              {{ item.visits }}
             </span>
-            <a-menu slot="overlay">
-              <a-menu-item v-if="item.status === 'PUBLISHED' || item.status === 'DRAFT'">
-                <a href="javascript:;" @click="handleEditClick(item)">编辑</a>
-              </a-menu-item>
-              <a-menu-item v-else-if="item.status === 'RECYCLE'">
-                <a-popconfirm
-                  :title="'你确定要发布【' + item.title + '】页面？'"
-                  @confirm="handleEditStatusClick(item.id, 'PUBLISHED')"
-                  okText="确定"
-                  cancelText="取消"
-                >
-                  <a href="javascript:;">还原</a>
-                </a-popconfirm>
-              </a-menu-item>
-              <a-menu-item v-if="item.status === 'PUBLISHED' || item.status === 'DRAFT'">
-                <a-popconfirm
-                  :title="'你确定要将【' + item.title + '】页面移到回收站？'"
-                  @confirm="handleEditStatusClick(item.id, 'RECYCLE')"
-                  okText="确定"
-                  cancelText="取消"
-                >
-                  <a href="javascript:;">回收站</a>
-                </a-popconfirm>
-              </a-menu-item>
-              <a-menu-item v-else-if="item.status === 'RECYCLE'">
-                <a-popconfirm
-                  :title="'你确定要永久删除【' + item.title + '】页面？'"
-                  @confirm="handleDeleteClick(item.id)"
-                  okText="确定"
-                  cancelText="取消"
-                >
-                  <a href="javascript:;">删除</a>
-                </a-popconfirm>
-              </a-menu-item>
-              <a-menu-item>
-                <a rel="noopener noreferrer" href="javascript:void(0);" @click="handleShowSheetSettings(item)">设置</a>
-              </a-menu-item>
-            </a-menu>
-          </a-dropdown>
-        </template>
-        <template slot="extra">
-          <span>
-            <a-badge :status="item.statusProperty.status" :text="item.statusProperty.text" />
-          </span>
-        </template>
-        <a-list-item-meta>
-          <template slot="description">
-            {{ item.createTime | moment }}
+            <span @click="handleShowSheetComments(item)">
+              <a-icon type="message" />
+              {{ item.commentCount }}
+            </span>
+            <a-dropdown placement="topLeft" :trigger="['click']">
+              <span>
+                <a-icon type="bars" />
+              </span>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item v-if="item.status === 'PUBLISHED' || item.status === 'DRAFT'">
+                    <a href="javascript:;" @click="handleEditClick(item)">编辑</a>
+                  </a-menu-item>
+                  <a-menu-item v-else-if="item.status === 'RECYCLE'">
+                    <a-popconfirm
+                      :title="'你确定要发布【' + item.title + '】页面？'"
+                      @confirm="handleEditStatusClick(item.id, 'PUBLISHED')"
+                      okText="确定"
+                      cancelText="取消"
+                    >
+                      <a href="javascript:;">还原</a>
+                    </a-popconfirm>
+                  </a-menu-item>
+                  <a-menu-item v-if="item.status === 'PUBLISHED' || item.status === 'DRAFT'">
+                    <a-popconfirm
+                      :title="'你确定要将【' + item.title + '】页面移到回收站？'"
+                      @confirm="handleEditStatusClick(item.id, 'RECYCLE')"
+                      okText="确定"
+                      cancelText="取消"
+                    >
+                      <a href="javascript:;">回收站</a>
+                    </a-popconfirm>
+                  </a-menu-item>
+                  <a-menu-item v-else-if="item.status === 'RECYCLE'">
+                    <a-popconfirm
+                      :title="'你确定要永久删除【' + item.title + '】页面？'"
+                      @confirm="handleDeleteClick(item.id)"
+                      okText="确定"
+                      cancelText="取消"
+                    >
+                      <a href="javascript:;">删除</a>
+                    </a-popconfirm>
+                  </a-menu-item>
+                  <a-menu-item>
+                    <a rel="noopener noreferrer" href="javascript:void(0);" @click="handleShowSheetSettings(item)"
+                      >设置</a
+                    >
+                  </a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
           </template>
-          <span
-            slot="title"
-            style="max-width: 300px;display: block;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"
-          >
-            <a v-if="item.status == 'PUBLISHED'" :href="item.fullPath" target="_blank" class="no-underline">
-              <a-tooltip placement="top" :title="'点击访问【' + item.title + '】'">{{ item.title }}</a-tooltip>
-            </a>
-            <a
-              v-else-if="item.status == 'DRAFT'"
-              href="javascript:void(0)"
-              class="no-underline"
-              @click="handlePreview(item.id)"
-            >
-              <a-tooltip placement="topLeft" :title="'点击预览【' + item.title + '】'">{{ item.title }}</a-tooltip>
-            </a>
-            <a v-else href="javascript:void(0);" class="no-underline" disabled>
-              {{ item.title }}
-            </a>
-          </span>
-        </a-list-item-meta>
-        <span> {{ item.summary }}... </span>
-      </a-list-item>
+          <template #extra>
+            <span>
+              <a-badge :status="item.statusProperty.status" :text="item.statusProperty.text" />
+            </span>
+          </template>
+          <a-list-item-meta>
+            <template #description>
+              {{ item.createTime | moment }}
+            </template>
+            <template #title>
+              <span
+                style="max-width: 300px;display: block;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"
+              >
+                <a v-if="item.status == 'PUBLISHED'" :href="item.fullPath" target="_blank" class="no-underline">
+                  <a-tooltip placement="top" :title="'点击访问【' + item.title + '】'">{{ item.title }}</a-tooltip>
+                </a>
+                <a
+                  v-else-if="item.status == 'DRAFT'"
+                  href="javascript:void(0)"
+                  class="no-underline"
+                  @click="handlePreview(item.id)"
+                >
+                  <a-tooltip placement="topLeft" :title="'点击预览【' + item.title + '】'">{{ item.title }}</a-tooltip>
+                </a>
+                <a v-else href="javascript:void(0);" class="no-underline" disabled>
+                  {{ item.title }}
+                </a>
+              </span>
+            </template>
+          </a-list-item-meta>
+          <span> {{ item.summary }}... </span>
+        </a-list-item>
+      </template>
     </a-list>
 
     <!-- Desktop -->
@@ -147,7 +154,7 @@
 
       <span slot="createTime" slot-scope="createTime">
         <a-tooltip placement="top">
-          <template slot="title">
+          <template #title>
             {{ createTime | moment }}
           </template>
           {{ createTime | timeAgo }}

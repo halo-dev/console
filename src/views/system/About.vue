@@ -4,24 +4,26 @@
       <a-col :span="24">
         <a-card :bordered="false" :bodyStyle="{ padding: '16px' }">
           <a-card :bordered="false" class="environment-info" :bodyStyle="{ padding: '16px' }">
-            <template slot="title">
+            <template #title>
               环境信息
               <a href="javascript:void(0);" @click="handleCopyEnvironments">
                 <a-icon type="copy" />
               </a>
             </template>
-            <a-popover slot="extra" placement="left" :title="isLatest ? '当前为最新版本' : '有新版本'">
-              <template slot="content">
-                <p>{{ versionMessage }}</p>
-                <a-button type="dashed" @click="handleShowVersionContent">查看详情</a-button>
-              </template>
-              <a-button
-                :loading="checking"
-                type="dashed"
-                shape="circle"
-                :icon="isLatest ? 'check-circle' : 'exclamation-circle'"
-              ></a-button>
-            </a-popover>
+            <template #extra>
+              <a-popover placement="left" :title="isLatest ? '当前为最新版本' : '有新版本'">
+                <template #content>
+                  <p>{{ versionMessage }}</p>
+                  <a-button type="dashed" @click="handleShowVersionContent">查看详情</a-button>
+                </template>
+                <a-button
+                  :loading="checking"
+                  type="dashed"
+                  shape="circle"
+                  :icon="isLatest ? 'check-circle' : 'exclamation-circle'"
+                ></a-button>
+              </a-popover>
+            </template>
 
             <ul class="p-0 m-0 list-none">
               <li>版本：{{ environments.version }}</li>

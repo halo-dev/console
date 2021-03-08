@@ -1,6 +1,6 @@
 <template>
   <page-view affix :title="sheetToStage.title ? sheetToStage.title : '新页面'">
-    <template slot="extra">
+    <template #extra>
       <a-space>
         <ReactiveButton
           type="danger"

@@ -1,6 +1,6 @@
 <template>
   <page-view :title="advancedOptions ? '高级选项' : '基础选项'">
-    <template slot="extra">
+    <template #extra>
       <a-button type="link" @click="advancedOptions = !advancedOptions" style="padding:0">
         切换到{{ advancedOptions ? '基础选项' : '高级选项' }}
       </a-button>
@@ -10,7 +10,9 @@
         <div class="card-container">
           <a-tabs type="card" class="general" v-if="!advancedOptions">
             <a-tab-pane key="general">
-              <span slot="tab"> <a-icon type="tool" />常规设置 </span>
+              <template #tab>
+                <span> <a-icon type="tool" />常规设置 </span>
+              </template>
               <GeneralTab
                 :options="options"
                 @onChange="onOptionsChange"
@@ -21,7 +23,9 @@
               />
             </a-tab-pane>
             <a-tab-pane key="seo">
-              <span slot="tab"> <a-icon type="global" />SEO 设置 </span>
+              <template #tab>
+                <span> <a-icon type="global" />SEO 设置 </span>
+              </template>
               <SeoTab
                 :options="options"
                 @onChange="onOptionsChange"
@@ -32,7 +36,9 @@
               />
             </a-tab-pane>
             <a-tab-pane key="post">
-              <span slot="tab"> <a-icon type="form" />文章设置 </span>
+              <template #tab>
+                <span> <a-icon type="form" />文章设置 </span>
+              </template>
               <PostTab
                 :options="options"
                 @onChange="onOptionsChange"
@@ -43,7 +49,9 @@
               />
             </a-tab-pane>
             <a-tab-pane key="comment">
-              <span slot="tab"> <a-icon type="message" />评论设置 </span>
+              <template #tab>
+                <span> <a-icon type="message" />评论设置 </span>
+              </template>
               <CommentTab
                 :options="options"
                 @onChange="onOptionsChange"
@@ -54,7 +62,9 @@
               />
             </a-tab-pane>
             <a-tab-pane key="attachment">
-              <span slot="tab"> <a-icon type="picture" />附件设置 </span>
+              <template #tab>
+                <span> <a-icon type="picture" />附件设置 </span>
+              </template>
               <AttachmentTab
                 :options="options"
                 @onChange="onOptionsChange"
@@ -65,7 +75,9 @@
               />
             </a-tab-pane>
             <a-tab-pane key="smtp">
-              <span slot="tab"> <a-icon type="mail" />SMTP 服务 </span>
+              <template #tab>
+                <span> <a-icon type="mail" />SMTP 服务 </span>
+              </template>
               <SmtpTab
                 :options="options"
                 @onChange="onOptionsChange"
@@ -76,7 +88,9 @@
               />
             </a-tab-pane>
             <a-tab-pane key="other">
-              <span slot="tab"> <a-icon type="align-left" />其他设置 </span>
+              <template #tab>
+                <span> <a-icon type="align-left" />其他设置 </span>
+              </template>
               <OtherTab
                 :options="options"
                 @onChange="onOptionsChange"
@@ -90,7 +104,9 @@
 
           <a-tabs type="card" class="advanced" v-else>
             <a-tab-pane key="permalink">
-              <span slot="tab"> <a-icon type="link" />固定链接 </span>
+              <template #tab>
+                <span> <a-icon type="link" />固定链接 </span>
+              </template>
               <PermalinkTab
                 :options="options"
                 @onChange="onOptionsChange"
@@ -101,7 +117,9 @@
               />
             </a-tab-pane>
             <a-tab-pane key="api">
-              <span slot="tab"> <a-icon type="api" />API 设置 </span>
+              <template #tab>
+                <span> <a-icon type="api" />API 设置 </span>
+              </template>
               <ApiTab
                 :options="options"
                 @onChange="onOptionsChange"
@@ -112,7 +130,9 @@
               />
             </a-tab-pane>
             <a-tab-pane key="advanced-other">
-              <span slot="tab"> <a-icon type="align-left" />其他设置 </span>
+              <template #tab>
+                <span> <a-icon type="align-left" />其他设置 </span>
+              </template>
               <AdvancedOtherTab
                 :options="options"
                 @onChange="onOptionsChange"

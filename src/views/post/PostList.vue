@@ -51,38 +51,42 @@
           <a-button type="primary" icon="plus">写文章</a-button>
         </router-link>
         <a-dropdown v-show="queryParam.status != null && queryParam.status != '' && !isMobile()">
-          <a-menu slot="overlay">
-            <a-menu-item key="1" v-if="queryParam.status === 'DRAFT' || queryParam.status === 'RECYCLE'">
-              <a href="javascript:void(0);" @click="handleEditStatusMore(postStatus.PUBLISHED.value)">
-                <span>发布</span>
-              </a>
-            </a-menu-item>
-            <a-menu-item
-              key="2"
-              v-if="
-                queryParam.status === 'PUBLISHED' || queryParam.status === 'DRAFT' || queryParam.status === 'INTIMATE'
-              "
-            >
-              <a href="javascript:void(0);" @click="handleEditStatusMore(postStatus.RECYCLE.value)">
-                <span>移到回收站</span>
-              </a>
-            </a-menu-item>
-            <a-menu-item
-              key="3"
-              v-if="
-                queryParam.status === 'RECYCLE' || queryParam.status === 'PUBLISHED' || queryParam.status === 'INTIMATE'
-              "
-            >
-              <a href="javascript:void(0);" @click="handleEditStatusMore(postStatus.DRAFT.value)">
-                <span>草稿</span>
-              </a>
-            </a-menu-item>
-            <a-menu-item key="4" v-if="queryParam.status === 'RECYCLE' || queryParam.status === 'DRAFT'">
-              <a href="javascript:void(0);" @click="handleDeleteMore">
-                <span>永久删除</span>
-              </a>
-            </a-menu-item>
-          </a-menu>
+          <template #overlay>
+            <a-menu>
+              <a-menu-item key="1" v-if="queryParam.status === 'DRAFT' || queryParam.status === 'RECYCLE'">
+                <a href="javascript:void(0);" @click="handleEditStatusMore(postStatus.PUBLISHED.value)">
+                  <span>发布</span>
+                </a>
+              </a-menu-item>
+              <a-menu-item
+                key="2"
+                v-if="
+                  queryParam.status === 'PUBLISHED' || queryParam.status === 'DRAFT' || queryParam.status === 'INTIMATE'
+                "
+              >
+                <a href="javascript:void(0);" @click="handleEditStatusMore(postStatus.RECYCLE.value)">
+                  <span>移到回收站</span>
+                </a>
+              </a-menu-item>
+              <a-menu-item
+                key="3"
+                v-if="
+                  queryParam.status === 'RECYCLE' ||
+                    queryParam.status === 'PUBLISHED' ||
+                    queryParam.status === 'INTIMATE'
+                "
+              >
+                <a href="javascript:void(0);" @click="handleEditStatusMore(postStatus.DRAFT.value)">
+                  <span>草稿</span>
+                </a>
+              </a-menu-item>
+              <a-menu-item key="4" v-if="queryParam.status === 'RECYCLE' || queryParam.status === 'DRAFT'">
+                <a href="javascript:void(0);" @click="handleDeleteMore">
+                  <span>永久删除</span>
+                </a>
+              </a-menu-item>
+            </a-menu>
+          </template>
           <a-button class="ml-2">
             批量操作
             <a-icon type="down" />
@@ -99,127 +103,134 @@
           :dataSource="formattedPosts"
           :loading="postsLoading"
         >
-          <a-list-item slot="renderItem" slot-scope="item, index" :key="index">
-            <template slot="actions">
-              <span>
-                <a-icon type="eye" />
-                {{ item.visits }}
-              </span>
-              <span @click="handleShowPostComments(item)">
-                <a-icon type="message" />
-                {{ item.commentCount }}
-              </span>
-              <a-dropdown placement="topLeft" :trigger="['click']">
+          <template #renderItem="{ item }">
+            <a-list-item>
+              <template #actions>
                 <span>
-                  <a-icon type="bars" />
+                  <a-icon type="eye" />
+                  {{ item.visits }}
                 </span>
-                <a-menu slot="overlay">
-                  <a-menu-item
-                    v-if="item.status === 'PUBLISHED' || item.status === 'DRAFT' || item.status === 'INTIMATE'"
-                  >
-                    <a href="javascript:;" @click="handleEditClick(item)">编辑</a>
-                  </a-menu-item>
-                  <a-menu-item v-else-if="item.status === 'RECYCLE'">
-                    <a-popconfirm
-                      :title="'你确定要发布【' + item.title + '】文章？'"
-                      @confirm="handleEditStatusClick(item.id, 'PUBLISHED')"
-                      okText="确定"
-                      cancelText="取消"
-                    >
-                      <a href="javascript:;">还原</a>
-                    </a-popconfirm>
-                  </a-menu-item>
-                  <a-menu-item
-                    v-if="item.status === 'PUBLISHED' || item.status === 'DRAFT' || item.status === 'INTIMATE'"
-                  >
-                    <a-popconfirm
-                      :title="'你确定要将【' + item.title + '】文章移到回收站？'"
-                      @confirm="handleEditStatusClick(item.id, 'RECYCLE')"
-                      okText="确定"
-                      cancelText="取消"
-                    >
-                      <a href="javascript:;">回收站</a>
-                    </a-popconfirm>
-                  </a-menu-item>
-                  <a-menu-item v-else-if="item.status === 'RECYCLE'">
-                    <a-popconfirm
-                      :title="'你确定要永久删除【' + item.title + '】文章？'"
-                      @confirm="handleDeleteClick(item.id)"
-                      okText="确定"
-                      cancelText="取消"
-                    >
-                      <a href="javascript:;">删除</a>
-                    </a-popconfirm>
-                  </a-menu-item>
-                  <a-menu-item>
-                    <a rel="noopener noreferrer" href="javascript:void(0);" @click="handleShowPostSettings(item)"
-                      >设置</a
-                    >
-                  </a-menu-item>
-                </a-menu>
-              </a-dropdown>
-            </template>
-            <template slot="extra">
-              <span>
-                <a-badge :status="item.statusProperty.status" :text="item.statusProperty.text" />
-              </span>
-            </template>
-            <a-list-item-meta>
-              <template slot="description">
-                {{ item.createTime | moment }}
+                <span @click="handleShowPostComments(item)">
+                  <a-icon type="message" />
+                  {{ item.commentCount }}
+                </span>
+                <a-dropdown placement="topLeft" :trigger="['click']">
+                  <span>
+                    <a-icon type="bars" />
+                  </span>
+                  <template #overlay>
+                    <a-menu>
+                      <a-menu-item
+                        v-if="item.status === 'PUBLISHED' || item.status === 'DRAFT' || item.status === 'INTIMATE'"
+                      >
+                        <a href="javascript:;" @click="handleEditClick(item)">编辑</a>
+                      </a-menu-item>
+                      <a-menu-item v-else-if="item.status === 'RECYCLE'">
+                        <a-popconfirm
+                          :title="'你确定要发布【' + item.title + '】文章？'"
+                          @confirm="handleEditStatusClick(item.id, 'PUBLISHED')"
+                          okText="确定"
+                          cancelText="取消"
+                        >
+                          <a href="javascript:;">还原</a>
+                        </a-popconfirm>
+                      </a-menu-item>
+                      <a-menu-item
+                        v-if="item.status === 'PUBLISHED' || item.status === 'DRAFT' || item.status === 'INTIMATE'"
+                      >
+                        <a-popconfirm
+                          :title="'你确定要将【' + item.title + '】文章移到回收站？'"
+                          @confirm="handleEditStatusClick(item.id, 'RECYCLE')"
+                          okText="确定"
+                          cancelText="取消"
+                        >
+                          <a href="javascript:;">回收站</a>
+                        </a-popconfirm>
+                      </a-menu-item>
+                      <a-menu-item v-else-if="item.status === 'RECYCLE'">
+                        <a-popconfirm
+                          :title="'你确定要永久删除【' + item.title + '】文章？'"
+                          @confirm="handleDeleteClick(item.id)"
+                          okText="确定"
+                          cancelText="取消"
+                        >
+                          <a href="javascript:;">删除</a>
+                        </a-popconfirm>
+                      </a-menu-item>
+                      <a-menu-item>
+                        <a rel="noopener noreferrer" href="javascript:void(0);" @click="handleShowPostSettings(item)"
+                          >设置</a
+                        >
+                      </a-menu-item>
+                    </a-menu>
+                  </template>
+                </a-dropdown>
               </template>
-              <span
-                slot="title"
-                style="max-width: 300px;display: block;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"
+              <template #extra>
+                <span>
+                  <a-badge :status="item.statusProperty.status" :text="item.statusProperty.text" />
+                </span>
+              </template>
+              <a-list-item-meta>
+                <template #description>
+                  {{ item.createTime | moment }}
+                </template>
+                <template #title>
+                  <span
+                    style="max-width: 300px;display: block;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"
+                  >
+                    <a-icon
+                      type="pushpin"
+                      v-if="item.topPriority != 0"
+                      theme="twoTone"
+                      twoToneColor="red"
+                      style="margin-right: 3px;"
+                    />
+                    <a
+                      v-if="item.status == 'PUBLISHED' || item.status == 'INTIMATE'"
+                      :href="item.fullPath"
+                      target="_blank"
+                      class="no-underline"
+                    >
+                      <a-tooltip placement="top" :title="'点击访问【' + item.title + '】'">{{ item.title }}</a-tooltip>
+                    </a>
+                    <a
+                      v-else-if="item.status == 'DRAFT'"
+                      href="javascript:void(0)"
+                      class="no-underline"
+                      @click="handlePreview(item.id)"
+                    >
+                      <a-tooltip placement="topLeft" :title="'点击预览【' + item.title + '】'">{{
+                        item.title
+                      }}</a-tooltip>
+                    </a>
+                    <a v-else href="javascript:void(0);" class="no-underline" disabled>
+                      {{ item.title }}
+                    </a>
+                  </span>
+                </template>
+              </a-list-item-meta>
+              <span> {{ item.summary }}... </span>
+              <br />
+              <br />
+              <a-tag
+                v-for="(category, categoryIndex) in item.categories"
+                :key="'category_' + categoryIndex"
+                color="blue"
+                @click="handleSelectCategory(category)"
+                style="margin-bottom: 8px"
+                >{{ category.name }}</a-tag
               >
-                <a-icon
-                  type="pushpin"
-                  v-if="item.topPriority != 0"
-                  theme="twoTone"
-                  twoToneColor="red"
-                  style="margin-right: 3px;"
-                />
-                <a
-                  v-if="item.status == 'PUBLISHED' || item.status == 'INTIMATE'"
-                  :href="item.fullPath"
-                  target="_blank"
-                  class="no-underline"
-                >
-                  <a-tooltip placement="top" :title="'点击访问【' + item.title + '】'">{{ item.title }}</a-tooltip>
-                </a>
-                <a
-                  v-else-if="item.status == 'DRAFT'"
-                  href="javascript:void(0)"
-                  class="no-underline"
-                  @click="handlePreview(item.id)"
-                >
-                  <a-tooltip placement="topLeft" :title="'点击预览【' + item.title + '】'">{{ item.title }}</a-tooltip>
-                </a>
-                <a v-else href="javascript:void(0);" class="no-underline" disabled>
-                  {{ item.title }}
-                </a>
-              </span>
-            </a-list-item-meta>
-            <span> {{ item.summary }}... </span>
-            <br />
-            <br />
-            <a-tag
-              v-for="(category, categoryIndex) in item.categories"
-              :key="'category_' + categoryIndex"
-              color="blue"
-              @click="handleSelectCategory(category)"
-              style="margin-bottom: 8px"
-              >{{ category.name }}</a-tag
-            >
-            <br />
-            <a-tag
-              v-for="(tag, tagIndex) in item.tags"
-              :key="'tag_' + tagIndex"
-              color="green"
-              style="margin-bottom: 8px"
-              >{{ tag.name }}</a-tag
-            >
-          </a-list-item>
+              <br />
+              <a-tag
+                v-for="(tag, tagIndex) in item.tags"
+                :key="'tag_' + tagIndex"
+                color="green"
+                style="margin-bottom: 8px"
+                >{{ tag.name }}</a-tag
+              >
+            </a-list-item>
+          </template>
         </a-list>
 
         <!-- Desktop -->
@@ -311,7 +322,7 @@
 
           <span slot="createTime" slot-scope="createTime">
             <a-tooltip placement="top">
-              <template slot="title">
+              <template #title>
                 {{ createTime | moment }}
               </template>
               {{ createTime | timeAgo }}

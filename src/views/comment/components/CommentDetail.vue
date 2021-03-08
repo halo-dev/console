@@ -12,52 +12,74 @@
         <a-list itemLayout="horizontal">
           <a-list-item>
             <a-list-item-meta :description="comment.author">
-              <span slot="title">评论者昵称：</span>
+              <template #title>
+                <span>评论者昵称：</span>
+              </template>
             </a-list-item-meta>
           </a-list-item>
           <a-list-item>
             <a-list-item-meta :description="comment.email">
-              <span slot="title">评论者邮箱：</span>
+              <template #title>
+                <span>评论者邮箱：</span>
+              </template>
             </a-list-item-meta>
           </a-list-item>
           <a-list-item>
             <a-list-item-meta :description="comment.ipAddress">
-              <span slot="title">评论者 IP：</span>
+              <template #title>
+                <span>评论者 IP：</span>
+              </template>
             </a-list-item-meta>
           </a-list-item>
           <a-list-item>
             <a-list-item-meta>
-              <a slot="description" target="_blank" :href="comment.authorUrl">{{ comment.authorUrl }}</a>
-              <span slot="title">评论者网址：</span>
+              <template #description>
+                <a target="_blank" :href="comment.authorUrl">{{ comment.authorUrl }}</a>
+              </template>
+              <template #title>
+                <span>评论者网址：</span>
+              </template>
             </a-list-item-meta>
           </a-list-item>
           <a-list-item>
             <a-list-item-meta>
-              <span slot="description">
-                <a-badge :status="comment.statusProperty.status" :text="comment.statusProperty.text" />
-              </span>
-              <span slot="title">评论状态：</span>
+              <template #description>
+                <span>
+                  <a-badge :status="comment.statusProperty.status" :text="comment.statusProperty.text" />
+                </span>
+              </template>
+              <template #title>
+                <span>评论状态：</span>
+              </template>
             </a-list-item-meta>
           </a-list-item>
           <a-list-item>
             <a-list-item-meta>
-              <a slot="description" target="_blank" :href="comment.post.fullPath" v-if="this.type == 'posts'">{{
-                comment.post.title
-              }}</a>
-              <a slot="description" target="_blank" :href="comment.sheet.fullPath" v-else-if="this.type == 'sheets'">{{
-                comment.sheet.title
-              }}</a>
-              <span slot="title" v-if="this.type == 'posts'">评论文章：</span>
-              <span slot="title" v-else-if="this.type == 'sheets'">评论页面：</span>
+              <template #description v-if="this.type == 'posts'">
+                <a target="_blank" :href="comment.post.fullPath">{{ comment.post.title }}</a>
+              </template>
+              <template #description v-else-if="this.type == 'sheets'">
+                <a target="_blank" :href="comment.sheet.fullPath">{{ comment.sheet.title }}</a>
+              </template>
+              <template #title v-if="this.type == 'posts'">
+                <span>评论文章：</span>
+              </template>
+              <template #title v-else-if="this.type == 'sheets'">
+                <span>评论页面：</span>
+              </template>
             </a-list-item-meta>
           </a-list-item>
           <a-list-item>
             <a-list-item-meta>
-              <template slot="description" v-if="editable">
+              <template #description v-if="editable">
                 <a-input type="textarea" :autoSize="{ minRows: 5 }" v-model="comment.content" />
               </template>
-              <span slot="description" v-html="comment.content" v-else></span>
-              <span slot="title">评论内容：</span>
+              <template #description>
+                <span v-html="comment.content" v-else></span>
+              </template>
+              <template #title>
+                <span>评论内容：</span>
+              </template>
             </a-list-item-meta>
           </a-list-item>
         </a-list>

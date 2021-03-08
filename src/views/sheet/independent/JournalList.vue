@@ -38,52 +38,58 @@
           <div class="mt-4">
             <a-empty v-if="!list.loading && list.data.length == 0" />
             <a-list v-else itemLayout="vertical" :pagination="false" :dataSource="list.data" :loading="list.loading">
-              <a-list-item slot="renderItem" slot-scope="item, index" :key="index">
-                <template slot="actions">
-                  <span>
-                    <a href="javascript:void(0);">
-                      <a-icon type="like-o" />
-                      {{ item.likes }}
-                    </a>
-                  </span>
-                  <span>
-                    <a href="javascript:void(0);" @click="handleOpenJournalCommentsDrawer(item)">
-                      <a-icon type="message" />
-                      {{ item.commentCount }}
-                    </a>
-                  </span>
-                  <span v-if="item.type == 'INTIMATE'">
-                    <a href="javascript:void(0);" disabled>
-                      <a-icon type="lock" />
-                    </a>
-                  </span>
-                  <span v-else>
-                    <a href="javascript:void(0);">
-                      <a-icon type="unlock" />
-                    </a>
-                  </span>
-                </template>
-                <template slot="extra">
-                  <a href="javascript:void(0);" @click="handleOpenEditModal(item)">编辑</a>
-                  <a-divider type="vertical" />
-                  <a-popconfirm
-                    title="你确定要删除这条日志？"
-                    @confirm="handleDelete(item.id)"
-                    okText="确定"
-                    cancelText="取消"
-                  >
-                    <a href="javascript:void(0);">删除</a>
-                  </a-popconfirm>
-                </template>
-
-                <a-list-item-meta>
-                  <template slot="description">
-                    <p v-html="item.content" class="journal-list-content"></p>
+              <template #renderItem="{ item }">
+                <a-list-item>
+                  <template #actions>
+                    <span>
+                      <a href="javascript:void(0);">
+                        <a-icon type="like-o" />
+                        {{ item.likes }}
+                      </a>
+                    </span>
+                    <span>
+                      <a href="javascript:void(0);" @click="handleOpenJournalCommentsDrawer(item)">
+                        <a-icon type="message" />
+                        {{ item.commentCount }}
+                      </a>
+                    </span>
+                    <span v-if="item.type == 'INTIMATE'">
+                      <a href="javascript:void(0);" disabled>
+                        <a-icon type="lock" />
+                      </a>
+                    </span>
+                    <span v-else>
+                      <a href="javascript:void(0);">
+                        <a-icon type="unlock" />
+                      </a>
+                    </span>
                   </template>
-                  <span slot="title">{{ item.createTime | moment }}</span>
-                  <a-avatar slot="avatar" size="large" :src="user.avatar" />
-                </a-list-item-meta>
-              </a-list-item>
+                  <template #extra>
+                    <a href="javascript:void(0);" @click="handleOpenEditModal(item)">编辑</a>
+                    <a-divider type="vertical" />
+                    <a-popconfirm
+                      title="你确定要删除这条日志？"
+                      @confirm="handleDelete(item.id)"
+                      okText="确定"
+                      cancelText="取消"
+                    >
+                      <a href="javascript:void(0);">删除</a>
+                    </a-popconfirm>
+                  </template>
+
+                  <a-list-item-meta>
+                    <template #description>
+                      <p v-html="item.content" class="journal-list-content"></p>
+                    </template>
+                    <template #title>
+                      <span>{{ item.createTime | moment }}</span>
+                    </template>
+                    <template #avatar>
+                      <a-avatar size="large" :src="user.avatar" />
+                    </template>
+                  </a-list-item-meta>
+                </a-list-item>
+              </template>
               <div class="page-wrapper">
                 <a-pagination
                   class="pagination"
@@ -113,7 +119,7 @@
       ></a-button>
     </div>
     <a-modal v-model="optionModal.visible" title="页面设置" :afterClose="() => (optionModal.visible = false)">
-      <template slot="footer">
+      <template #footer>
         <a-button key="submit" type="primary" @click="handleSaveOptions()">保存</a-button>
       </template>
       <a-form layout="vertical">
@@ -128,13 +134,13 @@
 
     <!-- 编辑日志弹窗 -->
     <a-modal v-model="form.visible">
-      <template slot="title">
+      <template #title>
         {{ formTitle }}
         <a-tooltip slot="action" title="只能输入250字">
           <a-icon type="info-circle-o" />
         </a-tooltip>
       </template>
-      <template slot="footer">
+      <template #footer>
         <a-button type="dashed" @click="attachmentDrawer.visible = true">附件库</a-button>
         <ReactiveButton
           type="primary"

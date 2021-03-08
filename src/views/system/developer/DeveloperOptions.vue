@@ -5,23 +5,33 @@
         <div class="card-container" v-if="options.developer_mode">
           <a-tabs type="card">
             <a-tab-pane key="environment">
-              <span slot="tab"> <a-icon type="safety" />运行环境 </span>
+              <template #tab>
+                <span> <a-icon type="safety" />运行环境 </span>
+              </template>
               <Environment />
             </a-tab-pane>
             <a-tab-pane key="runtimeLogs">
-              <span slot="tab"> <a-icon type="code" />实时日志 </span>
+              <template #tab>
+                <span> <a-icon type="code" />实时日志 </span>
+              </template>
               <RuntimeLogs />
             </a-tab-pane>
             <a-tab-pane key="optionsList">
-              <span slot="tab"> <a-icon type="table" />系统变量 </span>
+              <template #tab>
+                <span> <a-icon type="table" />系统变量 </span>
+              </template>
               <OptionsList />
             </a-tab-pane>
             <a-tab-pane key="staticStorage">
-              <span slot="tab"> <a-icon type="cloud" />静态存储 </span>
+              <template #tab>
+                <span> <a-icon type="cloud" />静态存储 </span>
+              </template>
               <StaticStorage />
             </a-tab-pane>
             <a-tab-pane key="settings">
-              <span slot="tab"> <a-icon type="setting" />设置 </span>
+              <template #tab>
+                <span> <a-icon type="setting" />设置 </span>
+              </template>
               <SettingsForm />
             </a-tab-pane>
           </a-tabs>

@@ -8,49 +8,55 @@
     :overlayStyle="{ width: '300px', top: '50px' }"
     title="待审核评论"
   >
-    <template slot="content">
+    <template #content>
       <div class="custom-tab-wrapper">
         <a-tabs v-model="activeKey" @change="handleTabsChanged">
           <a-tab-pane tab="文章" key="post">
             <a-list :loading="postCommentsLoading" :dataSource="converttedPostComments">
-              <a-list-item slot="renderItem" slot-scope="item">
-                <a-list-item-meta>
-                  <a-avatar
-                    class="bg-white"
-                    slot="avatar"
-                    :src="'//cn.gravatar.com/avatar/' + item.gravatarMd5 + '&d=mm'"
-                    size="large"
-                  />
-                  <template slot="title">
-                    <a :href="item.authorUrl" target="_blank">{{ item.author }}</a
-                    >：<span v-html="item.content"></span>
-                  </template>
-                  <template slot="description">
-                    {{ item.createTime | timeAgo }}
-                  </template>
-                </a-list-item-meta>
-              </a-list-item>
+              <template #renderItem="{ item }">
+                <a-list-item>
+                  <a-list-item-meta>
+                    <template #avatar>
+                      <a-avatar
+                        class="bg-white"
+                        :src="'//cn.gravatar.com/avatar/' + item.gravatarMd5 + '&d=mm'"
+                        size="large"
+                      />
+                    </template>
+                    <template #title>
+                      <a :href="item.authorUrl" target="_blank">{{ item.author }}</a
+                      >：<span v-html="item.content"></span>
+                    </template>
+                    <template #description>
+                      {{ item.createTime | timeAgo }}
+                    </template>
+                  </a-list-item-meta>
+                </a-list-item>
+              </template>
             </a-list>
           </a-tab-pane>
           <a-tab-pane tab="页面" key="sheet">
             <a-list :loading="sheetCommentsLoading" :dataSource="converttedSheetComments">
-              <a-list-item slot="renderItem" slot-scope="item">
-                <a-list-item-meta>
-                  <a-avatar
-                    class="bg-white"
-                    slot="avatar"
-                    :src="'//cn.gravatar.com/avatar/' + item.gravatarMd5 + '&d=mm'"
-                    size="large"
-                  />
-                  <template slot="title">
-                    <a :href="item.authorUrl" target="_blank">{{ item.author }}</a
-                    >：<span v-html="item.content"></span>
-                  </template>
-                  <template slot="description">
-                    {{ item.createTime | timeAgo }}
-                  </template>
-                </a-list-item-meta>
-              </a-list-item>
+              <template #renderItem="{ item }">
+                <a-list-item>
+                  <a-list-item-meta>
+                    <template #avatar>
+                      <a-avatar
+                        class="bg-white"
+                        :src="'//cn.gravatar.com/avatar/' + item.gravatarMd5 + '&d=mm'"
+                        size="large"
+                      />
+                    </template>
+                    <template #title>
+                      <a :href="item.authorUrl" target="_blank">{{ item.author }}</a
+                      >：<span v-html="item.content"></span>
+                    </template>
+                    <template #description>
+                      {{ item.createTime | timeAgo }}
+                    </template>
+                  </a-list-item-meta>
+                </a-list-item>
+              </template>
             </a-list>
           </a-tab-pane>
         </a-tabs>
