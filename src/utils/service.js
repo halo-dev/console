@@ -1,5 +1,4 @@
 import axios from 'axios'
-import Vue from 'vue'
 import { message, notification } from 'ant-design-vue'
 import store from '@/store'
 import { isObject } from './util'

@@ -194,10 +194,10 @@ export default {
   @apply bg-white;
   padding: 0 5px;
 }
-::v-deep .ant-list-item-action {
+:deep .ant-list-item-action {
   display: none;
 }
-::v-deep .menu-item:hover .ant-list-item-action {
+:deep .menu-item:hover .ant-list-item-action {
   display: block;
 }
 </style>

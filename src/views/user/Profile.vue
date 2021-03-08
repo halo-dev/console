@@ -44,20 +44,20 @@
             <a-tabs type="card">
               <a-tab-pane key="1">
                 <span slot="tab"> <a-icon type="idcard" />基本资料 </span>
-                <a-form-model ref="userForm" :model="userForm.model" :rules="userForm.rules" layout="vertical">
-                  <a-form-model-item label="用户名：" prop="username">
+                <a-form ref="userForm" :model="userForm.model" :rules="userForm.rules" layout="vertical">
+                  <a-form-item label="用户名：" prop="username">
                     <a-input v-model="userForm.model.username" />
-                  </a-form-model-item>
-                  <a-form-model-item label="昵称：" prop="nickname">
+                  </a-form-item>
+                  <a-form-item label="昵称：" prop="nickname">
                     <a-input v-model="userForm.model.nickname" />
-                  </a-form-model-item>
-                  <a-form-model-item label="电子邮箱：" prop="email">
+                  </a-form-item>
+                  <a-form-item label="电子邮箱：" prop="email">
                     <a-input v-model="userForm.model.email" />
-                  </a-form-model-item>
-                  <a-form-model-item label="个人说明：" prop="description">
+                  </a-form-item>
+                  <a-form-item label="个人说明：" prop="description">
                     <a-input :autoSize="{ minRows: 5 }" type="textarea" v-model="userForm.model.description" />
-                  </a-form-model-item>
-                  <a-form-model-item>
+                  </a-form-item>
+                  <a-form-item>
                     <ReactiveButton
                       type="primary"
                       @click="handleUpdateProfile"
@@ -68,27 +68,27 @@
                       loadedText="保存成功"
                       erroredText="保存失败"
                     ></ReactiveButton>
-                  </a-form-model-item>
-                </a-form-model>
+                  </a-form-item>
+                </a-form>
               </a-tab-pane>
               <a-tab-pane key="2">
                 <span slot="tab"> <a-icon type="lock" />密码 </span>
-                <a-form-model
+                <a-form
                   ref="passwordForm"
                   :model="passwordForm.model"
                   :rules="passwordForm.rules"
                   layout="vertical"
                 >
-                  <a-form-model-item label="原密码：" prop="oldPassword">
+                  <a-form-item label="原密码：" prop="oldPassword">
                     <a-input-password v-model="passwordForm.model.oldPassword" autocomplete="new-password" />
-                  </a-form-model-item>
-                  <a-form-model-item label="新密码：" prop="newPassword">
+                  </a-form-item>
+                  <a-form-item label="新密码：" prop="newPassword">
                     <a-input-password v-model="passwordForm.model.newPassword" autocomplete="new-password" />
-                  </a-form-model-item>
-                  <a-form-model-item label="确认密码：" prop="confirmPassword">
+                  </a-form-item>
+                  <a-form-item label="确认密码：" prop="confirmPassword">
                     <a-input-password v-model="passwordForm.model.confirmPassword" autocomplete="new-password" />
-                  </a-form-model-item>
-                  <a-form-model-item>
+                  </a-form-item>
+                  <a-form-item>
                     <ReactiveButton
                       type="primary"
                       @click="handleUpdatePassword"
@@ -99,20 +99,20 @@
                       loadedText="更改成功"
                       erroredText="更改失败"
                     ></ReactiveButton>
-                  </a-form-model-item>
-                </a-form-model>
+                  </a-form-item>
+                </a-form>
               </a-tab-pane>
               <a-tab-pane key="3">
                 <span slot="tab"> <a-icon type="safety-certificate" />两步验证 </span>
-                <a-form-model layout="vertical">
-                  <a-form-model-item label="两步验证：">
+                <a-form layout="vertical">
+                  <a-form-item label="两步验证：">
                     <a-switch
                       v-model="mfaParam.switch.checked"
                       :loading="mfaParam.switch.loading"
                       @change="handleMFASwitch"
                     />
-                  </a-form-model-item>
-                  <a-form-model-item label="两步验证应用：">
+                  </a-form-item>
+                  <a-form-item label="两步验证应用：">
                     <a-list itemLayout="horizontal">
                       <a-list-item>
                         <b>Authy</b> 功能丰富 专为两步验证码
@@ -163,8 +163,8 @@
                         </a>
                       </a-list-item>
                     </a-list>
-                  </a-form-model-item>
-                </a-form-model>
+                  </a-form-item>
+                </a-form>
               </a-tab-pane>
             </a-tabs>
           </div>
@@ -207,26 +207,26 @@
           erroredText="设置失败"
         ></ReactiveButton>
       </template>
-      <a-form-model ref="mfaForm" :model="mfaParam" :rules="mfaParam.rules" layout="vertical">
-        <a-form-model-item v-if="mfaUsed" label="两步验证码" prop="authcode">
+      <a-form ref="mfaForm" :model="mfaParam" :rules="mfaParam.rules" layout="vertical">
+        <a-form-item v-if="mfaUsed" label="两步验证码" prop="authcode">
           <a-input v-model="mfaParam.authcode" :maxLength="6">
             <a-icon slot="prefix" type="safety-certificate" style="color: rgba(0,0,0,.25)" />
           </a-input>
-        </a-form-model-item>
-        <a-form-model-item v-if="!mfaUsed" label="1. 请扫描二维码或导入 key" :help="`MFAKey:${mfaParam.mfaKey}`">
+        </a-form-item>
+        <a-form-item v-if="!mfaUsed" label="1. 请扫描二维码或导入 key" :help="`MFAKey:${mfaParam.mfaKey}`">
           <template slot="extra">
             <span class="text-red-600"
               >* 建议保存此二维码或 MFAKey，验证设备丢失将无法找回，只能通过重置密码关闭二步验证。</span
             >
           </template>
           <img width="100%" :src="mfaParam.qrImage" />
-        </a-form-model-item>
-        <a-form-model-item v-if="!mfaUsed" label="2. 验证两步验证码" prop="authcode">
+        </a-form-item>
+        <a-form-item v-if="!mfaUsed" label="2. 验证两步验证码" prop="authcode">
           <a-input v-model="mfaParam.authcode" :maxLength="6">
             <a-icon slot="prefix" type="safety-certificate" style="color: rgba(0,0,0,.25)" />
           </a-input>
-        </a-form-model-item>
-      </a-form-model>
+        </a-form-item>
+      </a-form>
     </a-modal>
   </div>
 </template>

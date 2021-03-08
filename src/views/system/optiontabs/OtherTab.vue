@@ -1,31 +1,31 @@
 <template>
   <div>
-    <a-form-model ref="otherOptionsForm" :model="options" :rules="rules" layout="vertical" :wrapperCol="wrapperCol">
-      <a-form-model-item label="自定义全局 head：">
+    <a-form ref="otherOptionsForm" :model="options" :rules="rules" layout="vertical" :wrapperCol="wrapperCol">
+      <a-form-item label="自定义全局 head：">
         <a-input
           type="textarea"
           :autoSize="{ minRows: 5 }"
           v-model="options.blog_custom_head"
           placeholder="放置于每个页面的 <head></head> 标签中"
         />
-      </a-form-model-item>
-      <a-form-model-item label="自定义内容页 head：">
+      </a-form-item>
+      <a-form-item label="自定义内容页 head：">
         <a-input
           type="textarea"
           :autoSize="{ minRows: 5 }"
           v-model="options.blog_custom_content_head"
           placeholder="仅放置于内容页面的 <head></head> 标签中"
         />
-      </a-form-model-item>
-      <a-form-model-item label="统计代码：">
+      </a-form-item>
+      <a-form-item label="统计代码：">
         <a-input
           type="textarea"
           :autoSize="{ minRows: 5 }"
           v-model="options.blog_statistics_code"
           placeholder="第三方网站统计的代码，如：Google Analytics、百度统计、CNZZ 等"
         />
-      </a-form-model-item>
-      <a-form-model-item>
+      </a-form-item>
+      <a-form-item>
         <ReactiveButton
           type="primary"
           @click="handleSaveOptions"
@@ -36,8 +36,8 @@
           loadedText="保存成功"
           erroredText="保存失败"
         ></ReactiveButton>
-      </a-form-model-item>
-    </a-form-model>
+      </a-form-item>
+    </a-form>
   </div>
 </template>
 <script>

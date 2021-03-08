@@ -3,21 +3,21 @@
     <a-row :gutter="12">
       <a-col :xl="10" :lg="10" :md="10" :sm="24" :xs="24" class="pb-3">
         <a-card :title="title" :bodyStyle="{ padding: '16px' }">
-          <a-form-model ref="tagForm" :model="form.model" :rules="form.rules" layout="horizontal">
-            <a-form-model-item label="名称：" help="* 页面上所显示的名称" prop="name">
+          <a-form ref="tagForm" :model="form.model" :rules="form.rules" layout="horizontal">
+            <a-form-item label="名称：" help="* 页面上所显示的名称" prop="name">
               <a-input v-model="form.model.name" />
-            </a-form-model-item>
-            <a-form-model-item label="别名：" help="* 一般为单个标签页面的标识，最好为英文" prop="slug">
+            </a-form-item>
+            <a-form-item label="别名：" help="* 一般为单个标签页面的标识，最好为英文" prop="slug">
               <a-input v-model="form.model.slug" />
-            </a-form-model-item>
-            <a-form-model-item label="封面图：" help="* 在标签页面可展示，需要主题支持" prop="thumbnail">
+            </a-form-item>
+            <a-form-item label="封面图：" help="* 在标签页面可展示，需要主题支持" prop="thumbnail">
               <a-input v-model="form.model.thumbnail">
                 <a href="javascript:void(0);" slot="addonAfter" @click="thumbnailDrawer.visible = true">
                   <a-icon type="picture" />
                 </a>
               </a-input>
-            </a-form-model-item>
-            <a-form-model-item>
+            </a-form-item>
+            <a-form-item>
               <ReactiveButton
                 v-if="!isUpdateMode"
                 type="primary"
@@ -51,8 +51,8 @@
               >
                 <a-button type="danger" class="float-right">删除</a-button>
               </a-popconfirm>
-            </a-form-model-item>
-          </a-form-model>
+            </a-form-item>
+          </a-form>
         </a-card>
       </a-col>
       <a-col :xl="14" :lg="14" :md="14" :sm="24" :xs="24" class="pb-3">

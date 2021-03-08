@@ -22,7 +22,7 @@
                 </a-radio-button>
               </a-radio-group>
             </div>
-            <a-form-model
+            <a-form
               class="installationForm animated fadeIn"
               ref="installationForm"
               :model="form.model"
@@ -33,45 +33,45 @@
               <a-divider orientation="left" dashed>
                 管理员信息
               </a-divider>
-              <a-form-model-item prop="username">
+              <a-form-item prop="username">
                 <a-input v-model="form.model.username" placeholder="用户名">
                   <a-icon slot="prefix" type="user" style="color: rgba(0,0,0,.25)" />
                 </a-input>
-              </a-form-model-item>
-              <a-form-model-item prop="username">
+              </a-form-item>
+              <a-form-item prop="username">
                 <a-input v-model="form.model.nickname" placeholder="用户昵称">
                   <a-icon slot="prefix" type="user" style="color: rgba(0,0,0,.25)" />
                 </a-input>
-              </a-form-model-item>
-              <a-form-model-item prop="email">
+              </a-form-item>
+              <a-form-item prop="email">
                 <a-input v-model="form.model.email" placeholder="用户邮箱">
                   <a-icon slot="prefix" type="mail" style="color: rgba(0,0,0,.25)" />
                 </a-input>
-              </a-form-model-item>
-              <a-form-model-item prop="password">
+              </a-form-item>
+              <a-form-item prop="password">
                 <a-input v-model="form.model.password" type="password" placeholder="登录密码（8-100位）">
                   <a-icon slot="prefix" type="lock" style="color: rgba(0,0,0,.25)" />
                 </a-input>
-              </a-form-model-item>
-              <a-form-model-item prop="confirmPassword">
+              </a-form-item>
+              <a-form-item prop="confirmPassword">
                 <a-input v-model="form.model.confirmPassword" type="password" placeholder="确认登录密码">
                   <a-icon slot="prefix" type="lock" style="color: rgba(0,0,0,.25)" />
                 </a-input>
-              </a-form-model-item>
+              </a-form-item>
               <a-divider orientation="left" dashed>
                 站点信息
               </a-divider>
-              <a-form-model-item prop="url">
+              <a-form-item prop="url">
                 <a-input v-model="form.model.url" placeholder="博客地址">
                   <a-icon slot="prefix" type="link" style="color: rgba(0,0,0,.25)" />
                 </a-input>
-              </a-form-model-item>
-              <a-form-model-item prop="title">
+              </a-form-item>
+              <a-form-item prop="title">
                 <a-input v-model="form.model.title" placeholder="博客标题">
                   <a-icon slot="prefix" type="book" style="color: rgba(0,0,0,.25)" />
                 </a-input>
-              </a-form-model-item>
-            </a-form-model>
+              </a-form-item>
+            </a-form>
 
             <!-- Data migration -->
             <div class="animated fadeIn" v-show="isImportMode">
@@ -266,7 +266,7 @@ export default {
 }
 </script>
 <style lang="less" scoped>
-::v-deep .installationForm {
+:deep .installationForm {
   .ant-divider {
     .ant-divider-inner-text {
       padding-left: 0;

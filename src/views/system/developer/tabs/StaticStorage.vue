@@ -85,11 +85,11 @@
           erroredText="创建失败"
         ></ReactiveButton>
       </template>
-      <a-form-model ref="directoryForm" :model="directoryForm.model" :rules="directoryForm.rules" layout="vertical">
-        <a-form-model-item prop="name" label="文件夹名：">
+      <a-form ref="directoryForm" :model="directoryForm.model" :rules="directoryForm.rules" layout="vertical">
+        <a-form-item prop="name" label="文件夹名：">
           <a-input ref="createDirectoryInput" v-model="directoryForm.model.name" @keyup.enter="handleCreateDirectory" />
-        </a-form-model-item>
-      </a-form-model>
+        </a-form-item>
+      </a-form>
     </a-modal>
     <a-modal v-model="renameForm.visible" :afterClose="onRenameModalClose" title="重命名">
       <template slot="footer">
@@ -103,11 +103,11 @@
           erroredText="重命名失败"
         ></ReactiveButton>
       </template>
-      <a-form-model ref="renameForm" :model="renameForm.model" :rules="renameForm.rules" layout="vertical">
-        <a-form-model-item prop="name" :label="list.selected.isFile ? '文件名：' : '文件夹名：'">
+      <a-form ref="renameForm" :model="renameForm.model" :rules="renameForm.rules" layout="vertical">
+        <a-form-item prop="name" :label="list.selected.isFile ? '文件名：' : '文件夹名：'">
           <a-input ref="renameModalInput" v-model="renameForm.model.name" @keyup.enter="handleRenameDirectoryOrFile" />
-        </a-form-model-item>
-      </a-form-model>
+        </a-form-item>
+      </a-form>
     </a-modal>
     <a-modal
       v-model="editContentForm.visible"

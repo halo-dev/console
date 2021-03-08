@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-form-model
+    <a-form
       labelAlign="left"
       ref="menuForm"
       :model="menuModel"
@@ -9,27 +9,27 @@
     >
       <a-row :gutter="24">
         <a-col :xl="8" :lg="8" :md="12" :sm="12" :xs="12">
-          <a-form-model-item label="名称" prop="name" help="* 页面上所显示的名称">
+          <a-form-item label="名称" prop="name" help="* 页面上所显示的名称">
             <a-input v-model="menuModel.name" autoFocus />
-          </a-form-model-item>
+          </a-form-item>
         </a-col>
         <a-col :xl="8" :lg="8" :md="12" :sm="12" :xs="12">
-          <a-form-model-item label="地址" prop="url" help="* 菜单的地址">
+          <a-form-item label="地址" prop="url" help="* 菜单的地址">
             <a-input v-model="menuModel.url" />
-          </a-form-model-item>
+          </a-form-item>
         </a-col>
         <a-col :xl="8" :lg="8" :md="12" :sm="12" :xs="12">
-          <a-form-model-item label="图标" prop="icon" help="* 请根据主题的支持情况选填">
+          <a-form-item label="图标" prop="icon" help="* 请根据主题的支持情况选填">
             <a-input v-model="menuModel.icon" />
-          </a-form-model-item>
+          </a-form-item>
         </a-col>
         <a-col :xl="8" :lg="8" :md="12" :sm="12" :xs="12">
-          <a-form-model-item label="打开方式" prop="target">
+          <a-form-item label="打开方式" prop="target">
             <a-radio-group v-model="menuModel.target" :options="targets" />
-          </a-form-model-item>
+          </a-form-item>
         </a-col>
         <a-col :xl="8" :lg="8" :md="12" :sm="12" :xs="12">
-          <a-form-model-item label=" " :colon="false">
+          <a-form-item label=" " :colon="false">
             <a-space>
               <ReactiveButton
                 type="primary"
@@ -43,10 +43,10 @@
               ></ReactiveButton>
               <a-button @click="handleCancel">取消</a-button>
             </a-space>
-          </a-form-model-item>
+          </a-form-item>
         </a-col>
       </a-row>
-    </a-form-model>
+    </a-form>
   </div>
 </template>
 <script>

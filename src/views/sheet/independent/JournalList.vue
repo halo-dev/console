@@ -147,19 +147,19 @@
           erroredText="发布失败"
         ></ReactiveButton>
       </template>
-      <a-form-model ref="journalForm" :model="form.model" :rules="form.rules" layout="vertical">
-        <a-form-model-item prop="sourceContent">
+      <a-form ref="journalForm" :model="form.model" :rules="form.rules" layout="vertical">
+        <a-form-item prop="sourceContent">
           <a-input
             ref="sourceContentInput"
             type="textarea"
             :autoSize="{ minRows: 8 }"
             v-model="form.model.sourceContent"
           />
-        </a-form-model-item>
-        <a-form-model-item>
+        </a-form-item>
+        <a-form-item>
           <a-switch checkedChildren="公开" unCheckedChildren="私密" v-model="form.isPublic" defaultChecked />
-        </a-form-model-item>
-      </a-form-model>
+        </a-form-item>
+      </a-form>
     </a-modal>
 
     <TargetCommentDrawer

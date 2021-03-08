@@ -1,13 +1,7 @@
 <template>
   <div>
-    <a-form-model
-      ref="loginForm"
-      :model="form.model"
-      :rules="form.rules"
-      layout="vertical"
-      @keyup.enter.native="handleLogin"
-    >
-      <a-form-model-item
+    <a-form ref="loginForm" :model="form.model" :rules="form.rules" layout="vertical" @keyup.enter.native="handleLogin">
+      <a-form-item
         v-if="!form.needAuthCode"
         class="animated fadeInUp"
         :style="{ 'animation-delay': '0.1s' }"
@@ -16,8 +10,8 @@
         <a-input placeholder="用户名/邮箱" v-model="form.model.username">
           <a-icon slot="prefix" type="user" style="color: rgba(0,0,0,.25)" />
         </a-input>
-      </a-form-model-item>
-      <a-form-model-item
+      </a-form-item>
+      <a-form-item
         v-if="!form.needAuthCode"
         class="animated fadeInUp"
         :style="{ 'animation-delay': '0.2s' }"
@@ -26,8 +20,8 @@
         <a-input v-model="form.model.password" type="password" placeholder="密码">
           <a-icon slot="prefix" type="lock" style="color: rgba(0,0,0,.25)" />
         </a-input>
-      </a-form-model-item>
-      <a-form-model-item
+      </a-form-item>
+      <a-form-item
         v-if="form.needAuthCode"
         class="animated fadeInUp"
         :style="{ 'animation-delay': '0.1s' }"
@@ -36,8 +30,8 @@
         <a-input placeholder="两步验证码" v-model="form.model.authcode" :maxLength="6">
           <a-icon slot="prefix" type="safety-certificate" style="color: rgba(0,0,0,.25)" />
         </a-input>
-      </a-form-model-item>
-      <a-form-model-item class="animated fadeInUp" :style="{ 'animation-delay': '0.3s' }">
+      </a-form-item>
+      <a-form-item class="animated fadeInUp" :style="{ 'animation-delay': '0.3s' }">
         <a-button
           :loading="form.logging"
           type="primary"
@@ -45,8 +39,8 @@
           @click="form.needAuthCode ? handleLogin() : handleLoginClick()"
           >{{ buttonName }}</a-button
         >
-      </a-form-model-item>
-    </a-form-model>
+      </a-form-item>
+    </a-form>
   </div>
 </template>
 <script>

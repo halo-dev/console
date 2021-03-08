@@ -273,11 +273,11 @@
           erroredText="回复失败"
         ></ReactiveButton>
       </template>
-      <a-form-model ref="replyCommentForm" :model="replyComment" :rules="replyCommentRules" layout="vertical">
-        <a-form-model-item prop="content">
+      <a-form ref="replyCommentForm" :model="replyComment" :rules="replyCommentRules" layout="vertical">
+        <a-form-item prop="content">
           <a-input ref="contentInput" type="textarea" :autoSize="{ minRows: 8 }" v-model.trim="replyComment.content" />
-        </a-form-model-item>
-      </a-form-model>
+        </a-form-item>
+      </a-form>
     </a-modal>
   </div>
 </template>

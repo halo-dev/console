@@ -91,8 +91,8 @@
       destroyOnClose
       @close="onDrawerClose"
     >
-      <a-form-model ref="photoForm" :model="form.model" :rules="form.rules" layout="vertical">
-        <a-form-model-item prop="url" label="图片地址：">
+      <a-form ref="photoForm" :model="form.model" :rules="form.rules" layout="vertical">
+        <a-form-item prop="url" label="图片地址：">
           <div class="pb-2">
             <img
               :src="form.model.url || '/images/placeholder.jpg'"
@@ -102,14 +102,14 @@
             />
           </div>
           <a-input v-model="form.model.url" placeholder="点击封面图选择图片，或者输入外部链接" />
-        </a-form-model-item>
-        <a-form-model-item prop="thumbnail" label="缩略图地址：">
+        </a-form-item>
+        <a-form-item prop="thumbnail" label="缩略图地址：">
           <a-input v-model="form.model.thumbnail" />
-        </a-form-model-item>
-        <a-form-model-item prop="name" label="图片名称：">
+        </a-form-item>
+        <a-form-item prop="name" label="图片名称：">
           <a-input v-model="form.model.name" />
-        </a-form-model-item>
-        <a-form-model-item prop="takeTime" label="拍摄日期：">
+        </a-form-item>
+        <a-form-item prop="takeTime" label="拍摄日期：">
           <a-date-picker
             showTime
             :defaultValue="takeTimeDefaultValue"
@@ -118,17 +118,17 @@
             @change="onTakeTimeChange"
             @ok="onTakeTimeSelect"
           />
-        </a-form-model-item>
-        <a-form-model-item prop="location" label="拍摄地点：">
+        </a-form-item>
+        <a-form-item prop="location" label="拍摄地点：">
           <a-input v-model="form.model.location" />
-        </a-form-model-item>
-        <a-form-model-item prop="team" label="分组：">
+        </a-form-item>
+        <a-form-item prop="team" label="分组：">
           <a-auto-complete :dataSource="computedTeams" v-model="form.model.team" allowClear style="width:100%" />
-        </a-form-model-item>
-        <a-form-model-item prop="description" label="描述：">
+        </a-form-item>
+        <a-form-item prop="description" label="描述：">
           <a-input v-model="form.model.description" type="textarea" :autoSize="{ minRows: 5 }" />
-        </a-form-model-item>
-      </a-form-model>
+        </a-form-item>
+      </a-form>
       <a-divider class="divider-transparent" />
       <div class="bottom-control">
         <a-space>

@@ -80,16 +80,16 @@
             </a-alert>
           </a-tab-pane>
           <a-tab-pane tab="远程下载" key="2">
-            <a-form-model
+            <a-form
               ref="remoteInstallForm"
               :model="installModal.remote"
               :rules="installModal.remote.rules"
               layout="vertical"
             >
-              <a-form-model-item prop="url" label="远程地址：" help="* 支持 Git 仓库地址，ZIP 链接。">
+              <a-form-item prop="url" label="远程地址：" help="* 支持 Git 仓库地址，ZIP 链接。">
                 <a-input v-model="installModal.remote.url" />
-              </a-form-model-item>
-              <a-form-model-item>
+              </a-form-item>
+              <a-form-item>
                 <ReactiveButton
                   type="primary"
                   @click="handleRemoteFetching"
@@ -100,8 +100,8 @@
                   loadedText="下载成功"
                   erroredText="下载失败"
                 ></ReactiveButton>
-              </a-form-model-item>
-            </a-form-model>
+              </a-form-item>
+            </a-form>
             <a-alert type="info" closable>
               <template slot="message">
                 目前仅支持远程 Git 仓库和 ZIP 下载链接。更多主题请访问：

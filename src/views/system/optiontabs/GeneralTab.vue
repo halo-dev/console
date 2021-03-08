@@ -1,35 +1,35 @@
 <template>
   <div>
-    <a-form-model ref="generalOptionsForm" :model="options" :rules="rules" layout="vertical" :wrapperCol="wrapperCol">
-      <a-form-model-item label="博客标题：" prop="blog_title">
+    <a-form ref="generalOptionsForm" :model="options" :rules="rules" layout="vertical" :wrapperCol="wrapperCol">
+      <a-form-item label="博客标题：" prop="blog_title">
         <a-input v-model="options.blog_title" />
-      </a-form-model-item>
-      <a-form-model-item label="博客地址：" prop="blog_url">
+      </a-form-item>
+      <a-form-item label="博客地址：" prop="blog_url">
         <a-input v-model="options.blog_url" placeholder="如：https://halo.run" />
-      </a-form-model-item>
-      <a-form-model-item label="Logo：" prop="blog_logo">
+      </a-form-item>
+      <a-form-item label="Logo：" prop="blog_logo">
         <a-input v-model="options.blog_logo">
           <a href="javascript:void(0);" slot="addonAfter" @click="handleShowLogoSelector">
             <a-icon type="picture" />
           </a>
         </a-input>
-      </a-form-model-item>
-      <a-form-model-item label="Favicon：" prop="blog_favicon">
+      </a-form-item>
+      <a-form-item label="Favicon：" prop="blog_favicon">
         <a-input v-model="options.blog_favicon">
           <a href="javascript:void(0);" slot="addonAfter" @click="handleShowFaviconSelector">
             <a-icon type="picture" />
           </a>
         </a-input>
-      </a-form-model-item>
-      <a-form-model-item label="页脚信息：" prop="blog_footer_info">
+      </a-form-item>
+      <a-form-item label="页脚信息：" prop="blog_footer_info">
         <a-input
           type="textarea"
           :autoSize="{ minRows: 5 }"
           v-model="options.blog_footer_info"
           placeholder="支持 HTML 格式的文本"
         />
-      </a-form-model-item>
-      <a-form-model-item>
+      </a-form-item>
+      <a-form-item>
         <ReactiveButton
           type="primary"
           @click="handleSaveOptions"
@@ -40,8 +40,8 @@
           loadedText="保存成功"
           erroredText="保存失败"
         ></ReactiveButton>
-      </a-form-model-item>
-    </a-form-model>
+      </a-form-item>
+    </a-form>
 
     <AttachmentSelectDrawer
       v-model="attachmentSelector.visible"

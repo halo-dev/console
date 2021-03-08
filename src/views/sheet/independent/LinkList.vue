@@ -3,11 +3,11 @@
     <a-row :gutter="12">
       <a-col :xl="10" :lg="10" :md="10" :sm="24" :xs="24" class="pb-3">
         <a-card :title="title" :bodyStyle="{ padding: '16px' }">
-          <a-form-model ref="linkForm" :model="form.model" :rules="form.rules" layout="horizontal">
-            <a-form-model-item label="网站名称：" prop="name">
+          <a-form ref="linkForm" :model="form.model" :rules="form.rules" layout="horizontal">
+            <a-form-item label="网站名称：" prop="name">
               <a-input v-model="form.model.name" />
-            </a-form-model-item>
-            <a-form-model-item label="网站地址：" help="* 需要加上 http://" prop="url">
+            </a-form-item>
+            <a-form-item label="网站地址：" help="* 需要加上 http://" prop="url">
               <a-input v-model="form.model.url">
                 <!-- <a
                   href="javascript:void(0);"
@@ -17,20 +17,20 @@
                   <a-icon type="sync" />
                 </a> -->
               </a-input>
-            </a-form-model-item>
-            <a-form-model-item label="Logo：" prop="logo">
+            </a-form-item>
+            <a-form-item label="Logo：" prop="logo">
               <a-input v-model="form.model.logo" />
-            </a-form-model-item>
-            <a-form-model-item label="分组：" prop="team">
+            </a-form-item>
+            <a-form-item label="分组：" prop="team">
               <a-auto-complete :dataSource="computedTeams" v-model="form.model.team" allowClear />
-            </a-form-model-item>
-            <a-form-model-item label="排序编号：" prop="priority">
+            </a-form-item>
+            <a-form-item label="排序编号：" prop="priority">
               <a-input-number :min="0" v-model="form.model.priority" style="width:100%" />
-            </a-form-model-item>
-            <a-form-model-item label="描述：" prop="description">
+            </a-form-item>
+            <a-form-item label="描述：" prop="description">
               <a-input type="textarea" :autoSize="{ minRows: 5 }" v-model="form.model.description" />
-            </a-form-model-item>
-            <a-form-model-item>
+            </a-form-item>
+            <a-form-item>
               <ReactiveButton
                 v-if="!isUpdateMode"
                 type="primary"
@@ -55,8 +55,8 @@
                 ></ReactiveButton>
                 <a-button type="dashed" @click="form.model = {}" v-if="isUpdateMode">返回添加</a-button>
               </a-button-group>
-            </a-form-model-item>
-          </a-form-model>
+            </a-form-item>
+          </a-form>
         </a-card>
       </a-col>
       <a-col :xl="14" :lg="14" :md="14" :sm="24" :xs="24" class="pb-3">

@@ -107,14 +107,14 @@
         banner
         closable
       />
-      <a-form-model ref="optionForm" :model="form.model" :rules="form.rules" layout="vertical">
-        <a-form-model-item prop="key" label="Key：">
+      <a-form ref="optionForm" :model="form.model" :rules="form.rules" layout="vertical">
+        <a-form-item prop="key" label="Key：">
           <a-input ref="keyInput" v-model="form.model.key" />
-        </a-form-model-item>
-        <a-form-model-item prop="value" label="Value：">
+        </a-form-item>
+        <a-form-item prop="value" label="Value：">
           <a-input type="textarea" :autoSize="{ minRows: 5 }" v-model="form.model.value" />
-        </a-form-model-item>
-      </a-form-model>
+        </a-form-item>
+      </a-form>
     </a-modal>
   </div>
 </template>

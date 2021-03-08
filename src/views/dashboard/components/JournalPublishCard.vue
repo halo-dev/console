@@ -6,16 +6,16 @@
         <a-icon type="info-circle-o" class="cursor-pointer" />
       </a-tooltip>
     </template>
-    <a-form-model ref="journalForm" :model="form.model" :rules="form.rules" layout="vertical">
-      <a-form-model-item prop="sourceContent">
+    <a-form ref="journalForm" :model="form.model" :rules="form.rules" layout="vertical">
+      <a-form-item prop="sourceContent">
         <a-input
           type="textarea"
           :autoSize="{ minRows: 8 }"
           v-model="form.model.sourceContent"
           placeholder="写点什么吧..."
         />
-      </a-form-model-item>
-      <a-form-model-item>
+      </a-form-item>
+      <a-form-item>
         <ReactiveButton
           @click="handleCreateJournalClick"
           @callback="
@@ -30,8 +30,8 @@
           loadedText="发布成功"
           erroredText="发布失败"
         ></ReactiveButton>
-      </a-form-model-item>
-    </a-form-model>
+      </a-form-item>
+    </a-form>
   </a-card>
 </template>
 <script>

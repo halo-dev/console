@@ -64,11 +64,11 @@
           erroredText="回复失败"
         ></ReactiveButton>
       </template>
-      <a-form-model ref="replyCommentForm" :model="replyModal.model" :rules="replyModal.rules" layout="vertical">
-        <a-form-model-item prop="content">
+      <a-form ref="replyCommentForm" :model="replyModal.model" :rules="replyModal.rules" layout="vertical">
+        <a-form-item prop="content">
           <a-input ref="contentInput" type="textarea" :autoSize="{ minRows: 8 }" v-model="replyModal.model.content" />
-        </a-form-model-item>
-      </a-form-model>
+        </a-form-item>
+      </a-form>
     </a-modal>
   </a-drawer>
 </template>

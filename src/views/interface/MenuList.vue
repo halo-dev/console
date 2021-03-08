@@ -40,21 +40,21 @@
             destroyTooltipOnHide
           >
             <template slot="content">
-              <a-form-model
+              <a-form
                 ref="teamForm"
                 :model="teams.form.model"
                 :rules="teams.form.rules"
                 @keyup.enter.native="handleCreateTeam"
               >
-                <a-form-model-item prop="team">
+                <a-form-item prop="team">
                   <a-input v-model="teams.form.model.team" autoFocus />
-                </a-form-model-item>
-                <a-form-model-item style="margin-bottom:0">
+                </a-form-item>
+                <a-form-item style="margin-bottom:0">
                   <a-button type="primary" @click="handleCreateTeam">
                     新增
                   </a-button>
-                </a-form-model-item>
-              </a-form-model>
+                </a-form-item>
+              </a-form>
             </template>
             <a-button type="primary" block class="mt-3">
               新增分组

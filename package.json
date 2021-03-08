@@ -68,9 +68,6 @@
     "tailwindcss": "^1.8.8",
     "vue-template-compiler": "^2.6.12"
   },
-  "gitHooks": {
-    "pre-commit": "lint-staged"
-  },
   "lint-staged": {
     "*.{js,jsx,vue}": [
       "vue-cli-service lint",
