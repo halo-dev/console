@@ -14,24 +14,34 @@
 </template>
 <script>
 import LoginForm from './LoginForm'
-import { mapGetters, mapActions } from 'vuex'
-export default {
-  name: 'LoginModal',
+
+import { defineComponent, computed } from 'vue'
+import { useStore } from 'vuex'
+
+export default defineComponent({
   components: {
     LoginForm
   },
-  computed: {
-    ...mapGetters(['loginModal'])
-  },
-  methods: {
-    ...mapActions(['ToggleLoginModal']),
-    onLoginSucceed() {
-      this.$emit('success')
-    },
-    handleCancelLogin() {
-      this.ToggleLoginModal(false)
+  setup({ emit }) {
+    const store = useStore()
+
+    const loginModal = computed(() => store.state.loginModal)
+
+    const handleToggleLoginModal = () => store.dispatch('ToggleLoginModal')
+
+    const handleCancelLogin = () => {
+      handleToggleLoginModal(false)
+    }
+
+    const onLoginSucceed = () => {
+      emit('success')
+    }
+
+    return {
+      loginModal,
+      handleCancelLogin,
+      onLoginSucceed
     }
   }
-}
+})
 </script>
-<style scoped></style>
