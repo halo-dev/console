@@ -9,7 +9,9 @@ import Antd from 'ant-design-vue'
 import 'ant-design-vue/dist/antd.css'
 import '@/styles/tailwind.css'
 
-// import './core/lazy_use'
+import bootstrap from '@/core/bootstrap'
+bootstrap()
+
 import '@/router/guard/'
 // import '@/filters/filter'
 // import './components'
