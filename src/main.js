@@ -1,9 +1,9 @@
-import Vue from 'vue'
+import { createApp } from 'vue'
 import App from './App.vue'
-import router from './router'
-import Contextmenu from 'vue-contextmenujs'
-import store from './store/'
-import './logger'
+import router from '@/router/'
+import store from '@/store/'
+
+import { setupLogger } from '@/plugins/logger'
 
 import '@/styles/tailwind.css'
 import './core/lazy_use'
@@ -12,14 +12,12 @@ import '@/filters/filter' // global filter
 import './components'
 import { version } from '../package.json'
 
-Vue.config.productionTip = false
-Vue.prototype.VERSION = version
+const app = createApp(App)
+app.use(store)
+app.use(router)
+app.provide('app_version', version)
 
-Vue.use(router)
-Vue.use(Contextmenu)
+// register plugins
+setupLogger(app)
 
-new Vue({
-  router,
-  store,
-  render: h => h(App)
-}).$mount('#app')
+app.mount('#app')

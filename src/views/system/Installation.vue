@@ -10,7 +10,7 @@
                 <small>安装向导</small>
               </span>
             </div>
-            <a-alert :message="`欢迎使用 Halo，您正在安装的是 Halo ${VERSION}。`" type="success" show-icon />
+            <a-alert :message="`欢迎使用 Halo，您正在安装的是 Halo ${app_version}。`" type="success" show-icon />
             <!-- Blogger info -->
             <div class="mt-5 mb-5">
               <a-radio-group v-model="installationMode">
@@ -178,6 +178,7 @@ export default {
       }
     }
   },
+  inject: ['app_version'],
   beforeMount() {
     this.handleVerifyIsInstall()
     this.$set(this.form.model, 'url', window.location.protocol + '//' + window.location.host)

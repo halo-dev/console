@@ -1,7 +1,7 @@
-import Vue from 'vue'
-import VueLogger from 'vuejs-logger'
+import VueLogger from 'vuejs3-logger'
 
 const isProduction = process.env.NODE_ENV === 'production'
+
 const options = {
   isEnabled: true,
   logLevel: isProduction ? 'error' : 'debug',
@@ -12,4 +12,6 @@ const options = {
   showConsoleColors: true
 }
 
-Vue.use(VueLogger, options)
+export function setupLogger(app) {
+  app.use(VueLogger, options)
+}
