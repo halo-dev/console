@@ -42,16 +42,20 @@
           :dataSource="list.data"
           :loading="list.loading"
         >
-          <a-list-item slot="renderItem" slot-scope="item, index" :key="index">
-            <a-card :bodyStyle="{ padding: 0 }" hoverable @click="handleOpenEditForm(item)">
-              <div class="photo-thumb">
-                <img :src="item.thumbnail" loading="lazy" />
-              </div>
-              <a-card-meta class="p-3">
-                <ellipsis :length="isMobile() ? 12 : 16" tooltip slot="description">{{ item.name }}</ellipsis>
-              </a-card-meta>
-            </a-card>
-          </a-list-item>
+          <template #renderItem="{ item }">
+            <a-list-item>
+              <a-card :bodyStyle="{ padding: 0 }" hoverable @click="handleOpenEditForm(item)">
+                <div class="photo-thumb">
+                  <img :src="item.thumbnail" loading="lazy" />
+                </div>
+                <a-card-meta class="p-3">
+                  <template #description>
+                    <ellipsis :length="isMobile() ? 12 : 16" tooltip>{{ item.name }}</ellipsis>
+                  </template>
+                </a-card-meta>
+              </a-card>
+            </a-list-item>
+          </template>
         </a-list>
       </a-col>
     </a-row>

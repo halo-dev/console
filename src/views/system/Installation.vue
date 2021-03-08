@@ -35,27 +35,37 @@
               </a-divider>
               <a-form-item prop="username">
                 <a-input v-model="form.model.username" placeholder="用户名">
-                  <a-icon slot="prefix" type="user" style="color: rgba(0,0,0,.25)" />
+                  <template #prefix>
+                    <UserOutlined :style="{ color: 'rgba(0,0,0,.25)' }" />
+                  </template>
                 </a-input>
               </a-form-item>
               <a-form-item prop="username">
                 <a-input v-model="form.model.nickname" placeholder="用户昵称">
-                  <a-icon slot="prefix" type="user" style="color: rgba(0,0,0,.25)" />
+                  <template #prefix>
+                    <UserOutlined :style="{ color: 'rgba(0,0,0,.25)' }" />
+                  </template>
                 </a-input>
               </a-form-item>
               <a-form-item prop="email">
                 <a-input v-model="form.model.email" placeholder="用户邮箱">
-                  <a-icon slot="prefix" type="mail" style="color: rgba(0,0,0,.25)" />
+                  <template #prefix>
+                    <MailOutlined :style="{ color: 'rgba(0,0,0,.25)' }" />
+                  </template>
                 </a-input>
               </a-form-item>
               <a-form-item prop="password">
                 <a-input v-model="form.model.password" type="password" placeholder="登录密码（8-100位）">
-                  <a-icon slot="prefix" type="lock" style="color: rgba(0,0,0,.25)" />
+                  <template #prefix>
+                    <LockOutlined :style="{ color: 'rgba(0,0,0,.25)' }" />
+                  </template>
                 </a-input>
               </a-form-item>
               <a-form-item prop="confirmPassword">
                 <a-input v-model="form.model.confirmPassword" type="password" placeholder="确认登录密码">
-                  <a-icon slot="prefix" type="lock" style="color: rgba(0,0,0,.25)" />
+                  <template #prefix>
+                    <LockOutlined :style="{ color: 'rgba(0,0,0,.25)' }" />
+                  </template>
                 </a-input>
               </a-form-item>
               <a-divider orientation="left" dashed>
@@ -63,12 +73,16 @@
               </a-divider>
               <a-form-item prop="url">
                 <a-input v-model="form.model.url" placeholder="博客地址">
-                  <a-icon slot="prefix" type="link" style="color: rgba(0,0,0,.25)" />
+                  <template #prefix>
+                    <LinkOutlined :style="{ color: 'rgba(0,0,0,.25)' }" />
+                  </template>
                 </a-input>
               </a-form-item>
               <a-form-item prop="title">
                 <a-input v-model="form.model.title" placeholder="博客标题">
-                  <a-icon slot="prefix" type="book" style="color: rgba(0,0,0,.25)" />
+                  <template #prefix>
+                    <BookOutlined :style="{ color: 'rgba(0,0,0,.25)' }" />
+                  </template>
                 </a-input>
               </a-form-item>
             </a-form>
@@ -127,7 +141,16 @@ import adminApi from '@/api/admin'
 import migrateApi from '@/api/migrate'
 import { mapActions } from 'vuex'
 
+import { UserOutlined, MailOutlined, LockOutlined, LinkOutlined, BookOutlined } from '@ant-design/icons-vue'
+
 export default {
+  components: {
+    UserOutlined,
+    MailOutlined,
+    LockOutlined,
+    LinkOutlined,
+    BookOutlined
+  },
   data() {
     const confirmPasswordValidate = (rule, value, callback) => {
       if (value !== this.form.model.password) {

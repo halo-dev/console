@@ -211,7 +211,7 @@
       <a-form ref="mfaForm" :model="mfaParam" :rules="mfaParam.rules" layout="vertical">
         <a-form-item v-if="mfaUsed" label="两步验证码" prop="authcode">
           <a-input v-model="mfaParam.authcode" :maxLength="6">
-            <a-icon slot="prefix" type="safety-certificate" style="color: rgba(0,0,0,.25)" />
+            <SafetyCertificateOutlined :style="{ color: 'rgba(0,0,0,.25)' }" />
           </a-input>
         </a-form-item>
         <a-form-item v-if="!mfaUsed" label="1. 请扫描二维码或导入 key" :help="`MFAKey:${mfaParam.mfaKey}`">
@@ -224,7 +224,7 @@
         </a-form-item>
         <a-form-item v-if="!mfaUsed" label="2. 验证两步验证码" prop="authcode">
           <a-input v-model="mfaParam.authcode" :maxLength="6">
-            <a-icon slot="prefix" type="safety-certificate" style="color: rgba(0,0,0,.25)" />
+            <SafetyCertificateOutlined :style="{ color: 'rgba(0,0,0,.25)' }" />
           </a-input>
         </a-form-item>
       </a-form>
@@ -238,7 +238,11 @@ import statisticsApi from '@/api/statistics'
 import { mapMutations, mapGetters } from 'vuex'
 import MD5 from 'md5.js'
 
+import { SafetyCertificateOutlined } from '@ant-design/icons-vue'
 export default {
+  components: {
+    SafetyCertificateOutlined
+  },
   data() {
     const validateConfirmPassword = (rule, value, callback) => {
       if (value && this.passwordForm.model.newPassword !== value) {

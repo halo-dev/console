@@ -7,24 +7,34 @@
       <a-form layout="vertical">
         <a-form-item>
           <a-input placeholder="用户名" v-model="resetParam.username">
-            <a-icon slot="prefix" type="user" style="color: rgba(0, 0, 0, 0.25)" />
+            <template #prefix>
+              <UserOutlined :style="{ color: 'rgba(0,0,0,.25)' }" />
+            </template>
           </a-input>
         </a-form-item>
         <a-form-item>
           <a-input placeholder="邮箱" v-model="resetParam.email">
-            <a-icon slot="prefix" type="mail" style="color: rgba(0, 0, 0, 0.25)" />
+            <template #prefix>
+              <MailOutlined :style="{ color: 'rgba(0,0,0,.25)' }" />
+            </template>
           </a-input>
         </a-form-item>
         <a-form-item>
           <a-input v-model="resetParam.code" type="password" placeholder="验证码">
-            <a-icon slot="prefix" type="safety-certificate" style="color: rgba(0, 0, 0, 0.25)" />
-            <a href="javascript:void(0);" slot="addonAfter" @click="handleSendCode"> 获取 </a>
+            <template #prefix>
+              <SafetyCertificateOutlined :style="{ color: 'rgba(0,0,0,.25)' }" />
+            </template>
+            <template #addonAfter>
+              <a href="javascript:void(0);" @click="handleSendCode"> 获取 </a>
+            </template>
           </a-input>
         </a-form-item>
 
         <a-form-item>
           <a-input v-model="resetParam.password" type="password" placeholder="新密码" autocomplete="new-password">
-            <a-icon slot="prefix" type="lock" style="color: rgba(0, 0, 0, 0.25)" />
+            <template #prefix>
+              <LockOutlined :style="{ color: 'rgba(0,0,0,.25)' }" />
+            </template>
           </a-input>
         </a-form-item>
         <a-form-item :style="{ 'animation-delay': '0.5s' }">
@@ -34,7 +44,9 @@
             placeholder="确认密码"
             autocomplete="new-password"
           >
-            <a-icon slot="prefix" type="lock" style="color: rgba(0, 0, 0, 0.25)" />
+            <template #prefix>
+              <LockOutlined :style="{ color: 'rgba(0,0,0,.25)' }" />
+            </template>
           </a-input>
         </a-form-item>
         <a-form-item>
@@ -53,8 +65,15 @@
 
 <script>
 import adminApi from '@/api/admin'
+import { UserOutlined, MailOutlined, LockOutlined, SafetyCertificateOutlined } from '@ant-design/icons-vue'
 
 export default {
+  components: {
+    UserOutlined,
+    MailOutlined,
+    LockOutlined,
+    SafetyCertificateOutlined
+  },
   data() {
     return {
       resetParam: {
