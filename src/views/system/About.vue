@@ -150,11 +150,11 @@ export default {
 User Agent：${navigator.userAgent}`
       this.$copyText(text)
         .then(message => {
-          this.$log.debug('copy', message)
+          console.log('copy', message)
           this.$message.success('复制成功！')
         })
         .catch(err => {
-          this.$log.debug('copy.err', err)
+          console.log('copy.err', err)
           this.$message.error('复制失败！')
         })
     },
@@ -167,7 +167,7 @@ User Agent：${navigator.userAgent}`
           _this.contributors = response.data
         })
         .catch(function(error) {
-          _this.$log.error('Fetch contributors error', error)
+          _console.log('Fetch contributors error', error)
         })
         .finally(() => {
           setTimeout(() => {
@@ -216,7 +216,7 @@ User Agent：${navigator.userAgent}`
           })
         })
         .catch(function(error) {
-          this.$log.error('Check update fail', error)
+          console.log('Check update fail', error)
         })
         .finally(() => {
           setTimeout(() => {

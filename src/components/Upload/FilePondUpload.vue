@@ -1,29 +1,27 @@
 <template>
-  <div>
-    <file-pond
-      ref="pond"
-      :label-idle="label"
-      :name="name"
-      :allow-multiple="multiple"
-      :allowRevert="false"
-      :accepted-file-types="accepts"
-      :maxParallelUploads="maxParallelUploads"
-      :allowImagePreview="allowImagePreview"
-      :maxFiles="maxFiles"
-      labelFileProcessing="上传中"
-      labelFileProcessingComplete="上传完成"
-      labelFileProcessingAborted="取消上传"
-      labelFileProcessingError="上传错误"
-      labelTapToCancel="点击取消"
-      labelTapToRetry="点击重试"
-      labelFileTypeNotAllowed="不支持当前文件格式"
-      fileValidateTypeLabelExpectedTypes="请选择 {allTypes} 格式的文件"
-      :files="fileList"
-      :server="server"
-      @init="handleFilePondInit"
-    >
-    </file-pond>
-  </div>
+  <file-pond
+    ref="pond"
+    :label-idle="label"
+    :name="name"
+    :allow-multiple="multiple"
+    :allowRevert="false"
+    :accepted-file-types="accepts"
+    :maxParallelUploads="maxParallelUploads"
+    :allowImagePreview="allowImagePreview"
+    :maxFiles="maxFiles"
+    labelFileProcessing="上传中"
+    labelFileProcessingComplete="上传完成"
+    labelFileProcessingAborted="取消上传"
+    labelFileProcessingError="上传错误"
+    labelTapToCancel="点击取消"
+    labelTapToRetry="点击重试"
+    labelFileTypeNotAllowed="不支持当前文件格式"
+    fileValidateTypeLabelExpectedTypes="请选择 {allTypes} 格式的文件"
+    :files="fileList"
+    :server="server"
+    @init="handleFilePondInit"
+  >
+  </file-pond>
 </template>
 <script>
 import { mapGetters } from 'vuex'
@@ -121,18 +119,18 @@ export default {
           )
             .then(response => {
               load(response)
-              this.$log.debug('Uploaded successfully', response)
+              console.log('Uploaded successfully', response)
               this.$emit('success', response, file)
             })
             .catch(failure => {
-              this.$log.debug('Failed to upload file', failure)
+              console.log('Failed to upload file', failure)
               this.$emit('failure', failure, file)
               error()
             })
           return {
             abort: () => {
               abort()
-              this.$log.debug('Upload operation aborted by the user')
+              console.log('Upload operation aborted by the user')
               source.cancel('Upload operation canceled by the user.')
             }
           }
@@ -143,7 +141,7 @@ export default {
   },
   methods: {
     handleFilePondInit() {
-      this.$log.debug('FilePond has initialized')
+      console.log('FilePond has initialized')
     },
     handleClearFileList() {
       this.$refs.pond.removeFiles()

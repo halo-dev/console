@@ -117,7 +117,7 @@ export default {
   methods: {
     handleShowDetailDrawer(attachment) {
       this.selectedAttachment = attachment
-      this.$log.debug('Show detail of', attachment)
+      console.log('Show detail of', attachment)
       this.detailVisible = true
     },
     handleContextMenu(event, item) {
@@ -129,11 +129,11 @@ export default {
               const text = `${encodeURI(item.path)}`
               this.$copyText(text)
                 .then(message => {
-                  this.$log.debug('copy', message)
+                  console.log('copy', message)
                   this.$message.success('复制成功！')
                 })
                 .catch(err => {
-                  this.$log.debug('copy.err', err)
+                  console.log('copy.err', err)
                   this.$message.error('复制失败！')
                 })
             },
@@ -145,11 +145,11 @@ export default {
               const text = `![${item.name}](${encodeURI(item.path)})`
               this.$copyText(text)
                 .then(message => {
-                  this.$log.debug('copy', message)
+                  console.log('copy', message)
                   this.$message.success('复制成功！')
                 })
                 .catch(err => {
-                  this.$log.debug('copy.err', err)
+                  console.log('copy.err', err)
                   this.$message.error('复制失败！')
                 })
             }

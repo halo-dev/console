@@ -322,7 +322,7 @@ export default {
       this.form.visible = true
     },
     handlePaginationChange(page, size) {
-      this.$log.debug(`Current: ${page}, PageSize: ${size}`)
+      console.log(`Current: ${page}, PageSize: ${size}`)
       this.list.pagination.page = page
       this.list.pagination.size = size
       this.hanldeListPhotos()

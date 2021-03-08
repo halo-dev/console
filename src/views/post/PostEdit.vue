@@ -143,7 +143,7 @@ export default {
   },
   methods: {
     handleSaveDraft(draftOnly = false) {
-      this.$log.debug('Draft only: ' + draftOnly)
+      console.log('Draft only: ' + draftOnly)
       this.postToStage.status = 'DRAFT'
       if (!this.postToStage.title) {
         this.postToStage.title = datetimeFormat(new Date(), 'YYYY-MM-DD-HH-mm-ss')
@@ -208,7 +208,7 @@ export default {
       if (this.postToStage.id) {
         // Update the post
         postApi.update(this.postToStage.id, this.postToStage, false).then(response => {
-          this.$log.debug('Updated post', response.data.data)
+          console.log('Updated post', response.data.data)
           postApi
             .preview(this.postToStage.id)
             .then(response => {
@@ -224,7 +224,7 @@ export default {
       } else {
         // Create the post
         postApi.create(this.postToStage, false).then(response => {
-          this.$log.debug('Created post', response.data.data)
+          console.log('Created post', response.data.data)
           this.postToStage = response.data.data
           postApi
             .preview(this.postToStage.id)

@@ -12,7 +12,7 @@ const service = axios.create({
 function setTokenToHeader(config) {
   // set token
   const token = store.getters.token
-  Vue.$log.debug('Got token from store', token)
+  console.log('Got token from store', token)
   if (token && token.access_token) {
     config.headers['Admin-Authorization'] = token.access_token
   }
@@ -40,7 +40,7 @@ async function refreshToken(error) {
       message.warning('当前登录状态已失效，请重新登录')
       store.dispatch('ToggleLoginModal', true)
     }
-    Vue.$log.error('Failed to refresh token', err)
+    console.log('Failed to refresh token', err)
   } finally {
     refreshTask = null
   }
@@ -76,21 +76,21 @@ service.interceptors.response.use(
   },
   error => {
     if (axios.isCancel(error)) {
-      Vue.$log.debug('Cancelled uploading by user.')
+      console.log('Cancelled uploading by user.')
       return Promise.reject(error)
     }
 
-    Vue.$log.error('Response failed', error)
+    console.log('Response failed', error)
 
     const response = error.response
     const status = response ? response.status : -1
-    Vue.$log.error('Server response status', status)
+    console.log('Server response status', status)
 
     const data = response ? response.data : null
     if (data) {
       let handled = false
       // Business response
-      Vue.$log.error('Business response status', data.status)
+      console.log('Business response status', data.status)
       if (data.status === 400) {
         // TODO handle 400 status error
         const errorDetails = getFieldValidationError(data)

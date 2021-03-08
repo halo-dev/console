@@ -186,7 +186,7 @@ export default {
     if (this.interval) {
       clearInterval(this.interval)
       this.interval = null
-      this.$log.debug('Cleared interval')
+      console.log('Cleared interval')
     }
     if (this.logListDrawerVisible) {
       this.logListDrawerVisible = false

@@ -1,4 +1,3 @@
-import Vue from 'vue'
 import router from '@/router'
 import store from '@/store'
 import NProgress from 'nprogress'
@@ -16,7 +15,7 @@ router.beforeEach(async (to, from, next) => {
     NProgress.start()
   }, 250)
   to.meta && typeof to.meta.title !== 'undefined' && setDocumentTitle(`${to.meta.title} - ${domTitle}`)
-  Vue.$log.debug('Token', store.getters.token)
+  console.log('Token', store.getters.token)
   if (store.getters.token) {
     if (to.name === 'Install') {
       next()

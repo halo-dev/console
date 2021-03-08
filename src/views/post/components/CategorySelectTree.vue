@@ -50,9 +50,9 @@ export default {
   },
   methods: {
     handleSelectionChange(value, label, extra) {
-      this.$log.debug('value: ', value)
-      this.$log.debug('label: ', label)
-      this.$log.debug('extra: ', extra)
+      console.log('value: ', value)
+      console.log('label: ', label)
+      console.log('extra: ', extra)
       this.$emit('change', value ? parseInt(value) : 0)
     }
   }

@@ -6,7 +6,7 @@ import permission from './modules/permission'
 import option from './modules/option'
 import getters from './getters'
 
-export default createStore({
+const store = createStore({
   modules: {
     app,
     user,
@@ -18,3 +18,9 @@ export default createStore({
   actions: {},
   getters
 })
+
+export function setupStore(app) {
+  app.use(store)
+}
+
+export default store

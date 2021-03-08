@@ -233,7 +233,7 @@ export default {
     this.handleListThemes()
   },
   destroyed() {
-    this.$log.debug('Theme list destroyed.')
+    console.log('Theme list destroyed.')
     this.themeSettingDrawer.visible = false
     this.installModal.visible = false
     this.localUpdateModel.visible = false

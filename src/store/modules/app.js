@@ -1,4 +1,4 @@
-import Vue from 'vue'
+import { setLocalStorage } from '@/utils/localStorage'
 import {
   SIDEBAR_TYPE,
   DEFAULT_THEME,
@@ -30,53 +30,53 @@ const app = {
   mutations: {
     SET_API_URL: (state, apiUrl) => {
       state.apiUrl = apiUrl
-      Vue.ls.set(API_URL, apiUrl)
+      setLocalStorage(API_URL, apiUrl)
     },
     RESTORE_API_URL: state => {
       state.apiUrl = null
-      Vue.ls.set(API_URL, null)
+      setLocalStorage(API_URL, null)
     },
     SET_SIDEBAR_TYPE: (state, type) => {
       state.sidebar = type
-      Vue.ls.set(SIDEBAR_TYPE, type)
+      setLocalStorage(SIDEBAR_TYPE, type)
     },
     CLOSE_SIDEBAR: state => {
-      Vue.ls.set(SIDEBAR_TYPE, true)
+      setLocalStorage(SIDEBAR_TYPE, true)
       state.sidebar = false
     },
     TOGGLE_DEVICE: (state, device) => {
       state.device = device
     },
     TOGGLE_THEME: (state, theme) => {
-      Vue.ls.set(DEFAULT_THEME, theme)
+      setLocalStorage(DEFAULT_THEME, theme)
       state.theme = theme
     },
     TOGGLE_LAYOUT_MODE: (state, layout) => {
-      Vue.ls.set(DEFAULT_LAYOUT_MODE, layout)
+      setLocalStorage(DEFAULT_LAYOUT_MODE, layout)
       state.layout = layout
     },
     TOGGLE_FIXED_HEADER: (state, fixed) => {
-      Vue.ls.set(DEFAULT_FIXED_HEADER, fixed)
+      setLocalStorage(DEFAULT_FIXED_HEADER, fixed)
       state.fixedHeader = fixed
     },
     TOGGLE_FIXED_SIDERBAR: (state, fixed) => {
-      Vue.ls.set(DEFAULT_FIXED_SIDEMENU, fixed)
+      setLocalStorage(DEFAULT_FIXED_SIDEMENU, fixed)
       state.fixSiderbar = fixed
     },
     TOGGLE_FIXED_HEADER_HIDDEN: (state, show) => {
-      Vue.ls.set(DEFAULT_FIXED_HEADER_HIDDEN, show)
+      setLocalStorage(DEFAULT_FIXED_HEADER_HIDDEN, show)
       state.autoHideHeader = show
     },
     TOGGLE_CONTENT_WIDTH: (state, type) => {
-      Vue.ls.set(DEFAULT_CONTENT_WIDTH_TYPE, type)
+      setLocalStorage(DEFAULT_CONTENT_WIDTH_TYPE, type)
       state.contentWidth = type
     },
     TOGGLE_COLOR: (state, color) => {
-      Vue.ls.set(DEFAULT_COLOR, color)
+      setLocalStorage(DEFAULT_COLOR, color)
       state.color = color
     },
     TOGGLE_LAYOUT_SETTING: (state, show) => {
-      Vue.ls.set(LAYOUT_SETTING, show)
+      setLocalStorage(LAYOUT_SETTING, show)
       state.layoutSetting = show
     },
     TOGGLE_LOGIN_MODAL: (state, show) => {

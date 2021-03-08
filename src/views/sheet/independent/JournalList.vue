@@ -338,7 +338,7 @@ export default {
       }
     },
     handlePaginationChange(page, pageSize) {
-      this.$log.debug(`Current: ${page}, PageSize: ${pageSize}`)
+      console.log(`Current: ${page}, PageSize: ${pageSize}`)
       this.list.pagination.page = page
       this.list.pagination.size = pageSize
       this.hanldeListJournals()

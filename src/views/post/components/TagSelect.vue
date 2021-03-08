@@ -72,10 +72,10 @@ export default {
       })
     },
     handleChange() {
-      this.$log.debug('Changed')
+      console.log('Changed')
       const tagNamesToCreate = this.selectedTagNames.filter(tagName => !this.tagNameMap[tagName])
 
-      this.$log.debug('Tag names to create', tagNamesToCreate)
+      console.log('Tag names to create', tagNamesToCreate)
 
       if (tagNamesToCreate === []) {
         const tagIds = this.selectedTagNames.map(tagName => this.tagNameMap[tagName].id)
@@ -89,7 +89,7 @@ export default {
       axios.all(createPromises).then(
         axios.spread(() => {
           this.handleListTags(() => {
-            this.$log.debug('Tag name map', this.tagNameMap)
+            console.log('Tag name map', this.tagNameMap)
             // Get all tag id
             const tagIds = this.selectedTagNames.map(tagName => this.tagNameMap[tagName].id)
             this.$emit('change', tagIds)

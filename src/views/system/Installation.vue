@@ -205,7 +205,7 @@ export default {
           this.form.installing = true
           this.installCleanToken(this.form.model)
             .then(response => {
-              this.$log.debug('Installation response', response)
+              console.log('Installation response', response)
             })
             .catch(() => {
               this.form.installErrored = true
@@ -227,10 +227,10 @@ export default {
       }
     },
     onImportUpload(data) {
-      this.$log.debug('Selected data', data)
+      console.log('Selected data', data)
       this.form.importData = data
       return new Promise(resolve => {
-        this.$log.debug('Handle uploading')
+        console.log('Handle uploading')
         resolve()
       })
     },
@@ -243,7 +243,7 @@ export default {
       migrateApi
         .migrate(this.form.importData)
         .then(() => {
-          this.$log.debug('Migrated successfullly')
+          console.log('Migrated successfullly')
         })
         .catch(() => {
           this.form.importErrored = true

@@ -5,10 +5,5 @@ export default {
   contentWidth: 'Fixed',
   fixedHeader: false,
   fixSiderbar: false,
-  autoHideHeader: false,
-  storageOptions: {
-    namespace: 'halo__',
-    name: 'ls',
-    storage: 'local'
-  }
+  autoHideHeader: false
 }

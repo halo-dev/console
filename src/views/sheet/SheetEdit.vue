@@ -134,7 +134,7 @@ export default {
   },
   methods: {
     handleSaveDraft(draftOnly = false) {
-      this.$log.debug('Draft only: ' + draftOnly)
+      console.log('Draft only: ' + draftOnly)
       this.sheetToStage.status = 'DRAFT'
       if (!this.sheetToStage.title) {
         this.sheetToStage.title = datetimeFormat(new Date(), 'YYYY-MM-DD-HH-mm-ss')
@@ -196,7 +196,7 @@ export default {
       this.previewSaving = true
       if (this.sheetToStage.id) {
         sheetApi.update(this.sheetToStage.id, this.sheetToStage, false).then(response => {
-          this.$log.debug('Updated sheet', response.data.data)
+          console.log('Updated sheet', response.data.data)
           sheetApi
             .preview(this.sheetToStage.id)
             .then(response => {
@@ -211,7 +211,7 @@ export default {
         })
       } else {
         sheetApi.create(this.sheetToStage, false).then(response => {
-          this.$log.debug('Created sheet', response.data.data)
+          console.log('Created sheet', response.data.data)
           this.sheetToStage = response.data.data
           sheetApi
             .preview(this.sheetToStage.id)

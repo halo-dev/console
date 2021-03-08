@@ -597,7 +597,7 @@ export default {
     },
     onSelectionChange(selectedRowKeys) {
       this.selectedRowKeys = selectedRowKeys
-      this.$log.debug(`SelectedRowKeys: ${selectedRowKeys}`)
+      console.log(`SelectedRowKeys: ${selectedRowKeys}`)
     },
     getCheckboxProps(post) {
       return {
@@ -608,7 +608,7 @@ export default {
       }
     },
     handlePaginationChange(page, pageSize) {
-      this.$log.debug(`Current: ${page}, PageSize: ${pageSize}`)
+      console.log(`Current: ${page}, PageSize: ${pageSize}`)
       this.pagination.page = page
       this.pagination.size = pageSize
       this.handleListPosts()
@@ -657,7 +657,7 @@ export default {
       postApi
         .updateStatusInBatch(this.selectedRowKeys, status)
         .then(() => {
-          this.$log.debug(`postId: ${this.selectedRowKeys}, status: ${status}`)
+          console.log(`postId: ${this.selectedRowKeys}, status: ${status}`)
           this.selectedRowKeys = []
         })
         .finally(() => {
@@ -672,7 +672,7 @@ export default {
       postApi
         .deleteInBatch(this.selectedRowKeys)
         .then(() => {
-          this.$log.debug(`delete: ${this.selectedRowKeys}`)
+          console.log(`delete: ${this.selectedRowKeys}`)
           this.selectedRowKeys = []
         })
         .finally(() => {

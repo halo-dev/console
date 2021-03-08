@@ -6,4 +6,8 @@ const router = createRouter({
   routes: constantRouterMap.concat(asyncRouterMap)
 })
 
+export function setupRouter(app) {
+  app.use(router)
+}
+
 export default router

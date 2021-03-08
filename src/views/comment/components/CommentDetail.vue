@@ -118,7 +118,7 @@ export default {
     },
     handleUpdateComment() {
       commentApi.update(this.type, this.comment.id, this.comment).then(response => {
-        this.$log.debug('Updated comment', response.data.data)
+        console.log('Updated comment', response.data.data)
         this.$message.success('评论修改成功！')
       })
       this.editable = false

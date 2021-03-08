@@ -113,7 +113,7 @@ export default {
         })
     },
     handlePaginationChange(page, pageSize) {
-      this.$log.debug(`Current: ${page}, PageSize: ${pageSize}`)
+      console.log(`Current: ${page}, PageSize: ${pageSize}`)
       this.pagination.page = page
       this.pagination.size = pageSize
       this.handleListLogs()

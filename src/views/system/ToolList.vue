@@ -88,7 +88,7 @@ export default {
     handleChange(info) {
       const status = info.file.status
       if (status !== 'uploading') {
-        this.$log.debug(info.file, info.fileList)
+        console.log(info.file, info.fileList)
       }
       if (status === 'done') {
         this.$message.success(`${info.file.name} 导入成功！`)

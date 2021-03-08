@@ -31,15 +31,15 @@ export default {
   },
   methods: {
     onCheck(checkedKeys, e) {
-      this.$log.debug('Chekced keys', checkedKeys)
-      this.$log.debug('e', e)
+      console.log('Chekced keys', checkedKeys)
+      console.log('e', e)
       const categoryIds = e.checkedNodes
         .filter(node => {
           return node.data.props.isLeaf
         })
         .map(node => node.key)
 
-      this.$log.debug('Effectively selected category ids', categoryIds)
+      console.log('Effectively selected category ids', categoryIds)
 
       this.$emit('check', categoryIds)
     }

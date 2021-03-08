@@ -4538,11 +4538,6 @@ es-to-primitive@^1.2.1:
     is-date-object "^1.0.1"
     is-symbol "^1.0.2"
 
-es6-object-assign@1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/es6-object-assign/-/es6-object-assign-1.1.0.tgz#c2c3582656247c39ea107cb1e6652b6f9f24523c"
-  integrity sha1-wsNYJlYkfDnqEHyx5mUrb58kUjw=
-
 es6-promise@^4.2.5:
   version "4.2.8"
   resolved "https://registry.yarnpkg.com/es6-promise/-/es6-promise-4.2.8.tgz#4eb21594c972bc40553d276e510539143db53e0a"
@@ -11087,10 +11082,10 @@ vue-eslint-parser@^7.6.0:
     esquery "^1.4.0"
     lodash "^4.17.15"
 
-vue-filepond@^6.0.3:
-  version "6.0.3"
-  resolved "https://registry.yarnpkg.com/vue-filepond/-/vue-filepond-6.0.3.tgz#199871e7d91f4d6a6c4ba5a4e653c6ce9cafbfa9"
-  integrity sha512-m0wArAdpgzOOs19bWA6zzYlHAb2aK+igPoKPZGrzpgKiiELPKW7XZ2OBDXzk7rhpFLkedujVrMqwjPyZfmQTTQ==
+vue-filepond@7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/vue-filepond/-/vue-filepond-7.0.0.tgz#49f17551be0b1b10f0b0671bce432662d3e22bb5"
+  integrity sha512-FUqJqwOxVsz5BMYeK0tSFUAo7JhpTx+TMRA5XkYAzA1HH3KnkUz5tzvjDH+Pc282DTH2BIZOJe435BwYxYuHWg==
 
 vue-github-badge@1.0.1:
   version "1.0.1"
@@ -11194,14 +11189,6 @@ vuedraggable@^2.24.3:
   integrity sha512-6/HDXi92GzB+Hcs9fC6PAAozK1RLt1ewPTLjK0anTYguXLAeySDmcnqE8IC0xa7shvSzRjQXq3/+dsZ7ETGF3g==
   dependencies:
     sortablejs "1.10.2"
-
-vuejs3-logger@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/vuejs3-logger/-/vuejs3-logger-1.0.0.tgz#9c387be967bc780f9ab87774b87c688a9b6f0b0a"
-  integrity sha512-fnUypm2TGQ+gEMs+0S8MsqGw/LGmGCd2ug2B5IryiLhI3vqzEJfHK680SDJ5SZCAeACtZxYXbRAp5llggZzvtA==
-  dependencies:
-    es6-object-assign "1.1.0"
-    vue "^3.0.0"
 
 vuex@^4.0.0:
   version "4.0.0"

@@ -511,7 +511,7 @@ export default {
       }
     },
     handlePaginationChange(page, pageSize) {
-      this.$log.debug(`Current: ${page}, PageSize: ${pageSize}`)
+      console.log(`Current: ${page}, PageSize: ${pageSize}`)
       this.pagination.page = page
       this.pagination.size = pageSize
       this.handleListComments()
@@ -530,7 +530,7 @@ export default {
       commentApi
         .updateStatusInBatch(this.type, this.selectedRowKeys, status)
         .then(() => {
-          this.$log.debug(`commentIds: ${this.selectedRowKeys}, status: ${status}`)
+          console.log(`commentIds: ${this.selectedRowKeys}, status: ${status}`)
           this.selectedRowKeys = []
         })
         .finally(() => {
@@ -545,7 +545,7 @@ export default {
       commentApi
         .deleteInBatch(this.type, this.selectedRowKeys)
         .then(() => {
-          this.$log.debug(`delete: ${this.selectedRowKeys}`)
+          console.log(`delete: ${this.selectedRowKeys}`)
           this.selectedRowKeys = []
         })
         .finally(() => {
@@ -562,7 +562,7 @@ export default {
     },
     onSelectionChange(selectedRowKeys) {
       this.selectedRowKeys = selectedRowKeys
-      this.$log.debug(`SelectedRowKeys: ${selectedRowKeys}`)
+      console.log(`SelectedRowKeys: ${selectedRowKeys}`)
     },
     getCheckboxProps(comment) {
       return {

@@ -218,7 +218,7 @@ export default {
         return
       }
       attachmentApi.update(this.attachment.id, this.attachment).then(response => {
-        this.$log.debug('Updated attachment', response.data.data)
+        console.log('Updated attachment', response.data.data)
       })
       this.editable = false
     },
@@ -226,11 +226,11 @@ export default {
       const text = `${encodeURI(this.attachment.path)}`
       this.$copyText(text)
         .then(message => {
-          this.$log.debug('copy', message)
+          console.log('copy', message)
           this.$message.success('复制成功！')
         })
         .catch(err => {
-          this.$log.debug('copy.err', err)
+          console.log('copy.err', err)
           this.$message.error('复制失败！')
         })
     },
@@ -238,11 +238,11 @@ export default {
       const text = `![${this.attachment.name}](${encodeURI(this.attachment.path)})`
       this.$copyText(text)
         .then(message => {
-          this.$log.debug('copy', message)
+          console.log('copy', message)
           this.$message.success('复制成功！')
         })
         .catch(err => {
-          this.$log.debug('copy.err', err)
+          console.log('copy.err', err)
           this.$message.error('复制失败！')
         })
     },
@@ -275,7 +275,7 @@ export default {
 
           // 设置视频地址
           this.$set(this.videoOptions.video, 'url', path)
-          this.$log.debug('video url', path)
+          console.log('video url', path)
         } else if (prefix === 'image') {
           this.handlePreviewVisible(true, false, false)
         } else {

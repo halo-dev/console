@@ -1,4 +1,4 @@
-import Vue from 'vue'
+import { setLocalStorage } from '@/utils/localStorage'
 import { OPTIONS } from '@/store/mutation-types'
 import optionApi from '@/api/option'
 const keys = [
@@ -21,7 +21,7 @@ const option = {
   },
   mutations: {
     SET_OPTIONS: (state, options) => {
-      Vue.ls.set(OPTIONS, options)
+      setLocalStorage(OPTIONS, options)
       state.options = options
     }
   },
