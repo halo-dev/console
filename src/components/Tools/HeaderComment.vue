@@ -64,10 +64,10 @@
     </template>
     <span class="header-comment">
       <a-badge dot v-if="postComments.length > 0 || sheetComments.length > 0">
-        <a-icon type="bell" />
+        <BellOutlined />
       </a-badge>
       <a-badge v-else>
-        <a-icon type="bell" />
+        <BellOutlined />
       </a-badge>
     </span>
   </a-popover>
@@ -77,9 +77,13 @@
 import commentApi from '@/api/comment'
 import marked from 'marked'
 import { decodeHTML } from '@/utils/util'
+import { BellOutlined } from '@ant-design/icons-vue'
 
 export default {
   name: 'HeaderComment',
+  components: {
+    BellOutlined
+  },
   data() {
     return {
       activeKey: 'post',
