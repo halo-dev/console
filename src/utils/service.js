@@ -37,7 +37,7 @@ async function refreshToken(error) {
   } catch (err) {
     if (err.response && err.response.data && err.response.data.data === refreshToken) {
       message.warning('当前登录状态已失效，请重新登录')
-      store.dispatch('ToggleLoginModal', true)
+      store.dispatch('toggleLoginModal', true)
     }
     console.log('Failed to refresh token', err)
   } finally {
@@ -124,7 +124,7 @@ service.interceptors.response.use(
         } else {
           // Login
           message.warning('当前登录状态已失效，请重新登录')
-          store.dispatch('ToggleLoginModal', true)
+          store.dispatch('toggleLoginModal', true)
         }
       } else if (data.status === 403) {
         // TODO handle 403 status error

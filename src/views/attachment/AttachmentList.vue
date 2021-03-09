@@ -89,7 +89,7 @@
                 </div>
                 <a-card-meta class="p-3">
                   <template #description>
-                    <ellipsis :length="isMobile() ? 12 : 16" tooltip>{{ item.name }}</ellipsis>
+                    {{ item.name }}
                   </template>
                 </a-card-meta>
                 <a-checkbox

@@ -20,9 +20,7 @@
           :loading="list.loading"
         >
           <span slot="name" slot-scope="name">
-            <ellipsis :length="64" tooltip>
-              {{ name }}
-            </ellipsis>
+            {{ name }}
           </span>
           <span slot="createTime" slot-scope="createTime">
             {{ createTime }}

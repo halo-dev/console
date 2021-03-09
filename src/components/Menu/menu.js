@@ -1,4 +1,4 @@
-import Menu from 'ant-design-vue/es/menu'
+import { Menu } from 'ant-design-vue'
 import Icon from 'ant-design-vue/es/icon'
 
 export default {

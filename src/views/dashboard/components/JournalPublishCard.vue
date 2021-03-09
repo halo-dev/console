@@ -9,7 +9,7 @@
       </a-tooltip>
     </template>
     <a-form ref="journalForm" :model="form.model" :rules="form.rules" layout="vertical">
-      <a-form-item prop="sourceContent">
+      <a-form-item name="sourceContent">
         <a-textarea
           type="textarea"
           :autoSize="{ minRows: 8 }"
@@ -19,7 +19,7 @@
       </a-form-item>
       <a-form-item>
         <ReactiveButton
-          @click="handleCreateJournalClick"
+          @onClick="handleCreateJournalClick"
           @callback="
             () => {
               if (!form.errored) form.model = {}

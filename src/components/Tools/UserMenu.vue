@@ -56,7 +56,6 @@ export default {
     ...mapActions(['logout', 'ToggleLayoutSetting']),
     handleLogout() {
       const that = this
-
       this.$confirm({
         title: '提示',
         content: '确定要注销登录吗 ?',

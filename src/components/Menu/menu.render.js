@@ -1,7 +1,5 @@
-import Menu from 'ant-design-vue/es/menu'
+import { Menu, SubMenu, MenuItem } from 'ant-design-vue'
 import Icon from 'ant-design-vue/es/icon'
-
-const { Item, SubMenu } = Menu
 
 export default {
   name: 'SMenu',
@@ -67,7 +65,7 @@ export default {
     },
     renderMenuItem: function(h, menu, pIndex, index) {
       const target = menu.meta.target || null
-      return h(Item, { key: menu.path ? menu.path : 'item_' + pIndex + '_' + index }, [
+      return h(MenuItem, { key: menu.path ? menu.path : 'item_' + pIndex + '_' + index }, [
         h('router-link', { attrs: { to: { name: menu.name }, target: target } }, [
           this.renderIcon(h, menu.meta.icon),
           h('span', [menu.meta.title])

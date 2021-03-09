@@ -126,7 +126,7 @@
                     <span>{{ item.type }}</span>
                   </template>
                 </a-list-item-meta>
-                <ellipsis :length="35" tooltip>{{ item.content }}</ellipsis>
+                {{ item.content }}
               </a-list-item>
             </template>
           </a-list>

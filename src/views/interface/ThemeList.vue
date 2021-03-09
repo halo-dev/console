@@ -149,7 +149,7 @@
           取消
         </a-button>
         <ReactiveButton
-          @click="handleDeleteTheme(themeDeleteModal.selected.id, themeDeleteModal.deleteSettings)"
+          @onClick="handleDeleteTheme(themeDeleteModal.selected.id, themeDeleteModal.deleteSettings)"
           @callback="handleDeleteThemeCallback"
           :loading="themeDeleteModal.deleting"
           :errored="themeDeleteModal.deleteErrored"

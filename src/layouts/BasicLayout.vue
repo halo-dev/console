@@ -63,9 +63,7 @@
 
 <script>
 import { triggerWindowResizeEvent } from '@/utils/util'
-import { mapState, mapActions } from 'vuex'
 import { mixin, mixinDevice } from '@/mixins/mixin'
-import config from '@/config/defaultSettings'
 import { asyncRouterMap } from '@/config/router.config.js'
 
 import RouteView from './RouteView'
@@ -75,9 +73,10 @@ import GlobalFooter from '@/components/GlobalFooter'
 import SettingDrawer from '@/components/SettingDrawer/SettingDrawer'
 import LoginModal from '@/components/Login/LoginModal'
 
-export default {
-  name: 'BasicLayout',
-  mixins: [mixin, mixinDevice],
+import { defineComponent, ref, computed, watch } from 'vue'
+import { useStore } from 'vuex'
+
+export default defineComponent({
   components: {
     RouteView,
     SideMenu,
@@ -86,78 +85,67 @@ export default {
     SettingDrawer,
     LoginModal
   },
-  data() {
-    return {
-      production: config.production,
-      collapsed: false,
-      menus: []
-    }
-  },
-  computed: {
-    ...mapState({
-      // 动态主路由
-      mainMenu: state => state.permission.addRouters
-    }),
-    contentPaddingLeft() {
-      if (!this.fixSidebar || this.isMobile()) {
+
+  mixins: [mixin, mixinDevice],
+
+  setup(mixins) {
+    const store = useStore()
+
+    const setSidebar = value => store.dispatch('setSidebar', value)
+    const toggleLoginModal = value => store.dispatch('toggleLoginModal', value)
+
+    const { isMobile, fixSidebar, sidebarOpened } = mixins
+
+    let collapsed = ref(!sidebarOpened)
+    let menus = ref([])
+
+    menus.value = asyncRouterMap.find(item => item.path === '/').children
+
+    const contentPaddingLeft = computed(() => {
+      if (!fixSidebar || isMobile()) {
         return '0'
       }
-      if (this.sidebarOpened) {
+      if (sidebarOpened) {
         return '256px'
       }
       return '80px'
-    }
-  },
-  watch: {
-    sidebarOpened(val) {
-      this.collapsed = !val
-    }
-  },
-  created() {
-    this.menus = asyncRouterMap.find(item => item.path === '/').children
-    // this.menus = this.mainMenu.find((item) => item.path === '/').children
-    this.collapsed = !this.sidebarOpened
-  },
-  mounted() {
-    const userAgent = navigator.userAgent
-    if (userAgent.indexOf('Edge') > -1) {
-      this.$nextTick(() => {
-        this.collapsed = !this.collapsed
-        setTimeout(() => {
-          this.collapsed = !this.collapsed
-        }, 16)
-      })
-    }
-  },
-  methods: {
-    ...mapActions(['setSidebar', 'ToggleLoginModal']),
-    toggle() {
-      this.collapsed = !this.collapsed
-      this.setSidebar(!this.collapsed)
+    })
+
+    const toggle = () => {
+      collapsed.value = !collapsed.value
+      setSidebar(!collapsed.value)
       triggerWindowResizeEvent()
-    },
-    paddingCalc() {
-      let left = ''
-      if (this.sidebarOpened) {
-        left = this.isDesktop() ? '256px' : '80px'
-      } else {
-        left = (this.isMobile() && '0') || (this.fixSidebar && '80px') || '0'
+    }
+
+    const menuSelect = () => {
+      if (!isDesktop()) {
+        collapsed.value = false
       }
-      return left
-    },
-    menuSelect() {
-      if (!this.isDesktop()) {
-        this.collapsed = false
-      }
-    },
-    drawerClose() {
-      this.collapsed = false
-    },
-    onLoginSucceed() {
-      this.ToggleLoginModal(false)
+    }
+
+    const drawerClose = () => {
+      collapsed.value = false
+    }
+
+    const onLoginSucceed = () => {
+      toggleLoginModal(false)
+    }
+
+    watch(sidebarOpened, value => {
+      collapsed.value = !value
+    })
+
+    return {
+      collapsed,
+      menus,
+      contentPaddingLeft,
+      toggle,
+      menuSelect,
+      drawerClose,
+      onLoginSucceed
     }
   }
-}
+})
 </script>
 
 <style lang="less">

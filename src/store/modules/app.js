@@ -120,7 +120,7 @@ const app = {
     ToggleLayoutSetting({ commit }, show) {
       commit('TOGGLE_LAYOUT_SETTING', show)
     },
-    ToggleLoginModal({ commit }, show) {
+    toggleLoginModal({ commit }, show) {
       commit('TOGGLE_LOGIN_MODAL', show)
     }
   }

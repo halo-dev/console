@@ -25,9 +25,9 @@ export default defineComponent({
   setup({ emit }) {
     const store = useStore()
 
-    const loginModal = computed(() => store.state.loginModal)
+    const loginModal = computed(() => store.getters.loginModal)
 
-    const handleToggleLoginModal = () => store.dispatch('ToggleLoginModal')
+    const handleToggleLoginModal = () => store.dispatch('toggleLoginModal')
 
     const handleCancelLogin = () => {
       handleToggleLoginModal(false)

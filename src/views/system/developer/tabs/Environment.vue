@@ -82,9 +82,7 @@
               <tr>
                 <td>Java Home</td>
                 <td>
-                  <ellipsis :length="isMobile() ? 50 : 256" tooltip>
-                    {{ systemProperties['java.home'].value }}
-                  </ellipsis>
+                  {{ systemProperties['java.home'].value }}
                 </td>
               </tr>
             </tbody>
@@ -115,17 +113,13 @@
               <tr>
                 <td>启动目录</td>
                 <td>
-                  <ellipsis :length="isMobile() ? 50 : 256" tooltip>
-                    {{ systemProperties['user.dir'].value }}
-                  </ellipsis>
+                  {{ systemProperties['user.dir'].value }}
                 </td>
               </tr>
               <tr>
                 <td>日志目录</td>
                 <td>
-                  <ellipsis :length="isMobile() ? 50 : 256" tooltip>
                     {{ systemProperties['LOG_FILE'].value }}
-                  </ellipsis>
                 </td>
               </tr>
             </tbody>

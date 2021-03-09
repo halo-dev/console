@@ -120,7 +120,6 @@
             <template slot="url" slot-scope="text">
               <a target="_blank" :href="text">{{ text }}</a>
             </template>
-            <ellipsis :length="15" tooltip slot="name" slot-scope="text">{{ text }}</ellipsis>
             <span slot="action" slot-scope="text, record">
               <a href="javascript:void(0);" @click="form.model = record">编辑</a>
               <a-divider type="vertical" />
