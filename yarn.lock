@@ -11029,11 +11029,6 @@ vue-contextmenujs@^1.3.13:
   resolved "https://registry.yarnpkg.com/vue-contextmenujs/-/vue-contextmenujs-1.3.13.tgz#3bdae023c7bd42095e78da4258000250d50ab8ef"
   integrity sha512-P5ihsM6bfEUcSQZu2ifukYtv17mg4dcwyU04CN1sg8ItZbcsCeAs6orj2SCgDgquuHTLWVUL6nOu12x+OLM+eA==
 
-vue-count-to@^1.0.13:
-  version "1.0.13"
-  resolved "https://registry.yarnpkg.com/vue-count-to/-/vue-count-to-1.0.13.tgz#3e7573ea6e64c2b2972f64e0a2ab2e23c7590ff3"
-  integrity sha512-6R4OVBVNtQTlcbXu6SJ8ENR35M2/CdWt3Jmv57jOUM+1ojiFmjVGvZPH8DfHpMDSA+ITs+EW5V6qthADxeyYOQ==
-
 vue-demi@latest:
   version "0.7.1"
   resolved "https://registry.yarnpkg.com/vue-demi/-/vue-demi-0.7.1.tgz#e7cf3e70e4c69bc192f4530c2665ce8b289f5dc4"

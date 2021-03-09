@@ -89,7 +89,7 @@ export default defineComponent({
       visible: false
     })
 
-    const handleCheckIsInstall = async () => {
+    const handleVerifyIsInstall = async () => {
       const response = await adminApi.isInstalled()
       if (!response.data.data) {
         router.push({ name: 'Install' })
@@ -125,7 +125,7 @@ export default defineComponent({
     }
 
     onBeforeMount(() => {
-      handleCheckIsInstall()
+      handleVerifyIsInstall()
       document.addEventListener('keydown', function(e) {
         if (e.keyCode === 72 && e.altKey && e.shiftKey) {
           resetPasswordButtonVisible.value = !resetPasswordButtonVisible.value

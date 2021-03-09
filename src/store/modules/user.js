@@ -14,7 +14,7 @@ const user = {
       state.token = token
     },
     CLEAR_TOKEN: state => {
-      removeLocalStorage.remove(ACCESS_TOKEN)
+      removeLocalStorage(ACCESS_TOKEN)
       state.token = null
     },
     SET_USER: (state, user) => {

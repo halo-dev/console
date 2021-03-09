@@ -1,17 +1,20 @@
 <template>
-  <a-button
-    :type="computedType"
-    @click="handleClick"
-    :icon="computedIcon"
-    :loading="loading"
-    :size="size"
-    :block="block"
-    >{{ computedText }}</a-button
-  >
+  <a-button :type="computedType" @click="handleClick" :loading="props.loading" :size="props.size" :block="props.block">
+    {{ computedText }}
+    <template #icon>
+      <component v-if="computedIcon" :is="computedIcon"></component>
+      <slot v-else-if="slots.icon" name="icon" />
+    </template>
+  </a-button>
 </template>
 <script>
-export default {
-  name: 'ReactiveButton',
+import { defineComponent, ref, computed, watch, toRef } from 'vue'
+import { CloseCircleOutlined, CheckCircleOutlined } from '@ant-design/icons-vue'
+export default defineComponent({
+  components: {
+    CloseCircleOutlined,
+    CheckCircleOutlined
+  },
   props: {
     type: {
       type: String,
@@ -50,51 +53,59 @@ export default {
       default: ''
     }
   },
-  data() {
-    return {
-      loaded: false,
-      hasError: false
+  setup(props, { emit, slots }) {
+    const loaded = ref(false)
+    const hasError = ref(false)
+
+    const computedType = computed(() => {
+      if (loaded.value) {
+        return hasError.value ? 'danger' : props.type
+      }
+      return props.type
+    })
+
+    const computedIcon = computed(() => {
+      if (loaded.value) {
+        return hasError.value ? 'CloseCircleOutlined' : 'CheckCircleOutlined'
+      }
+      return null
+    })
+
+    const computedText = computed(() => {
+      if (loaded.value) {
+        return hasError.value ? props.erroredText : props.loadedText
+      }
+      return props.text
+    })
+
+    const handleClick = () => {
+      emit('onClick')
     }
-  },
-  watch: {
-    loading(value) {
+
+    const loading = toRef(props, 'loading')
+
+    watch(loading, value => {
       if (!value) {
-        this.loaded = true
-        if (this.errored) {
-          this.hasError = true
+        loaded.value = true
+        if (props.errored) {
+          hasError.value = true
         }
         setTimeout(() => {
-          this.loaded = false
-          this.hasError = false
-          this.$emit('callback')
+          loaded.value = false
+          hasError.value = false
+          emit('callback')
         }, 400)
       }
-    }
-  },
-  computed: {
-    computedType() {
-      if (this.loaded) {
-        return this.hasError ? 'danger' : this.type
-      }
-      return this.type
-    },
-    computedIcon() {
-      if (this.loaded) {
-        return this.hasError ? 'close-circle' : 'check-circle'
-      }
-      return this.icon
-    },
-    computedText() {
-      if (this.loaded) {
-        return this.hasError ? this.erroredText : this.loadedText
-      }
-      return this.text
-    }
-  },
-  methods: {
-    handleClick() {
-      this.$emit('click')
+    })
+
+    return {
+      props,
+      slots,
+      computedType,
+      computedIcon,
+      computedText,
+      handleClick
     }
   }
-}
+})
 </script>
