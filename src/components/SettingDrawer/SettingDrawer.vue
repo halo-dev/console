@@ -160,9 +160,9 @@ export default {
     ...mapGetters(['layoutSetting'])
   },
   methods: {
-    ...mapActions(['setSidebar', 'ToggleLayoutSetting']),
+    ...mapActions(['setSidebar', 'toggleLayoutSetting']),
     onClose() {
-      this.ToggleLayoutSetting(false)
+      this.toggleLayoutSetting(false)
     },
     handleMenuTheme(theme) {
       this.baseConfig.navTheme = theme

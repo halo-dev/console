@@ -117,7 +117,7 @@ const app = {
     ToggleColor({ commit }, color) {
       commit('TOGGLE_COLOR', color)
     },
-    ToggleLayoutSetting({ commit }, show) {
+    toggleLayoutSetting({ commit }, show) {
       commit('TOGGLE_LAYOUT_SETTING', show)
     },
     toggleLoginModal({ commit }, show) {

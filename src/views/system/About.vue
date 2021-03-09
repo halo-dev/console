@@ -7,7 +7,7 @@
             <template #title>
               环境信息
               <a href="javascript:void(0);" @click="handleCopyEnvironments">
-                <a-icon type="copy" />
+                <CopyOutlined />
               </a>
             </template>
             <template #extra>
@@ -16,12 +16,12 @@
                   <p>{{ versionMessage }}</p>
                   <a-button type="dashed" @click="handleShowVersionContent">查看详情</a-button>
                 </template>
-                <a-button
-                  :loading="checking"
-                  type="dashed"
-                  shape="circle"
-                  :icon="isLatest ? 'check-circle' : 'exclamation-circle'"
-                ></a-button>
+                <a-button :loading="checking" type="dashed" shape="circle">
+                  <template #icon>
+                    <CheckCircleOutlined v-if="isLatest" />
+                    <ExclamationCircleOutlined v-else />
+                  </template>
+                </a-button>
               </a-popover>
             </template>
 
@@ -58,8 +58,6 @@
           </a-card>
         </a-card>
       </a-col>
-
-      <a-col :span="24"> </a-col>
     </a-row>
 
     <a-modal
@@ -80,141 +78,153 @@ import adminApi from '@/api/admin'
 import axios from 'axios'
 import marked from 'marked'
 import { PageView } from '@/layouts'
-export default {
+
+import { defineComponent, reactive, ref, computed, h, onMounted } from 'vue'
+import { useClipboard } from '@vueuse/core'
+import { message, notification, Button } from 'ant-design-vue'
+import { CopyOutlined, CheckCircleOutlined, ExclamationCircleOutlined, SmileOutlined } from '@ant-design/icons-vue'
+
+export default defineComponent({
   components: {
+    CopyOutlined,
+    CheckCircleOutlined,
+    ExclamationCircleOutlined,
     PageView
   },
-  data() {
-    return {
-      environments: {},
-      contributors: [
-        {
-          login: '',
-          id: 0,
-          node_id: '',
-          avatar_url: '',
-          gravatar_id: '',
-          url: '',
-          html_url: '',
-          followers_url: '',
-          following_url: '',
-          gists_url: '',
-          starred_url: '',
-          subscriptions_url: '',
-          organizations_url: '',
-          repos_url: '',
-          events_url: '',
-          received_events_url: '',
-          type: '',
-          site_admin: false,
-          contributions: 0
-        }
-      ],
-      contributorsLoading: true,
-      checking: false,
-      isLatest: false,
-      latestData: {},
-      versionContentVisible: false
-    }
-  },
-  computed: {
-    versionMessage() {
-      return `当前版本：${this.environments.version}，${
-        this.isLatest ? '已经是最新版本。' : `新版本：${this.latestData.name}，你可以点击下方按钮查看详情。`
-      }`
-    },
-    versionContent() {
-      if (this.latestData && this.latestData.body) {
-        return marked(this.latestData.body)
-      } else {
-        return '暂无内容'
+  setup() {
+    let environments = ref({
+      database: null,
+      mode: null,
+      startTime: null,
+      version: null
+    })
+    let latestData = ref({})
+    let contributors = ref([
+      {
+        login: '',
+        id: 0,
+        node_id: '',
+        avatar_url: '',
+        gravatar_id: '',
+        url: '',
+        html_url: '',
+        followers_url: '',
+        following_url: '',
+        gists_url: '',
+        starred_url: '',
+        subscriptions_url: '',
+        organizations_url: '',
+        repos_url: '',
+        events_url: '',
+        received_events_url: '',
+        type: '',
+        site_admin: false,
+        contributions: 0
       }
-    },
-    versionContentModalTitle() {
-      return `${this.latestData.name} 更新内容`
+    ])
+
+    let contributorsLoading = ref(false)
+    let checking = ref(false)
+    let isLatest = ref(false)
+    let versionContentVisible = ref(false)
+
+    const versionMessage = computed(() => {
+      return `当前版本：${environments.value.version}，${
+        isLatest.value ? '已经是最新版本。' : `新版本：${latestData.value.name}，你可以点击下方按钮查看详情。`
+      }`
+    })
+
+    const versionContent = computed(() => {
+      if (latestData.value && latestData.value.body) {
+        return marked(latestData.value.body)
+      }
+      return '暂无内容'
+    })
+
+    const versionContentModalTitle = computed(() => {
+      return `${latestData.value.name} 更新内容`
+    })
+
+    const getEnvironments = async () => {
+      const response = await adminApi.environments()
+      environments.value = response.data.data
+      handleCheckServerUpdate()
     }
-  },
-  created() {
-    this.getEnvironments()
-    this.fetchContributors()
-  },
-  methods: {
-    async getEnvironments() {
-      await adminApi.environments().then(response => {
-        this.environments = response.data.data
-      })
-      this.checkServerUpdate()
-    },
-    handleCopyEnvironments() {
-      const text = `版本：${this.environments.version}
-数据库：${this.environments.database}
-运行模式：${this.environments.mode}
+
+    getEnvironments()
+
+    const handleCopyEnvironments = () => {
+      const { copy, isSupported } = useClipboard()
+
+      if (!isSupported) {
+        message.warning('当前浏览器不支持复制')
+        return
+      }
+
+      const text = `版本：${environments.value.version}
+数据库：${environments.value.database}
+运行模式：${environments.value.mode}
 User Agent：${navigator.userAgent}`
-      this.$copyText(text)
-        .then(message => {
-          console.log('copy', message)
-          this.$message.success('复制成功！')
+
+      copy(text)
+        .then(() => {
+          message.success('复制成功！')
         })
-        .catch(err => {
-          console.log('copy.err', err)
-          this.$message.error('复制失败！')
+        .catch(() => {
+          message.error('复制失败！')
         })
-    },
-    fetchContributors() {
-      const _this = this
-      _this.contributorsLoading = true
+    }
+
+    const handleFetchContributors = () => {
+      contributorsLoading.value = true
       axios
         .get('https://api.github.com/repos/halo-dev/halo/contributors')
         .then(response => {
-          _this.contributors = response.data
+          contributors.value = response.data
         })
         .catch(function(error) {
           console.log('Fetch contributors error', error)
         })
         .finally(() => {
           setTimeout(() => {
-            _this.contributorsLoading = false
+            contributorsLoading.value = false
           }, 200)
         })
-    },
-    checkServerUpdate() {
-      const _this = this
-      _this.checking = true
+    }
+
+    handleFetchContributors()
+
+    const handleCheckServerUpdate = () => {
+      checking.value = true
       axios
         .get('https://api.github.com/repos/halo-dev/halo/releases/latest')
         .then(response => {
           const data = response.data
-          _this.latestData = data
+          latestData.value = data
           if (data.draft || data.prerelease) {
             return
           }
-          const current = _this.calculateIntValue(_this.environments.version)
-          const latest = _this.calculateIntValue(data.name)
+          const current = calculateIntValue(environments.value.version)
+          const latest = calculateIntValue(data.name)
           if (current >= latest) {
-            _this.isLatest = true
+            isLatest.value = true
             return
           }
           const title = '新版本提醒'
           const content = '检测到 Halo 新版本：' + data.name + '，点击下方按钮查看最新版本。'
-          _this.$notification.open({
+          notification.open({
             message: title,
             description: content,
-            icon: <a-icon type="smile" style="color: #108ee9" />,
-            btn: h => {
-              return h(
-                'a-button',
-                {
-                  props: {
-                    type: 'primary',
-                    size: 'small'
-                  },
-                  on: {
-                    click: () => this.handleShowVersionContent()
-                  }
-                },
-                '去看看'
-              )
-            }
+            icon: h(SmileOutlined, { style: 'color: #108ee9' }),
+            btn: h(
+              Button,
+              {
+                type: 'primary',
+                size: 'small',
+                onClick: () => handleShowVersionContent()
+              },
+              '查看'
+            )
           })
         })
         .catch(function(error) {
@@ -222,17 +232,20 @@ User Agent：${navigator.userAgent}`
         })
         .finally(() => {
           setTimeout(() => {
-            this.checking = false
+            checking.value = false
           }, 200)
         })
-    },
-    handleShowVersionContent() {
-      this.versionContentVisible = true
-    },
-    handleOpenVersionUrl() {
-      window.open(this.latestData.html_url, '_blank')
-    },
-    calculateIntValue(version) {
+    }
+
+    const handleShowVersionContent = () => {
+      versionContentVisible.value = true
+    }
+
+    const handleOpenVersionUrl = () => {
+      window.open(latestData.value.html_url, '_blank')
+    }
+
+    const calculateIntValue = version => {
       version = version.replace(/v/g, '')
       const ss = version.split('.')
       if (ss == null || ss.length !== 3) {
@@ -246,6 +259,22 @@ User Agent：${navigator.userAgent}`
       }
       return major * 1000000 + minor * 1000 + micro
     }
+
+    return {
+      environments,
+      latestData,
+      contributors,
+      contributorsLoading,
+      checking,
+      isLatest,
+      versionContentVisible,
+      versionMessage,
+      versionContent,
+      versionContentModalTitle,
+      handleCopyEnvironments,
+      handleShowVersionContent,
+      handleOpenVersionUrl
+    }
   }
-}
+})
 </script>

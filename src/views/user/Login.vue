@@ -51,7 +51,7 @@
 <script>
 import adminApi from '@/api/admin'
 
-import { defineComponent, onBeforeMount, computed, ref, reactive } from 'vue'
+import { defineComponent, onBeforeMount, computed, ref } from 'vue'
 
 import { ApiOutlined, RollbackOutlined, SettingOutlined } from '@ant-design/icons-vue'
 import LoginForm from '@/components/Login/LoginForm'
@@ -84,7 +84,7 @@ export default defineComponent({
 
     let resetPasswordButtonVisible = ref(false)
 
-    const apiModel = reactive({
+    const apiModel = ref({
       apiUrl: window.location.host,
       visible: false
     })
@@ -108,19 +108,19 @@ export default defineComponent({
     }
 
     const handleModifyApiUrl = () => {
-      setApiUrl(apiModel.apiUrl)
-      apiModel.visible = false
+      setApiUrl(apiModel.value.apiUrl)
+      apiModel.value.visible = false
     }
 
     const handleRestoreApiUrl = () => {
       restoreApiUrl()
-      apiModel.apiUrl = defaultApiUrl
+      apiModel.value.apiUrl = defaultApiUrl
     }
 
     const handleToggleShowApiForm = () => {
-      apiModel.visible = !apiModel.visible
-      if (apiModel.visible) {
-        apiModel.apiUrl = defaultApiUrl
+      apiModel.value.visible = !apiModel.value.visible
+      if (apiModel.value.visible) {
+        apiModel.value.apiUrl = defaultApiUrl
       }
     }
 

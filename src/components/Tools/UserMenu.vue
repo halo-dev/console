@@ -64,7 +64,7 @@ export default defineComponent({
     const options = computed(() => store.getters.options)
 
     const logout = () => store.dispatch('logout')
-    const ToggleLayoutSetting = value => store.dispatch('ToggleLayoutSetting', value)
+    const toggleLayoutSetting = value => store.dispatch('toggleLayoutSetting', value)
 
     const handleLogout = () => {
       Modal.confirm({
@@ -79,7 +79,7 @@ export default defineComponent({
     }
 
     const handleShowLayoutSetting = () => {
-      ToggleLayoutSetting(true)
+      toggleLayoutSetting(true)
     }
 
     return {
