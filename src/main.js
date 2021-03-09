@@ -13,7 +13,6 @@ import bootstrap from '@/core/bootstrap'
 bootstrap()
 
 import '@/router/guard/'
-// import '@/filters/filter'
 import { registerComponents } from './components'
 import { version } from '../package.json'
 

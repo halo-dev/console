@@ -28,7 +28,7 @@
                       >：<span v-html="item.content"></span>
                     </template>
                     <template #description>
-                      {{ item.createTime | timeAgo }}
+                      {{ item.createTime }}
                     </template>
                   </a-list-item-meta>
                 </a-list-item>
@@ -52,7 +52,7 @@
                       >：<span v-html="item.content"></span>
                     </template>
                     <template #description>
-                      {{ item.createTime | timeAgo }}
+                      {{ item.createTime }}
                     </template>
                   </a-list-item-meta>
                 </a-list-item>

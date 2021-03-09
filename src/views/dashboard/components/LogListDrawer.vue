@@ -14,7 +14,7 @@
           <a-list :loading="loading" :dataSource="formattedLogsDatas">
             <template #renderItem="{ item }">
               <a-list-item>
-                <a-list-item-meta :description="item.createTime | timeAgo">
+                <a-list-item-meta :description="item.createTime">
                   <template #title>
                     <span>{{ item.type }}</span>
                   </template>

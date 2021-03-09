@@ -140,7 +140,7 @@
                   >
                     <a-icon type="user" v-if="item.isAdmin" style="margin-right: 3px;" />&nbsp;
                     <a :href="item.authorUrl" target="_blank">{{ item.author }}</a>
-                    &nbsp;<small style="color:rgba(0, 0, 0, 0.45)">{{ item.createTime | timeAgo }}</small>
+                    &nbsp;<small style="color:rgba(0, 0, 0, 0.45)">{{ item.createTime }}</small>
                   </span>
                 </template>
                 <template #title v-else>
@@ -149,7 +149,7 @@
                   >
                     <a-icon type="user" v-if="item.isAdmin" style="margin-right: 3px;" />&nbsp;{{
                       item.author
-                    }}&nbsp;<small style="color:rgba(0, 0, 0, 0.45)">{{ item.createTime | timeAgo }}</small>
+                    }}&nbsp;<small style="color:rgba(0, 0, 0, 0.45)">{{ item.createTime }}</small>
                   </span>
                 </template>
               </a-list-item-meta>
@@ -190,9 +190,9 @@
           <span slot="createTime" slot-scope="createTime">
             <a-tooltip placement="top">
               <template #title>
-                {{ createTime | moment }}
+                {{ createTime }}
               </template>
-              {{ createTime | timeAgo }}
+              {{ createTime }}
             </a-tooltip>
           </span>
           <span slot="action" slot-scope="text, record">

@@ -48,15 +48,15 @@
               </tr>
               <tr>
                 <td>JVM 最大可用内存</td>
-                <td>{{ jvm.memory.max | fileSizeFormat }}</td>
+                <td>{{ jvm.memory.max }}</td>
               </tr>
               <tr>
                 <td>JVM 可用内存</td>
-                <td>{{ jvm.memory.committed | fileSizeFormat }}</td>
+                <td>{{ jvm.memory.committed }}</td>
               </tr>
               <tr>
                 <td>JVM 已用内存</td>
-                <td>{{ jvm.memory.used | fileSizeFormat }}</td>
+                <td>{{ jvm.memory.used }}</td>
               </tr>
               <tr>
                 <td>GC 次数</td>
@@ -106,7 +106,7 @@
               </tr>
               <tr>
                 <td>启动时间</td>
-                <td>{{ system.process.startTime | moment }}</td>
+                <td>{{ system.process.startTime }}</td>
               </tr>
               <tr>
                 <td>已启动时间</td>

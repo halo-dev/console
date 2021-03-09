@@ -54,7 +54,7 @@
           <a-list-item>
             <a-list-item-meta>
               <template #description>
-                {{ attachment.size | fileSizeFormat }}
+                {{ attachment.size }}
               </template>
               <template #title>
                 <span>附件大小：</span>
@@ -71,7 +71,7 @@
           <a-list-item>
             <a-list-item-meta>
               <template #description>
-                {{ attachment.createTime | moment }}
+                {{ attachment.createTime }}
               </template>
               <template #title>
                 <span>上传日期：</span>

@@ -48,17 +48,17 @@
           <span slot="createTime" slot-scope="createTime">
             <a-tooltip placement="top">
               <template #title>
-                {{ createTime | moment }}
+                {{ createTime  }}
               </template>
-              {{ createTime | timeAgo }}
+              {{ createTime  }}
             </a-tooltip>
           </span>
           <span slot="updateTime" slot-scope="updateTime">
             <a-tooltip placement="top">
               <template #title>
-                {{ updateTime | moment }}
+                {{ updateTime  }}
               </template>
-              {{ updateTime | timeAgo }}
+              {{ updateTime  }}
             </a-tooltip>
           </span>
           <span slot="action" slot-scope="text, record">

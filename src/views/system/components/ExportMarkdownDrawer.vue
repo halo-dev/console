@@ -37,7 +37,7 @@
                   </a>
                 </template>
                 <template #description>
-                  <p>{{ item.updateTime | timeAgo }}/{{ item.fileSize | fileSizeFormat }}</p>
+                  <p>{{ item.updateTime }}/{{ item.fileSize }}</p>
                 </template>
               </a-list-item-meta>
             </a-list-item>

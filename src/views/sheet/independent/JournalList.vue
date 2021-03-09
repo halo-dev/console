@@ -82,7 +82,7 @@
                       <p v-html="item.content" class="journal-list-content"></p>
                     </template>
                     <template #title>
-                      <span>{{ item.createTime | moment }}</span>
+                      <span>{{ item.createTime }}</span>
                     </template>
                     <template #avatar>
                       <a-avatar size="large" :src="user.avatar" />

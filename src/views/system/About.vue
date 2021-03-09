@@ -29,7 +29,7 @@
               <li>版本：{{ environments.version }}</li>
               <li>数据库：{{ environments.database }}</li>
               <li>运行模式：{{ environments.mode }}</li>
-              <li>启动时间：{{ environments.startTime | moment }}</li>
+              <li>启动时间：{{ environments.startTime }}</li>
             </ul>
             <a href="https://halo.run" target="_blank" class="mr-3"
               >官网

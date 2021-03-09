@@ -173,7 +173,7 @@
               </template>
               <a-list-item-meta>
                 <template #description>
-                  {{ item.createTime | moment }}
+                  {{ item.createTime }}
                 </template>
                 <template #title>
                   <span
@@ -323,9 +323,9 @@
           <span slot="createTime" slot-scope="createTime">
             <a-tooltip placement="top">
               <template #title>
-                {{ createTime | moment }}
+                {{ createTime }}
               </template>
-              {{ createTime | timeAgo }}
+              {{ createTime }}
             </a-tooltip>
           </span>
 

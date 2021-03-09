@@ -57,9 +57,9 @@
       <template #datetime>
         <a-tooltip>
           <template #title>
-            <span>{{ comment.createTime | moment }}</span>
+            <span>{{ comment.createTime }}</span>
           </template>
-          <span>{{ comment.createTime | timeAgo }}</span>
+          <span>{{ comment.createTime }}</span>
         </a-tooltip>
       </template>
       <template v-if="comment.children">

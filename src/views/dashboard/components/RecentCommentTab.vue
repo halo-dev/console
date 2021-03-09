@@ -35,8 +35,8 @@
             <p class="comment-content-wrapper" v-html="item.content"></p>
           </template>
           <template #datetime>
-            <a-tooltip :title="item.createTime | moment">
-              <span>{{ item.createTime | timeAgo }}</span>
+            <a-tooltip :title="item.createTime">
+              <span>{{ item.createTime }}</span>
             </a-tooltip>
           </template>
         </a-comment>

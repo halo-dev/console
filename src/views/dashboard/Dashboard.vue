@@ -38,7 +38,7 @@
         <analysis-card title="建立天数" :number="statisticsData.establishDays">
           <template #action>
             <a-tooltip>
-              <template #title>博客建立于 {{ statisticsData.birthday | moment }}</template>
+              <template #title>博客建立于 {{ statisticsData.birthday }}</template>
               <a href="javascript:void(0);">
                 <a-icon v-if="statisticsLoading" type="loading" />
                 <a-icon v-else type="info-circle-o" />
@@ -76,7 +76,7 @@
                           </a>
                         </template>
                       </a-list-item-meta>
-                      <div>{{ item.createTime | timeAgo }}</div>
+                      <div>{{ item.createTime }}</div>
                     </a-list-item>
                   </template>
                 </a-list>
@@ -121,7 +121,7 @@
           <a-list :dataSource="formattedLogDatas" :loading="logLoading">
             <template #renderItem="{ item }">
               <a-list-item>
-                <a-list-item-meta :description="item.createTime | timeAgo">
+                <a-list-item-meta :description="item.createTime">
                   <template #title>
                     <span>{{ item.type }}</span>
                   </template>

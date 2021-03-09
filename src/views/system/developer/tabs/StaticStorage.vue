@@ -25,7 +25,7 @@
             </ellipsis>
           </span>
           <span slot="createTime" slot-scope="createTime">
-            {{ createTime | moment }}
+            {{ createTime }}
           </span>
           <span slot="action" slot-scope="text, record">
             <a href="javascript:void(0);" v-if="!record.isFile" @click="handleUpload(record)">上传</a>
