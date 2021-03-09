@@ -529,7 +529,7 @@ export default {
   beforeMount() {
     this.handleListCategories()
   },
-  destroyed: function() {
+  unmounted: function() {
     if (this.postSettingVisible) {
       this.postSettingVisible = false
     }

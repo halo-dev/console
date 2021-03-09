@@ -115,7 +115,7 @@ export default {
       return ''
     }
   },
-  destroyed: function() {
+  unmounted: function() {
     if (this.attachmentSelector.visible) {
       this.attachmentSelector.visible = false
     }

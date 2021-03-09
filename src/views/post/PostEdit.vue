@@ -98,7 +98,7 @@ export default {
       }
     })
   },
-  destroyed: function() {
+  unmounted: function() {
     if (this.postSettingVisible) {
       this.postSettingVisible = false
     }

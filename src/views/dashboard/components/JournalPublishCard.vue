@@ -10,10 +10,10 @@
     </template>
     <a-form ref="journalForm" :model="form.model" :rules="form.rules" layout="vertical">
       <a-form-item prop="sourceContent">
-        <a-input
+        <a-textarea
           type="textarea"
           :autoSize="{ minRows: 8 }"
-          v-model="form.model.sourceContent"
+          v-model:value="form.model.sourceContent"
           placeholder="写点什么吧..."
         />
       </a-form-item>

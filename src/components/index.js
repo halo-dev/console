@@ -1,5 +1,3 @@
-import Vue from 'vue'
-
 import Ellipsis from '@/components/Ellipsis'
 import FooterToolbar from '@/components/FooterToolbar'
 import FilePondUpload from '@/components/Upload/FilePondUpload'
@@ -14,10 +12,8 @@ const _components = {
   ReactiveButton
 }
 
-const components = {}
-
-Object.keys(_components).forEach(key => {
-  components[key] = Vue.component(key, _components[key])
-})
-
-export default components
+export function registerComponents(app) {
+  Object.keys(_components).forEach(key => {
+    app.component(key, _components[key])
+  })
+}

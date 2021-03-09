@@ -186,7 +186,7 @@ export default {
       })
     }
   },
-  destroyed: function() {
+  unmounted: function() {
     if (this.logListDrawerVisible) {
       this.logListDrawerVisible = false
     }

@@ -3,10 +3,10 @@
     <div class="halo-logo ">
       <span
         >Halo
-        <small v-if="apiForm.visible">API 设置</small>
+        <small v-if="apiModel.visible">API 设置</small>
       </span>
     </div>
-    <div v-show="!apiForm.visible" class="login-form">
+    <div v-show="!apiModel.visible" class="login-form">
       <LoginForm @success="onLoginSucceed" />
       <a-row>
         <a-col :span="24">
@@ -21,11 +21,11 @@
         </a-col>
       </a-row>
     </div>
-    <div v-show="apiForm.visible" class="api-form">
-      <a-form layout="vertical">
-        <a-form-item>
+    <div v-show="apiModel.visible" class="api-form">
+      <a-form layout="vertical" :model="apiModel">
+        <a-form-item name="apiUrl">
           <a-tooltip placement="top" title="如果 Admin 不是独立部署，请不要更改此 API" trigger="click">
-            <a-input placeholder="API 地址" v-model="apiForm.apiUrl">
+            <a-input placeholder="API 地址" v-model:value="apiModel.apiUrl">
               <template #prefix>
                 <ApiOutlined :style="{ color: 'rgba(0,0,0,.25)' }" />
               </template>
@@ -50,74 +50,97 @@
 
 <script>
 import adminApi from '@/api/admin'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
-import { ApiOutlined, RollbackOutlined, SettingOutlined } from '@ant-design/icons-vue'
 
+import { defineComponent, onBeforeMount, computed, ref, reactive } from 'vue'
+
+import { ApiOutlined, RollbackOutlined, SettingOutlined } from '@ant-design/icons-vue'
 import LoginForm from '@/components/Login/LoginForm'
-export default {
+
+import { useStore } from 'vuex'
+import { useRouter, useRoute } from 'vue-router'
+
+export default defineComponent({
   components: {
     LoginForm,
     ApiOutlined,
     RollbackOutlined,
     SettingOutlined
   },
-  data() {
-    return {
-      resetPasswordButtonVisible: false,
-      apiForm: {
-        apiUrl: window.location.host,
-        visible: false
-      }
-    }
-  },
-  computed: {
-    ...mapGetters({ defaultApiUrl: 'apiUrl' })
-  },
-  beforeMount() {
-    const _this = this
-    _this.handleVerifyIsInstall()
-    document.addEventListener('keydown', function(e) {
-      if (e.keyCode === 72 && e.altKey && e.shiftKey) {
-        _this.resetPasswordButtonVisible = !_this.resetPasswordButtonVisible
-      }
+  setup() {
+    const store = useStore()
+    const router = useRouter()
+    const route = useRoute()
+
+    // actions
+    const refreshUserCache = () => store.dispatch('refreshUserCache')
+    const refreshOptionsCache = () => store.dispatch('refreshOptionsCache')
+
+    // getters
+    const defaultApiUrl = computed(() => store.getters.apiUrl)
+
+    // mutations
+    const setApiUrl = url => store.commit('SET_API_URL', url)
+    const restoreApiUrl = () => store.commit('RESTORE_API_URL')
+
+    let resetPasswordButtonVisible = ref(false)
+
+    const apiModel = reactive({
+      apiUrl: window.location.host,
+      visible: false
     })
-  },
-  methods: {
-    ...mapActions(['refreshUserCache', 'refreshOptionsCache']),
-    ...mapMutations({
-      setApiUrl: 'SET_API_URL',
-      restoreApiUrl: 'RESTORE_API_URL'
-    }),
-    async handleVerifyIsInstall() {
+
+    const handleCheckIsInstall = async () => {
       const response = await adminApi.isInstalled()
       if (!response.data.data) {
-        this.$router.push({ name: 'Install' })
-      }
-    },
-    onLoginSucceed() {
-      // Refresh the user info
-      this.refreshUserCache()
-      this.refreshOptionsCache()
-      if (this.$route.query.redirect) {
-        this.$router.replace(this.$route.query.redirect)
-      } else {
-        this.$router.replace({ name: 'Dashboard' })
-      }
-    },
-    handleModifyApiUrl() {
-      this.setApiUrl(this.apiForm.apiUrl)
-      this.apiForm.visible = false
-    },
-    handleRestoreApiUrl() {
-      this.restoreApiUrl()
-      this.apiForm.apiUrl = this.defaultApiUrl
-    },
-    handleToggleShowApiForm() {
-      this.apiForm.visible = !this.apiForm.visible
-      if (this.apiForm.visible) {
-        this.apiForm.apiUrl = this.defaultApiUrl
+        router.push({ name: 'Install' })
       }
     }
+
+    const onLoginSucceed = () => {
+      // Refresh the user info
+      refreshUserCache()
+      refreshOptionsCache()
+      if (route.query.redirect) {
+        router.replace(route.query.redirect)
+      } else {
+        router.replace({ name: 'Dashboard' })
+      }
+    }
+
+    const handleModifyApiUrl = () => {
+      setApiUrl(apiModel.apiUrl)
+      apiModel.visible = false
+    }
+
+    const handleRestoreApiUrl = () => {
+      restoreApiUrl()
+      apiModel.apiUrl = defaultApiUrl
+    }
+
+    const handleToggleShowApiForm = () => {
+      apiModel.visible = !apiModel.visible
+      if (apiModel.visible) {
+        apiModel.apiUrl = defaultApiUrl
+      }
+    }
+
+    onBeforeMount(() => {
+      handleCheckIsInstall()
+      document.addEventListener('keydown', function(e) {
+        if (e.keyCode === 72 && e.altKey && e.shiftKey) {
+          resetPasswordButtonVisible.value = !resetPasswordButtonVisible.value
+        }
+      })
+    })
+
+    return {
+      apiModel,
+      resetPasswordButtonVisible,
+      onLoginSucceed,
+      handleModifyApiUrl,
+      handleRestoreApiUrl,
+      handleToggleShowApiForm
+    }
   }
-}
+})
 </script>

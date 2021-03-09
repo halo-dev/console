@@ -238,7 +238,7 @@ export default {
   beforeMount() {
     this.handleListThemes()
   },
-  destroyed() {
+  unmounted() {
     console.log('Theme list destroyed.')
     this.themeSettingDrawer.visible = false
     this.installModal.visible = false

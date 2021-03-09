@@ -1,38 +1,36 @@
 <template>
-  <div>
-    <a-form layout="vertical" @keyup.enter="handleLogin">
-      <a-form-item v-if="!needAuthCode" v-bind="validateInfos.username">
-        <a-input placeholder="用户名/邮箱" v-model:value="model.username">
-          <template #prefix>
-            <UserOutlined :style="{ color: 'rgba(0,0,0,.25)' }" />
-          </template>
-        </a-input>
-      </a-form-item>
-      <a-form-item v-if="!needAuthCode" v-bind="validateInfos.password">
-        <a-input type="password" placeholder="密码" v-model:value="model.password">
-          <template #prefix>
-            <LockOutlined :style="{ color: 'rgba(0,0,0,.25)' }" />
-          </template>
-        </a-input>
-      </a-form-item>
-      <a-form-item v-if="needAuthCode" v-bind="validateInfos.authcode">
-        <a-input placeholder="两步验证码" v-model:value="model.authcode" :maxLength="6">
-          <template #prefix>
-            <SafetyCertificateOutlined :style="{ color: 'rgba(0,0,0,.25)' }" />
-          </template>
-        </a-input>
-      </a-form-item>
-      <a-form-item>
-        <a-button
-          :loading="logging"
-          type="primary"
-          :block="true"
-          @click="needAuthCode ? handleLogin() : handleLoginClick()"
-          >{{ buttonName }}</a-button
-        >
-      </a-form-item>
-    </a-form>
-  </div>
+  <a-form layout="vertical" @keyup.enter="handleLogin">
+    <a-form-item v-if="!needAuthCode" v-bind="validateInfos.username">
+      <a-input placeholder="用户名/邮箱" v-model:value="model.username">
+        <template #prefix>
+          <UserOutlined :style="{ color: 'rgba(0,0,0,.25)' }" />
+        </template>
+      </a-input>
+    </a-form-item>
+    <a-form-item v-if="!needAuthCode" v-bind="validateInfos.password">
+      <a-input type="password" placeholder="密码" v-model:value="model.password">
+        <template #prefix>
+          <LockOutlined :style="{ color: 'rgba(0,0,0,.25)' }" />
+        </template>
+      </a-input>
+    </a-form-item>
+    <a-form-item v-if="needAuthCode" v-bind="validateInfos.authcode">
+      <a-input placeholder="两步验证码" v-model:value="model.authcode" :maxLength="6">
+        <template #prefix>
+          <SafetyCertificateOutlined :style="{ color: 'rgba(0,0,0,.25)' }" />
+        </template>
+      </a-input>
+    </a-form-item>
+    <a-form-item>
+      <a-button
+        :loading="logging"
+        type="primary"
+        :block="true"
+        @click="needAuthCode ? handleLogin() : handleLoginClick()"
+        >{{ buttonName }}</a-button
+      >
+    </a-form-item>
+  </a-form>
 </template>
 
 <script>
@@ -48,10 +46,10 @@ export default defineComponent({
     LockOutlined,
     SafetyCertificateOutlined
   },
-  setup({ emit }) {
+  setup(props, { emit }) {
     const store = useStore()
 
-    const login = () => store.dispatch('login')
+    const login = (username, password, authcode) => store.dispatch('login', { username, password, authcode })
 
     const model = reactive({
       authcode: null,
@@ -106,7 +104,7 @@ export default defineComponent({
     const handleLogin = () => {
       validate().then(() => {
         logging.value = true
-        login(model)
+        login(model.username, model.password, model.authcode)
           .then(() => {
             emit('success')
           })

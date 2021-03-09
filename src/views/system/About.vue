@@ -169,7 +169,7 @@ User Agent：${navigator.userAgent}`
           _this.contributors = response.data
         })
         .catch(function(error) {
-          _console.log('Fetch contributors error', error)
+          console.log('Fetch contributors error', error)
         })
         .finally(() => {
           setTimeout(() => {

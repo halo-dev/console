@@ -195,7 +195,7 @@ export default {
     this.handleListMediaTypes()
     this.handleListTypes()
   },
-  destroyed: function() {
+  unmounted: function() {
     if (this.drawerVisible) {
       this.drawerVisible = false
     }

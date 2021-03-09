@@ -323,7 +323,7 @@ export default {
   created() {
     this.handleListSheets()
   },
-  destroyed() {
+  unmounted() {
     if (this.sheetSettingVisible) {
       this.sheetSettingVisible = false
     }

@@ -109,7 +109,7 @@ export default {
       this.$emit('toggle')
     }
   },
-  beforeDestroy() {
+  beforeUnmount() {
     document.body.removeEventListener('scroll', this.handleScroll, true)
   }
 }

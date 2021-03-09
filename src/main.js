@@ -14,7 +14,7 @@ bootstrap()
 
 import '@/router/guard/'
 // import '@/filters/filter'
-// import './components'
+import { registerComponents } from './components'
 import { version } from '../package.json'
 
 const app = createApp(App)
@@ -23,6 +23,7 @@ app.use(Antd)
 
 setupRouter(app)
 setupStore(app)
+registerComponents(app)
 app.provide('app_version', version)
 
 app.mount('#app')

@@ -90,7 +90,7 @@ export default {
       }
     })
   },
-  destroyed: function() {
+  unmounted: function() {
     if (this.sheetSettingVisible) {
       this.sheetSettingVisible = false
     }

@@ -11,12 +11,7 @@
       </div>
       <div class="number">
         <slot name="number">
-          <countTo
-            :startVal="startNumber"
-            :endVal="(typeof number === 'function' && number()) || number"
-            :duration="3000"
-            :autoplay="true"
-          ></countTo>
+          {{ number }}
         </slot>
       </div>
     </div>
@@ -24,12 +19,8 @@
 </template>
 
 <script>
-import countTo from 'vue-count-to'
 export default {
   name: 'AnalysisCard',
-  components: {
-    countTo
-  },
   props: {
     title: {
       type: String,
@@ -40,16 +31,6 @@ export default {
       type: Number,
       required: false,
       default: 0
-    }
-  },
-  data() {
-    return {
-      startNumber: 0
-    }
-  },
-  watch: {
-    number: function(newValue, oldValue) {
-      this.startNumber = oldValue
     }
   }
 }
