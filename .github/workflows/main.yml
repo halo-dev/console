@@ -1,9 +1,22 @@
-name: Node.js CI
+name: Halo Admin CI
 
-on: [push, pull_request]
+on:
+  pull_request:
+    paths:
+      - '**'
+      - '!**.md'
+  push:
+    branches:
+      - '**'
+    paths:
+      - '**'
+      - '!**.md'
+  release:
+    types:
+      - created
 
 jobs:
-  build:
+  check:
     runs-on: ubuntu-latest
 
     strategy:
@@ -16,4 +29,4 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm install
-      - run: npm run build --if-present
+      - run: npm run lint
