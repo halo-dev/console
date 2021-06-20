@@ -56,6 +56,7 @@ jobs:
           echo "PACKAGE_VERSION=${PACKAGE_VERSION}" >> $GITHUB_ENV
           echo "ARTIFACT_NAME=${ARTIFACT_NAME}" >> $GITHUB_ENV
           echo "ARTIFACT_PATHNAME=${ARTIFACT_PATHNAME}" >> $GITHUB_ENV
+          echo "RELEASE_ID=${{ github.event.release.id }}" >> $GITHUB_ENV
           zip -r $ARTIFACT_PATHNAME dist
 
       - name: Upload a Release Asset
