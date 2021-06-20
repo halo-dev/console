@@ -41,8 +41,8 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '14'
+      - run: npm install
       - name: Build for release
-        run: npm install
         run: npm run build
       - name: Compress dist directory
         run: |
