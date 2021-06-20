@@ -42,6 +42,7 @@ jobs:
         with:
           node-version: '14'
       - name: Build for release
+        run: npm install
         run: npm run build
       - name: Compress dist directory
         run: |
