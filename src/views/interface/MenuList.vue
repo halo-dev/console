@@ -88,12 +88,6 @@
                 erroredText="保存失败"
                 :disabled="list.data.length <= 0"
               ></ReactiveButton>
-              <a-button v-if="!menuSort.visible" @click="handleOpenMenuSort()" type="primary" ghost>
-                排序
-              </a-button>
-              <a-button v-else @click="handleCloseMenuSort()" type="default">
-                取消排序
-              </a-button>
               <a-button v-if="!form.visible" @click="handleOpenCreateMenuForm()" type="primary" ghost>
                 新增
               </a-button>
@@ -124,12 +118,7 @@
               @cancel="handleCloseCreateMenuForm()"
             />
             <a-empty v-if="list.data.length === 0 && !list.loading && !form.visible" />
-            <MenuTreeNode
-              v-model="list.data"
-              :menuSort="menuSort.visible"
-              :excludedTeams="excludedTeams"
-              @reload="handleListMenus"
-            />
+            <MenuTreeNode v-model="list.data" :excludedTeams="excludedTeams" @reload="handleListMenus" />
           </a-spin>
         </a-card>
       </a-col>
@@ -162,9 +151,6 @@ export default {
       list: {
         data: [],
         loading: false
-      },
-      menuSort: {
-        visible: false
       },
       form: {
         visible: false,
@@ -337,12 +323,6 @@ export default {
         }
       })
     },
-    handleOpenMenuSort() {
-      this.menuSort.visible = true
-    },
-    handleCloseMenuSort() {
-      this.menuSort.visible = false
-    },
     handleOpenCreateMenuForm() {
       this.form.visible = true
       this.form.model = {
@@ -383,11 +363,3 @@ export default {
   }
 }
 </script>
-<style>
-@media (max-width: 576px) {
-  .pb-3 .ant-card-head-wrapper {
-    flex-direction: column;
-    align-items: flex-end;
-  }
-}
-</style>

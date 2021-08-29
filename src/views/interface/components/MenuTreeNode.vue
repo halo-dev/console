@@ -16,7 +16,7 @@
           <a-list-item class="menu-item">
             <a-list-item-meta>
               <span slot="title" class="inline-block font-bold title">
-                <a-icon class="cursor-pointer mover" v-if="menuSort" type="bars" />
+                <a-icon class="cursor-pointer mover" type="bars" />
                 {{ item.name }}
                 <a-tooltip title="外部链接" v-if="item.target === '_blank'">
                   <a-icon type="link" />
@@ -72,12 +72,7 @@
             @cancel="handleCloseCreateMenuForm(item)"
           />
           <div class="a-list-nested" style="margin-left: 44px;">
-            <MenuTreeNode
-              :list="item.children"
-              :menuSort="menuSort"
-              :excludedTeams="excludedTeams"
-              @reload="onReloadEmit"
-            />
+            <MenuTreeNode :list="item.children" :excludedTeams="excludedTeams" @reload="onReloadEmit" />
           </div>
         </div>
       </transition-group>
@@ -113,11 +108,6 @@ export default {
       required: false,
       type: Array,
       default: null
-    },
-    menuSort: {
-      required: false,
-      type: Boolean,
-      default: false
     }
   },
   data() {
