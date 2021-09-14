@@ -21,8 +21,7 @@ function setTokenToHeader(config) {
 async function reRequest(error) {
   const config = error.response.config
   setTokenToHeader(config)
-  const res = await axios.request(config)
-  return res
+  return await axios.request(config)
 }
 
 let refreshTask = null

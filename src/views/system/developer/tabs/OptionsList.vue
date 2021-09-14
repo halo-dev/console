@@ -70,7 +70,7 @@
               cancelText="取消"
               @confirm="handleDeleteOption(record.id)"
             >
-              <a href="javascript:;">删除</a>
+              <a href="javascript:void(0);">删除</a>
             </a-popconfirm>
           </span>
         </a-table>
