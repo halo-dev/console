@@ -423,7 +423,6 @@ export default {
       this.attachmentDrawer.visible = false
     },
     handleMFASwitch(useMFAuth) {
-      // loding
       this.mfaParam.switch.loading = true
       if (!useMFAuth && this.mfaUsed) {
         // true -> false

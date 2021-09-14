@@ -37,7 +37,7 @@
         <a-table
           :rowKey="option => option.id"
           :columns="columns"
-          :dataSource="formattedDatas"
+          :dataSource="formattedData"
           :loading="loading"
           :pagination="false"
           :scrollToFirstRowOnChange="true"
@@ -194,7 +194,7 @@ export default {
     }
   },
   computed: {
-    formattedDatas() {
+    formattedData() {
       return this.options.map(option => {
         option.typeProperty = this.optionType[option.type]
         return option

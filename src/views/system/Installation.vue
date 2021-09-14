@@ -242,7 +242,7 @@ export default {
       migrateApi
         .migrate(this.form.importData)
         .then(() => {
-          this.$log.debug('Migrated successfullly')
+          this.$log.debug('Migrated successfully')
         })
         .catch(() => {
           this.form.importErrored = true
