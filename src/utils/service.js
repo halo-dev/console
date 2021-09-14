@@ -60,7 +60,6 @@ function getFieldValidationError(data) {
 service.interceptors.request.use(
   config => {
     config.baseURL = store.getters.apiUrl
-    // TODO set token
     setTokenToHeader(config)
     return config
   },
@@ -91,7 +90,6 @@ service.interceptors.response.use(
       // Business response
       Vue.$log.error('Business response status', data.status)
       if (data.status === 400) {
-        // TODO handle 400 status error
         const errorDetails = getFieldValidationError(data)
         if (errorDetails) {
           handled = true
@@ -115,7 +113,6 @@ service.interceptors.response.use(
           })
         }
       } else if (data.status === 401) {
-        // TODO handle 401 status error
         if (store.getters.token && store.getters.token.access_token === data.data) {
           const res = refreshToken(error)
           if (res !== error) {
