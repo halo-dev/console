@@ -246,7 +246,7 @@
               style="margin-right: 3px;"
             />
             <a
-              v-if="['PUBLISHED', 'INTIMATE'].includes(item.status)"
+              v-if="['PUBLISHED', 'INTIMATE'].includes(record.status)"
               :href="record.fullPath"
               target="_blank"
               class="no-underline"
