@@ -139,11 +139,7 @@
       </template>
       <a-form layout="vertical">
         <a-form-item>
-          <codemirror
-            ref="editor"
-            :value="editContentForm.model.content"
-            :options="editContentForm.codeMirror.options"
-          ></codemirror>
+          <Codemirror ref="editor" :value="editContentForm.model.content"></Codemirror>
         </a-form-item>
       </a-form>
     </a-modal>
@@ -152,9 +148,7 @@
 <script>
 import { mapGetters } from 'vuex'
 import staticApi from '@/api/static'
-import { codemirror } from 'vue-codemirror-lite'
-const context = require.context('codemirror/mode', true, /\.js$/)
-context.keys().map(context)
+import Codemirror from '@/components/Codemirror/Codemirror'
 const columns = [
   {
     title: '文件名',
@@ -181,7 +175,7 @@ const columns = [
 ]
 export default {
   components: {
-    codemirror
+    Codemirror
   },
   name: 'StaticStorage',
   data() {
@@ -242,8 +236,6 @@ export default {
   },
   beforeMount() {
     this.handleListStatics()
-    this.editContentForm.codeMirror.instance = require('codemirror')
-    this.editContentForm.codeMirror.instance.modeURL = 'codemirror/mode/%N/%N.js'
   },
   computed: {
     ...mapGetters(['options']),
@@ -367,6 +359,9 @@ export default {
       const postfix = arr[arr.length - 1]
       staticApi.getContent(_this.options.blog_url + file.relativePath).then(response => {
         _this.editContentForm.model.content = response.data
+        this.$nextTick(() => {
+          this.$refs.editor.handleInitCodemirror()
+        })
         const info = _this.editContentForm.codeMirror.instance.findModeByExtension(postfix)
         if (info === undefined) {
           _this.$message.error(`不支持编辑 "${postfix}" 类型的文件`)
