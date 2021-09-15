@@ -44,10 +44,6 @@ export default {
   beforeMount() {
     this.handleLoadLogsLines()
   },
-  updated() {
-    // 滚动条定位到底部
-    this.$el.querySelector('.CodeMirror-scroll').scrollTop = this.$el.querySelector('.CodeMirror-scroll').scrollHeight
-  },
   methods: {
     handleLoadLogsLines() {
       this.loading = true
@@ -60,9 +56,7 @@ export default {
           })
         })
         .finally(() => {
-          setTimeout(() => {
-            this.loading = false
-          }, 400)
+          this.loading = false
         })
     },
     handleDownloadLogFile() {
