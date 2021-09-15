@@ -53,6 +53,8 @@ export default {
           this.logContent = response.data.data
           this.$nextTick(() => {
             this.$refs.editor.handleInitCodemirror()
+            const scrollerView = this.$el.querySelector('.cm-scroller')
+            scrollerView.scrollTop = scrollerView.scrollHeight - scrollerView.clientHeight
           })
         })
         .finally(() => {
