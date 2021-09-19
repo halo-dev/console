@@ -3,13 +3,66 @@
     <a-form-model ref="commentOptionsForm" :model="options" :rules="rules" layout="vertical" :wrapperCol="wrapperCol">
       <a-form-model-item label="评论者头像：">
         <a-select v-model="options.comment_gravatar_default">
-          <a-select-option value="mm">默认</a-select-option>
-          <a-select-option value="identicon">抽象几何图形</a-select-option>
-          <a-select-option value="monsterid">小怪物</a-select-option>
-          <a-select-option value="wavatar">Wavatar</a-select-option>
-          <a-select-option value="retro">复古</a-select-option>
-          <a-select-option value="robohash">机器人</a-select-option>
-          <a-select-option value="blank">不显示头像</a-select-option>
+          <a-select-option value="">
+            <a-avatar class="comment_select_gravatar" :size="18" :src="options.gravatar_source + '?s=256&d='"></a-avatar
+            >默认
+          </a-select-option>
+          <a-select-option value="mm">
+            <a-avatar
+              class="comment_select_gravatar"
+              :size="18"
+              :src="options.gravatar_source + '?s=256&d=mm'"
+            ></a-avatar
+            >匿名者
+          </a-select-option>
+          <a-select-option value="identicon">
+            <a-avatar
+              class="comment_select_gravatar"
+              :size="18"
+              :src="options.gravatar_source + '?s=256&d=identicon'"
+            ></a-avatar
+            >抽象几何图形
+          </a-select-option>
+          <a-select-option value="monsterid">
+            <a-avatar
+              class="comment_select_gravatar"
+              :size="18"
+              :src="options.gravatar_source + '?s=256&d=monsterid'"
+            ></a-avatar
+            >小怪物
+          </a-select-option>
+          <a-select-option value="wavatar">
+            <a-avatar
+              class="comment_select_gravatar"
+              :size="18"
+              :src="options.gravatar_source + '?s=256&d=wavatar'"
+            ></a-avatar
+            >Wavatar
+          </a-select-option>
+          <a-select-option value="retro">
+            <a-avatar
+              class="comment_select_gravatar"
+              :size="18"
+              :src="options.gravatar_source + '?s=256&d=retro'"
+            ></a-avatar
+            >复古
+          </a-select-option>
+          <a-select-option value="robohash">
+            <a-avatar
+              class="comment_select_gravatar"
+              :size="18"
+              :src="options.gravatar_source + '?s=256&d=robohash'"
+            ></a-avatar
+            >机器人
+          </a-select-option>
+          <a-select-option value="blank">
+            <a-avatar
+              class="comment_select_gravatar"
+              :size="18"
+              :src="options.gravatar_source + '?s=256&d=blank'"
+            ></a-avatar
+            >不显示头像
+          </a-select-option>
         </a-select>
       </a-form-model-item>
       <a-form-model-item label="评论审核后才显示：">
@@ -106,3 +159,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.comment_select_gravatar {
+  border: 1px #c8c8ca solid;
+  margin: 0 5px 3px 0;
+}
+</style>
