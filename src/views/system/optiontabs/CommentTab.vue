@@ -3,65 +3,14 @@
     <a-form-model ref="commentOptionsForm" :model="options" :rules="rules" layout="vertical" :wrapperCol="wrapperCol">
       <a-form-model-item label="评论者头像：">
         <a-select v-model="options.comment_gravatar_default">
-          <a-select-option value="">
-            <a-avatar class="comment_select_gravatar" :size="18" :src="options.gravatar_source + '?s=256&d='"></a-avatar
-            >默认
-          </a-select-option>
-          <a-select-option value="mm">
+          <a-select-option v-for="(avatarType, index) in avatarTypes" :key="index" :value="avatarType.value">
             <a-avatar
               class="comment_select_gravatar"
               :size="18"
-              :src="options.gravatar_source + '?s=256&d=mm'"
-            ></a-avatar
-            >匿名者
-          </a-select-option>
-          <a-select-option value="identicon">
-            <a-avatar
-              class="comment_select_gravatar"
-              :size="18"
-              :src="options.gravatar_source + '?s=256&d=identicon'"
-            ></a-avatar
-            >抽象几何图形
-          </a-select-option>
-          <a-select-option value="monsterid">
-            <a-avatar
-              class="comment_select_gravatar"
-              :size="18"
-              :src="options.gravatar_source + '?s=256&d=monsterid'"
-            ></a-avatar
-            >小怪物
-          </a-select-option>
-          <a-select-option value="wavatar">
-            <a-avatar
-              class="comment_select_gravatar"
-              :size="18"
-              :src="options.gravatar_source + '?s=256&d=wavatar'"
-            ></a-avatar
-            >Wavatar
-          </a-select-option>
-          <a-select-option value="retro">
-            <a-avatar
-              class="comment_select_gravatar"
-              :size="18"
-              :src="options.gravatar_source + '?s=256&d=retro'"
-            ></a-avatar
-            >复古
-          </a-select-option>
-          <a-select-option value="robohash">
-            <a-avatar
-              class="comment_select_gravatar"
-              :size="18"
-              :src="options.gravatar_source + '?s=256&d=robohash'"
-            ></a-avatar
-            >机器人
-          </a-select-option>
-          <a-select-option value="blank">
-            <a-avatar
-              class="comment_select_gravatar"
-              :size="18"
-              :src="options.gravatar_source + '?s=256&d=blank'"
-            ></a-avatar
-            >不显示头像
+              :src="options.gravatar_source + '?s=256&d=' + avatarType.value"
+            >
+            </a-avatar
+            >{{ avatarType.text }}
           </a-select-option>
         </a-select>
       </a-form-model-item>
@@ -105,6 +54,41 @@
   </div>
 </template>
 <script>
+const avatarTypes = [
+  {
+    text: '默认',
+    value: ''
+  },
+  {
+    text: '匿名者',
+    value: 'mm'
+  },
+  {
+    text: '抽象几何图形',
+    value: 'identicon'
+  },
+  {
+    text: '小怪物',
+    value: 'monsterid'
+  },
+  {
+    text: 'Wavatar',
+    value: 'wavatar'
+  },
+  {
+    text: '复古',
+    value: 'retro'
+  },
+  {
+    text: '机器人',
+    value: 'robohash'
+  },
+  {
+    text: '不显示头像',
+    value: 'blank'
+  }
+]
+
 export default {
   name: 'CommentTab',
   props: {
@@ -129,7 +113,8 @@ export default {
         sm: { span: 12 },
         xs: { span: 24 }
       },
-      rules: {}
+      rules: {},
+      avatarTypes
     }
   },
   watch: {
