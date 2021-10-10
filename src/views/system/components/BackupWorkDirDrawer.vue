@@ -60,9 +60,13 @@
         ></ReactiveButton>
       </template>
       <a-checkbox-group v-model="backupedItems">
-        <a-checkbox :value="item" v-for="item in workDirOptions" :key="item">
-          {{ item }}
-        </a-checkbox>
+        <a-row>
+          <a-col :span="8" v-for="item in workDirOptions" :key="item">
+            <a-checkbox :value="item">
+              {{ item }}
+            </a-checkbox>
+          </a-col>
+        </a-row>
       </a-checkbox-group>
     </a-modal>
   </a-drawer>
