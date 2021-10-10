@@ -41,20 +41,30 @@
     <a-divider class="divider-transparent" />
     <div class="bottom-control">
       <a-space>
-        <ReactiveButton
-          type="primary"
-          icon="download"
-          @click="handleBackupClick"
-          @callback="handleBackupedCallback"
-          :loading="backuping"
-          :errored="backupErrored"
-          text="备份"
-          loadedText="备份成功"
-          erroredText="备份失败"
-        ></ReactiveButton>
+        <a-button type="primary" icon="download" @click="handleBackupClick">备份</a-button>
         <a-button type="dashed" icon="reload" :loading="loading" @click="handleListBackups">刷新</a-button>
       </a-space>
     </div>
+    <a-modal v-model="backupConfirmModalVisible" title="备份选项">
+      <template slot="footer">
+        <a-button @click="() => (backupConfirmModalVisible = false)">取消</a-button>
+        <ReactiveButton
+          type="primary"
+          @click="handleBackupConfirmed"
+          @callback="handleBackupedCallback"
+          :loading="backuping"
+          :errored="backupErrored"
+          text="确认"
+          loadedText="备份成功"
+          erroredText="备份失败"
+        ></ReactiveButton>
+      </template>
+      <a-checkbox-group v-model="backupedItems">
+        <a-checkbox :value="item" v-for="item in workDirOptions" :key="item">
+          {{ item }}
+        </a-checkbox>
+      </a-checkbox-group>
+    </a-modal>
   </a-drawer>
 </template>
 <script>
@@ -68,7 +78,10 @@ export default {
       backuping: false,
       loading: false,
       backupErrored: false,
-      backups: []
+      backups: [],
+      backupConfirmModalVisible: false,
+      workDirOptions: [],
+      backupedItems: []
     }
   },
   model: {
@@ -102,9 +115,16 @@ export default {
         })
     },
     handleBackupClick() {
+      backupApi.listWorkDirOptions().then(res => {
+        this.backupConfirmModalVisible = true
+        this.workDirOptions = res.data.data
+        this.backupedItems = res.data.data
+      })
+    },
+    handleBackupConfirmed() {
       this.backuping = true
       backupApi
-        .backupWorkDir()
+        .backupWorkDir(this.backupedItems)
         .catch(() => {
           this.backupErrored = true
         })
@@ -118,6 +138,7 @@ export default {
       if (this.backupErrored) {
         this.backupErrored = false
       } else {
+        this.backupConfirmModalVisible = false
         this.handleListBackups()
       }
     },
