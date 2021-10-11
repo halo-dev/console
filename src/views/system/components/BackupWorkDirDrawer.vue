@@ -45,9 +45,9 @@
         <a-button type="dashed" icon="reload" :loading="loading" @click="handleListBackups">刷新</a-button>
       </a-space>
     </div>
-    <a-modal v-model="backupConfirmModalVisible" title="备份选项">
+    <a-modal v-model="optionsModal.visible" title="备份选项">
       <template slot="footer">
-        <a-button @click="() => (backupConfirmModalVisible = false)">取消</a-button>
+        <a-button @click="() => (optionsModal.visible = false)">取消</a-button>
         <ReactiveButton
           type="primary"
           @click="handleBackupConfirmed"
@@ -59,9 +59,9 @@
           erroredText="备份失败"
         ></ReactiveButton>
       </template>
-      <a-checkbox-group v-model="backupedItems">
+      <a-checkbox-group v-model="optionsModal.selected" style="width: 100%">
         <a-row>
-          <a-col :span="8" v-for="item in workDirOptions" :key="item">
+          <a-col :span="8" v-for="item in optionsModal.options" :key="item">
             <a-checkbox :value="item">
               {{ item }}
             </a-checkbox>
@@ -83,9 +83,11 @@ export default {
       loading: false,
       backupErrored: false,
       backups: [],
-      backupConfirmModalVisible: false,
-      workDirOptions: [],
-      backupedItems: []
+      optionsModal: {
+        options: [],
+        visible: false,
+        selected: []
+      }
     }
   },
   model: {
@@ -120,15 +122,17 @@ export default {
     },
     handleBackupClick() {
       backupApi.listWorkDirOptions().then(res => {
-        this.backupConfirmModalVisible = true
-        this.workDirOptions = res.data.data
-        this.backupedItems = res.data.data
+        this.optionsModal = {
+          visible: true,
+          options: res.data.data,
+          selected: res.data.data
+        }
       })
     },
     handleBackupConfirmed() {
       this.backuping = true
       backupApi
-        .backupWorkDir(this.backupedItems)
+        .backupWorkDir(this.optionsModal.selected)
         .catch(() => {
           this.backupErrored = true
         })
@@ -142,7 +146,7 @@ export default {
       if (this.backupErrored) {
         this.backupErrored = false
       } else {
-        this.backupConfirmModalVisible = false
+        this.optionsModal.visible = false
         this.handleListBackups()
       }
     },

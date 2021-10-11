@@ -15,11 +15,11 @@ backupApi.importMarkdown = (formData, uploadProgress, cancelToken) => {
   })
 }
 
-backupApi.backupWorkDir = backupItems => {
+backupApi.backupWorkDir = options => {
   return service({
     url: `${baseUrl}/work-dir`,
     method: 'post',
-    data: backupItems,
+    data: options,
     timeout: 8640000 // 24 hours
   })
 }
