@@ -121,11 +121,11 @@ export default {
         })
     },
     handleBackupClick() {
-      backupApi.listWorkDirOptions().then(res => {
+      backupApi.listWorkDirOptions().then(response => {
         this.optionsModal = {
           visible: true,
-          options: res.data.data,
-          selected: res.data.data
+          options: response.data.data,
+          selected: response.data.data
         }
       })
     },
