@@ -379,7 +379,7 @@
       </div>
     </a-card>
 
-    <PostSettingDrawer
+    <!-- <PostSettingDrawer
       :post="selectedPost"
       :tagIds="selectedTagIds"
       :categoryIds="selectedCategoryIds"
@@ -392,7 +392,23 @@
       @onRefreshTagIds="onRefreshTagIdsFromSetting"
       @onRefreshCategoryIds="onRefreshCategoryIdsFromSetting"
       @onRefreshPostMetas="onRefreshPostMetasFromSetting"
-    />
+    /> -->
+
+    <PostSettingModal
+      :loading="postSettingLoading"
+      :post="selectedPost"
+      :visible.sync="postSettingVisible"
+      @close="onPostSettingsClose"
+    >
+      <template #extraFooter>
+        <a-button @click="onSettingLoadPrevious">
+          上一篇
+        </a-button>
+        <a-button @click="onSettingLoadNext">
+          下一篇
+        </a-button>
+      </template>
+    </PostSettingModal>
 
     <TargetCommentDrawer
       :visible="postCommentVisible"
@@ -408,7 +424,8 @@
 <script>
 import { mixin, mixinDevice } from '@/mixins/mixin.js'
 import { PageView } from '@/layouts'
-import PostSettingDrawer from './components/PostSettingDrawer'
+// import PostSettingDrawer from './components/PostSettingDrawer'
+import PostSettingModal from './components/PostSettingModal.vue'
 import TargetCommentDrawer from '../comment/components/TargetCommentDrawer'
 import categoryApi from '@/api/category'
 import postApi from '@/api/post'
@@ -466,7 +483,8 @@ export default {
   name: 'PostList',
   components: {
     PageView,
-    PostSettingDrawer,
+    // PostSettingDrawer,
+    PostSettingModal,
     TargetCommentDrawer
   },
   mixins: [mixin, mixinDevice],
@@ -501,6 +519,7 @@ export default {
       postsLoading: false,
       categoriesLoading: false,
       postSettingVisible: false,
+      postSettingLoading: false,
       postCommentVisible: false,
       selectedPost: {},
       selectedTagIds: [],
@@ -680,13 +699,19 @@ export default {
         })
     },
     handleShowPostSettings(post) {
-      postApi.get(post.id).then(response => {
-        this.selectedPost = response.data.data
-        this.selectedTagIds = this.selectedPost.tagIds
-        this.selectedCategoryIds = this.selectedPost.categoryIds
-        this.selectedMetas = this.selectedPost.metas
-        this.postSettingVisible = true
-      })
+      this.postSettingVisible = true
+      this.postSettingLoading = true
+      postApi
+        .get(post.id)
+        .then(response => {
+          this.selectedPost = response.data.data
+          this.selectedTagIds = this.selectedPost.tagIds
+          this.selectedCategoryIds = this.selectedPost.categoryIds
+          this.selectedMetas = this.selectedPost.metas
+        })
+        .finally(() => {
+          this.postSettingLoading = false
+        })
     },
     handleShowPostComments(post) {
       postApi.get(post.id).then(response => {
@@ -728,6 +753,34 @@ export default {
     },
     onRefreshPostMetasFromSetting(metas) {
       this.selectedMetas = metas
+    },
+    onSettingLoadPrevious() {
+      const currentSelectedIndex = this.posts.findIndex(post => post.id === this.selectedPost.id)
+      if (currentSelectedIndex > 0) {
+        this.postSettingLoading = true
+        postApi
+          .get(this.posts[currentSelectedIndex - 1].id)
+          .then(response => {
+            this.selectedPost = response.data.data
+          })
+          .finally(() => {
+            this.postSettingLoading = false
+          })
+      }
+    },
+    onSettingLoadNext() {
+      const currentSelectedIndex = this.posts.findIndex(post => post.id === this.selectedPost.id)
+      if (currentSelectedIndex < this.posts.length - 1) {
+        this.postSettingLoading = true
+        postApi
+          .get(this.posts[currentSelectedIndex + 1].id)
+          .then(response => {
+            this.selectedPost = response.data.data
+          })
+          .finally(() => {
+            this.postSettingLoading = false
+          })
+      }
     }
   }
 }
