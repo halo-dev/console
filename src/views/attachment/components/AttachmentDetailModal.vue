@@ -31,7 +31,7 @@
             </a-list-item-meta>
           </a-list-item>
           <a-list-item>
-            <a-list-item-meta :description="attachment.typeProperty">
+            <a-list-item-meta :description="attachment.type | typeText">
               <span slot="title">存储位置：</span>
             </a-list-item-meta>
           </a-list-item>
@@ -57,7 +57,10 @@
             </a-list-item-meta>
           </a-list-item>
           <a-list-item>
-            <a-list-item-meta :description="attachment.path">
+            <a-list-item-meta>
+              <template #description>
+                <a :href="attachment.path" target="_blank">{{ attachment.path }}</a>
+              </template>
               <span slot="title">
                 普通链接：
                 <a href="javascript:void(0);" @click="handleCopyLink(`${encodeURI(attachment.path)}`)">
@@ -86,15 +89,6 @@
 
     <template #footer>
       <slot name="extraFooter" />
-      <a-popconfirm
-        title="你确定要添加到图库？"
-        @confirm="handleAddToPhoto"
-        okText="确定"
-        cancelText="取消"
-        v-if="addToPhoto"
-      >
-        <a-button type="dashed">添加到图库</a-button>
-      </a-popconfirm>
       <a-popconfirm title="你确定要删除该附件？" @confirm="handleDelete" okText="确定" cancelText="取消">
         <ReactiveButton
           type="danger"
@@ -118,6 +112,11 @@ import photoApi from '@/api/photo'
 export default {
   name: 'AttachmentDetailModal',
   mixins: [mixin, mixinDevice],
+  filters: {
+    typeText(type) {
+      return type ? attachmentApi.type[type].text : ''
+    }
+  },
   props: {
     visible: {
       type: Boolean,
@@ -125,7 +124,7 @@ export default {
     },
     attachment: {
       type: Object,
-      required: true
+      default: () => ({})
     },
     addToPhoto: {
       type: Boolean,

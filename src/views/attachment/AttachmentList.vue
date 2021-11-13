@@ -8,32 +8,32 @@
               <a-row :gutter="48">
                 <a-col :md="6" :sm="24">
                   <a-form-item label="关键词：">
-                    <a-input v-model="queryParam.keyword" @keyup.enter="handleQuery()" />
+                    <a-input v-model="list.params.keyword" @keyup.enter="handleQuery()" />
                   </a-form-item>
                 </a-col>
                 <a-col :md="6" :sm="24">
                   <a-form-item label="存储位置：">
                     <a-select
-                      v-model="queryParam.attachmentType"
+                      v-model="list.params.attachmentType"
                       @change="handleQuery()"
-                      :loading="typesLoading"
+                      :loading="types.loading"
                       allowClear
                     >
-                      <a-select-option v-for="item in types" :key="item" :value="item">{{
-                        attachmentType[item].text
-                      }}</a-select-option>
+                      <a-select-option v-for="item in types.data" :key="item" :value="item">
+                        {{ item | typeText }}
+                      </a-select-option>
                     </a-select>
                   </a-form-item>
                 </a-col>
                 <a-col :md="6" :sm="24">
                   <a-form-item label="文件类型：">
                     <a-select
-                      v-model="queryParam.mediaType"
+                      v-model="list.params.mediaType"
                       @change="handleQuery()"
-                      :loading="mediaTypesLoading"
+                      :loading="mediaTypes.loading"
                       allowClear
                     >
-                      <a-select-option v-for="(item, index) in mediaTypes" :key="index" :value="item">{{
+                      <a-select-option v-for="(item, index) in mediaTypes.data" :key="index" :value="item">{{
                         item
                       }}</a-select-option>
                     </a-select>
@@ -51,7 +51,7 @@
             </a-form>
           </div>
           <div class="mb-0 table-operator">
-            <a-button type="primary" icon="cloud-upload" @click="() => (uploadVisible = true)">上传</a-button>
+            <a-button type="primary" icon="cloud-upload" @click="upload.visible = true">上传</a-button>
             <a-button icon="select" v-show="!supportMultipleSelection" @click="handleMultipleSelection">
               批量操作
             </a-button>
@@ -73,14 +73,14 @@
         <a-list
           class="attachments-group"
           :grid="{ gutter: 12, xs: 2, sm: 2, md: 4, lg: 6, xl: 6, xxl: 6 }"
-          :dataSource="formattedDatas"
-          :loading="listLoading"
+          :dataSource="list.data"
+          :loading="list.loading"
         >
           <a-list-item slot="renderItem" slot-scope="item, index" :key="index">
             <a-card
               :bodyStyle="{ padding: 0 }"
               hoverable
-              @click="handleShowDetailDrawer(item)"
+              @click="handleOpenDetail(item)"
               @contextmenu.prevent="handleContextMenu($event, item)"
             >
               <div class="attach-thumb attachments-group-item">
@@ -115,17 +115,17 @@
         :defaultPageSize="pagination.size"
         :pageSizeOptions="['18', '36', '54', '72', '90', '108']"
         showSizeChanger
-        @change="handlePaginationChange"
-        @showSizeChange="handlePaginationChange"
+        @change="handlePageChange"
+        @showSizeChange="handlePageSizeChange"
         showLessItems
       />
     </div>
-    <a-modal title="上传附件" v-model="uploadVisible" :footer="null" :afterClose="onUploadClose" destroyOnClose>
-      <FilePondUpload ref="upload" :uploadHandler="uploadHandler"></FilePondUpload>
+    <a-modal title="上传附件" v-model="upload.visible" :footer="null" :afterClose="onUploadClose" destroyOnClose>
+      <FilePondUpload ref="upload" :uploadHandler="upload.handler"></FilePondUpload>
     </a-modal>
     <AttachmentDetailModal
       :visible.sync="detailVisible"
-      :attachment="selectAttachment"
+      :attachment="list.selected"
       :addToPhoto="true"
       @delete="handleListAttachments()"
     >
@@ -150,46 +150,52 @@ export default {
     AttachmentDetailModal
   },
   mixins: [mixin, mixinDevice],
+  filters: {
+    typeText(type) {
+      return attachmentApi.type[type].text
+    }
+  },
   data() {
     return {
-      attachmentType: attachmentApi.type,
-      listLoading: true,
-      uploadVisible: false,
+      list: {
+        data: [],
+        loading: false,
+        total: 0,
+        hasNext: false,
+        hasPrevious: false,
+        selected: {},
+        params: {
+          page: 0,
+          size: 18,
+          keyword: null,
+          mediaType: null,
+          attachmentType: null
+        }
+      },
+
+      mediaTypes: {
+        data: [],
+        loading: false
+      },
+
+      types: {
+        data: [],
+        loading: false
+      },
+
+      upload: {
+        handler: attachmentApi.upload,
+        visible: false
+      },
+
+      detailVisible: false,
+
       supportMultipleSelection: false,
       selectedAttachmentCheckbox: {},
-      batchSelectedAttachments: [],
-      selectAttachment: {},
-      attachments: [],
-      mediaTypes: [],
-      mediaTypesLoading: false,
-      types: [],
-      typesLoading: false,
-      editable: false,
-      pagination: {
-        page: 1,
-        size: 18,
-        sort: null,
-        total: 1
-      },
-      queryParam: {
-        page: 0,
-        size: 18,
-        sort: null,
-        keyword: null,
-        mediaType: null,
-        attachmentType: null
-      },
-      detailVisible: false,
-      uploadHandler: attachmentApi.upload
+      batchSelectedAttachments: []
     }
   },
   computed: {
-    formattedDatas() {
-      return this.attachments.map(attachment => {
-        attachment.typeProperty = this.attachmentType[attachment.type]
-        return attachment
-      })
-    },
     selectedAttachmentStyle() {
       return {
         border: `2px solid ${this.color()}`
@@ -202,6 +208,13 @@ export default {
         }
         return attachment.mediaType.startsWith('image')
       }
+    },
+    pagination() {
+      return {
+        page: this.list.params.page + 1,
+        size: this.list.params.size,
+        total: this.list.total
+      }
     }
   },
   created() {
@@ -209,66 +222,74 @@ export default {
     this.handleListMediaTypes()
     this.handleListTypes()
   },
-  destroyed() {
-    if (this.detailVisible) {
-      this.detailVisible = false
-    }
-  },
-  beforeRouteLeave(to, from, next) {
-    if (this.detailVisible) {
-      this.detailVisible = false
-    }
-    next()
-  },
   methods: {
     ...mapGetters(['color']),
-    handleListAttachments() {
-      this.listLoading = true
-      this.queryParam.page = this.pagination.page - 1
-      this.queryParam.size = this.pagination.size
-      this.queryParam.sort = this.pagination.sort
-      attachmentApi
-        .query(this.queryParam)
-        .then(response => {
-          this.attachments = response.data.data.content
-          this.pagination.total = response.data.data.total
-        })
-        .finally(() => {
-          setTimeout(() => {
-            this.listLoading = false
-          }, 200)
-        })
+
+    /**
+     * List attachments
+     */
+    async handleListAttachments() {
+      try {
+        this.list.loading = true
+
+        const response = await attachmentApi.query(this.list.params)
+
+        this.list.data = response.data.data.content
+        this.list.total = response.data.data.total
+        this.list.hasNext = response.data.data.hasNext
+        this.list.hasPrevious = response.data.data.hasPrevious
+      } catch (error) {
+        this.$log.error(error)
+      } finally {
+        this.list.loading = false
+      }
     },
+
+    /**
+     * List attachment media types
+     */
     async handleListMediaTypes() {
       try {
-        this.mediaTypesLoading = true
+        this.mediaTypes.loading = true
 
         const response = await attachmentApi.getMediaTypes()
 
-        this.mediaTypes = response.data.data
+        this.mediaTypes.data = response.data.data
       } catch (error) {
         this.$log.error(error)
       } finally {
-        this.mediaTypesLoading = false
+        this.mediaTypes.loading = false
       }
     },
+
+    /**
+     * List attachment upload types
+     */
     async handleListTypes() {
       try {
-        this.typesLoading = true
+        this.types.loading = true
 
         const response = await attachmentApi.getTypes()
 
-        this.types = response.data.data
+        this.types.data = response.data.data
       } catch (error) {
         this.$log.error(error)
       } finally {
-        this.typesLoading = false
+        this.types.loading = false
       }
     },
-    handleShowDetailDrawer(attachment) {
-      this.selectAttachment = attachment
+
+    /**
+     * Handle open attachment detail modal event
+     */
+    handleOpenDetail(attachment) {
+      this.list.selected = attachment
       this.detailVisible = !this.supportMultipleSelection
     },
+
+    /**
+     * Show context menu
+     */
     handleContextMenu(event, item) {
       this.$contextmenu({
         items: [
@@ -302,6 +323,22 @@ export default {
                   this.$log.debug('copy.err', err)
                   this.$message.error('复制失败！')
                 })
+            },
+            divided: true
+          },
+          {
+            label: '删除',
+            onClick: () => {
+              this.$confirm({
+                title: '提示',
+                content: '确定删除该附件？',
+                okText: '确定',
+                cancelText: '取消',
+                onOk: async () => {
+                  await attachmentApi.delete(item.id)
+                  this.handleListAttachments()
+                }
+              })
             }
           }
         ],
@@ -310,26 +347,46 @@ export default {
       })
       return false
     },
-    handlePaginationChange(page, size) {
-      this.$log.debug(`Current: ${page}, PageSize: ${size}`)
-      this.pagination.page = page
-      this.pagination.size = size
+
+    /**
+     * Handle page change
+     */
+    handlePageChange(page = 1) {
+      this.list.params.page = page - 1
       this.handleListAttachments()
     },
+
+    /**
+     * Handle page size change
+     */
+    handlePageSizeChange(current, size) {
+      this.$log.debug(`Current: ${current}, PageSize: ${size}`)
+      this.list.params.page = 0
+      this.list.params.size = size
+      this.handleListAttachments()
+    },
+
+    /**
+     * Reset query params
+     */
     handleResetParam() {
-      this.queryParam.keyword = null
-      this.queryParam.mediaType = null
-      this.queryParam.attachmentType = null
-      this.handlePaginationChange(1, this.pagination.size)
+      this.list.params.keyword = null
+      this.list.params.mediaType = null
+      this.list.params.attachmentType = null
+      this.handlePageChange()
       this.handleListMediaTypes()
       this.handleListTypes()
     },
+
+    /**
+     * Search attachments
+     */
     handleQuery() {
-      this.handlePaginationChange(1, this.pagination.size)
+      this.handlePageChange()
     },
     onUploadClose() {
       this.$refs.upload.handleClearFileList()
-      this.handlePaginationChange(1, this.pagination.size)
+      this.handlePageChange()
       this.handleListMediaTypes()
       this.handleListTypes()
     },
@@ -340,7 +397,7 @@ export default {
       this.supportMultipleSelection = true
       // 不允许附件详情抽屉显示
       this.detailVisible = false
-      this.attachments.forEach(item => {
+      this.list.data.forEach(item => {
         this.$set(this.selectedAttachmentCheckbox, item.id, false)
       })
     },
@@ -364,6 +421,10 @@ export default {
         this.batchSelectedAttachments.splice(index, 1)
       }
     },
+
+    /**
+     * Deletes selected attachments
+     */
     handleDeleteAttachmentInBatch() {
       const that = this
       if (this.batchSelectedAttachments.length <= 0) {
@@ -391,25 +452,37 @@ export default {
     /**
      * Select previous attachment
      */
-    handleSelectPrevious() {
-      const index = this.attachments.findIndex(item => item.id === this.selectAttachment.id)
-      if (index === 0) {
-        this.$message.warn('已经是第一个了')
+    async handleSelectPrevious() {
+      const index = this.list.data.findIndex(item => item.id === this.list.selected.id)
+      if (index > 0) {
+        this.list.selected = this.list.data[index - 1]
         return
       }
-      this.selectAttachment = this.attachments[index - 1]
+      if (index === 0 && this.list.hasPrevious) {
+        this.list.params.page--
+        await this.handleListAttachments()
+
+        this.list.selected = this.list.data[this.list.data.length - 1]
+        return
+      }
     },
 
     /**
      * Select next attachment
      */
-    handleSelectNext() {
-      const index = this.attachments.findIndex(item => item.id === this.selectAttachment.id)
-      if (index === this.attachments.length - 1) {
-        this.$message.warn('已经是最后一个了')
+    async handleSelectNext() {
+      const index = this.list.data.findIndex(item => item.id === this.list.selected.id)
+      if (index < this.list.data.length - 1) {
+        this.list.selected = this.list.data[index + 1]
         return
       }
-      this.selectAttachment = this.attachments[index + 1]
+      if (index === this.list.data.length - 1 && this.list.hasNext) {
+        this.list.params.page++
+        await this.handleListAttachments()
+
+        this.list.selected = this.list.data[0]
+        return
+      }
     }
   }
 }
