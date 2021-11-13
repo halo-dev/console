@@ -117,27 +117,31 @@
     <a-modal title="上传附件" v-model="uploadVisible" :footer="null" :afterClose="onUploadClose" destroyOnClose>
       <FilePondUpload ref="upload" :uploadHandler="uploadHandler"></FilePondUpload>
     </a-modal>
-    <AttachmentDetailDrawer
-      v-model="drawerVisible"
-      v-if="selectAttachment"
+    <AttachmentDetailModal
+      :visible.sync="drawerVisible"
       :attachment="selectAttachment"
       :addToPhoto="true"
       @delete="handleListAttachments()"
-    />
+    >
+      <template #extraFooter>
+        <a-button type="primary" ghost @click="handleSelectPrevious">上一项</a-button>
+        <a-button type="primary" ghost @click="handleSelectNext">下一项</a-button>
+      </template>
+    </AttachmentDetailModal>
   </page-view>
 </template>
 
 <script>
 import { mixin, mixinDevice } from '@/mixins/mixin.js'
 import { PageView } from '@/layouts'
-import AttachmentDetailDrawer from './components/AttachmentDetailDrawer'
+import AttachmentDetailModal from './components/AttachmentDetailModal.vue'
 import attachmentApi from '@/api/attachment'
 import { mapGetters } from 'vuex'
 
 export default {
   components: {
     PageView,
-    AttachmentDetailDrawer
+    AttachmentDetailModal
   },
   mixins: [mixin, mixinDevice],
   data() {
@@ -379,6 +383,30 @@ export default {
         },
         onCancel() {}
       })
+    },
+
+    /**
+     * Select previous attachment
+     */
+    handleSelectPrevious() {
+      const index = this.attachments.findIndex(item => item.id === this.selectAttachment.id)
+      if (index === 0) {
+        this.$message.warn('已经是第一个了')
+        return
+      }
+      this.selectAttachment = this.attachments[index - 1]
+    },
+
+    /**
+     * Select next attachment
+     */
+    handleSelectNext() {
+      const index = this.attachments.findIndex(item => item.id === this.selectAttachment.id)
+      if (index === this.attachments.length - 1) {
+        this.$message.warn('已经是最后一个了')
+        return
+      }
+      this.selectAttachment = this.attachments[index + 1]
     }
   }
 }
