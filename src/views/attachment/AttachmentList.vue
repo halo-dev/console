@@ -84,7 +84,7 @@
               @contextmenu.prevent="handleContextMenu($event, item)"
             >
               <div class="attach-thumb attachments-group-item">
-                <span v-if="!handleJudgeMediaType(item)" class="attachments-group-item-type">{{ item.suffix }}</span>
+                <span v-if="!isImage(item)" class="attachments-group-item-type">{{ item.suffix }}</span>
                 <span
                   v-else
                   class="attachments-group-item-img"
@@ -124,7 +124,7 @@
       <FilePondUpload ref="upload" :uploadHandler="uploadHandler"></FilePondUpload>
     </a-modal>
     <AttachmentDetailModal
-      :visible.sync="drawerVisible"
+      :visible.sync="detailVisible"
       :attachment="selectAttachment"
       :addToPhoto="true"
       @delete="handleListAttachments()"
@@ -179,7 +179,7 @@ export default {
         mediaType: null,
         attachmentType: null
       },
-      drawerVisible: false,
+      detailVisible: false,
       uploadHandler: attachmentApi.upload
     }
   },
@@ -194,6 +194,14 @@ export default {
       return {
         border: `2px solid ${this.color()}`
       }
+    },
+    isImage() {
+      return function(attachment) {
+        if (!attachment || !attachment.mediaType) {
+          return false
+        }
+        return attachment.mediaType.startsWith('image')
+      }
     }
   },
   created() {
@@ -201,14 +209,14 @@ export default {
     this.handleListMediaTypes()
     this.handleListTypes()
   },
-  destroyed: function() {
-    if (this.drawerVisible) {
-      this.drawerVisible = false
+  destroyed() {
+    if (this.detailVisible) {
+      this.detailVisible = false
     }
   },
   beforeRouteLeave(to, from, next) {
-    if (this.drawerVisible) {
-      this.drawerVisible = false
+    if (this.detailVisible) {
+      this.detailVisible = false
     }
     next()
   },
@@ -231,41 +239,41 @@ export default {
           }, 200)
         })
     },
-    handleListMediaTypes() {
-      this.mediaTypesLoading = true
-      attachmentApi
-        .getMediaTypes()
-        .then(response => {
-          this.mediaTypes = response.data.data
-        })
-        .finally(() => {
-          setTimeout(() => {
-            this.mediaTypesLoading = false
-          }, 200)
-        })
+    async handleListMediaTypes() {
+      try {
+        this.mediaTypesLoading = true
+
+        const response = await attachmentApi.getMediaTypes()
+
+        this.mediaTypes = response.data.data
+      } catch (error) {
+        this.$log.error(error)
+      } finally {
+        this.mediaTypesLoading = false
+      }
     },
-    handleListTypes() {
-      this.typesLoading = true
-      attachmentApi
-        .getTypes()
-        .then(response => {
-          this.types = response.data.data
-        })
-        .finally(() => {
-          setTimeout(() => {
-            this.typesLoading = false
-          }, 200)
-        })
+    async handleListTypes() {
+      try {
+        this.typesLoading = true
+
+        const response = await attachmentApi.getTypes()
+
+        this.types = response.data.data
+      } catch (error) {
+        this.$log.error(error)
+      } finally {
+        this.typesLoading = false
+      }
     },
     handleShowDetailDrawer(attachment) {
       this.selectAttachment = attachment
-      this.drawerVisible = !this.supportMultipleSelection
+      this.detailVisible = !this.supportMultipleSelection
     },
     handleContextMenu(event, item) {
       this.$contextmenu({
         items: [
           {
-            label: `${this.handleJudgeMediaType(item) ? '复制图片链接' : '复制文件链接'}`,
+            label: `复制${this.isImage(item) ? '图片' : '文件'}链接`,
             onClick: () => {
               const text = `${encodeURI(item.path)}`
               this.$copyText(text)
@@ -281,7 +289,7 @@ export default {
             divided: true
           },
           {
-            disabled: !this.handleJudgeMediaType(item),
+            disabled: !this.isImage(item),
             label: '复制 Markdown 格式链接',
             onClick: () => {
               const text = `![${item.name}](${encodeURI(item.path)})`
@@ -325,31 +333,20 @@ export default {
       this.handleListMediaTypes()
       this.handleListTypes()
     },
-    handleJudgeMediaType(attachment) {
-      const mediaType = attachment.mediaType
-      // 判断文件类型
-      if (mediaType) {
-        const prefix = mediaType.split('/')[0]
-
-        return prefix === 'image'
-      }
-      // 没有获取到文件返回false
-      return false
-    },
     getCheckStatus(key) {
       return this.selectedAttachmentCheckbox[key] || false
     },
     handleMultipleSelection() {
       this.supportMultipleSelection = true
       // 不允许附件详情抽屉显示
-      this.drawerVisible = false
+      this.detailVisible = false
       this.attachments.forEach(item => {
         this.$set(this.selectedAttachmentCheckbox, item.id, false)
       })
     },
     handleCancelMultipleSelection() {
       this.supportMultipleSelection = false
-      this.drawerVisible = false
+      this.detailVisible = false
       this.batchSelectedAttachments = []
       for (const key in this.selectedCheckbox) {
         this.$set(this.selectedAttachmentCheckbox, key, false)
