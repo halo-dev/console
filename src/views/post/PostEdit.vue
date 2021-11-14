@@ -36,11 +36,15 @@
       :post="postToStage"
       :visible="postSettingVisible"
       @close="postSettingVisible = false"
-      @onRefreshPost="onRefreshPostFromSetting"
       @onSaved="handleRestoreSavedStatus"
     /> -->
 
-    <PostSettingModal :post="postToStage" :visible.sync="postSettingVisible" />
+    <PostSettingModal
+      :post="postToStage"
+      :visible.sync="postSettingVisible"
+      :savedCallback="onPostSavedCallback"
+      @onUpdate="onUpdateFromSetting"
+    />
 
     <AttachmentDrawer v-model="attachmentDrawerVisible" />
   </page-view>
@@ -89,9 +93,6 @@ export default {
     })
   },
   destroyed() {
-    if (this.postSettingVisible) {
-      this.postSettingVisible = false
-    }
     if (this.attachmentDrawerVisible) {
       this.attachmentDrawerVisible = false
     }
@@ -100,9 +101,6 @@ export default {
     }
   },
   beforeRouteLeave(to, from, next) {
-    if (this.postSettingVisible) {
-      this.postSettingVisible = false
-    }
     if (this.attachmentDrawerVisible) {
       this.attachmentDrawerVisible = false
     }
@@ -237,7 +235,11 @@ export default {
       this.contentChanges++
       this.postToStage.originalContent = val
     },
-    onRefreshPostFromSetting(post) {
+    onPostSavedCallback() {
+      this.contentChanges = 0
+      this.$router.push({ name: 'PostList' })
+    },
+    onUpdateFromSetting(post) {
       this.postToStage = post
     }
   }

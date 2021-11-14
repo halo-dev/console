@@ -1,6 +1,13 @@
 <template>
-  <a-modal v-model="modalVisible" :width="680" :maskClosable="false" :bodyStyle="{ padding: 0 }" destroyOnClose>
-    <template #title> 文章设置 <a-icon v-if="loading" type="loading" /> </template>
+  <a-modal
+    v-model="modalVisible"
+    :width="680"
+    :maskClosable="false"
+    :bodyStyle="{ padding: 0 }"
+    destroyOnClose
+    :afterClose="onClosed"
+  >
+    <template #title> {{ modalTitle }} <a-icon v-if="loading" type="loading" /> </template>
 
     <div class="card-container">
       <a-tabs type="card">
@@ -69,6 +76,19 @@
             <a-form-item label="访问密码：">
               <a-input-password v-model="form.model.password" autocomplete="new-password" />
             </a-form-item>
+            <a-form-item label="封面图：">
+              <div class="post-thumb">
+                <a-space direction="vertical">
+                  <img
+                    class="img"
+                    :src="form.model.thumbnail || '/images/placeholder.jpg'"
+                    @click="thumbDrawerVisible = true"
+                  />
+                  <a-input v-model="form.model.thumbnail" placeholder="点击封面图选择图片，或者输入外部链接"></a-input>
+                  <a-button type="dashed" @click="form.model.thumbnail = null">移除</a-button>
+                </a-space>
+              </div>
+            </a-form-item>
           </a-form>
         </a-tab-pane>
         <a-tab-pane key="seo" tab="SEO">
@@ -98,8 +118,8 @@
     </div>
     <template slot="footer">
       <slot name="extraFooter" />
-      <a-button key="back" :disabled="loading" @click="modalVisible = false">
-        取消
+      <a-button :disabled="loading" @click="modalVisible = false">
+        关闭
       </a-button>
 
       <ReactiveButton
@@ -177,6 +197,9 @@ export default {
         this.$emit('update:visible', value)
       }
     },
+    modalTitle() {
+      return this.form.model.id ? '文章设置' : '文章发布'
+    },
     pickerDefaultValue() {
       if (this.form.model.createTime) {
         const date = new Date(this.form.model.createTime)
@@ -222,6 +245,10 @@ export default {
     modalVisible(value) {
       if (value) {
         this.form.model = Object.assign({}, this.post)
+
+        if (!this.form.model.slug && !this.form.model.id) {
+          this.handleGenerateSlug()
+        }
       }
     },
     post: {
@@ -314,6 +341,13 @@ export default {
           this.$set(this.form.model, 'slug', result)
         }
       }
+    },
+
+    /**
+     * Handle modal close event
+     */
+    onClosed() {
+      this.$emit('onUpdate', this.form.model)
     }
   }
 }
