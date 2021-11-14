@@ -32,19 +32,15 @@
       </a-col>
     </a-row>
 
-    <PostSettingDrawer
-      :categoryIds="selectedCategoryIds"
-      :metas="selectedMetas"
+    <!-- <PostSettingDrawer
       :post="postToStage"
-      :tagIds="selectedTagIds"
       :visible="postSettingVisible"
       @close="postSettingVisible = false"
-      @onRefreshCategoryIds="onRefreshCategoryIdsFromSetting"
       @onRefreshPost="onRefreshPostFromSetting"
-      @onRefreshPostMetas="onRefreshPostMetasFromSetting"
-      @onRefreshTagIds="onRefreshTagIdsFromSetting"
       @onSaved="handleRestoreSavedStatus"
-    />
+    /> -->
+
+    <PostSettingModal :post="postToStage" :visible.sync="postSettingVisible" />
 
     <AttachmentDrawer v-model="attachmentDrawerVisible" />
   </page-view>
@@ -54,7 +50,7 @@
 import { mixin, mixinDevice, mixinPostEdit } from '@/mixins/mixin.js'
 import { datetimeFormat } from '@/utils/datetime'
 
-import PostSettingDrawer from './components/PostSettingDrawer'
+import PostSettingModal from './components/PostSettingModal'
 import AttachmentDrawer from '../attachment/components/AttachmentDrawer'
 import MarkdownEditor from '@/components/Editor/MarkdownEditor'
 import { PageView } from '@/layouts'
@@ -64,7 +60,7 @@ import postApi from '@/api/post'
 export default {
   mixins: [mixin, mixinDevice, mixinPostEdit],
   components: {
-    PostSettingDrawer,
+    PostSettingModal,
     AttachmentDrawer,
     MarkdownEditor,
     PageView
@@ -74,9 +70,6 @@ export default {
       attachmentDrawerVisible: false,
       postSettingVisible: false,
       postToStage: {},
-      selectedTagIds: [],
-      selectedCategoryIds: [],
-      selectedMetas: [],
       contentChanges: 0,
       draftSaving: false,
       previewSaving: false,
@@ -91,14 +84,11 @@ export default {
         postApi.get(postId).then(response => {
           const post = response.data.data
           vm.postToStage = post
-          vm.selectedTagIds = post.tagIds
-          vm.selectedCategoryIds = post.categoryIds
-          vm.selectedMetas = post.metas
         })
       }
     })
   },
-  destroyed: function() {
+  destroyed() {
     if (this.postSettingVisible) {
       this.postSettingVisible = false
     }
@@ -249,15 +239,6 @@ export default {
     },
     onRefreshPostFromSetting(post) {
       this.postToStage = post
-    },
-    onRefreshTagIdsFromSetting(tagIds) {
-      this.selectedTagIds = tagIds
-    },
-    onRefreshCategoryIdsFromSetting(categoryIds) {
-      this.selectedCategoryIds = categoryIds
-    },
-    onRefreshPostMetasFromSetting(metas) {
-      this.selectedMetas = metas
     }
   }
 }

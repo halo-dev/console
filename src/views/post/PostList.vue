@@ -383,6 +383,7 @@
       :loading="postSettingLoading"
       :post="selectedPost"
       :visible.sync="postSettingVisible"
+      :savedCallback="onPostSavedCallback"
       @close="onPostSettingsClose"
     >
       <template #extraFooter>
@@ -736,6 +737,9 @@ export default {
       setTimeout(() => {
         this.handleListPosts(false)
       }, 500)
+    },
+    onPostSavedCallback() {
+      this.handleListPosts(false)
     },
     onPostCommentsClose() {
       this.postCommentVisible = false

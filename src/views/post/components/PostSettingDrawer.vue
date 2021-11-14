@@ -360,30 +360,22 @@ export default {
       const blogUrl = this.options.blog_url
       const archivesPrefix = this.options.archives_prefix
       const pathSuffix = this.options.path_suffix ? this.options.path_suffix : ''
+      const slug = this.selectedPost.slug || '{slug}'
+      const createTime = this.selectedPost.createTime || new Date()
+      const id = this.selectedPost.id || '{id}'
       switch (permalinkType) {
         case 'DEFAULT':
-          return `${blogUrl}/${archivesPrefix}/${
-            this.selectedPost.slug ? this.selectedPost.slug : '{slug}'
-          }${pathSuffix}`
+          return `${blogUrl}/${archivesPrefix}/${slug}${pathSuffix}`
         case 'YEAR':
-          return `${blogUrl}${datetimeFormat(
-            this.selectedPost.createTime ? this.selectedPost.createTime : new Date(),
-            '/YYYY/'
-          )}${this.selectedPost.slug ? this.selectedPost.slug : '{slug}'}${pathSuffix}`
+          return `${blogUrl}${datetimeFormat(createTime, '/YYYY/')}${slug}${pathSuffix}`
         case 'DATE':
-          return `${blogUrl}${datetimeFormat(
-            this.selectedPost.createTime ? this.selectedPost.createTime : new Date(),
-            '/YYYY/MM/'
-          )}${this.selectedPost.slug ? this.selectedPost.slug : '{slug}'}${pathSuffix}`
+          return `${blogUrl}${datetimeFormat(createTime, '/YYYY/MM/')}${slug}${pathSuffix}`
         case 'DAY':
-          return `${blogUrl}${datetimeFormat(
-            this.selectedPost.createTime ? this.selectedPost.createTime : new Date(),
-            '/YYYY/MM/DD/'
-          )}${this.selectedPost.slug ? this.selectedPost.slug : '{slug}'}${pathSuffix}`
+          return `${blogUrl}${datetimeFormat(createTime, '/YYYY/MM/DD/')}${slug}${pathSuffix}`
         case 'ID':
-          return `${blogUrl}/?p=${this.selectedPost.id ? this.selectedPost.id : '{id}'}`
+          return `${blogUrl}/?p=${id}`
         case 'ID_SLUG':
-          return `${blogUrl}/${archivesPrefix}/${this.selectedPost.id ? this.selectedPost.id : '{id}'}${pathSuffix}`
+          return `${blogUrl}/${archivesPrefix}/${id}${pathSuffix}`
         default:
           return ''
       }

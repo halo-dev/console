@@ -1,5 +1,5 @@
 <template>
-  <a-modal v-model="modalVisible" :width="680" :bodyStyle="{ padding: 0 }">
+  <a-modal v-model="modalVisible" :width="680" :maskClosable="false" :bodyStyle="{ padding: 0 }" destroyOnClose>
     <template #title> 文章设置 <a-icon v-if="loading" type="loading" /> </template>
 
     <div class="card-container">
@@ -9,7 +9,7 @@
             <a-form-item label="文章标题">
               <a-input v-model="form.model.title" />
             </a-form-item>
-            <a-form-item label="文章别名" help="https://ryanc.cc/archives/halo-1410-released.html">
+            <a-form-item label="文章别名" :help="fullPath">
               <a-input v-model="form.model.slug">
                 <template #addonAfter>
                   <a-popconfirm
@@ -42,14 +42,29 @@
         </a-tab-pane>
         <a-tab-pane key="advanced" tab="高级">
           <a-form labelAlign="left" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-            <a-form-item label="开启评论">
+            <a-form-item label="禁止评论">
               <a-switch v-model="form.model.disallowComment" />
             </a-form-item>
             <a-form-item label="是否置顶">
-              <a-switch v-model="form.model.topPriority" />
+              <a-switch v-model="topPriority" />
             </a-form-item>
             <a-form-item label="发表时间：">
-              <a-date-picker showTime format="YYYY-MM-DD HH:mm:ss" placeholder="选择文章发表时间" />
+              <a-date-picker
+                showTime
+                :defaultValue="pickerDefaultValue"
+                format="YYYY-MM-DD HH:mm:ss"
+                placeholder="选择文章发表时间"
+                @change="onCreateTimeSelect"
+                @ok="onCreateTimeSelect"
+              />
+            </a-form-item>
+            <a-form-item label="自定义模板：">
+              <a-select v-model="form.model.template">
+                <a-select-option key="" value="">无</a-select-option>
+                <a-select-option v-for="template in templates" :key="template" :value="template">
+                  {{ template }}
+                </a-select-option>
+              </a-select>
             </a-form-item>
             <a-form-item label="访问密码：">
               <a-input-password v-model="form.model.password" autocomplete="new-password" />
@@ -86,9 +101,16 @@
       <a-button key="back" :disabled="loading" @click="modalVisible = false">
         取消
       </a-button>
-      <a-button key="submit" :disabled="loading" type="primary">
-        保存
-      </a-button>
+
+      <ReactiveButton
+        @click="handlePublishClick()"
+        @callback="handleSavedCallback"
+        :loading="form.saving"
+        :errored="form.saveErrored"
+        :text="`${form.model.id ? '保存' : '发布'}`"
+        :loadedText="`${form.model.id ? '保存' : '发布'}成功`"
+        :erroredText="`${form.model.id ? '保存' : '发布'}失败`"
+      ></ReactiveButton>
     </template>
   </a-modal>
 </template>
@@ -100,14 +122,13 @@ import TagSelect from './TagSelect'
 
 // libs
 import { mixin, mixinDevice } from '@/mixins/mixin.js'
-// import { datetimeFormat } from '@/utils/datetime'
+import { datetimeFormat } from '@/utils/datetime'
 import pinyin from 'tiny-pinyin'
-// import { mapGetters } from 'vuex'
+import { mapGetters } from 'vuex'
 
 // apis
-// import categoryApi from '@/api/category'
-// import postApi from '@/api/post'
-// import themeApi from '@/api/theme'
+import postApi from '@/api/post'
+import themeApi from '@/api/theme'
 
 export default {
   name: 'PostSettingModal',
@@ -129,22 +150,71 @@ export default {
     post: {
       type: Object,
       default: () => ({})
+    },
+    savedCallback: {
+      type: Function,
+      default: null
     }
   },
   data() {
     return {
       form: {
-        model: {}
-      }
+        model: {},
+        saving: false,
+        saveErrored: false
+      },
+
+      templates: []
     }
   },
   computed: {
+    ...mapGetters(['options']),
     modalVisible: {
       get() {
         return this.visible
       },
       set(value) {
         this.$emit('update:visible', value)
+      }
+    },
+    pickerDefaultValue() {
+      if (this.form.model.createTime) {
+        const date = new Date(this.form.model.createTime)
+        return datetimeFormat(date, 'YYYY-MM-DD HH:mm:ss')
+      }
+      return datetimeFormat(new Date(), 'YYYY-MM-DD HH:mm:ss')
+    },
+    topPriority: {
+      get() {
+        return this.form.model.topPriority === 0 ? false : true
+      },
+      set(value) {
+        this.form.model.topPriority = value ? 1 : 0
+      }
+    },
+    fullPath() {
+      const permalinkType = this.options.post_permalink_type
+      const blogUrl = this.options.blog_url
+      const archivesPrefix = this.options.archives_prefix
+      const pathSuffix = this.options.path_suffix || ''
+      const slug = this.form.model.slug || '{slug}'
+      const createTime = this.form.model.createTime || new Date()
+      const id = this.form.model.id || '{id}'
+      switch (permalinkType) {
+        case 'DEFAULT':
+          return `${blogUrl}/${archivesPrefix}/${slug}${pathSuffix}`
+        case 'YEAR':
+          return `${blogUrl}${datetimeFormat(createTime, '/YYYY/')}${slug}${pathSuffix}`
+        case 'DATE':
+          return `${blogUrl}${datetimeFormat(createTime, '/YYYY/MM/')}${slug}${pathSuffix}`
+        case 'DAY':
+          return `${blogUrl}${datetimeFormat(createTime, '/YYYY/MM/DD/')}${slug}${pathSuffix}`
+        case 'ID':
+          return `${blogUrl}/?p=${id}`
+        case 'ID_SLUG':
+          return `${blogUrl}/${archivesPrefix}/${id}${pathSuffix}`
+        default:
+          return ''
       }
     }
   },
@@ -161,7 +231,68 @@ export default {
       }
     }
   },
+  created() {
+    this.handleListCustomTemplates()
+  },
   methods: {
+    handlePublishClick() {
+      this.form.model.status = 'PUBLISHED'
+      this.handleCreateOrUpdate()
+    },
+
+    /**
+     * Creates or updates a post
+     */
+    async handleCreateOrUpdate() {
+      const { id } = this.form.model
+      try {
+        this.form.saving = true
+        if (id) {
+          await postApi.update(id, this.form.model, false)
+        } else {
+          await postApi.create(this.form.model, false)
+        }
+      } catch (error) {
+        this.form.saveErrored = true
+        this.$log.error(error)
+      } finally {
+        setTimeout(() => {
+          this.form.saving = false
+        }, 400)
+      }
+    },
+
+    /**
+     * Handle saved callback event
+     */
+    handleSavedCallback() {
+      if (this.form.saveErrored) {
+        this.form.saveErrored = false
+      } else {
+        this.savedCallback && this.savedCallback()
+      }
+    },
+
+    /**
+     * Handle list custom templates
+     */
+    async handleListCustomTemplates() {
+      try {
+        const response = await themeApi.customPostTpls()
+
+        this.templates = response.data.data
+      } catch (error) {
+        this.$log.error(error)
+      }
+    },
+
+    /**
+     * Handle create time selected event
+     */
+    onCreateTimeSelect(value) {
+      this.form.model.createTime = value.valueOf()
+    },
+
     /**
      * Generate slug
      */
