@@ -1,20 +1,20 @@
 <template>
   <a-modal title="附件详情" :width="isMobile() ? '100%' : '50%'" v-model="modalVisible">
     <a-row type="flex" :gutter="24">
-      <a-col :span="9">
-        <div class="attach-detail-img">
+      <a-col :xl="9" :lg="9" :md="24" :sm="24" :xs="24">
+        <div class="attach-detail-img pb-3">
           <a v-if="isImage" :href="attachment.path" target="_blank">
             <img :src="attachment.path" class="w-full" loading="lazy" />
           </a>
           <div v-else>此文件不支持预览</div>
         </div>
       </a-col>
-      <a-col :span="15">
+      <a-col :xl="15" :lg="15" :md="24" :sm="24" :xs="24">
         <a-list itemLayout="horizontal">
-          <a-list-item>
+          <a-list-item style="padding-top: 0;">
             <a-list-item-meta>
               <template slot="description" v-if="editable">
-                <a-input ref="nameInput" v-model="attachment.name" @blur="doUpdateAttachment" />
+                <a-input ref="nameInput" v-model="attachment.name" @blur="handleUpdateName" />
               </template>
               <template slot="description" v-else>{{ attachment.name }}</template>
               <span slot="title">
@@ -96,6 +96,7 @@
           :loading="deleting"
           :errored="deleteErrored"
           text="删除"
+          icon="delete"
           loadedText="删除成功"
           erroredText="删除失败"
         ></ReactiveButton>
@@ -107,7 +108,6 @@
 <script>
 import { mixin, mixinDevice } from '@/mixins/mixin.js'
 import attachmentApi from '@/api/attachment'
-import photoApi from '@/api/photo'
 
 export default {
   name: 'AttachmentDetailModal',
@@ -125,11 +125,6 @@ export default {
     attachment: {
       type: Object,
       default: () => ({})
-    },
-    addToPhoto: {
-      type: Boolean,
-      required: false,
-      default: false
     }
   },
   data() {
@@ -173,11 +168,19 @@ export default {
         }, 400)
       }
     },
+
+    /**
+     * Handles the deletion callback event
+     */
     handleDeletedCallback() {
       this.$emit('delete', this.attachment)
       this.deleteErrored = false
       this.modalVisible = false
     },
+
+    /**
+     * Shows the edit name input
+     */
     handleEditName() {
       this.editable = !this.editable
       if (this.editable) {
@@ -186,7 +189,11 @@ export default {
         })
       }
     },
-    doUpdateAttachment() {
+
+    /**
+     * Updates the attachment name
+     */
+    async handleUpdateName() {
       if (!this.attachment.name) {
         this.$notification['error']({
           message: '提示',
@@ -194,11 +201,19 @@ export default {
         })
         return
       }
-      attachmentApi.update(this.attachment.id, this.attachment).then(response => {
-        this.$log.debug('Updated attachment', response.data.data)
-      })
-      this.editable = false
+      try {
+        await attachmentApi.update(this.attachment.id, this.attachment)
+      } catch (error) {
+        this.$log.error(error)
+      } finally {
+        this.editable = false
+      }
     },
+
+    /**
+     * Handles the copy link event
+     * @param {String} link
+     */
     handleCopyLink(link) {
       this.$copyText(link)
         .then(message => {
@@ -209,18 +224,6 @@ export default {
           this.$log.debug('copy.err', err)
           this.$message.error('复制失败！')
         })
-    },
-    handleAddToPhoto() {
-      const photo = {
-        name: this.attachment.name,
-        thumbnail: encodeURI(this.attachment.thumbPath),
-        url: encodeURI(this.attachment.path),
-        takeTime: new Date().getTime()
-      }
-
-      photoApi.create(photo).then(() => {
-        this.$message.success('添加成功！')
-      })
     }
   }
 }
