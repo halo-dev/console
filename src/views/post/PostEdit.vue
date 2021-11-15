@@ -41,8 +41,8 @@
 
     <PostSettingModal
       :post="postToStage"
-      :visible.sync="postSettingVisible"
       :savedCallback="onPostSavedCallback"
+      :visible.sync="postSettingVisible"
       @onUpdate="onUpdateFromSetting"
     />
 
@@ -86,8 +86,7 @@ export default {
     next(vm => {
       if (postId) {
         postApi.get(postId).then(response => {
-          const post = response.data.data
-          vm.postToStage = post
+          vm.postToStage = response.data.data
         })
       }
     })

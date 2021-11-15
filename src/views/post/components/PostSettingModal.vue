@@ -1,29 +1,32 @@
 <template>
   <a-modal
     v-model="modalVisible"
-    :width="680"
-    :maskClosable="false"
-    :bodyStyle="{ padding: 0 }"
-    destroyOnClose
     :afterClose="onClosed"
+    :bodyStyle="{ padding: 0 }"
+    :maskClosable="false"
+    :width="680"
+    destroyOnClose
   >
-    <template #title> {{ modalTitle }} <a-icon v-if="loading" type="loading" /> </template>
+    <template #title>
+      {{ modalTitle }}
+      <a-icon v-if="loading" type="loading" />
+    </template>
 
     <div class="card-container">
       <a-tabs type="card">
         <a-tab-pane key="normal" tab="常规">
-          <a-form labelAlign="left" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
+          <a-form :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" labelAlign="left">
             <a-form-item label="文章标题">
               <a-input v-model="form.model.title" />
             </a-form-item>
-            <a-form-item label="文章别名" :help="fullPath">
+            <a-form-item :help="fullPath" label="文章别名">
               <a-input v-model="form.model.slug">
                 <template #addonAfter>
                   <a-popconfirm
-                    title="是否确定根据标题重新生成别名？"
-                    ok-text="确定"
                     cancel-text="取消"
+                    ok-text="确定"
                     placement="left"
+                    title="是否确定根据标题重新生成别名？"
                     @confirm="handleGenerateSlug"
                   >
                     <a-icon class="cursor-pointer" type="sync" />
@@ -39,16 +42,16 @@
             </a-form-item>
             <a-form-item label="摘要">
               <a-input
-                type="textarea"
                 v-model="form.model.summary"
                 :autoSize="{ minRows: 5 }"
                 placeholder="如不填写，会从文章中自动截取"
+                type="textarea"
               />
             </a-form-item>
           </a-form>
         </a-tab-pane>
         <a-tab-pane key="advanced" tab="高级">
-          <a-form labelAlign="left" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
+          <a-form :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" labelAlign="left">
             <a-form-item label="禁止评论">
               <a-switch v-model="form.model.disallowComment" />
             </a-form-item>
@@ -57,10 +60,10 @@
             </a-form-item>
             <a-form-item label="发表时间：">
               <a-date-picker
-                showTime
                 :defaultValue="pickerDefaultValue"
                 format="YYYY-MM-DD HH:mm:ss"
                 placeholder="选择文章发表时间"
+                showTime
                 @change="onCreateTimeSelect"
                 @ok="onCreateTimeSelect"
               />
@@ -80,8 +83,9 @@
               <div class="post-thumb">
                 <a-space direction="vertical">
                   <img
-                    class="img"
                     :src="form.model.thumbnail || '/images/placeholder.jpg'"
+                    alt="Post cover thumbnail"
+                    class="img"
                     @click="thumbDrawerVisible = true"
                   />
                   <a-input v-model="form.model.thumbnail" placeholder="点击封面图选择图片，或者输入外部链接"></a-input>
@@ -92,27 +96,27 @@
           </a-form>
         </a-tab-pane>
         <a-tab-pane key="seo" tab="SEO">
-          <a-form labelAlign="left" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
+          <a-form :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" labelAlign="left">
             <a-form-item label="自定义关键词">
               <a-input
-                type="textarea"
                 v-model="form.model.metaKeywords"
                 :autoSize="{ minRows: 5 }"
                 placeholder="多个关键词以英文逗号隔开，如不填写，将自动使用标签作为关键词"
+                type="textarea"
               />
             </a-form-item>
             <a-form-item label="自定义描述">
               <a-input
-                type="textarea"
                 v-model="form.model.metaDescription"
                 :autoSize="{ minRows: 5 }"
                 placeholder="如不填写，会从文章中自动截取"
+                type="textarea"
               />
             </a-form-item>
           </a-form>
         </a-tab-pane>
         <a-tab-pane key="meta" tab="元数据">
-          元数据
+          <MetaEditor :metas.sync="form.model.metas" :targetId="form.model.id" target="post" />
         </a-tab-pane>
       </a-tabs>
     </div>
@@ -122,24 +126,24 @@
         关闭
       </a-button>
       <ReactiveButton
-        type="danger"
         v-if="!form.model.id"
-        @click="handleCreateOrUpdate('DRAFT')"
-        @callback="handleSavedCallback"
-        :loading="form.draftSaving"
         :errored="form.draftSaveErrored"
-        text="保存草稿"
-        loadedText="保存成功"
+        :loading="form.draftSaving"
         erroredText="保存失败"
+        loadedText="保存成功"
+        text="保存草稿"
+        type="danger"
+        @callback="handleSavedCallback"
+        @click="handleCreateOrUpdate('DRAFT')"
       ></ReactiveButton>
       <ReactiveButton
-        @click="handleCreateOrUpdate()"
-        @callback="handleSavedCallback"
-        :loading="form.saving"
         :errored="form.saveErrored"
-        :text="`${form.model.id ? '保存' : '发布'}`"
-        :loadedText="`${form.model.id ? '保存' : '发布'}成功`"
         :erroredText="`${form.model.id ? '保存' : '发布'}失败`"
+        :loadedText="`${form.model.id ? '保存' : '发布'}成功`"
+        :loading="form.saving"
+        :text="`${form.model.id ? '保存' : '发布'}`"
+        @callback="handleSavedCallback"
+        @click="handleCreateOrUpdate()"
       ></ReactiveButton>
     </template>
   </a-modal>
@@ -149,6 +153,7 @@
 import CategoryTree from './CategoryTree'
 // import CategorySelectTree from './CategorySelectTree'
 import TagSelect from './TagSelect'
+import MetaEditor from '@/components/Post/MetaEditor'
 
 // libs
 import { mixin, mixinDevice } from '@/mixins/mixin.js'
@@ -166,7 +171,8 @@ export default {
   components: {
     CategoryTree,
     // CategorySelectTree,
-    TagSelect
+    TagSelect,
+    MetaEditor
   },
   props: {
     visible: {
@@ -221,7 +227,7 @@ export default {
     },
     topPriority: {
       get() {
-        return this.form.model.topPriority === 0 ? false : true
+        return this.form.model.topPriority !== 0
       },
       set(value) {
         this.form.model.topPriority = value ? 1 : 0

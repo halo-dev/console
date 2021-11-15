@@ -1,6 +1,6 @@
 <template>
   <page-view>
-    <a-card :bordered="false" :bodyStyle="{ padding: '16px' }">
+    <a-card :bodyStyle="{ padding: '16px' }" :bordered="false">
       <div class="table-page-search-wrapper">
         <a-form layout="inline">
           <a-row :gutter="48">
@@ -11,10 +11,10 @@
             </a-col>
             <a-col :md="6" :sm="24">
               <a-form-item label="文章状态：">
-                <a-select v-model="list.params.status" placeholder="请选择文章状态" @change="handleQuery()" allowClear>
-                  <a-select-option v-for="status in Object.keys(postStatus)" :key="status" :value="status">{{
-                    postStatus[status].text
-                  }}</a-select-option>
+                <a-select v-model="list.params.status" allowClear placeholder="请选择文章状态" @change="handleQuery()">
+                  <a-select-option v-for="status in Object.keys(postStatus)" :key="status" :value="status">
+                    {{ postStatus[status].text }}
+                  </a-select-option>
                 </a-select>
               </a-form-item>
             </a-col>
@@ -22,14 +22,14 @@
               <a-form-item label="分类目录：">
                 <a-select
                   v-model="list.params.categoryId"
-                  placeholder="请选择分类"
-                  @change="handleQuery()"
                   :loading="categories.loading"
                   allowClear
+                  placeholder="请选择分类"
+                  @change="handleQuery()"
                 >
-                  <a-select-option v-for="category in categories.data" :key="category.id"
-                    >{{ category.name }}({{ category.postCount }})</a-select-option
-                  >
+                  <a-select-option v-for="category in categories.data" :key="category.id">
+                    {{ category.name }}({{ category.postCount }})
+                  </a-select-option>
                 </a-select>
               </a-form-item>
             </a-col>
@@ -48,26 +48,26 @@
 
       <div class="table-operator">
         <router-link :to="{ name: 'PostWrite' }">
-          <a-button type="primary" icon="plus">写文章</a-button>
+          <a-button icon="plus" type="primary">写文章</a-button>
         </router-link>
         <a-dropdown v-show="list.params.status != null && list.params.status !== '' && !isMobile()">
           <a-menu slot="overlay">
-            <a-menu-item key="1" v-if="['DRAFT', 'RECYCLE'].includes(list.params.status)">
+            <a-menu-item v-if="['DRAFT', 'RECYCLE'].includes(list.params.status)" key="1">
               <a href="javascript:void(0);" @click="handleEditStatusMore(postStatus.PUBLISHED.value)">
                 <span>发布</span>
               </a>
             </a-menu-item>
-            <a-menu-item key="2" v-if="['PUBLISHED', 'DRAFT', 'INTIMATE'].includes(list.params.status)">
+            <a-menu-item v-if="['PUBLISHED', 'DRAFT', 'INTIMATE'].includes(list.params.status)" key="2">
               <a href="javascript:void(0);" @click="handleEditStatusMore(postStatus.RECYCLE.value)">
                 <span>移到回收站</span>
               </a>
             </a-menu-item>
-            <a-menu-item key="3" v-if="['RECYCLE', 'PUBLISHED', 'INTIMATE'].includes(list.params.status)">
+            <a-menu-item v-if="['RECYCLE', 'PUBLISHED', 'INTIMATE'].includes(list.params.status)" key="3">
               <a href="javascript:void(0);" @click="handleEditStatusMore(postStatus.DRAFT.value)">
                 <span>草稿</span>
               </a>
             </a-menu-item>
-            <a-menu-item key="4" v-if="['RECYCLE', 'DRAFT'].includes(list.params.status)">
+            <a-menu-item v-if="['RECYCLE', 'DRAFT'].includes(list.params.status)" key="4">
               <a href="javascript:void(0);" @click="handleDeleteMore">
                 <span>永久删除</span>
               </a>
@@ -83,13 +83,13 @@
         <!-- Mobile -->
         <a-list
           v-if="isMobile()"
-          itemLayout="vertical"
-          size="large"
-          :pagination="false"
           :dataSource="formattedPosts"
           :loading="list.loading"
+          :pagination="false"
+          itemLayout="vertical"
+          size="large"
         >
-          <a-list-item slot="renderItem" slot-scope="item, index" :key="index">
+          <a-list-item :key="index" slot="renderItem" slot-scope="item, index">
             <template slot="actions">
               <span>
                 <a-icon type="eye" />
@@ -99,7 +99,7 @@
                 <a-icon type="message" />
                 {{ item.commentCount }}
               </span>
-              <a-dropdown placement="topLeft" :trigger="['click']">
+              <a-dropdown :trigger="['click']" placement="topLeft">
                 <span>
                   <a-icon type="bars" />
                 </span>
@@ -110,9 +110,9 @@
                   <a-menu-item v-else-if="item.status === 'RECYCLE'">
                     <a-popconfirm
                       :title="'你确定要发布【' + item.title + '】文章？'"
-                      @confirm="handleEditStatusClick(item.id, 'PUBLISHED')"
-                      okText="确定"
                       cancelText="取消"
+                      okText="确定"
+                      @confirm="handleEditStatusClick(item.id, 'PUBLISHED')"
                     >
                       <a href="javascript:void(0);">还原</a>
                     </a-popconfirm>
@@ -120,9 +120,9 @@
                   <a-menu-item v-if="['PUBLISHED', 'DRAFT', 'INTIMATE'].includes(item.status)">
                     <a-popconfirm
                       :title="'你确定要将【' + item.title + '】文章移到回收站？'"
-                      @confirm="handleEditStatusClick(item.id, 'RECYCLE')"
-                      okText="确定"
                       cancelText="取消"
+                      okText="确定"
+                      @confirm="handleEditStatusClick(item.id, 'RECYCLE')"
                     >
                       <a href="javascript:void(0);">回收站</a>
                     </a-popconfirm>
@@ -130,17 +130,17 @@
                   <a-menu-item v-else-if="item.status === 'RECYCLE'">
                     <a-popconfirm
                       :title="'你确定要永久删除【' + item.title + '】文章？'"
-                      @confirm="handleDeleteClick(item.id)"
-                      okText="确定"
                       cancelText="取消"
+                      okText="确定"
+                      @confirm="handleDeleteClick(item.id)"
                     >
                       <a href="javascript:void(0);">删除</a>
                     </a-popconfirm>
                   </a-menu-item>
                   <a-menu-item>
-                    <a rel="noopener noreferrer" href="javascript:void(0);" @click="handleShowPostSettings(item)"
-                      >设置</a
-                    >
+                    <a href="javascript:void(0);" rel="noopener noreferrer" @click="handleShowPostSettings(item)">
+                      设置
+                    </a>
                   </a-menu-item>
                 </a-menu>
               </a-dropdown>
@@ -159,29 +159,29 @@
                 style="max-width: 300px;display: block;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"
               >
                 <a-icon
-                  type="pushpin"
                   v-if="item.topPriority !== 0"
+                  style="margin-right: 3px;"
                   theme="twoTone"
                   twoToneColor="red"
-                  style="margin-right: 3px;"
+                  type="pushpin"
                 />
                 <a
                   v-if="['PUBLISHED', 'INTIMATE'].includes(item.status)"
                   :href="item.fullPath"
-                  target="_blank"
                   class="no-underline"
+                  target="_blank"
                 >
-                  <a-tooltip placement="top" :title="'点击访问【' + item.title + '】'">{{ item.title }}</a-tooltip>
+                  <a-tooltip :title="'点击访问【' + item.title + '】'" placement="top">{{ item.title }}</a-tooltip>
                 </a>
                 <a
                   v-else-if="item.status === 'DRAFT'"
-                  href="javascript:void(0)"
                   class="no-underline"
+                  href="javascript:void(0)"
                   @click="handlePreview(item.id)"
                 >
-                  <a-tooltip placement="topLeft" :title="'点击预览【' + item.title + '】'">{{ item.title }}</a-tooltip>
+                  <a-tooltip :title="'点击预览【' + item.title + '】'" placement="topLeft">{{ item.title }}</a-tooltip>
                 </a>
-                <a v-else href="javascript:void(0);" class="no-underline" disabled>
+                <a v-else class="no-underline" disabled href="javascript:void(0);">
                   {{ item.title }}
                 </a>
               </span>
@@ -193,61 +193,61 @@
               v-for="(category, categoryIndex) in item.categories"
               :key="'category_' + categoryIndex"
               color="blue"
-              @click="handleSelectCategory(category)"
               style="margin-bottom: 8px"
-              >{{ category.name }}</a-tag
-            >
+              @click="handleSelectCategory(category)"
+              >{{ category.name }}
+            </a-tag>
             <br />
             <a-tag
               v-for="(tag, tagIndex) in item.tags"
               :key="'tag_' + tagIndex"
               color="green"
               style="margin-bottom: 8px"
-              >{{ tag.name }}</a-tag
-            >
+              >{{ tag.name }}
+            </a-tag>
           </a-list-item>
         </a-list>
 
         <!-- Desktop -->
         <a-table
           v-else
+          :columns="columns"
+          :dataSource="formattedPosts"
+          :loading="list.loading"
+          :pagination="false"
           :rowKey="post => post.id"
           :rowSelection="{
             selectedRowKeys: selectedRowKeys,
             onChange: onSelectionChange,
             getCheckboxProps: getCheckboxProps
           }"
-          :columns="columns"
-          :dataSource="formattedPosts"
-          :loading="list.loading"
-          :pagination="false"
           :scrollToFirstRowOnChange="true"
         >
           <span slot="postTitle" slot-scope="text, record">
             <a-icon
-              type="pushpin"
               v-if="record.topPriority !== 0"
+              style="margin-right: 3px;"
               theme="twoTone"
               twoToneColor="red"
-              style="margin-right: 3px;"
+              type="pushpin"
             />
             <a
               v-if="['PUBLISHED', 'INTIMATE'].includes(record.status)"
               :href="record.fullPath"
-              target="_blank"
               class="no-underline"
+              target="_blank"
             >
-              <a-tooltip placement="top" :title="'点击访问【' + text + '】'">{{ text }}</a-tooltip>
+              <a-tooltip :title="'点击访问【' + text + '】'" placement="top">{{ text }}</a-tooltip>
             </a>
             <a
               v-else-if="record.status === 'DRAFT'"
-              href="javascript:void(0)"
               class="no-underline"
+              href="javascript:void(0)"
               @click="handlePreview(record.id)"
             >
-              <a-tooltip placement="topLeft" :title="'点击预览【' + text + '】'">{{ text }}</a-tooltip>
+              <a-tooltip :title="'点击预览【' + text + '】'" placement="topLeft">{{ text }}</a-tooltip>
             </a>
-            <a v-else href="javascript:void(0);" class="no-underline" disabled>
+            <a v-else class="no-underline" disabled href="javascript:void(0);">
               {{ text }}
             </a>
           </span>
@@ -260,8 +260,8 @@
               v-for="(category, index) in categoriesOfPost"
               :key="index"
               color="blue"
-              @click="handleSelectCategory(category)"
               style="margin-bottom: 8px;cursor:pointer"
+              @click="handleSelectCategory(category)"
               >{{ category.name }}</a-tag
             >
           </span>
@@ -275,14 +275,14 @@
           <span
             slot="commentCount"
             slot-scope="text, record"
-            @click="handleShowPostComments(record)"
             style="cursor: pointer;"
+            @click="handleShowPostComments(record)"
           >
             <a-badge
               :count="record.commentCount"
               :numberStyle="{ backgroundColor: '#f38181' }"
-              :showZero="true"
               :overflowCount="999"
+              :showZero="true"
             />
           </span>
 
@@ -290,8 +290,8 @@
             <a-badge
               :count="visits"
               :numberStyle="{ backgroundColor: '#00e0ff' }"
-              :showZero="true"
               :overflowCount="9999"
+              :showZero="true"
             />
           </span>
 
@@ -306,17 +306,17 @@
 
           <span slot="action" slot-scope="text, post">
             <a
+              v-if="['PUBLISHED', 'DRAFT', 'INTIMATE'].includes(post.status)"
               href="javascript:void(0);"
               @click="handleEditClick(post)"
-              v-if="['PUBLISHED', 'DRAFT', 'INTIMATE'].includes(post.status)"
               >编辑</a
             >
             <a-popconfirm
-              :title="'你确定要发布【' + post.title + '】文章？'"
-              @confirm="handleEditStatusClick(post.id, 'PUBLISHED')"
-              okText="确定"
-              cancelText="取消"
               v-else-if="post.status === 'RECYCLE'"
+              :title="'你确定要发布【' + post.title + '】文章？'"
+              cancelText="取消"
+              okText="确定"
+              @confirm="handleEditStatusClick(post.id, 'PUBLISHED')"
             >
               <a href="javascript:void(0);">还原</a>
             </a-popconfirm>
@@ -324,21 +324,21 @@
             <a-divider type="vertical" />
 
             <a-popconfirm
-              :title="'你确定要将【' + post.title + '】文章移到回收站？'"
-              @confirm="handleEditStatusClick(post.id, 'RECYCLE')"
-              okText="确定"
-              cancelText="取消"
               v-if="['PUBLISHED', 'DRAFT', 'INTIMATE'].includes(post.status)"
+              :title="'你确定要将【' + post.title + '】文章移到回收站？'"
+              cancelText="取消"
+              okText="确定"
+              @confirm="handleEditStatusClick(post.id, 'RECYCLE')"
             >
               <a href="javascript:void(0);">回收站</a>
             </a-popconfirm>
 
             <a-popconfirm
-              :title="'你确定要永久删除【' + post.title + '】文章？'"
-              @confirm="handleDeleteClick(post.id)"
-              okText="确定"
-              cancelText="取消"
               v-else-if="post.status === 'RECYCLE'"
+              :title="'你确定要永久删除【' + post.title + '】文章？'"
+              cancelText="取消"
+              okText="确定"
+              @confirm="handleDeleteClick(post.id)"
             >
               <a href="javascript:void(0);">删除</a>
             </a-popconfirm>
@@ -350,15 +350,15 @@
         </a-table>
         <div class="page-wrapper">
           <a-pagination
-            class="pagination"
             :current="pagination.page"
-            :total="pagination.total"
             :defaultPageSize="pagination.size"
             :pageSizeOptions="['10', '20', '50', '100']"
-            showSizeChanger
-            @showSizeChange="handlePageSizeChange"
-            @change="handlePageChange"
+            :total="pagination.total"
+            class="pagination"
             showLessItems
+            showSizeChanger
+            @change="handlePageChange"
+            @showSizeChange="handlePageSizeChange"
           />
         </div>
       </div>
@@ -382,8 +382,8 @@
     <PostSettingModal
       :loading="postSettingLoading"
       :post="selectedPost"
-      :visible.sync="postSettingVisible"
       :savedCallback="onPostSavedCallback"
+      :visible.sync="postSettingVisible"
       @close="onPostSettingsClose"
     >
       <template #extraFooter>
@@ -397,11 +397,11 @@
     </PostSettingModal>
 
     <TargetCommentDrawer
-      :visible="postCommentVisible"
-      :title="selectedPost.title"
+      :id="selectedPost.id"
       :description="selectedPost.summary"
       :target="`posts`"
-      :id="selectedPost.id"
+      :title="selectedPost.title"
+      :visible="postCommentVisible"
       @close="onPostCommentsClose"
     />
   </page-view>
@@ -780,7 +780,6 @@ export default {
         const response = await postApi.get(this.list.data[this.list.data.length - 1].id)
         this.selectedPost = response.data.data
         this.postSettingLoading = false
-        return
       }
     },
 
@@ -804,7 +803,6 @@ export default {
         const response = await postApi.get(this.list.data[0].id)
         this.selectedPost = response.data.data
         this.postSettingLoading = false
-        return
       }
     }
   }
