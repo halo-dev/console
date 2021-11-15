@@ -121,9 +121,19 @@
       <a-button :disabled="loading" @click="modalVisible = false">
         关闭
       </a-button>
-
       <ReactiveButton
-        @click="handlePublishClick()"
+        type="danger"
+        v-if="!form.model.id"
+        @click="handleCreateOrUpdate('DRAFT')"
+        @callback="handleSavedCallback"
+        :loading="form.draftSaving"
+        :errored="form.draftSaveErrored"
+        text="保存草稿"
+        loadedText="保存成功"
+        erroredText="保存失败"
+      ></ReactiveButton>
+      <ReactiveButton
+        @click="handleCreateOrUpdate()"
         @callback="handleSavedCallback"
         :loading="form.saving"
         :errored="form.saveErrored"
@@ -181,7 +191,9 @@ export default {
       form: {
         model: {},
         saving: false,
-        saveErrored: false
+        saveErrored: false,
+        draftSaving: false,
+        draftSaveErrored: false
       },
 
       templates: []
@@ -262,29 +274,27 @@ export default {
     this.handleListCustomTemplates()
   },
   methods: {
-    handlePublishClick() {
-      this.form.model.status = 'PUBLISHED'
-      this.handleCreateOrUpdate()
-    },
-
     /**
      * Creates or updates a post
      */
-    async handleCreateOrUpdate() {
-      const { id } = this.form.model
+    async handleCreateOrUpdate(preStatus = 'PUBLISHED') {
+      this.form.model.status = preStatus
+      const { id, status } = this.form.model
       try {
-        this.form.saving = true
+        this.form[status === 'PUBLISHED' ? 'saving' : 'draftSaving'] = true
+
         if (id) {
           await postApi.update(id, this.form.model, false)
         } else {
           await postApi.create(this.form.model, false)
         }
       } catch (error) {
-        this.form.saveErrored = true
+        this.form[status === 'PUBLISHED' ? 'saveErrored' : 'draftSaveErrored'] = true
         this.$log.error(error)
       } finally {
         setTimeout(() => {
           this.form.saving = false
+          this.form.draftSaving = false
         }, 400)
       }
     },
@@ -293,8 +303,9 @@ export default {
      * Handle saved callback event
      */
     handleSavedCallback() {
-      if (this.form.saveErrored) {
+      if (this.form.saveErrored || this.form.draftSaveErrored) {
         this.form.saveErrored = false
+        this.form.draftSaveErrored = false
       } else {
         this.savedCallback && this.savedCallback()
       }
