@@ -1,8 +1,8 @@
 <template>
   <page-view>
-    <a-row :gutter="12" type="flex" align="middle">
+    <a-row :gutter="12" align="middle" type="flex">
       <a-col :span="24" class="pb-3">
-        <a-card :bordered="false" :bodyStyle="{ padding: '16px' }">
+        <a-card :bodyStyle="{ padding: '16px' }" :bordered="false">
           <div class="table-page-search-wrapper">
             <a-form layout="inline">
               <a-row :gutter="48">
@@ -15,9 +15,9 @@
                   <a-form-item label="存储位置：">
                     <a-select
                       v-model="list.params.attachmentType"
-                      @change="handleQuery()"
                       :loading="types.loading"
                       allowClear
+                      @change="handleQuery()"
                     >
                       <a-select-option v-for="item in types.data" :key="item" :value="item">
                         {{ item | typeText }}
@@ -29,13 +29,13 @@
                   <a-form-item label="文件类型：">
                     <a-select
                       v-model="list.params.mediaType"
-                      @change="handleQuery()"
                       :loading="mediaTypes.loading"
                       allowClear
+                      @change="handleQuery()"
                     >
-                      <a-select-option v-for="(item, index) in mediaTypes.data" :key="index" :value="item">{{
-                        item
-                      }}</a-select-option>
+                      <a-select-option v-for="(item, index) in mediaTypes.data" :key="index" :value="item"
+                        >{{ item }}
+                      </a-select-option>
                     </a-select>
                   </a-form-item>
                 </a-col>
@@ -51,19 +51,19 @@
             </a-form>
           </div>
           <div class="mb-0 table-operator">
-            <a-button type="primary" icon="cloud-upload" @click="upload.visible = true">上传</a-button>
-            <a-button icon="select" v-show="!supportMultipleSelection" @click="handleMultipleSelection">
+            <a-button icon="cloud-upload" type="primary" @click="upload.visible = true">上传</a-button>
+            <a-button v-show="!supportMultipleSelection" icon="select" @click="handleMultipleSelection">
               批量操作
             </a-button>
             <a-button
-              type="danger"
-              icon="delete"
               v-show="supportMultipleSelection"
+              icon="delete"
+              type="danger"
               @click="handleDeleteAttachmentInBatch"
             >
               删除
             </a-button>
-            <a-button icon="close" v-show="supportMultipleSelection" @click="handleCancelMultipleSelection">
+            <a-button v-show="supportMultipleSelection" icon="close" @click="handleCancelMultipleSelection">
               取消
             </a-button>
           </div>
@@ -71,12 +71,12 @@
       </a-col>
       <a-col :span="24">
         <a-list
-          class="attachments-group"
-          :grid="{ gutter: 12, xs: 2, sm: 2, md: 4, lg: 6, xl: 6, xxl: 6 }"
           :dataSource="list.data"
+          :grid="{ gutter: 12, xs: 2, sm: 2, md: 4, lg: 6, xl: 6, xxl: 6 }"
           :loading="list.loading"
+          class="attachments-group"
         >
-          <a-list-item slot="renderItem" slot-scope="item, index" :key="index">
+          <a-list-item :key="index" slot="renderItem" slot-scope="item, index">
             <a-card
               :bodyStyle="{ padding: 0 }"
               hoverable
@@ -87,20 +87,20 @@
                 <span v-if="!isImage(item)" class="attachments-group-item-type">{{ item.suffix }}</span>
                 <span
                   v-else
-                  class="attachments-group-item-img"
                   :style="`background-image:url(${item.thumbPath})`"
+                  class="attachments-group-item-img"
                   loading="lazy"
                 />
               </div>
               <a-card-meta class="p-3">
-                <ellipsis :length="isMobile() ? 12 : 16" tooltip slot="description">{{ item.name }}</ellipsis>
+                <ellipsis slot="description" :length="isMobile() ? 12 : 16" tooltip>{{ item.name }}</ellipsis>
               </a-card-meta>
               <a-checkbox
-                class="select-attachment-checkbox"
-                :style="getCheckStatus(item.id) ? selectedAttachmentStyle : ''"
-                :checked="getCheckStatus(item.id)"
-                @click="handleAttachmentSelectionChanged($event, item)"
                 v-show="supportMultipleSelection"
+                :checked="getCheckStatus(item.id)"
+                :style="getCheckStatus(item.id) ? selectedAttachmentStyle : ''"
+                class="select-attachment-checkbox"
+                @click="handleAttachmentSelectionChanged($event, item)"
               ></a-checkbox>
             </a-card>
           </a-list-item>
@@ -109,29 +109,29 @@
     </a-row>
     <div class="page-wrapper">
       <a-pagination
-        class="pagination"
         :current="pagination.page"
-        :total="pagination.total"
         :defaultPageSize="pagination.size"
         :pageSizeOptions="['18', '36', '54', '72', '90', '108']"
+        :total="pagination.total"
+        class="pagination"
+        showLessItems
         showSizeChanger
         @change="handlePageChange"
         @showSizeChange="handlePageSizeChange"
-        showLessItems
       />
     </div>
-    <a-modal title="上传附件" v-model="upload.visible" :footer="null" :afterClose="onUploadClose" destroyOnClose>
+    <a-modal v-model="upload.visible" :afterClose="onUploadClose" :footer="null" destroyOnClose title="上传附件">
       <FilePondUpload ref="upload" :uploadHandler="upload.handler"></FilePondUpload>
     </a-modal>
     <AttachmentDetailModal
-      :visible.sync="detailVisible"
-      :attachment="list.selected"
       :addToPhoto="true"
+      :attachment="list.selected"
+      :visible.sync="detailVisible"
       @delete="handleListAttachments()"
     >
       <template #extraFooter>
-        <a-button type="primary" ghost @click="handleSelectPrevious">上一项</a-button>
-        <a-button type="primary" ghost @click="handleSelectNext">下一项</a-button>
+        <a-button :disabled="selectPreviousButtonDisabled" @click="handleSelectPrevious">上一项</a-button>
+        <a-button :disabled="selectNextButtonDisabled" @click="handleSelectNext">下一项</a-button>
       </template>
     </AttachmentDetailModal>
   </page-view>
@@ -215,6 +215,14 @@ export default {
         size: this.list.params.size,
         total: this.list.total
       }
+    },
+    selectPreviousButtonDisabled() {
+      const index = this.list.data.findIndex(attachment => attachment.id === this.list.selected.id)
+      return index === 0 && !this.list.hasPrevious
+    },
+    selectNextButtonDisabled() {
+      const index = this.list.data.findIndex(attachment => attachment.id === this.list.selected.id)
+      return index === this.list.data.length - 1 && !this.list.hasNext
     }
   },
   created() {
@@ -463,7 +471,6 @@ export default {
         await this.handleListAttachments()
 
         this.list.selected = this.list.data[this.list.data.length - 1]
-        return
       }
     },
 
@@ -481,7 +488,6 @@ export default {
         await this.handleListAttachments()
 
         this.list.selected = this.list.data[0]
-        return
       }
     }
   }
