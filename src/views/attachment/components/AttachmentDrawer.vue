@@ -15,18 +15,23 @@
       <a-divider />
       <a-row type="flex" align="middle">
         <a-col :span="24">
-          <a-spin :spinning="loading">
+          <a-spin :spinning="loading" class="attachments-group">
             <a-empty v-if="formattedDatas.length === 0" />
             <div
               v-else
-              class="attach-item"
+              class="attach-item attachments-group-item"
               v-for="(item, index) in formattedDatas"
               :key="index"
               @click="handleShowDetailDrawer(item)"
               @contextmenu.prevent="handleContextMenu($event, item)"
             >
-              <span v-show="!handleJudgeMediaType(item)">当前格式不支持预览</span>
-              <img :src="item.thumbPath" v-show="handleJudgeMediaType(item)" loading="lazy" />
+              <span v-if="!handleJudgeMediaType(item)" class="attachments-group-item-type">{{ item.suffix }}</span>
+              <span
+                v-else
+                class="attachments-group-item-img"
+                :style="`background-image:url(${item.thumbPath})`"
+                loading="lazy"
+              />
             </div>
           </a-spin>
         </a-col>
@@ -42,12 +47,12 @@
         ></a-pagination>
       </div>
 
-      <AttachmentDetailDrawer
+      <!-- <AttachmentDetailDrawer
         v-model="detailVisible"
         v-if="selectedAttachment"
         :attachment="selectedAttachment"
         @delete="handleListAttachments"
-      />
+      /> -->
       <a-divider class="divider-transparent" />
       <div class="bottom-control">
         <a-button @click="uploadVisible = true" type="primary">上传附件</a-button>
@@ -62,14 +67,14 @@
 
 <script>
 import { mixin, mixinDevice } from '@/mixins/mixin.js'
-import AttachmentDetailDrawer from './AttachmentDetailDrawer'
+// import AttachmentDetailDrawer from './AttachmentDetailDrawer'
 import attachmentApi from '@/api/attachment'
 
 export default {
   name: 'AttachmentDrawer',
   mixins: [mixin, mixinDevice],
   components: {
-    AttachmentDetailDrawer
+    // AttachmentDetailDrawer
   },
   model: {
     prop: 'visible',
