@@ -364,33 +364,18 @@
       </div>
     </a-card>
 
-    <!-- <PostSettingDrawer
-      :post="selectedPost"
-      :tagIds="selectedTagIds"
-      :categoryIds="selectedCategoryIds"
-      :metas="selectedMetas"
-      :needTitle="true"
-      :saveDraftButton="false"
-      :visible="postSettingVisible"
-      @close="onPostSettingsClose"
-      @onRefreshPost="onRefreshPostFromSetting"
-      @onRefreshTagIds="onRefreshTagIdsFromSetting"
-      @onRefreshCategoryIds="onRefreshCategoryIdsFromSetting"
-      @onRefreshPostMetas="onRefreshPostMetasFromSetting"
-    /> -->
-
     <PostSettingModal
       :loading="postSettingLoading"
       :post="selectedPost"
       :savedCallback="onPostSavedCallback"
       :visible.sync="postSettingVisible"
-      @close="onPostSettingsClose"
+      @onClose="selectedPost = {}"
     >
       <template #extraFooter>
-        <a-button @click="handleSelectPrevious">
+        <a-button :disabled="selectPreviousButtonDisabled" @click="handleSelectPrevious">
           上一篇
         </a-button>
-        <a-button @click="handleSelectNext">
+        <a-button :disabled="selectNextButtonDisabled" @click="handleSelectNext">
           下一篇
         </a-button>
       </template>
@@ -410,7 +395,6 @@
 <script>
 import { mixin, mixinDevice } from '@/mixins/mixin.js'
 import { PageView } from '@/layouts'
-// import PostSettingDrawer from './components/PostSettingDrawer'
 import PostSettingModal from './components/PostSettingModal.vue'
 import TargetCommentDrawer from '../comment/components/TargetCommentDrawer'
 import categoryApi from '@/api/category'
@@ -469,7 +453,6 @@ export default {
   name: 'PostList',
   components: {
     PageView,
-    // PostSettingDrawer,
     PostSettingModal,
     TargetCommentDrawer
   },
@@ -499,18 +482,10 @@ export default {
       },
 
       selectedRowKeys: [],
-      selectedMetas: [
-        {
-          key: '',
-          value: ''
-        }
-      ],
       postSettingVisible: false,
       postSettingLoading: false,
       postCommentVisible: false,
-      selectedPost: {},
-      selectedTagIds: [],
-      selectedCategoryIds: []
+      selectedPost: {}
     }
   },
   computed: {
@@ -526,6 +501,14 @@ export default {
         size: this.list.params.size,
         total: this.list.total
       }
+    },
+    selectPreviousButtonDisabled() {
+      const index = this.list.data.findIndex(post => post.id === this.selectedPost.id)
+      return index === 0 && !this.list.hasPrevious
+    },
+    selectNextButtonDisabled() {
+      const index = this.list.data.findIndex(post => post.id === this.selectedPost.id)
+      return index === this.list.data.length - 1 && !this.list.hasNext
     }
   },
   beforeMount() {
@@ -708,9 +691,6 @@ export default {
         .get(post.id)
         .then(response => {
           this.selectedPost = response.data.data
-          this.selectedTagIds = this.selectedPost.tagIds
-          this.selectedCategoryIds = this.selectedPost.categoryIds
-          this.selectedMetas = this.selectedPost.metas
         })
         .finally(() => {
           this.postSettingLoading = false
@@ -730,14 +710,6 @@ export default {
     handleClearRowKeys() {
       this.selectedRowKeys = []
     },
-    // 关闭文章设置抽屉
-    onPostSettingsClose() {
-      this.postSettingVisible = false
-      this.selectedPost = {}
-      setTimeout(() => {
-        this.handleListPosts(false)
-      }, 500)
-    },
     onPostSavedCallback() {
       this.handleListPosts(false)
     },
@@ -747,18 +719,6 @@ export default {
       setTimeout(() => {
         this.handleListPosts(false)
       }, 500)
-    },
-    onRefreshPostFromSetting(post) {
-      this.selectedPost = post
-    },
-    onRefreshTagIdsFromSetting(tagIds) {
-      this.selectedTagIds = tagIds
-    },
-    onRefreshCategoryIdsFromSetting(categoryIds) {
-      this.selectedCategoryIds = categoryIds
-    },
-    onRefreshPostMetasFromSetting(metas) {
-      this.selectedMetas = metas
     },
 
     /**

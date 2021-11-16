@@ -32,13 +32,6 @@
       </a-col>
     </a-row>
 
-    <!-- <PostSettingDrawer
-      :post="postToStage"
-      :visible="postSettingVisible"
-      @close="postSettingVisible = false"
-      @onSaved="handleRestoreSavedStatus"
-    /> -->
-
     <PostSettingModal
       :post="postToStage"
       :savedCallback="onPostSavedCallback"

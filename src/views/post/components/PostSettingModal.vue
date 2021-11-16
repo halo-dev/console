@@ -60,7 +60,7 @@
             </a-form-item>
             <a-form-item label="发表时间：">
               <a-date-picker
-                :defaultValue="pickerDefaultValue"
+                :defaultValue="createTimeDefaultValue"
                 format="YYYY-MM-DD HH:mm:ss"
                 placeholder="选择文章发表时间"
                 showTime
@@ -86,7 +86,7 @@
                     :src="form.model.thumbnail || '/images/placeholder.jpg'"
                     alt="Post cover thumbnail"
                     class="img"
-                    @click="thumbDrawerVisible = true"
+                    @click="attachmentSelectVisible = true"
                   />
                   <a-input v-model="form.model.thumbnail" placeholder="点击封面图选择图片，或者输入外部链接"></a-input>
                   <a-button type="dashed" @click="form.model.thumbnail = null">移除</a-button>
@@ -146,12 +146,16 @@
         @click="handleCreateOrUpdate()"
       ></ReactiveButton>
     </template>
+    <AttachmentSelectDrawer
+      v-model="attachmentSelectVisible"
+      :drawerWidth="480"
+      @listenToSelect="handleSelectPostThumb"
+    />
   </a-modal>
 </template>
 <script>
 // components
 import CategoryTree from './CategoryTree'
-// import CategorySelectTree from './CategorySelectTree'
 import TagSelect from './TagSelect'
 import MetaEditor from '@/components/Post/MetaEditor'
 
@@ -170,7 +174,6 @@ export default {
   mixins: [mixin, mixinDevice],
   components: {
     CategoryTree,
-    // CategorySelectTree,
     TagSelect,
     MetaEditor
   },
@@ -202,7 +205,9 @@ export default {
         draftSaveErrored: false
       },
 
-      templates: []
+      templates: [],
+
+      attachmentSelectVisible: false
     }
   },
   computed: {
@@ -218,7 +223,7 @@ export default {
     modalTitle() {
       return this.form.model.id ? '文章设置' : '文章发布'
     },
-    pickerDefaultValue() {
+    createTimeDefaultValue() {
       if (this.form.model.createTime) {
         const date = new Date(this.form.model.createTime)
         return datetimeFormat(date, 'YYYY-MM-DD HH:mm:ss')
@@ -284,6 +289,14 @@ export default {
      * Creates or updates a post
      */
     async handleCreateOrUpdate(preStatus = 'PUBLISHED') {
+      if (!this.form.model.title) {
+        this.$notification['error']({
+          message: '提示',
+          description: '文章标题不能为空！'
+        })
+        return
+      }
+
       this.form.model.status = preStatus
       const { id, status } = this.form.model
       try {
@@ -361,9 +374,19 @@ export default {
     },
 
     /**
+     * Select post thumbnail
+     * @param data
+     */
+    handleSelectPostThumb(data) {
+      this.form.model.thumbnail = encodeURI(data.path)
+      this.attachmentSelectVisible = false
+    },
+
+    /**
      * Handle modal close event
      */
     onClosed() {
+      this.$emit('onClose')
       this.$emit('onUpdate', this.form.model)
     }
   }

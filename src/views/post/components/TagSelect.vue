@@ -1,10 +1,10 @@
 <template>
   <a-select
     v-model="selectedTagNames"
-    class="w-full"
-    allowClear
-    mode="tags"
     :token-separators="[',', '|']"
+    allowClear
+    class="w-full"
+    mode="tags"
     placeholder="选择或输入标签"
     @change="handleChange"
   >
@@ -46,6 +46,9 @@ export default {
     },
     tagIds: {
       handler(newValue) {
+        if (!this.tags.length) {
+          return
+        }
         this.selectedTagNames = newValue.map(tagId => this.tagIdMap[tagId].name)
       },
       deep: true
