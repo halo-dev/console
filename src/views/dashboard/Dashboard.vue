@@ -254,9 +254,7 @@ export default {
           this.latestPosts = response.data
         })
         .finally(() => {
-          setTimeout(() => {
-            this.activityLoading = false
-          }, 200)
+          this.activityLoading = false
         })
     },
     handleListLatestLogs() {
@@ -267,9 +265,7 @@ export default {
           this.latestLogs = response.data
         })
         .finally(() => {
-          setTimeout(() => {
-            this.logLoading = false
-          }, 200)
+          this.logLoading = false
         })
     },
     handleLoadStatistics() {
@@ -282,9 +278,7 @@ export default {
           clearInterval(this.interval)
         })
         .finally(() => {
-          setTimeout(() => {
-            this.statisticsLoading = false
-          }, 200)
+          this.statisticsLoading = false
         })
     },
     handlePostPreview(postId) {

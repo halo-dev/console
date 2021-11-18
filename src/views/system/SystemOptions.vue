@@ -1,5 +1,5 @@
 <template>
-  <page-view :title="advancedOptions ? '高级选项' : '基础选项'">
+  <page-view :title="title">
     <template slot="extra">
       <a-button style="padding:0" type="link" @click="advancedOptions = !advancedOptions">
         切换到{{ advancedOptions ? '基础选项' : '高级选项' }}
@@ -166,34 +166,60 @@ export default {
       errored: false
     }
   },
+  computed: {
+    title() {
+      return this.advancedOptions ? '高级选项' : '基础选项'
+    }
+  },
   created() {
     this.handleListOptions()
   },
   methods: {
     ...mapActions(['refreshUserCache', 'refreshOptionsCache']),
-    handleListOptions() {
-      apiClient.option.list().then(response => {
+
+    /**
+     * Get options list
+     *
+     * @returns {Promise<void>}
+     */
+    async handleListOptions() {
+      try {
+        const response = await apiClient.option.listAsMapView()
         this.options = response.data
-      })
+      } catch (e) {
+        this.$log.error(e)
+      }
     },
+
+    /**
+     * Handle options change event
+     *
+     * @param val new options
+     */
     onOptionsChange(val) {
       this.options = val
     },
-    onSaveOptions() {
-      this.saving = true
-      apiClient.option
-        .save(this.options)
-        .catch(() => {
-          this.errored = true
-        })
-        .finally(() => {
-          setTimeout(() => {
-            this.saving = false
-          }, 400)
-          this.handleListOptions()
-          this.refreshOptionsCache()
-          this.refreshUserCache()
-        })
+
+    /**
+     * Save options
+     *
+     * @returns {Promise<void>}
+     */
+    async onSaveOptions() {
+      try {
+        this.saving = true
+        await apiClient.option.saveMapView(this.options)
+      } catch (e) {
+        this.errored = true
+        this.$log.error(e)
+      } finally {
+        setTimeout(() => {
+          this.saving = false
+        }, 400)
+        await this.handleListOptions()
+        await this.refreshOptionsCache()
+        await this.refreshUserCache()
+      }
     }
   }
 }
