@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import { ACCESS_TOKEN, USER } from '@/store/mutation-types'
 import adminApi from '@/api/admin'
-import userApi from '@/api/user'
+import apiClient from '@/utils/api-client'
 
 const user = {
   state: {
@@ -25,7 +25,7 @@ const user = {
   actions: {
     installCleanToken({ commit }, installData) {
       return new Promise((resolve, reject) => {
-        adminApi
+        apiClient.installation
           .install(installData)
           .then(response => {
             commit('CLEAR_TOKEN')
@@ -38,10 +38,10 @@ const user = {
     },
     refreshUserCache({ commit }) {
       return new Promise((resolve, reject) => {
-        userApi
+        apiClient.user
           .getProfile()
           .then(response => {
-            commit('SET_USER', response.data.data)
+            commit('SET_USER', response.data)
             resolve(response)
           })
           .catch(error => {

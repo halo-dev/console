@@ -1,25 +1,26 @@
 <template>
-  <a-form layout="vertical" :wrapperCol="wrapperCol">
+  <a-form :wrapperCol="wrapperCol" layout="vertical">
     <a-form-item label="开发者选项：">
       <a-switch v-model="options.developer_mode" />
     </a-form-item>
     <a-form-item>
       <ReactiveButton
-        type="primary"
-        @click="handleSaveOptions"
-        @callback="errored = false"
-        :loading="saving"
         :errored="errored"
-        text="保存"
-        loadedText="保存成功"
+        :loading="saving"
         erroredText="保存失败"
+        loadedText="保存成功"
+        text="保存"
+        type="primary"
+        @callback="errored = false"
+        @click="handleSaveOptions"
       ></ReactiveButton>
     </a-form-item>
   </a-form>
 </template>
 <script>
 import { mapActions } from 'vuex'
-import optionApi from '@/api/option'
+import apiClient from '@/utils/api-client'
+
 export default {
   name: 'SettingsForm',
   data() {
@@ -41,13 +42,13 @@ export default {
   methods: {
     ...mapActions(['refreshOptionsCache']),
     handleListOptions() {
-      optionApi.listAll().then(response => {
-        this.options = response.data.data
+      apiClient.option.list().then(response => {
+        this.options = response.data
       })
     },
     handleSaveOptions() {
       this.saving = true
-      optionApi
+      apiClient.option
         .save(this.options)
         .catch(() => {
           this.errored = false

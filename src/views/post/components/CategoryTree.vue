@@ -1,11 +1,11 @@
 <template>
   <a-tree
-    checkable
-    :treeData="categoryTree"
-    defaultExpandAll
-    checkStrictly
-    showLine
     :checkedKeys="categoryIds"
+    :treeData="categoryTree"
+    checkStrictly
+    checkable
+    defaultExpandAll
+    showLine
     @check="onCheck"
   >
   </a-tree>
@@ -13,6 +13,7 @@
 
 <script>
 import categoryApi from '@/api/category'
+import apiClient from '@/utils/api-client'
 
 export default {
   name: 'CategoryTree',
@@ -51,7 +52,7 @@ export default {
       try {
         this.categories.loading = true
 
-        const { data } = await categoryApi.listAll()
+        const { data } = await apiClient.category.list({ sort: [], more: false })
 
         this.categories.data = data.data
       } catch (error) {

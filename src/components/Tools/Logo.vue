@@ -1,14 +1,15 @@
 <template>
   <div class="logo">
     <a href="javascript:void(0);" @click="onLogoClick()">
-      <img src="/images/logo.svg" alt="Halo Logo" />
+      <img alt="Halo Logo" src="/images/logo.svg" />
     </a>
   </div>
 </template>
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import optionApi from '@/api/option'
+import apiClient from '@/utils/api-client'
+
 export default {
   name: 'Logo',
   data() {
@@ -27,7 +28,7 @@ export default {
     onLogoClick() {
       this.clickCount++
       if (this.clickCount === 10) {
-        optionApi.save(this.optionsToCreate).then(() => {
+        apiClient.option.save([this.optionsToCreate]).then(() => {
           this.refreshOptionsCache()
           this.$message.success(`开发者选项已启用！`)
           this.clickCount = 0

@@ -2,7 +2,7 @@
   <page-view>
     <a-row>
       <a-col :span="24">
-        <a-card :bordered="false" :bodyStyle="{ padding: '16px' }">
+        <a-card :bodyStyle="{ padding: '16px' }" :bordered="false">
           <div class="table-page-search-wrapper">
             <a-form layout="inline">
               <a-row :gutter="48">
@@ -13,10 +13,10 @@
                 </a-col>
                 <a-col :md="6" :sm="24">
                   <a-form-item label="状态：">
-                    <a-select placeholder="请选择状态" v-model="list.queryParam.type" @change="handleQuery()">
-                      <a-select-option v-for="type in Object.keys(list.journalType)" :key="type" :value="type">{{
-                        list.journalType[type].text
-                      }}</a-select-option>
+                    <a-select v-model="list.queryParam.type" placeholder="请选择状态" @change="handleQuery()">
+                      <a-select-option v-for="type in Object.keys(list.journalType)" :key="type" :value="type"
+                        >{{ list.journalType[type].text }}
+                      </a-select-option>
                     </a-select>
                   </a-form-item>
                 </a-col>
@@ -32,13 +32,13 @@
             </a-form>
           </div>
           <div class="table-operator">
-            <a-button type="primary" icon="plus" @click="handleOpenPublishModal">写日志</a-button>
+            <a-button icon="plus" type="primary" @click="handleOpenPublishModal">写日志</a-button>
           </div>
           <a-divider />
           <div class="mt-4">
             <a-empty v-if="!list.loading && list.data.length === 0" />
-            <a-list v-else itemLayout="vertical" :pagination="false" :dataSource="list.data" :loading="list.loading">
-              <a-list-item slot="renderItem" slot-scope="item, index" :key="index">
+            <a-list v-else :dataSource="list.data" :loading="list.loading" :pagination="false" itemLayout="vertical">
+              <a-list-item :key="index" slot="renderItem" slot-scope="item, index">
                 <template slot="actions">
                   <span>
                     <a href="javascript:void(0);">
@@ -53,7 +53,7 @@
                     </a>
                   </span>
                   <span v-if="item.type === 'INTIMATE'">
-                    <a href="javascript:void(0);" disabled>
+                    <a disabled href="javascript:void(0);">
                       <a-icon type="lock" />
                     </a>
                   </span>
@@ -67,10 +67,10 @@
                   <a href="javascript:void(0);" @click="handleOpenEditModal(item)">编辑</a>
                   <a-divider type="vertical" />
                   <a-popconfirm
+                    cancelText="取消"
+                    okText="确定"
                     title="你确定要删除这条日志？"
                     @confirm="handleDelete(item.id)"
-                    okText="确定"
-                    cancelText="取消"
                   >
                     <a href="javascript:void(0);">删除</a>
                   </a-popconfirm>
@@ -78,23 +78,23 @@
 
                 <a-list-item-meta>
                   <template slot="description">
-                    <p v-html="item.content" class="journal-list-content"></p>
+                    <p class="journal-list-content" v-html="item.content"></p>
                   </template>
                   <span slot="title">{{ item.createTime | moment }}</span>
-                  <a-avatar slot="avatar" size="large" :src="user.avatar" />
+                  <a-avatar slot="avatar" :src="user.avatar" size="large" />
                 </a-list-item-meta>
               </a-list-item>
               <div class="page-wrapper">
                 <a-pagination
-                  class="pagination"
                   :current="list.pagination.page"
-                  :total="list.pagination.total"
                   :defaultPageSize="list.pagination.size"
                   :pageSizeOptions="['1', '2', '5', '10', '20', '50', '100']"
-                  showSizeChanger
-                  @showSizeChange="handlePaginationChange"
-                  @change="handlePaginationChange"
+                  :total="list.pagination.total"
+                  class="pagination"
                   showLessItems
+                  showSizeChanger
+                  @change="handlePaginationChange"
+                  @showSizeChange="handlePaginationChange"
                 />
               </div>
             </a-list>
@@ -105,19 +105,19 @@
 
     <div style="position: fixed;bottom: 30px;right: 30px;">
       <a-button
-        type="primary"
-        shape="circle"
         icon="setting"
+        shape="circle"
         size="large"
+        type="primary"
         @click="optionModal.visible = true"
       ></a-button>
     </div>
-    <a-modal v-model="optionModal.visible" title="页面设置" :afterClose="() => (optionModal.visible = false)">
+    <a-modal v-model="optionModal.visible" :afterClose="() => (optionModal.visible = false)" title="页面设置">
       <template slot="footer">
         <a-button key="submit" type="primary" @click="handleSaveOptions()">保存</a-button>
       </template>
       <a-form layout="vertical">
-        <a-form-item label="页面标题：" help="* 需要主题进行适配">
+        <a-form-item help="* 需要主题进行适配" label="页面标题：">
           <a-input v-model="optionModal.options.journals_title" />
         </a-form-item>
         <a-form-item label="每页显示条数：">
@@ -137,36 +137,36 @@
       <template slot="footer">
         <a-button type="dashed" @click="attachmentDrawer.visible = true">附件库</a-button>
         <ReactiveButton
-          type="primary"
-          @click="handleSaveOrUpdate"
-          @callback="handleSaveOrUpdateCallback"
-          :loading="form.saving"
           :errored="form.saveErrored"
-          text="发布"
-          loadedText="发布成功"
+          :loading="form.saving"
           erroredText="发布失败"
+          loadedText="发布成功"
+          text="发布"
+          type="primary"
+          @callback="handleSaveOrUpdateCallback"
+          @click="handleSaveOrUpdate"
         ></ReactiveButton>
       </template>
       <a-form-model ref="journalForm" :model="form.model" :rules="form.rules" layout="vertical">
         <a-form-model-item prop="sourceContent">
           <a-input
             ref="sourceContentInput"
-            type="textarea"
-            :autoSize="{ minRows: 8 }"
             v-model="form.model.sourceContent"
+            :autoSize="{ minRows: 8 }"
+            type="textarea"
           />
         </a-form-model-item>
         <a-form-model-item>
-          <a-switch checkedChildren="公开" unCheckedChildren="私密" v-model="form.isPublic" defaultChecked />
+          <a-switch v-model="form.isPublic" checkedChildren="公开" defaultChecked unCheckedChildren="私密" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
 
     <TargetCommentDrawer
-      :visible="journalCommentDrawer.visible"
+      :id="list.selected.id"
       :description="list.selected.content"
       :target="`journals`"
-      :id="list.selected.id"
+      :visible="journalCommentDrawer.visible"
       @close="onJournalCommentsDrawerClose"
     />
 
@@ -179,9 +179,9 @@ import { PageView } from '@/layouts'
 import TargetCommentDrawer from '../../comment/components/TargetCommentDrawer'
 import AttachmentDrawer from '../../attachment/components/AttachmentDrawer'
 import { mixin, mixinDevice } from '@/mixins/mixin.js'
-import { mapGetters, mapActions } from 'vuex'
-import journalApi from '@/api/journal'
-import optionApi from '@/api/option'
+import { mapActions, mapGetters } from 'vuex'
+import apiClient from '@/utils/api-client'
+
 export default {
   mixins: [mixin, mixinDevice],
   components: { PageView, TargetCommentDrawer, AttachmentDrawer },
@@ -205,7 +205,14 @@ export default {
         },
         selected: {},
 
-        journalType: journalApi.journalType
+        journalType: {
+          PUBLIC: {
+            text: '公开'
+          },
+          INTIMATE: {
+            text: '私密'
+          }
+        }
       },
 
       form: {
@@ -231,8 +238,8 @@ export default {
     }
   },
   beforeMount() {
-    this.hanldeListJournals()
-    this.hanldeListOptions()
+    this.handleListJournals()
+    this.handleListOptions()
   },
   computed: {
     ...mapGetters(['user']),
@@ -242,26 +249,24 @@ export default {
   },
   methods: {
     ...mapActions(['refreshOptionsCache']),
-    hanldeListJournals() {
+    handleListJournals() {
       this.list.loading = true
       this.list.queryParam.page = this.list.pagination.page - 1
       this.list.queryParam.size = this.list.pagination.size
       this.list.queryParam.sort = this.list.pagination.sort
-      journalApi
-        .query(this.list.queryParam)
+      apiClient.journal
+        .list(this.list.queryParam)
         .then(response => {
-          this.list.data = response.data.data.content
-          this.list.pagination.total = response.data.data.total
+          this.list.data = response.data.content
+          this.list.pagination.total = response.data.total
         })
         .finally(() => {
-          setTimeout(() => {
-            this.list.loading = false
-          }, 200)
+          this.list.loading = false
         })
     },
-    hanldeListOptions() {
-      optionApi.listAll().then(response => {
-        this.optionModal.options = response.data.data
+    handleListOptions() {
+      apiClient.option.list().then(response => {
+        this.optionModal.options = response.data
       })
     },
     handleQuery() {
@@ -288,8 +293,8 @@ export default {
       })
     },
     handleDelete(id) {
-      journalApi.delete(id).finally(() => {
-        this.hanldeListJournals()
+      apiClient.journal.delete(id).finally(() => {
+        this.handleListJournals()
       })
     },
     handleOpenJournalCommentsDrawer(journal) {
@@ -303,7 +308,7 @@ export default {
           _this.form.model.type = _this.form.isPublic ? 'PUBLIC' : 'INTIMATE'
           _this.form.saving = true
           if (_this.form.model.id) {
-            journalApi
+            apiClient.journal
               .update(_this.form.model.id, _this.form.model)
               .catch(() => {
                 _this.form.saveErrored = true
@@ -314,7 +319,7 @@ export default {
                 }, 400)
               })
           } else {
-            journalApi
+            apiClient.journal
               .create(_this.form.model)
               .catch(() => {
                 _this.form.saveErrored = true
@@ -334,28 +339,28 @@ export default {
       } else {
         this.form.isPublic = true
         this.form.visible = false
-        this.hanldeListJournals()
+        this.handleListJournals()
       }
     },
     handlePaginationChange(page, pageSize) {
       this.$log.debug(`Current: ${page}, PageSize: ${pageSize}`)
       this.list.pagination.page = page
       this.list.pagination.size = pageSize
-      this.hanldeListJournals()
+      this.handleListJournals()
     },
     onJournalCommentsDrawerClose() {
       this.form.model = {}
       this.journalCommentDrawer.visible = false
     },
     handleSaveOptions() {
-      optionApi
+      apiClient.option
         .save(this.optionModal.options)
         .then(() => {
           this.$message.success('保存成功！')
           this.optionModal.visible = false
         })
         .finally(() => {
-          this.hanldeListOptions()
+          this.handleListOptions()
           this.refreshOptionsCache()
         })
     }

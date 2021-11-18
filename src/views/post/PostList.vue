@@ -397,8 +397,7 @@ import { mixin, mixinDevice } from '@/mixins/mixin.js'
 import { PageView } from '@/layouts'
 import PostSettingModal from './components/PostSettingModal.vue'
 import TargetCommentDrawer from '../comment/components/TargetCommentDrawer'
-import categoryApi from '@/api/category'
-import postApi from '@/api/post'
+import apiClient from '@/utils/api-client'
 
 const columns = [
   {
@@ -459,7 +458,32 @@ export default {
   mixins: [mixin, mixinDevice],
   data() {
     return {
-      postStatus: postApi.postStatus,
+      postStatus: {
+        PUBLISHED: {
+          value: 'PUBLISHED',
+          color: 'green',
+          status: 'success',
+          text: '已发布'
+        },
+        DRAFT: {
+          value: 'DRAFT',
+          color: 'yellow',
+          status: 'warning',
+          text: '草稿'
+        },
+        RECYCLE: {
+          value: 'RECYCLE',
+          color: 'red',
+          status: 'error',
+          text: '回收站'
+        },
+        INTIMATE: {
+          value: 'INTIMATE',
+          color: 'blue',
+          status: 'success',
+          text: '私密'
+        }
+      },
       columns,
       list: {
         data: [],
@@ -552,12 +576,12 @@ export default {
         if (enableLoading) {
           this.list.loading = true
         }
-        const response = await postApi.query(this.list.params)
+        const response = await apiClient.post.list(this.list.params)
 
-        this.list.data = response.data.data.content
-        this.list.total = response.data.data.total
-        this.list.hasPrevious = response.data.data.hasPrevious
-        this.list.hasNext = response.data.data.hasNext
+        this.list.data = response.data.content
+        this.list.total = response.data.total
+        this.list.hasPrevious = response.data.hasPrevious
+        this.list.hasNext = response.data.hasNext
       } catch (error) {
         this.$log.error(error)
       } finally {
@@ -572,9 +596,9 @@ export default {
       try {
         this.categories.loading = true
 
-        const response = await categoryApi.listAll(true)
+        const response = await apiClient.category.list({ sort: [], more: true })
 
-        this.categories.data = response.data.data
+        this.categories.data = response.data
       } catch (error) {
         this.$log.error(error)
       } finally {
@@ -635,8 +659,8 @@ export default {
       this.handleQuery()
     },
     handleEditStatusClick(postId, status) {
-      postApi
-        .updateStatus(postId, status)
+      apiClient.post
+        .updateStatusById(postId, status)
         .then(() => {
           this.$message.success('操作成功！')
         })
@@ -645,7 +669,7 @@ export default {
         })
     },
     handleDeleteClick(postId) {
-      postApi
+      apiClient.post
         .delete(postId)
         .then(() => {
           this.$message.success('删除成功！')
@@ -659,7 +683,7 @@ export default {
         this.$message.info('请至少选择一项！')
         return
       }
-      postApi
+      apiClient.post
         .updateStatusInBatch(this.selectedRowKeys, status)
         .then(() => {
           this.$log.debug(`postId: ${this.selectedRowKeys}, status: ${status}`)
@@ -674,7 +698,7 @@ export default {
         this.$message.info('请至少选择一项！')
         return
       }
-      postApi
+      apiClient.post
         .deleteInBatch(this.selectedRowKeys)
         .then(() => {
           this.$log.debug(`delete: ${this.selectedRowKeys}`)
@@ -687,23 +711,23 @@ export default {
     handleShowPostSettings(post) {
       this.postSettingVisible = true
       this.postSettingLoading = true
-      postApi
+      apiClient.post
         .get(post.id)
         .then(response => {
-          this.selectedPost = response.data.data
+          this.selectedPost = response.data
         })
         .finally(() => {
           this.postSettingLoading = false
         })
     },
     handleShowPostComments(post) {
-      postApi.get(post.id).then(response => {
-        this.selectedPost = response.data.data
+      apiClient.post.get(post.id).then(response => {
+        this.selectedPost = response.data
         this.postCommentVisible = true
       })
     },
     handlePreview(postId) {
-      postApi.preview(postId).then(response => {
+      apiClient.post.getPreviewLinkById(postId).then(response => {
         window.open(response.data, '_blank')
       })
     },
@@ -728,8 +752,8 @@ export default {
       const index = this.list.data.findIndex(post => post.id === this.selectedPost.id)
       if (index > 0) {
         this.postSettingLoading = true
-        const response = await postApi.get(this.list.data[index - 1].id)
-        this.selectedPost = response.data.data
+        const response = await apiClient.post.get(this.list.data[index - 1].id)
+        this.selectedPost = response.data
         this.postSettingLoading = false
         return
       }
@@ -737,8 +761,8 @@ export default {
         this.list.params.page--
         await this.handleListPosts()
         this.postSettingLoading = true
-        const response = await postApi.get(this.list.data[this.list.data.length - 1].id)
-        this.selectedPost = response.data.data
+        const response = await apiClient.post.get(this.list.data[this.list.data.length - 1].id)
+        this.selectedPost = response.data
         this.postSettingLoading = false
       }
     },
@@ -750,8 +774,8 @@ export default {
       const index = this.list.data.findIndex(post => post.id === this.selectedPost.id)
       if (index < this.list.data.length - 1) {
         this.postSettingLoading = true
-        const response = await postApi.get(this.list.data[index + 1].id)
-        this.selectedPost = response.data.data
+        const response = await apiClient.post.get(this.list.data[index + 1].id)
+        this.selectedPost = response.data
         this.postSettingLoading = false
         return
       }
@@ -760,8 +784,8 @@ export default {
         await this.handleListPosts()
 
         this.postSettingLoading = true
-        const response = await postApi.get(this.list.data[0].id)
-        this.selectedPost = response.data.data
+        const response = await apiClient.post.get(this.list.data[0].id)
+        this.selectedPost = response.data
         this.postSettingLoading = false
       }
     }

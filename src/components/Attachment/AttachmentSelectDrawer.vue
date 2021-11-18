@@ -1,34 +1,34 @@
 <template>
   <div>
     <a-drawer
+      :afterVisibleChange="handleAfterVisibleChanged"
       :title="title"
+      :visible="visible"
       :width="isMobile() ? '100%' : drawerWidth"
       closable
-      :visible="visible"
       destroyOnClose
       @close="onClose"
-      :afterVisibleChange="handleAfterVisibleChanged"
     >
-      <a-row type="flex" align="middle">
-        <a-input-search placeholder="搜索" v-model="queryParam.keyword" @search="handleQuery()" enterButton />
+      <a-row align="middle" type="flex">
+        <a-input-search v-model="queryParam.keyword" enterButton placeholder="搜索" @search="handleQuery()" />
       </a-row>
       <a-divider />
-      <a-row type="flex" align="middle">
+      <a-row align="middle" type="flex">
         <a-col :span="24">
           <a-spin :spinning="loading" class="attachments-group">
             <a-empty v-if="attachments.length === 0" />
             <div
-              v-else
-              class="attach-item  attachments-group-item"
               v-for="(item, index) in attachments"
+              v-else
               :key="index"
+              class="attach-item  attachments-group-item"
               @click="handleSelectAttachment(item)"
             >
               <span v-if="!handleJudgeMediaType(item)" class="attachments-group-item-type">{{ item.suffix }}</span>
               <span
                 v-else
-                class="attachments-group-item-img"
                 :style="`background-image:url(${item.thumbPath})`"
+                class="attachments-group-item-img"
                 loading="lazy"
               />
             </div>
@@ -39,22 +39,22 @@
       <div class="page-wrapper">
         <a-pagination
           :current="pagination.page"
-          :total="pagination.total"
           :defaultPageSize="pagination.size"
-          @change="handlePaginationChange"
+          :total="pagination.total"
           showLessItems
+          @change="handlePaginationChange"
         ></a-pagination>
       </div>
       <a-divider class="divider-transparent" />
       <div class="bottom-control">
         <a-space>
-          <a-button type="dashed" v-if="isChooseAvatar" @click="handleSelectGravatar">使用 Gravatar</a-button>
-          <a-button @click="handleShowUploadModal" type="primary">上传附件</a-button>
+          <a-button v-if="isChooseAvatar" type="dashed" @click="handleSelectGravatar">使用 Gravatar</a-button>
+          <a-button type="primary" @click="handleShowUploadModal">上传附件</a-button>
         </a-space>
       </div>
     </a-drawer>
 
-    <a-modal title="上传附件" v-model="uploadVisible" :footer="null" :afterClose="onUploadClose" destroyOnClose>
+    <a-modal v-model="uploadVisible" :afterClose="onUploadClose" :footer="null" destroyOnClose title="上传附件">
       <FilePondUpload ref="upload" :uploadHandler="uploadHandler"></FilePondUpload>
     </a-modal>
   </div>
@@ -62,7 +62,7 @@
 
 <script>
 import { mixin, mixinDevice } from '@/mixins/mixin.js'
-import attachmentApi from '@/api/attachment'
+import apiClient from '@/utils/api-client'
 
 export default {
   name: 'AttachmentSelectDrawer',
@@ -110,7 +110,7 @@ export default {
         keyword: null
       },
       attachments: [],
-      uploadHandler: attachmentApi.upload
+      uploadHandler: apiClient.attachment.upload
     }
   },
   methods: {
@@ -122,11 +122,11 @@ export default {
       this.queryParam.page = this.pagination.page - 1
       this.queryParam.size = this.pagination.size
       this.queryParam.sort = this.pagination.sort
-      attachmentApi
-        .query(this.queryParam)
+      apiClient.attachment
+        .list(this.queryParam)
         .then(response => {
-          this.attachments = response.data.data.content
-          this.pagination.total = response.data.data.total
+          this.attachments = response.data.content
+          this.pagination.total = response.data.total
         })
         .finally(() => {
           setTimeout(() => {
