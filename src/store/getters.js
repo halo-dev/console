@@ -6,12 +6,6 @@ const getters = {
   loginModal: state => state.app.loginModal,
   token: state => state.user.token,
   user: state => state.user.user,
-  apiUrl: state => {
-    if (state.app.apiUrl) {
-      return state.app.apiUrl
-    }
-    return `${window.location.protocol}//${window.location.host}`
-  },
   options: state => state.option.options
 }
 

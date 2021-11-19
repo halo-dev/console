@@ -5,12 +5,14 @@ const localStorageCredentials = encrypt.decrypt(localStorage.getItem('UserCreden
 
 const localStorageTokenStore = new LocalStorageTokenStore()
 
+const apiUrl = process.env.VUE_APP_API_URL ? process.env.VUE_APP_API_URL : 'http://localhost:8080'
+
 const haloRestApiClient = new HaloRestAPIClient({
-  baseUrl: 'http://localhost:8090'
+  baseUrl: apiUrl
 })
 
 const buildTokenProvider = credentials => {
-  return new DefaultTokenProvider(credentials, 'http://localhost:8090', localStorageTokenStore)
+  return new DefaultTokenProvider(credentials, apiUrl, localStorageTokenStore)
 }
 
 if (localStorageCredentials) {

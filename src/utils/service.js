@@ -59,7 +59,7 @@ function getFieldValidationError(data) {
 
 service.interceptors.request.use(
   config => {
-    config.baseURL = store.getters.apiUrl
+    // config.baseURL = store.getters.apiUrl
     setTokenToHeader(config)
     return config
   },

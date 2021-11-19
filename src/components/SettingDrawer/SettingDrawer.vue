@@ -106,8 +106,8 @@
                 slot="actions"
                 size="small"
                 :disabled="layoutMode === 'topmenu'"
-                :defaultChecked="fixSiderbar"
-                @change="handleFixSiderbar"
+                :defaultChecked="fixedSidebar"
+                @change="handleFixedSidebar"
               />
               <a-list-item-meta>
                 <div slot="title" :style="{ opacity: layoutMode === 'topmenu' ? '0.5' : '1' }">固定侧边菜单</div>
@@ -157,7 +157,7 @@ export default {
     handleLayout(mode) {
       this.baseConfig.layout = mode
       this.$store.dispatch('ToggleLayoutMode', mode)
-      this.handleFixSiderbar(false)
+      this.handleFixedSidebar(false)
       if (mode === 'sidemenu') {
         this.handleContentWidthChange('Fixed')
       }
@@ -181,14 +181,14 @@ export default {
       this.baseConfig.autoHideHeader = autoHidden
       this.$store.dispatch('ToggleFixedHeaderHidden', autoHidden)
     },
-    handleFixSiderbar(fixed) {
+    handleFixedSidebar(fixed) {
       if (this.layoutMode === 'topmenu') {
-        this.baseConfig.fixSiderbar = false
-        this.$store.dispatch('ToggleFixSiderbar', false)
+        this.baseConfig.fixedSidebar = false
+        this.$store.dispatch('ToggleFixedSidebar', false)
         return
       }
-      this.baseConfig.fixSiderbar = fixed
-      this.$store.dispatch('ToggleFixSiderbar', fixed)
+      this.baseConfig.fixedSidebar = fixed
+      this.$store.dispatch('ToggleFixedSidebar', fixed)
     }
   }
 }
