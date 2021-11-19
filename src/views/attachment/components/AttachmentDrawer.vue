@@ -68,7 +68,6 @@
 <script>
 import { mixin, mixinDevice } from '@/mixins/mixin.js'
 // import AttachmentDetailDrawer from './AttachmentDetailDrawer'
-import attachmentApi from '@/api/attachment'
 import apiClient from '@/utils/api-client'
 
 export default {
@@ -90,7 +89,44 @@ export default {
   },
   data() {
     return {
-      attachmentType: attachmentApi.type,
+      attachmentType: {
+        LOCAL: {
+          type: 'LOCAL',
+          text: '本地'
+        },
+        SMMS: {
+          type: 'SMMS',
+          text: 'SM.MS'
+        },
+        UPOSS: {
+          type: 'UPOSS',
+          text: '又拍云'
+        },
+        QINIUOSS: {
+          type: 'QINIUOSS',
+          text: '七牛云'
+        },
+        ALIOSS: {
+          type: 'ALIOSS',
+          text: '阿里云'
+        },
+        BAIDUBOS: {
+          type: 'BAIDUBOS',
+          text: '百度云'
+        },
+        TENCENTCOS: {
+          type: 'TENCENTCOS',
+          text: '腾讯云'
+        },
+        HUAWEIOBS: {
+          type: 'HUAWEIOBS',
+          text: '华为云'
+        },
+        MINIO: {
+          type: 'MINIO',
+          text: 'MinIO'
+        }
+      },
       detailVisible: false,
       attachmentDrawerVisible: false,
       uploadVisible: false,
@@ -109,7 +145,7 @@ export default {
       },
       attachments: [],
       selectedAttachment: {},
-      uploadHandler: attachmentApi.upload
+      uploadHandler: apiClient.attachment.upload
     }
   },
   computed: {

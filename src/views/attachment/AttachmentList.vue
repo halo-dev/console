@@ -141,9 +141,47 @@
 import { mixin, mixinDevice } from '@/mixins/mixin.js'
 import { PageView } from '@/layouts'
 import AttachmentDetailModal from './components/AttachmentDetailModal.vue'
-import attachmentApi from '@/api/attachment'
 import apiClient from '@/utils/api-client'
 import { mapGetters } from 'vuex'
+
+const attachmentType = {
+  LOCAL: {
+    type: 'LOCAL',
+    text: '本地'
+  },
+  SMMS: {
+    type: 'SMMS',
+    text: 'SM.MS'
+  },
+  UPOSS: {
+    type: 'UPOSS',
+    text: '又拍云'
+  },
+  QINIUOSS: {
+    type: 'QINIUOSS',
+    text: '七牛云'
+  },
+  ALIOSS: {
+    type: 'ALIOSS',
+    text: '阿里云'
+  },
+  BAIDUBOS: {
+    type: 'BAIDUBOS',
+    text: '百度云'
+  },
+  TENCENTCOS: {
+    type: 'TENCENTCOS',
+    text: '腾讯云'
+  },
+  HUAWEIOBS: {
+    type: 'HUAWEIOBS',
+    text: '华为云'
+  },
+  MINIO: {
+    type: 'MINIO',
+    text: 'MinIO'
+  }
+}
 
 export default {
   components: {
@@ -153,7 +191,7 @@ export default {
   mixins: [mixin, mixinDevice],
   filters: {
     typeText(type) {
-      return attachmentApi.type[type].text
+      return attachmentType[type].text
     }
   },
   data() {
@@ -185,7 +223,7 @@ export default {
       },
 
       upload: {
-        handler: attachmentApi.upload,
+        handler: apiClient.attachment.upload,
         visible: false
       },
 

@@ -6,14 +6,14 @@
           <a-row :gutter="48">
             <a-col :md="6" :sm="24">
               <a-form-item label="关键词：">
-                <a-input v-model="queryParam.keyword" @keyup.enter="handleQuery()" />
+                <a-input v-model="list.params.keyword" @keyup.enter="handleQuery()" />
               </a-form-item>
             </a-col>
             <a-col :md="6" :sm="24">
               <a-form-item label="评论状态：">
-                <a-select v-model="queryParam.status" allowClear placeholder="请选择评论状态" @change="handleQuery()">
-                  <a-select-option v-for="status in Object.keys(commentStatus)" :key="status" :value="status"
-                    >{{ commentStatus[status].text }}
+                <a-select v-model="list.params.status" allowClear placeholder="请选择评论状态" @change="handleQuery()">
+                  <a-select-option v-for="status in Object.keys(commentStatus)" :key="status" :value="status">
+                    {{ commentStatus[status].text }}
                   </a-select-option>
                 </a-select>
               </a-form-item>
@@ -32,19 +32,19 @@
       </div>
 
       <div class="table-operator">
-        <a-dropdown v-show="queryParam.status != null && queryParam.status !== '' && !isMobile()">
+        <a-dropdown v-show="list.params.status != null && list.params.status !== '' && !isMobile()">
           <a-menu slot="overlay">
-            <a-menu-item v-if="queryParam.status === 'AUDITING'" key="1">
+            <a-menu-item v-if="list.params.status === 'AUDITING'" key="1">
               <a href="javascript:void(0);" @click="handleEditStatusMore(commentStatus.PUBLISHED.value)">
                 通过
               </a>
             </a-menu-item>
-            <a-menu-item v-if="queryParam.status === 'PUBLISHED' || queryParam.status === 'AUDITING'" key="2">
+            <a-menu-item v-if="list.params.status === 'PUBLISHED' || list.params.status === 'AUDITING'" key="2">
               <a href="javascript:void(0);" @click="handleEditStatusMore(commentStatus.RECYCLE.value)">
                 移到回收站
               </a>
             </a-menu-item>
-            <a-menu-item v-if="queryParam.status === 'RECYCLE'" key="3">
+            <a-menu-item v-if="list.params.status === 'RECYCLE'" key="3">
               <a href="javascript:void(0);" @click="handleDeleteMore">
                 永久删除
               </a>
@@ -61,7 +61,7 @@
         <a-list
           v-if="isMobile()"
           :dataSource="formattedComments"
-          :loading="loading"
+          :loading="list.loading"
           :pagination="false"
           itemLayout="vertical"
           size="large"
@@ -143,8 +143,9 @@
               >
                 <a-icon v-if="item.isAdmin" style="margin-right: 3px;" type="user" />&nbsp;{{ item.author }}&nbsp;<small
                   style="color:rgba(0, 0, 0, 0.45)"
-                  >{{ item.createTime | timeAgo }}</small
                 >
+                  {{ item.createTime | timeAgo }}
+                </small>
               </span>
             </a-list-item-meta>
             <p v-html="item.content"></p>
@@ -155,7 +156,7 @@
           v-else
           :columns="columns"
           :dataSource="formattedComments"
-          :loading="loading"
+          :loading="list.loading"
           :pagination="false"
           :rowKey="comment => comment.id"
           :rowSelection="{
@@ -174,12 +175,12 @@
           <span slot="status" slot-scope="statusProperty">
             <a-badge :status="statusProperty.status" :text="statusProperty.text" />
           </span>
-          <a v-if="type === 'posts'" slot="post" slot-scope="post" :href="post.fullPath" target="_blank">{{
-            post.title
-          }}</a>
-          <a v-if="type === 'sheets'" slot="sheet" slot-scope="sheet" :href="sheet.fullPath" target="_blank">{{
-            sheet.title
-          }}</a>
+          <a v-if="type === 'posts'" slot="post" slot-scope="post" :href="post.fullPath" target="_blank">
+            {{ post.title }}
+          </a>
+          <a v-if="type === 'sheets'" slot="sheet" slot-scope="sheet" :href="sheet.fullPath" target="_blank">
+            {{ sheet.title }}
+          </a>
           <span slot="createTime" slot-scope="createTime">
             <a-tooltip placement="top">
               <template slot="title">
@@ -201,9 +202,9 @@
               </a-menu>
             </a-dropdown>
 
-            <a v-else-if="record.status === 'PUBLISHED'" href="javascript:void(0);" @click="handleReplyClick(record)"
-              >回复</a
-            >
+            <a v-else-if="record.status === 'PUBLISHED'" href="javascript:void(0);" @click="handleReplyClick(record)">
+              回复
+            </a>
 
             <a-popconfirm
               v-else-if="record.status === 'RECYCLE'"
@@ -247,8 +248,8 @@
             class="pagination"
             showLessItems
             showSizeChanger
-            @change="handlePaginationChange"
-            @showSizeChange="handlePaginationChange"
+            @change="handlePageChange"
+            @showSizeChange="handlePageSizeChange"
           />
         </div>
       </div>
@@ -366,6 +367,27 @@ const sheetColumns = [
     scopedSlots: { customRender: 'action' }
   }
 ]
+
+const commentStatus = {
+  PUBLISHED: {
+    value: 'PUBLISHED',
+    color: 'green',
+    status: 'success',
+    text: '已发布'
+  },
+  AUDITING: {
+    value: 'AUDITING',
+    color: 'yellow',
+    status: 'warning',
+    text: '待审核'
+  },
+  RECYCLE: {
+    value: 'RECYCLE',
+    color: 'red',
+    status: 'error',
+    text: '回收站'
+  }
+}
 export default {
   name: 'CommentTab',
   mixins: [mixin, mixinDevice],
@@ -381,49 +403,28 @@ export default {
   },
   data() {
     return {
-      columns: this.type === 'posts' ? postColumns : sheetColumns,
+      commentStatus,
       replyCommentVisible: false,
-      pagination: {
-        page: 1,
-        size: 10,
-        sort: null,
-        total: 1
-      },
-      queryParam: {
-        page: 0,
-        size: 10,
-        sort: null,
-        keyword: null,
-        status: null
+
+      list: {
+        data: [],
+        loading: false,
+        total: 0,
+        hasPrevious: false,
+        hasNext: false,
+        params: {
+          page: 0,
+          size: 10,
+          keyword: null,
+          status: null
+        }
       },
       selectedRowKeys: [],
       selectedRows: [],
-      comments: [],
       selectedComment: {},
       replyComment: {},
       replyCommentRules: {
         content: [{ required: true, message: '* 内容不能为空', trigger: ['change'] }]
-      },
-      loading: false,
-      commentStatus: {
-        PUBLISHED: {
-          value: 'PUBLISHED',
-          color: 'green',
-          status: 'success',
-          text: '已发布'
-        },
-        AUDITING: {
-          value: 'AUDITING',
-          color: 'yellow',
-          status: 'warning',
-          text: '待审核'
-        },
-        RECYCLE: {
-          value: 'RECYCLE',
-          color: 'red',
-          status: 'error',
-          text: '回收站'
-        }
       },
       replying: false,
       replyErrored: false
@@ -434,34 +435,43 @@ export default {
   },
   computed: {
     formattedComments() {
-      return this.comments.map(comment => {
+      return this.list.data.map(comment => {
         comment.statusProperty = this.commentStatus[comment.status]
         comment.content = marked(comment.content)
         return comment
       })
+    },
+    pagination() {
+      return {
+        page: this.list.params.page + 1,
+        size: this.list.params.size,
+        total: this.list.total
+      }
+    },
+    columns() {
+      return this.type === 'posts' ? postColumns : sheetColumns
     }
   },
   methods: {
-    handleListComments() {
-      this.loading = true
-      this.queryParam.page = this.pagination.page - 1
-      this.queryParam.size = this.pagination.size
-      this.queryParam.sort = this.pagination.sort
-      apiClient.comment
-        .list(this.type, this.queryParam)
-        .then(response => {
-          this.comments = response.data.content
-          this.pagination.total = response.data.total
-        })
-        .finally(() => {
-          setTimeout(() => {
-            this.loading = false
-          }, 200)
-        })
+    async handleListComments() {
+      try {
+        this.list.loading = true
+
+        const response = await apiClient.comment.list(this.type, this.list.params)
+
+        this.list.data = response.data.content
+        this.list.total = response.data.total
+        this.list.hasPrevious = response.data.hasPrevious
+        this.list.hasNext = response.data.hasNext
+      } catch (e) {
+        this.$log.error(e)
+      } finally {
+        this.list.loading = false
+      }
     },
     handleQuery() {
       this.handleClearRowKeys()
-      this.handlePaginationChange(1, this.pagination.size)
+      this.handlePageChange(1)
     },
     handleEditStatusClick(commentId, status) {
       apiClient.comment
@@ -528,17 +538,30 @@ export default {
         this.handleListComments()
       }
     },
-    handlePaginationChange(page, pageSize) {
-      this.$log.debug(`Current: ${page}, PageSize: ${pageSize}`)
-      this.pagination.page = page
-      this.pagination.size = pageSize
+
+    /**
+     * Handle page change
+     */
+    handlePageChange(page = 1) {
+      this.list.params.page = page - 1
       this.handleListComments()
     },
+
+    /**
+     * Handle page size change
+     */
+    handlePageSizeChange(current, size) {
+      this.$log.debug(`Current: ${current}, PageSize: ${size}`)
+      this.list.params.page = 0
+      this.list.params.size = size
+      this.handleListComments()
+    },
+
     handleResetParam() {
-      this.queryParam.keyword = null
-      this.queryParam.status = null
+      this.list.params.keyword = null
+      this.list.params.status = null
       this.handleClearRowKeys()
-      this.handlePaginationChange(1, this.pagination.size)
+      this.handlePageChange(1)
     },
     handleEditStatusMore(status) {
       if (this.selectedRowKeys.length <= 0) {
@@ -585,7 +608,7 @@ export default {
     getCheckboxProps(comment) {
       return {
         props: {
-          disabled: this.queryParam.status == null || this.queryParam.status === '',
+          disabled: this.list.params.status == null || this.list.params.status === '',
           name: comment.author
         }
       }
