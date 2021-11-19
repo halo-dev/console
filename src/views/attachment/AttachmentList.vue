@@ -142,6 +142,7 @@ import { mixin, mixinDevice } from '@/mixins/mixin.js'
 import { PageView } from '@/layouts'
 import AttachmentDetailModal from './components/AttachmentDetailModal.vue'
 import attachmentApi from '@/api/attachment'
+import apiClient from '@/utils/api-client'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -240,12 +241,12 @@ export default {
       try {
         this.list.loading = true
 
-        const response = await attachmentApi.query(this.list.params)
+        const response = await apiClient.attachment.list(this.list.params)
 
-        this.list.data = response.data.data.content
-        this.list.total = response.data.data.total
-        this.list.hasNext = response.data.data.hasNext
-        this.list.hasPrevious = response.data.data.hasPrevious
+        this.list.data = response.data.content
+        this.list.total = response.data.total
+        this.list.hasNext = response.data.hasNext
+        this.list.hasPrevious = response.data.hasPrevious
       } catch (error) {
         this.$log.error(error)
       } finally {
@@ -260,9 +261,9 @@ export default {
       try {
         this.mediaTypes.loading = true
 
-        const response = await attachmentApi.getMediaTypes()
+        const response = await apiClient.attachment.listMediaTypes()
 
-        this.mediaTypes.data = response.data.data
+        this.mediaTypes.data = response.data
       } catch (error) {
         this.$log.error(error)
       } finally {
@@ -277,9 +278,9 @@ export default {
       try {
         this.types.loading = true
 
-        const response = await attachmentApi.getTypes()
+        const response = await apiClient.attachment.listTypes()
 
-        this.types.data = response.data.data
+        this.types.data = response.data
       } catch (error) {
         this.$log.error(error)
       } finally {
@@ -343,8 +344,8 @@ export default {
                 okText: '确定',
                 cancelText: '取消',
                 onOk: async () => {
-                  await attachmentApi.delete(item.id)
-                  this.handleListAttachments()
+                  await apiClient.attachment.delete(item.id)
+                  await this.handleListAttachments()
                 }
               })
             }
@@ -443,7 +444,7 @@ export default {
         title: '确定要批量删除选中的附件吗?',
         content: '一旦删除不可恢复，请谨慎操作',
         onOk() {
-          attachmentApi
+          apiClient.attachment
             .deleteInBatch(that.batchSelectedAttachments)
             .then(() => {
               that.handleCancelMultipleSelection()

@@ -43,7 +43,6 @@
 </template>
 
 <script>
-import commentApi from '@/api/comment'
 import apiClient from '@/utils/api-client'
 
 import marked from 'marked'
@@ -80,8 +79,8 @@ export default {
   methods: {
     handleListTargetComments() {
       this.loading = true
-      commentApi
-        .latestComment(this.type, 5, 'PUBLISHED')
+      apiClient.comment
+        .latest(this.type, 5, 'PUBLISHED')
         .then(response => {
           this.comments = response.data.data
         })
