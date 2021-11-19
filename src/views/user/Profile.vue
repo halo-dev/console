@@ -400,7 +400,7 @@ export default {
           apiClient.user
             .updateProfile(this.userForm.model)
             .then(response => {
-              this.userForm.model = response.data.data
+              this.userForm.model = response.data
               this.setUser(Object.assign({}, this.userForm.model))
             })
             .catch(() => {

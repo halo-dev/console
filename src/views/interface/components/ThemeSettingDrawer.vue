@@ -222,7 +222,7 @@ export default {
       apiClient.theme
         .listSettings(this.theme.id)
         .then(response => {
-          this.themeSettings = response.data.data
+          this.themeSettings = response.data
         })
         .finally(() => {
           setTimeout(() => {

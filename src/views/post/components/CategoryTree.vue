@@ -12,8 +12,38 @@
 </template>
 
 <script>
-import categoryApi from '@/api/category'
 import apiClient from '@/utils/api-client'
+
+function concreteTree(parentCategory, categories) {
+  categories.forEach(category => {
+    if (parentCategory.key === category.parentId) {
+      if (!parentCategory.children) {
+        parentCategory.children = []
+      }
+      parentCategory.children.push({
+        key: category.id,
+        title: category.name,
+        isLeaf: false
+      })
+    }
+  })
+
+  if (parentCategory.children) {
+    parentCategory.children.forEach(category => concreteTree(category, categories))
+  } else {
+    parentCategory.isLeaf = true
+  }
+}
+
+function getConcreteTree(categories) {
+  const topCategoryNode = {
+    key: 0,
+    title: 'top',
+    children: []
+  }
+  concreteTree(topCategoryNode, categories)
+  return topCategoryNode.children
+}
 
 export default {
   name: 'CategoryTree',
@@ -41,7 +71,7 @@ export default {
       if (!this.categories.data.length) {
         return []
       }
-      return categoryApi.concreteTree(this.categories.data)
+      return getConcreteTree(this.categories.data)
     }
   },
   created() {
@@ -54,7 +84,7 @@ export default {
 
         const { data } = await apiClient.category.list({ sort: [], more: false })
 
-        this.categories.data = data.data
+        this.categories.data = data
       } catch (error) {
         this.$log.error(error)
       } finally {

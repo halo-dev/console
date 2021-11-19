@@ -366,7 +366,7 @@ export default {
             }
           })
           .then(response => {
-            this.selectedSheet = response.data.data
+            this.selectedSheet = response.data
           })
           .finally(() => {
             setTimeout(() => {
