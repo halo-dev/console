@@ -92,9 +92,9 @@ export default {
       this.refreshUserCache()
       this.refreshOptionsCache()
       if (this.$route.query.redirect) {
-        this.$router.replace(this.$route.query.redirect)
+        this.$router.push(this.$route.query.redirect)
       } else {
-        this.$router.replace({ name: 'Dashboard' })
+        this.$router.push({ name: 'Dashboard' })
       }
     },
     handleModifyApiUrl() {

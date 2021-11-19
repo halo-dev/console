@@ -5,7 +5,7 @@ specifiers:
   '@codemirror/basic-setup': ^0.19.0
   '@codemirror/lang-html': ^0.19.3
   '@codemirror/lang-java': ^0.19.1
-  '@halo-dev/admin-api': ^1.0.0-alpha.17
+  '@halo-dev/admin-api': ^1.0.0-alpha.18
   '@vue/cli-plugin-babel': ^3.12.1
   '@vue/cli-plugin-eslint': ^4.5.15
   '@vue/cli-plugin-unit-jest': ^4.5.15
@@ -18,6 +18,7 @@ specifiers:
   babel-eslint: ^10.1.0
   babel-jest: ^26.6.3
   babel-plugin-import: ^1.13.3
+  crypto-js: ^4.1.1
   dayjs: ^1.10.7
   enquire.js: ^2.1.6
   eslint: ^6.8.0
@@ -54,9 +55,10 @@ dependencies:
   '@codemirror/basic-setup': 0.19.0
   '@codemirror/lang-html': 0.19.3
   '@codemirror/lang-java': 0.19.1
-  '@halo-dev/admin-api': 1.0.0-alpha.17
+  '@halo-dev/admin-api': 1.0.0-alpha.18
   ant-design-vue: 1.7.8_9065e7474e033a8e4b95615fc8e6c36c
   axios: 0.21.4
+  crypto-js: 4.1.1
   dayjs: 1.10.7
   enquire.js: 2.1.6
   filepond: 4.30.3
@@ -1348,27 +1350,27 @@ packages:
       purgecss: 2.3.0
     dev: true
 
-  /@halo-dev/admin-api/1.0.0-alpha.17:
-    resolution: {integrity: sha512-CfXbNF6uM0hdzTJW64ckcm3M8+f/AYpQemKsoBLs2yhQq5LdE0zbusy7ST1mWYBOrtqvxD58tqzcxQmqFz9tMQ==}
+  /@halo-dev/admin-api/1.0.0-alpha.18:
+    resolution: {integrity: sha512-j4xl1J60p2h448NlCHN8glAQc/RKnGqvyzdFVF4X/9NusrFGdKqTlXeLypPRieA3o/wjHD9Bwmu6HGE1oLjGxg==}
     engines: {node: '>=12'}
     dependencies:
-      '@halo-dev/rest-api-client': 1.0.0-alpha.17
+      '@halo-dev/rest-api-client': 1.0.0-alpha.18
     transitivePeerDependencies:
       - debug
     dev: false
 
-  /@halo-dev/logger/1.0.0-alpha.17:
-    resolution: {integrity: sha512-5shS48tZbNkxBEGPti5wyBZ5KFjus5tke8o3Vr44V67bKHUY4rk2OuKercL4Szw6+F/S5j6CRn0BONiTD3ieUA==}
+  /@halo-dev/logger/1.0.0-alpha.18:
+    resolution: {integrity: sha512-8PS22HzjHv2dk4tIdGeeu3OBeCRmI3OQ88wnFY+z5TWyUWwNp/OBigYH0ZW66ShQEtZQ7smpsja34IpiFXcghg==}
     engines: {node: '>=12.0.0'}
     dependencies:
       tslib: 2.3.1
     dev: false
 
-  /@halo-dev/rest-api-client/1.0.0-alpha.17:
-    resolution: {integrity: sha512-JSSM3TF2oz8OqnR0nuZP4m/z8SQ6tL8U+fZZYGn2jQrysUmm+nE6rX8/pOry9psfHEtFwM0t/+h4p7hgX8c/XQ==}
+  /@halo-dev/rest-api-client/1.0.0-alpha.18:
+    resolution: {integrity: sha512-3JK5fxFjzuanoA9gBRlrsnw1rww9tC2g1/1y7kIwnC2FAc1V0bdpnclNhuPKL7bhFP6pAcKfZiuXHRU482PAYA==}
     engines: {node: '>=12'}
     dependencies:
-      '@halo-dev/logger': 1.0.0-alpha.17
+      '@halo-dev/logger': 1.0.0-alpha.18
       axios: 0.20.0
       form-data: 4.0.0
       js-base64: 3.7.2
@@ -4165,6 +4167,10 @@ packages:
       randombytes: 2.1.0
       randomfill: 1.0.4
     dev: true
+
+  /crypto-js/4.1.1:
+    resolution: {integrity: sha512-o2JlM7ydqd3Qk9CA0L4NL6mTzU2sdx96a+oOfPu8Mkl/PK51vSyoi8/rQ8NknZtk44vq15lmhAj9CIAGwgeWKw==}
+    dev: false
 
   /css-color-names/0.0.4:
     resolution: {integrity: sha1-gIrcLnnPhHOAabZGyyDsJ762KeA=}

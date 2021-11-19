@@ -36,8 +36,9 @@
   </div>
 </template>
 <script>
-import adminApi from '@/api/admin'
 import { mapActions } from 'vuex'
+import apiClient, { doAuthorize } from '@/utils/api-client'
+import store from '@/store'
 
 export default {
   name: 'LoginForm',
@@ -78,10 +79,13 @@ export default {
       _this.$refs.loginForm.validate(valid => {
         if (valid) {
           _this.form.logging = true
-          adminApi
-            .loginPreCheck(_this.form.model.username, _this.form.model.password)
+          apiClient
+            .needMFACode({
+              username: _this.form.model.username,
+              password: _this.form.model.password
+            })
             .then(response => {
-              const data = response.data.data
+              const data = response.data
               if (data && data.needMFACode) {
                 _this.form.needAuthCode = true
                 _this.form.model.authcode = null
@@ -102,10 +106,13 @@ export default {
       _this.$refs.loginForm.validate(valid => {
         if (valid) {
           _this.form.logging = true
-          _this
-            .login(_this.form.model)
-            .then(() => {
+          doAuthorize(_this.form.model)
+            .then(response => {
+              store.commit('SET_TOKEN', response)
               _this.$emit('success')
+            })
+            .catch(e => {
+              console.log(e)
             })
             .finally(() => {
               setTimeout(() => {
