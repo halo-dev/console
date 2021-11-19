@@ -82,12 +82,10 @@ export default {
       apiClient.comment
         .latest(this.type, 5, 'PUBLISHED')
         .then(response => {
-          this.comments = response.data.data
+          this.comments = response.data
         })
         .finally(() => {
-          setTimeout(() => {
-            this.loading = false
-          }, 200)
+          this.loading = false
         })
     },
     handlePostPreview(postId) {

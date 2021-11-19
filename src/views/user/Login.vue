@@ -1,12 +1,12 @@
 <template>
   <div class="container-wrapper animated fadeIn">
     <div class="halo-logo">
-      <img src="/images/logo.svg" alt="Halo Logo" />
+      <img alt="Halo Logo" src="/images/logo.svg" />
       <span v-if="apiForm.visible">API 设置</span>
     </div>
     <div v-show="!apiForm.visible" class="login-form">
       <LoginForm @success="onLoginSucceed" />
-      <router-link v-if="resetPasswordButtonVisible" class="tip" :to="{ name: 'ResetPassword' }">
+      <router-link v-if="resetPasswordButtonVisible" :to="{ name: 'ResetPassword' }" class="tip">
         找回密码
       </router-link>
       <a class="tip" @click="handleToggleShowApiForm">
@@ -39,10 +39,10 @@
 </template>
 
 <script>
-import adminApi from '@/api/admin'
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 import LoginForm from '@/components/Login/LoginForm'
+import apiClient from '@/utils/api-client'
 
 export default {
   components: {
@@ -82,8 +82,8 @@ export default {
       }
     },
     async handleVerifyIsInstall() {
-      const response = await adminApi.isInstalled()
-      if (!response.data.data) {
+      const response = await apiClient.isInstalled()
+      if (!response.data) {
         await this.$router.push({ name: 'Install' })
       }
     },
