@@ -111,9 +111,6 @@ export default {
               store.commit('SET_TOKEN', response)
               _this.$emit('success')
             })
-            .catch(e => {
-              console.log(e)
-            })
             .finally(() => {
               setTimeout(() => {
                 _this.form.logging = false
