@@ -206,9 +206,9 @@ export default {
         params: {
           page: 0,
           size: 18,
-          keyword: null,
-          mediaType: null,
-          attachmentType: null
+          keyword: undefined,
+          mediaType: undefined,
+          attachmentType: undefined
         }
       },
 
@@ -417,9 +417,9 @@ export default {
      * Reset query params
      */
     handleResetParam() {
-      this.list.params.keyword = null
-      this.list.params.mediaType = null
-      this.list.params.attachmentType = null
+      this.list.params.keyword = undefined
+      this.list.params.mediaType = undefined
+      this.list.params.attachmentType = undefined
       this.handlePageChange()
       this.handleListMediaTypes()
       this.handleListTypes()

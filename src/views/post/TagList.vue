@@ -133,9 +133,7 @@ export default {
           this.list.data = response.data
         })
         .finally(() => {
-          setTimeout(() => {
-            this.list.loading = false
-          }, 200)
+          this.list.loading = false
         })
     },
     handleDeleteTag(tagId) {

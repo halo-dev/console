@@ -360,9 +360,7 @@ export default {
           this.mfaParam.mfaType = this.userForm.model.mfaType && this.userForm.model.mfaType
         })
         .finally(() => {
-          setTimeout(() => {
-            this.statistics.loading = false
-          }, 200)
+          this.statistics.loading = false
         })
     },
     handleUpdatePassword() {

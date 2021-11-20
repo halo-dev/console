@@ -234,9 +234,7 @@ export default {
           this.handleListMenus()
         })
         .finally(() => {
-          setTimeout(() => {
-            this.teams.loading = false
-          }, 200)
+          this.teams.loading = false
         })
     },
     handleListMenus() {
@@ -248,9 +246,7 @@ export default {
           this.list.data = response.data
         })
         .finally(() => {
-          setTimeout(() => {
-            this.list.loading = false
-          }, 200)
+          this.list.loading = false
         })
     },
     handleMenuMoved(pid, menus) {

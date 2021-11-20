@@ -243,9 +243,7 @@ export default {
           this.sheet.independents = response[3].data
         })
         .finally(() => {
-          setTimeout(() => {
-            this.loading = false
-          }, 200)
+          this.loading = false
         })
     },
     handleListSheets() {

@@ -30,7 +30,7 @@ async function refreshToken(error) {
   const refreshToken = store.getters.token.refresh_token
   try {
     if (refreshTask === null) {
-      refreshTask = store.dispatch('refreshToken', refreshToken)
+      // refreshTask = store.dispatch('refreshToken', refreshToken)
     }
 
     await refreshTask

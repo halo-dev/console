@@ -231,9 +231,7 @@ export default {
           this.pagination.total = response.data.total
         })
         .finally(() => {
-          setTimeout(() => {
-            this.loading = false
-          }, 200)
+          this.loading = false
         })
     },
     handleQuery() {

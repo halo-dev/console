@@ -308,9 +308,7 @@ export default {
           this.customTpls = response.data
         })
         .finally(() => {
-          setTimeout(() => {
-            this.customTplsLoading = false
-          }, 200)
+          this.customTplsLoading = false
         })
     },
     handleSelectSheetThumb(data) {

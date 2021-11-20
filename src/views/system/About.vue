@@ -171,9 +171,7 @@ User Agent：${navigator.userAgent}`
           _this.$log.error('Fetch contributors error', error)
         })
         .finally(() => {
-          setTimeout(() => {
-            _this.contributorsLoading = false
-          }, 200)
+          _this.contributorsLoading = false
         })
     },
     checkServerUpdate() {
@@ -220,9 +218,7 @@ User Agent：${navigator.userAgent}`
           this.$log.error('Check update fail', error)
         })
         .finally(() => {
-          setTimeout(() => {
-            this.checking = false
-          }, 200)
+          this.checking = false
         })
     },
     handleShowVersionContent() {

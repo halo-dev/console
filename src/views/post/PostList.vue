@@ -496,9 +496,9 @@ export default {
         params: {
           page: 0,
           size: 10,
-          keyword: null,
-          categoryId: null,
-          status: null
+          keyword: undefined,
+          categoryId: undefined,
+          status: undefined
         }
       },
 
@@ -645,9 +645,9 @@ export default {
      * Reset query params
      */
     handleResetParam() {
-      this.list.params.keyword = null
-      this.list.params.categoryId = null
-      this.list.params.status = null
+      this.list.params.keyword = undefined
+      this.list.params.categoryId = undefined
+      this.list.params.status = undefined
       this.handleClearRowKeys()
       this.handlePageChange(1)
       this.handleListCategories()

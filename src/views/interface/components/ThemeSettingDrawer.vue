@@ -225,9 +225,7 @@ export default {
           this.themeSettings = response.data
         })
         .finally(() => {
-          setTimeout(() => {
-            this.settingLoading = false
-          }, 200)
+          this.settingLoading = false
         })
     },
     handleSaveSettings() {
