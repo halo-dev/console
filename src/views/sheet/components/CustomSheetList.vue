@@ -201,7 +201,7 @@
       <a-pagination
         :current="pagination.page"
         :defaultPageSize="pagination.size"
-        :pageSizeOptions="['1', '2', '5', '10', '20', '50', '100']"
+        :pageSizeOptions="['10', '20', '50', '100']"
         :total="pagination.total"
         class="pagination"
         showLessItems

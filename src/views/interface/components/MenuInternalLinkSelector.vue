@@ -83,7 +83,7 @@
                   <a-pagination
                     :current="sheet.customs.pagination.page"
                     :defaultPageSize="sheet.customs.pagination.size"
-                    :pageSizeOptions="['1', '2', '5', '10', '20', '50', '100']"
+                    :pageSizeOptions="['10', '20', '50', '100']"
                     :total="sheet.customs.pagination.total"
                     class="pagination"
                     showLessItems

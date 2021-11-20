@@ -16,7 +16,7 @@ const buildTokenProvider = credentials => {
 }
 
 if (localStorageCredentials) {
-  const tokenProvider = buildTokenProvider(localStorageTokenStore)
+  const tokenProvider = buildTokenProvider(localStorageCredentials)
   haloRestApiClient.setTokenProvider(tokenProvider)
 }
 
