@@ -302,7 +302,7 @@ export default {
         this.form[status === 'PUBLISHED' ? 'saving' : 'draftSaving'] = true
 
         if (id) {
-          await apiClient.post.update(id, { post: this.form.model, autoSave: false })
+          await apiClient.post.update(id, this.form.model)
         } else {
           await apiClient.post.create(this.form.model)
         }

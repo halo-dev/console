@@ -146,7 +146,7 @@ export default {
             })
         } else {
           apiClient.post
-            .update(this.postToStage.id, { post: this.postToStage, autoSave: false })
+            .update(this.postToStage.id, this.postToStage)
             .then(response => {
               this.postToStage = response.data
               this.handleRestoreSavedStatus()
@@ -186,7 +186,7 @@ export default {
       this.previewSaving = true
       if (this.postToStage.id) {
         // Update the post
-        apiClient.post.update(this.postToStage.id, { post: this.postToStage, autoSave: false }).then(response => {
+        apiClient.post.update(this.postToStage.id, this.postToStage).then(response => {
           this.$log.debug('Updated post', response.data)
           apiClient.post
             .getPreviewLinkById(this.postToStage.id)

@@ -339,7 +339,7 @@ export default {
       }
       if (this.selectedSheet.id) {
         apiClient.sheet
-          .update(this.selectedSheet.id, this.selectedSheet, false)
+          .update(this.selectedSheet.id, this.selectedSheet)
           .catch(() => {
             if (this.selectedSheet.status === 'DRAFT') {
               this.draftSaveErrored = true

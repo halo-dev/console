@@ -157,7 +157,7 @@ export default {
             })
         } else {
           apiClient.sheet
-            .update(this.sheetToStage.id, this.sheetToStage, false)
+            .update(this.sheetToStage.id, this.sheetToStage)
             .then(response => {
               this.sheetToStage = response.data
               this.handleRestoreSavedStatus()
@@ -195,7 +195,7 @@ export default {
       }
       this.previewSaving = true
       if (this.sheetToStage.id) {
-        apiClient.sheet.update(this.sheetToStage.id, this.sheetToStage, false).then(response => {
+        apiClient.sheet.update(this.sheetToStage.id, this.sheetToStage).then(response => {
           this.$log.debug('Updated sheet', response.data)
           apiClient.sheet
             .getPreviewLinkById(this.sheetToStage.id)
