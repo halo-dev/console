@@ -16,13 +16,6 @@ adminApi.login = (username, password, authcode) => {
   })
 }
 
-adminApi.logout = () => {
-  return service({
-    url: `${baseUrl}/logout`,
-    method: 'post'
-  })
-}
-
 adminApi.refreshToken = refreshToken => {
   return service({
     url: `${baseUrl}/refresh/${refreshToken}`,

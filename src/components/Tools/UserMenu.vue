@@ -41,6 +41,7 @@
 <script>
 import HeaderComment from './HeaderComment'
 import { mapActions, mapGetters } from 'vuex'
+import apiClient, { haloRestApiClient } from '@/utils/api-client'
 
 export default {
   name: 'UserMenu',
@@ -51,27 +52,26 @@ export default {
     ...mapGetters(['user', 'options'])
   },
   methods: {
-    ...mapActions(['logout', 'ToggleLayoutSetting']),
+    ...mapActions(['ToggleLayoutSetting']),
     handleLogout() {
-      const that = this
+      const _this = this
 
       this.$confirm({
         title: '提示',
         content: '确定要注销登录吗 ?',
-        onOk() {
-          return that
-            .logout({})
-            .then(() => {
-              window.location.reload()
+        onOk: async () => {
+          try {
+            await apiClient.logout()
+            haloRestApiClient.getTokenProvider().clearToken()
+            window.location.reload()
+          } catch (e) {
+            _this.$log.err(e)
+            _this.$message.error({
+              title: '错误',
+              description: e.message
             })
-            .catch(err => {
-              that.$message.error({
-                title: '错误',
-                description: err.message
-              })
-            })
-        },
-        onCancel() {}
+          }
+        }
       })
     },
     handleShowLayoutSetting() {

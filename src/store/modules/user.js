@@ -49,19 +49,6 @@ const user = {
           })
       })
     },
-    logout({ commit }) {
-      return new Promise(resolve => {
-        adminApi
-          .logout()
-          .then(() => {
-            commit('CLEAR_TOKEN')
-            resolve()
-          })
-          .catch(() => {
-            resolve()
-          })
-      })
-    },
     refreshToken({ commit }, refreshToken) {
       return new Promise((resolve, reject) => {
         adminApi
