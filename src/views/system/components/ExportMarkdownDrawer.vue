@@ -110,7 +110,7 @@ export default {
     handleExportClick(needFrontMatter = false) {
       this.backuping = true
       apiClient.backup
-        .backupMarkdown(needFrontMatter)
+        .backupMarkdown({ needFrontMatter })
         .catch(() => {
           this.backupErrored = true
         })

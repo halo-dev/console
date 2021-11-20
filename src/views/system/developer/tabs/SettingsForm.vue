@@ -25,7 +25,7 @@ export default {
   name: 'SettingsForm',
   data() {
     return {
-      options: [],
+      options: {},
       wrapperCol: {
         xl: { span: 8 },
         lg: { span: 8 },
@@ -41,28 +41,31 @@ export default {
   },
   methods: {
     ...mapActions(['refreshOptionsCache']),
-    handleListOptions() {
-      apiClient.option.list().then(response => {
-        this.options = response.data
-      })
+    async handleListOptions() {
+      try {
+        const { data } = await apiClient.option.listAsMapViewByKeys(['developer_mode'])
+        this.options = data
+      } catch (e) {
+        this.$log.error(e)
+      }
     },
-    handleSaveOptions() {
-      this.saving = true
-      apiClient.option
-        .save(this.options)
-        .catch(() => {
-          this.errored = false
-        })
-        .finally(() => {
-          setTimeout(() => {
-            this.saving = false
-          }, 400)
-          this.handleListOptions()
-          this.refreshOptionsCache()
-          if (!this.options.developer_mode) {
-            this.$router.push({ name: 'ToolList' })
-          }
-        })
+    async handleSaveOptions() {
+      try {
+        this.saving = true
+        await apiClient.option.saveMapView(this.options)
+      } catch (e) {
+        this.errored = false
+        this.$log.error(e)
+      } finally {
+        setTimeout(() => {
+          this.saving = false
+        }, 400)
+        await this.handleListOptions()
+        await this.refreshOptionsCache()
+        if (!this.options.developer_mode) {
+          await this.$router.replace({ name: 'ToolList' })
+        }
+      }
     }
   }
 }
