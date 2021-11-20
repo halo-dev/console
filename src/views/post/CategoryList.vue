@@ -102,8 +102,9 @@
                   style="max-width: 300px;display: block;white-space: nowrap;overflow: hidden;text-overflow: ellipsis;"
                 >
                   {{ item.name }}{{ item.password ? '（加密）' : '' }}
-                </span> </a-list-item-meta
-              >x
+                </span></a-list-item-meta
+              >
+              x
               <span>
                 {{ item.description }}
               </span>

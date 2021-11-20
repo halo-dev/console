@@ -3,7 +3,7 @@ import router from '@/router'
 import store from '@/store'
 import NProgress from 'nprogress'
 import { domTitle, setDocumentTitle } from '@/utils/domUtil'
-import apiClient from '@/utils/api-client'
+import apiClient, { haloRestApiClient } from '@/utils/api-client'
 
 NProgress.configure({ showSpinner: false, speed: 500 })
 
@@ -16,8 +16,9 @@ router.beforeEach(async (to, from, next) => {
     NProgress.start()
   }, 250)
   to.meta && typeof to.meta.title !== 'undefined' && setDocumentTitle(`${to.meta.title} - ${domTitle}`)
-  Vue.$log.debug('Token', store.getters.token)
-  if (store.getters.token) {
+  const tokenProvider = haloRestApiClient.getTokenProvider()
+  Vue.$log.debug('Token', tokenProvider)
+  if (tokenProvider) {
     if (to.name === 'Install') {
       next()
       return

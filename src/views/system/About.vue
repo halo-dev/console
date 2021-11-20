@@ -163,7 +163,7 @@ User Agent：${navigator.userAgent}`
       const _this = this
       _this.contributorsLoading = true
       axios
-        .get('https://api.github.com/repos/halo-dev/halo/contributors')
+        .get('https://api.github.com/repos/halo-dev/halo/contributors?per_page=100')
         .then(response => {
           _this.contributors = response.data
         })

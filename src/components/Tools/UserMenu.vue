@@ -16,8 +16,8 @@
     </a>
     <header-comment class="action" />
     <a-dropdown>
-      <span class="action ant-dropdown-link user-dropdown-menu" v-if="user">
-        <a-avatar class="avatar" size="small" :src="user.avatar || '//cn.gravatar.com/avatar/?s=256&d=mm'" />
+      <span v-if="user" class="action ant-dropdown-link user-dropdown-menu">
+        <a-avatar :src="user.avatar || '//cn.gravatar.com/avatar/?s=256&d=mm'" class="avatar" size="small" />
       </span>
       <a-menu slot="overlay" class="user-dropdown-menu-wrapper">
         <a-menu-item key="0">
