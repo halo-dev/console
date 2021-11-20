@@ -73,7 +73,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['login', 'refreshUserCache', 'refreshOptionsCache']),
+    ...mapActions(['refreshUserCache', 'refreshOptionsCache']),
     handleLoginClick() {
       const _this = this
       _this.$refs.loginForm.validate(valid => {

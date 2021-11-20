@@ -262,14 +262,15 @@
               color="blue"
               style="margin-bottom: 8px;cursor:pointer"
               @click="handleSelectCategory(category)"
-              >{{ category.name }}</a-tag
             >
+              {{ category.name }}
+            </a-tag>
           </span>
 
           <span slot="tags" slot-scope="tags">
-            <a-tag v-for="(tag, index) in tags" :key="index" color="green" style="margin-bottom: 8px">{{
-              tag.name
-            }}</a-tag>
+            <a-tag v-for="(tag, index) in tags" :key="index" color="green" style="margin-bottom: 8px">
+              {{ tag.name }}
+            </a-tag>
           </span>
 
           <span

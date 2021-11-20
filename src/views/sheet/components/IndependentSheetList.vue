@@ -103,19 +103,19 @@ export default {
     }
   },
   created() {
-    this.loadIndependentSheets()
+    this.handleListIndependentSheets()
   },
   methods: {
-    loadIndependentSheets() {
-      this.loading = true
-      apiClient.sheet
-        .listIndependents()
-        .then(response => {
-          this.independentSheets = response.data
-        })
-        .finally(() => {
-          this.loading = false
-        })
+    async handleListIndependentSheets() {
+      try {
+        const { data } = await apiClient.sheet.listIndependents()
+
+        this.independentSheets = data
+      } catch (e) {
+        this.$log.error(e)
+      } finally {
+        this.loading = false
+      }
     }
   }
 }

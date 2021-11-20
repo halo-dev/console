@@ -49,22 +49,6 @@ const user = {
           })
       })
     },
-    login({ commit }, { username, password, authcode }) {
-      return new Promise((resolve, reject) => {
-        adminApi
-          .login(username, password, authcode)
-          .then(response => {
-            const token = response.data.data
-            Vue.$log.debug('Got token', token)
-            commit('SET_TOKEN', token)
-
-            resolve(response)
-          })
-          .catch(error => {
-            reject(error)
-          })
-      })
-    },
     logout({ commit }) {
       return new Promise(resolve => {
         adminApi

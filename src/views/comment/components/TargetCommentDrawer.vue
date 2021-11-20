@@ -152,13 +152,11 @@ export default {
       apiClient.comment
         .listAsTreeView(this.target, this.id, this.list.queryParam)
         .then(response => {
-          this.list.data = response.data.data.content
-          this.list.pagination.total = response.data.data.total
+          this.list.data = response.data.content
+          this.list.pagination.total = response.data.total
         })
         .finally(() => {
-          setTimeout(() => {
-            this.list.loading = false
-          }, 200)
+          this.list.loading = false
         })
     },
     handlePaginationChange(page, pageSize) {

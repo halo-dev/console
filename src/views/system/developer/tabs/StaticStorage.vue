@@ -245,7 +245,7 @@ export default {
       apiClient.staticStorage
         .list()
         .then(response => {
-          this.list.data = response.data.data
+          this.list.data = response.data
         })
         .finally(() => {
           this.list.loading = false

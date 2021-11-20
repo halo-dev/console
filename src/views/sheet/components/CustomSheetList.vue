@@ -4,7 +4,7 @@
     <a-list
       v-if="isMobile()"
       :dataSource="formattedSheets"
-      :loading="loading"
+      :loading="list.loading"
       :pagination="false"
       itemLayout="vertical"
       size="large"
@@ -101,7 +101,7 @@
       v-else
       :columns="customColumns"
       :dataSource="formattedSheets"
-      :loading="loading"
+      :loading="list.loading"
       :pagination="false"
       :rowKey="sheet => sheet.id"
       :scrollToFirstRowOnChange="true"
@@ -206,8 +206,8 @@
         class="pagination"
         showLessItems
         showSizeChanger
-        @change="handlePaginationChange"
-        @showSizeChange="handlePaginationChange"
+        @change="handlePageChange"
+        @showSizeChange="handlePageSizeChange"
       />
     </div>
     <SheetSettingDrawer
@@ -271,6 +271,25 @@ const customColumns = [
     scopedSlots: { customRender: 'action' }
   }
 ]
+
+const sheetStatus = {
+  PUBLISHED: {
+    color: 'green',
+    status: 'success',
+    text: '已发布'
+  },
+  DRAFT: {
+    color: 'yellow',
+    status: 'warning',
+    text: '草稿'
+  },
+  RECYCLE: {
+    color: 'red',
+    status: 'error',
+    text: '回收站'
+  }
+}
+
 export default {
   name: 'CustomSheetList',
   mixins: [mixin, mixinDevice],
@@ -280,53 +299,39 @@ export default {
   },
   data() {
     return {
-      pagination: {
-        page: 1,
-        size: 10,
-        sort: null,
-        total: 1
-      },
-      queryParam: {
-        page: 0,
-        size: 10,
-        sort: null,
-        keyword: null,
-        categoryId: null,
-        status: null
-      },
-      loading: false,
-      sheetStatus: {
-        PUBLISHED: {
-          color: 'green',
-          status: 'success',
-          text: '已发布'
-        },
-        DRAFT: {
-          color: 'yellow',
-          status: 'warning',
-          text: '草稿'
-        },
-        RECYCLE: {
-          color: 'red',
-          status: 'error',
-          text: '回收站'
+      customColumns,
+      sheetStatus,
+
+      list: {
+        data: [],
+        loading: false,
+        total: 0,
+        hasPrevious: false,
+        hasNext: false,
+        params: {
+          page: 0,
+          size: 10
         }
       },
-      customColumns,
       selectedSheet: {},
       selectedMetas: [],
       sheetSettingVisible: false,
-      sheetCommentVisible: false,
-      sheets: [],
-      menu: {}
+      sheetCommentVisible: false
     }
   },
   computed: {
     formattedSheets() {
-      return this.sheets.map(sheet => {
+      return this.list.data.map(sheet => {
         sheet.statusProperty = this.sheetStatus[sheet.status]
         return sheet
       })
+    },
+    pagination() {
+      return {
+        page: this.list.params.page + 1,
+        size: this.list.params.size,
+        total: this.list.total
+      }
     }
   },
   created() {
@@ -344,24 +349,23 @@ export default {
     next()
   },
   methods: {
-    handleListSheets(enableLoading = true) {
-      if (enableLoading) {
-        this.loading = true
+    async handleListSheets(enableLoading = true) {
+      try {
+        if (enableLoading) {
+          this.list.loading = true
+        }
+
+        const { data } = await apiClient.sheet.list(this.list.params)
+
+        this.list.data = data.content
+        this.list.total = data.total
+        this.list.hasPrevious = data.hasPrevious
+        this.list.hasNext = data.hasNext
+      } catch (e) {
+        this.$log.error(e)
+      } finally {
+        this.list.loading = false
       }
-      this.queryParam.page = this.pagination.page - 1
-      this.queryParam.size = this.pagination.size
-      this.queryParam.sort = this.pagination.sort
-      apiClient.sheet
-        .list(this.queryParam)
-        .then(response => {
-          this.sheets = response.data.content
-          this.pagination.total = response.data.total
-        })
-        .finally(() => {
-          setTimeout(() => {
-            this.loading = false
-          }, 200)
-        })
     },
     handleEditClick(sheet) {
       this.$router.push({ name: 'SheetEdit', query: { sheetId: sheet.id } })
@@ -404,12 +408,25 @@ export default {
         window.open(response.data, '_blank')
       })
     },
-    handlePaginationChange(page, pageSize) {
-      this.$log.debug(`Current: ${page}, PageSize: ${pageSize}`)
-      this.pagination.page = page
-      this.pagination.size = pageSize
+
+    /**
+     * Handle page change
+     */
+    handlePageChange(page = 1) {
+      this.list.params.page = page - 1
       this.handleListSheets()
     },
+
+    /**
+     * Handle page size change
+     */
+    handlePageSizeChange(current, size) {
+      this.$log.debug(`Current: ${current}, PageSize: ${size}`)
+      this.list.params.page = 0
+      this.list.params.size = size
+      this.handleListSheets()
+    },
+
     onSheetSettingsClose() {
       this.sheetSettingVisible = false
       this.selectedSheet = {}
