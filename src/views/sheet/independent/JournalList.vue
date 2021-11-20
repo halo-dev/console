@@ -8,14 +8,14 @@
               <a-row :gutter="48">
                 <a-col :md="6" :sm="24">
                   <a-form-item label="关键词：">
-                    <a-input v-model="list.queryParam.keyword" @keyup.enter="handleQuery()" />
+                    <a-input v-model="list.params.keyword" @keyup.enter="handleQuery()" />
                   </a-form-item>
                 </a-col>
                 <a-col :md="6" :sm="24">
                   <a-form-item label="状态：">
-                    <a-select v-model="list.queryParam.type" placeholder="请选择状态" @change="handleQuery()">
-                      <a-select-option v-for="type in Object.keys(list.journalType)" :key="type" :value="type"
-                        >{{ list.journalType[type].text }}
+                    <a-select v-model="list.params.type" placeholder="请选择状态" @change="handleQuery()">
+                      <a-select-option v-for="type in Object.keys(list.journalType)" :key="type" :value="type">
+                        {{ list.journalType[type].text }}
                       </a-select-option>
                     </a-select>
                   </a-form-item>
@@ -86,15 +86,15 @@
               </a-list-item>
               <div class="page-wrapper">
                 <a-pagination
-                  :current="list.pagination.page"
-                  :defaultPageSize="list.pagination.size"
+                  :current="pagination.page"
+                  :defaultPageSize="pagination.size"
                   :pageSizeOptions="['10', '20', '50', '100']"
-                  :total="list.pagination.total"
+                  :total="pagination.total"
                   class="pagination"
                   showLessItems
                   showSizeChanger
-                  @change="handlePaginationChange"
-                  @showSizeChange="handlePaginationChange"
+                  @change="handlePageChange"
+                  @showSizeChange="handlePageSizeChange"
                 />
               </div>
             </a-list>
@@ -175,9 +175,12 @@
 </template>
 
 <script>
+// components
 import { PageView } from '@/layouts'
 import TargetCommentDrawer from '../../comment/components/TargetCommentDrawer'
 import AttachmentDrawer from '../../attachment/components/AttachmentDrawer'
+
+// libs
 import { mixin, mixinDevice } from '@/mixins/mixin.js'
 import { mapActions, mapGetters } from 'vuex'
 import apiClient from '@/utils/api-client'
@@ -190,21 +193,14 @@ export default {
       list: {
         data: [],
         loading: false,
-        pagination: {
-          page: 1,
-          size: 10,
-          sort: null,
-          total: 1
-        },
-        queryParam: {
+        total: 0,
+        params: {
           page: 0,
           size: 10,
-          sort: null,
-          keyword: null,
-          type: null
+          keyword: undefined,
+          type: undefined
         },
         selected: {},
-
         journalType: {
           PUBLIC: {
             text: '公开'
@@ -245,24 +241,30 @@ export default {
     ...mapGetters(['user']),
     formTitle() {
       return this.form.model.id ? '编辑' : '发表'
+    },
+    pagination() {
+      return {
+        page: this.list.params.page + 1,
+        size: this.list.params.size,
+        total: this.list.total
+      }
     }
   },
   methods: {
     ...mapActions(['refreshOptionsCache']),
-    handleListJournals() {
-      this.list.loading = true
-      this.list.queryParam.page = this.list.pagination.page - 1
-      this.list.queryParam.size = this.list.pagination.size
-      this.list.queryParam.sort = this.list.pagination.sort
-      apiClient.journal
-        .list(this.list.queryParam)
-        .then(response => {
-          this.list.data = response.data.content
-          this.list.pagination.total = response.data.total
-        })
-        .finally(() => {
-          this.list.loading = false
-        })
+    async handleListJournals() {
+      try {
+        this.list.loading = true
+
+        const { data } = await apiClient.journal.list(this.list.params)
+
+        this.list.data = data.content
+        this.list.total = data.total
+      } catch (e) {
+        this.$log.error(e)
+      } finally {
+        this.list.loading = false
+      }
     },
     handleListOptions() {
       apiClient.option.list().then(response => {
@@ -270,12 +272,12 @@ export default {
       })
     },
     handleQuery() {
-      this.handlePaginationChange(1, this.list.pagination.size)
+      this.handlePageChange(1)
     },
     handleResetParam() {
-      this.list.queryParam.keyword = null
-      this.list.queryParam.type = null
-      this.handlePaginationChange(1, this.list.pagination.size)
+      this.list.params.keyword = undefined
+      this.list.params.type = undefined
+      this.handlePageChange(1)
     },
     handleOpenPublishModal() {
       this.form.visible = true
@@ -342,10 +344,22 @@ export default {
         this.handleListJournals()
       }
     },
-    handlePaginationChange(page, pageSize) {
-      this.$log.debug(`Current: ${page}, PageSize: ${pageSize}`)
-      this.list.pagination.page = page
-      this.list.pagination.size = pageSize
+
+    /**
+     * Handle page change
+     */
+    handlePageChange(page = 1) {
+      this.list.params.page = page - 1
+      this.handleListJournals()
+    },
+
+    /**
+     * Handle page size change
+     */
+    handlePageSizeChange(current, size) {
+      this.$log.debug(`Current: ${current}, PageSize: ${size}`)
+      this.list.params.page = 0
+      this.list.params.size = size
       this.handleListJournals()
     },
     onJournalCommentsDrawerClose() {

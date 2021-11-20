@@ -99,7 +99,7 @@ export default {
     handleListBackups() {
       this.loading = true
       apiClient.backup
-        .listMarkdown()
+        .listMarkdownBackups()
         .then(response => {
           this.files = response.data
         })
@@ -110,7 +110,7 @@ export default {
     handleExportClick(needFrontMatter = false) {
       this.backuping = true
       apiClient.backup
-        .exportToMarkdown(needFrontMatter)
+        .backupMarkdown(needFrontMatter)
         .catch(() => {
           this.backupErrored = true
         })
@@ -129,7 +129,7 @@ export default {
     },
     handleFileDeleteClick(file) {
       file.deleting = true
-      apiClient.backup.deleteMarkdown(file.filename).finally(() => {
+      apiClient.backup.deleteMarkdownBackup(file.filename).finally(() => {
         setTimeout(() => {
           file.deleting = false
         }, 400)
@@ -138,7 +138,7 @@ export default {
     },
     handleDownloadMarkdownPackage(item) {
       apiClient.backup
-        .fetchMarkdown(item.filename)
+        .getMarkdownBackup(item.filename)
         .then(response => {
           const downloadElement = document.createElement('a')
           const href = new window.URL(response.data.downloadLink)

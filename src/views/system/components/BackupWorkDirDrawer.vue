@@ -111,7 +111,7 @@ export default {
     handleListBackups() {
       this.loading = true
       apiClient.backup
-        .listFromWorkDir()
+        .listWorkdirBackups()
         .then(response => {
           this.backups = response.data
         })
@@ -120,7 +120,7 @@ export default {
         })
     },
     handleBackupClick() {
-      apiClient.backup.exportToMarkdown().then(response => {
+      apiClient.backup.getWorkdirBackupOptions().then(response => {
         this.optionsModal = {
           visible: true,
           options: response.data,
@@ -131,7 +131,7 @@ export default {
     handleBackupConfirmed() {
       this.backuping = true
       apiClient.backup
-        .exportToMarkdown(this.optionsModal.selected)
+        .backupWorkdir(this.optionsModal.selected)
         .catch(() => {
           this.backupErrored = true
         })
@@ -151,7 +151,7 @@ export default {
     },
     handleBackupDeleteClick(backup) {
       backup.deleting = true
-      apiClient.backup.deleteFromWorkDir(backup.filename).finally(() => {
+      apiClient.backup.deleteWorkdirBackup(backup.filename).finally(() => {
         setTimeout(() => {
           backup.deleting = false
         }, 400)
@@ -160,7 +160,7 @@ export default {
     },
     handleDownloadBackupPackage(item) {
       apiClient.backup
-        .fetchFromWorkDir(item.filename)
+        .getWorkdirBackup(item.filename)
         .then(response => {
           const downloadElement = document.createElement('a')
           const href = new window.URL(response.data.downloadLink)

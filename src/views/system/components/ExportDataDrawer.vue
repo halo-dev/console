@@ -92,7 +92,7 @@ export default {
     handleListBackups() {
       this.loading = true
       apiClient.backup
-        .list()
+        .listDataBackups()
         .then(response => {
           this.files = response.data
         })
@@ -103,7 +103,7 @@ export default {
     handleExportClick() {
       this.backuping = true
       apiClient.backup
-        .exportAll()
+        .backupData()
         .catch(() => {
           this.backupErrored = true
         })
@@ -122,7 +122,7 @@ export default {
     },
     handleFileDeleteClick(file) {
       file.deleting = true
-      apiClient.backup.delete(file.filename).finally(() => {
+      apiClient.backup.deleteDataBackup(file.filename).finally(() => {
         setTimeout(() => {
           file.deleting = false
         }, 400)
@@ -131,7 +131,7 @@ export default {
     },
     handleDownloadBackupFile(item) {
       apiClient.backup
-        .fetch(item.filename)
+        .getDataBackup(item.filename)
         .then(response => {
           const downloadElement = document.createElement('a')
           const href = new window.URL(response.data.downloadLink)
