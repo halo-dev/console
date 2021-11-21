@@ -1,5 +1,6 @@
 import { AdminApiClient, DefaultTokenProvider, HaloRestAPIClient, LocalStorageTokenStore } from '@halo-dev/admin-api'
 import encrypt from '@/utils/encrypt'
+import './axios-interceptors'
 
 const localStorageCredentials = encrypt.decrypt(localStorage.getItem('UserCredentials'))
 
