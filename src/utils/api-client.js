@@ -2,26 +2,23 @@ import { AdminApiClient, DefaultTokenProvider, HaloRestAPIClient, LocalStorageTo
 import encrypt from '@/utils/encrypt'
 import './axios-interceptors'
 
-const localStorageCredentials = encrypt.decrypt(localStorage.getItem('UserCredentials'))
-
-const localStorageTokenStore = new LocalStorageTokenStore()
-
 const apiUrl = process.env.VUE_APP_API_URL ? process.env.VUE_APP_API_URL : 'http://localhost:8080'
 
-const haloRestApiClient = new HaloRestAPIClient({
-  baseUrl: apiUrl
-})
-
 const buildTokenProvider = credentials => {
-  return new DefaultTokenProvider(credentials, apiUrl, localStorageTokenStore)
+  return new DefaultTokenProvider(credentials, apiUrl, new LocalStorageTokenStore())
 }
 
-if (localStorageCredentials) {
-  const tokenProvider = buildTokenProvider(localStorageCredentials)
-  haloRestApiClient.setTokenProvider(tokenProvider)
-}
-
-const apiClient = new AdminApiClient(haloRestApiClient)
+const haloRestApiClient = new HaloRestAPIClient({
+  baseUrl: apiUrl,
+  tokenProvider: (function() {
+    const localStorageCredentials = encrypt.decrypt(localStorage.getItem('UserCredentials'))
+    if (localStorageCredentials) {
+      const tokenProvider = buildTokenProvider(localStorageCredentials)
+      return tokenProvider
+    }
+    return null
+  })()
+})
 
 const doAuthorize = credentials => {
   const encodedCredentials = encrypt.encrypt({ ...credentials })
@@ -32,6 +29,6 @@ const doAuthorize = credentials => {
   return tokenProvider.getToken()
 }
 
-export default apiClient
+export default new AdminApiClient(haloRestApiClient)
 
-export { haloRestApiClient, doAuthorize, localStorageTokenStore }
+export { haloRestApiClient, doAuthorize }
