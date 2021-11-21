@@ -438,11 +438,18 @@ export default {
         // show open MFA modal
         this.mfaParam.modal.title = '确认开启两步验证？'
         // generate MFAKey and Qr Image
-        apiClient.user.generateMFAQrImage('TFA_TOTP').then(response => {
-          this.mfaParam.mfaKey = response.data.mfaKey
-          this.mfaParam.qrImage = response.data.qrImage
-          this.mfaParam.modal.visible = true
-        })
+        apiClient.user
+          .generateMFAQrImage({
+            mfaType: 'TFA_TOTP'
+          })
+          .then(response => {
+            this.mfaParam.mfaKey = response.data.mfaKey
+            this.mfaParam.qrImage = response.data.qrImage
+            this.mfaParam.modal.visible = true
+          })
+          .catch(() => {
+            this.mfaParam.switch.loading = false
+          })
       }
     },
     handleSetMFAuth() {
@@ -469,13 +476,12 @@ export default {
       })
     },
     handleSetMFAuthCallback() {
-      const _this = this
-      if (_this.mfaParam.errored) {
-        _this.mfaParam.errored = false
+      if (this.mfaParam.errored) {
+        this.mfaParam.errored = false
       } else {
-        _this.handleCloseMFAuthModal()
-        _this.handleLoadStatistics()
-        _this.$message.success(_this.mfaUsed ? '两步验证已关闭！' : '两步验证已开启,下次登录生效！')
+        this.handleCloseMFAuthModal()
+        this.handleLoadStatistics()
+        this.$message.success(this.mfaUsed ? '两步验证已关闭！' : '两步验证已开启,下次登录生效！')
       }
     },
     handleCloseMFAuthModal() {
