@@ -13,7 +13,6 @@ specifiers:
   '@vue/eslint-config-prettier': ^6.0.0
   '@vue/test-utils': ^1.2.2
   ant-design-vue: ^1.7.8
-  axios: ^0.21.4
   babel-core: 7.0.0-bridge.0
   babel-eslint: ^10.1.0
   babel-jest: ^26.6.3
@@ -57,7 +56,6 @@ dependencies:
   '@codemirror/lang-java': 0.19.1
   '@halo-dev/admin-api': 1.0.0-alpha.23
   ant-design-vue: 1.7.8_9065e7474e033a8e4b95615fc8e6c36c
-  axios: 0.21.4
   crypto-js: 4.1.1
   dayjs: 1.10.7
   enquire.js: 2.1.6
@@ -2852,14 +2850,6 @@ packages:
   /axios/0.20.0:
     resolution: {integrity: sha512-ANA4rr2BDcmmAQLOKft2fufrtuvlqR+cXNNinUmvfeSNCOF98PZL+7M/v1zIdGo7OLjEA9J2gXJL+j4zGsl0bA==}
     deprecated: Critical security vulnerability fixed in v0.21.1. For more information, see https://github.com/axios/axios/pull/3410
-    dependencies:
-      follow-redirects: 1.14.4
-    transitivePeerDependencies:
-      - debug
-    dev: false
-
-  /axios/0.21.4:
-    resolution: {integrity: sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==}
     dependencies:
       follow-redirects: 1.14.4
     transitivePeerDependencies:
