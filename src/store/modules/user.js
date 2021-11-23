@@ -83,7 +83,7 @@ const user = {
         apiClient
           .refreshToken(refreshToken)
           .then(response => {
-            const token = response.data.data
+            const token = response.data
             Vue.$log.debug('Got token', token)
             commit('SET_TOKEN', token)
 

@@ -1,6 +1,7 @@
-import { AdminApiClient, HaloRestAPIClient, AuthorizedClient } from '@halo-dev/admin-api'
+import { AdminApiClient, HaloRestAPIClient } from '@halo-dev/admin-api'
 import store from '@/store'
-import Vue from 'vue'
+import { isObject } from '@/utils/util'
+import { message, notification } from 'ant-design-vue'
 
 const apiUrl = process.env.VUE_APP_API_URL ? process.env.VUE_APP_API_URL : 'http://localhost:8080'
 
@@ -9,32 +10,75 @@ const haloRestApiClient = new HaloRestAPIClient({
 })
 
 const apiClient = new AdminApiClient(haloRestApiClient)
-const authorizedClient = new AuthorizedClient(apiUrl)
 
 haloRestApiClient.interceptors.request.use(
-  config => {
-    const storedToken = store.getters.token
-    if (storedToken) {
-      config.headers['Admin-Authorization'] = storedToken.access_token
+  async config => {
+    const token = store.getters.token
+    if (token && token.access_token) {
+      config.headers['Admin-Authorization'] = token.access_token
+    }
+
+    // TODO ignore login and refresh token requests
+
+    const expireTime = Date.now() + 1000 * token.expired_at
+    if (Date.now() >= expireTime) {
+      await store.dispatch('refreshToken', token.refresh_token)
+      return config
     }
     return config
   },
-  () => {
-    const storedToken = store.getters.token
-    const expireTime = Date.now() + 1000 * storedToken.expired_at
-    if (Date.now() > expireTime) {
-      Vue.$log.warning(`Token has expired at ${storedToken.expired_at}, ready to refresh token.`)
-      // token过期
-      store
-        .dispatch('refreshToken', storedToken.refresh_token)
-        .then(() => {})
-        .catch(() => {
-          window.location.reload()
+  error => {
+    return Promise.reject(error)
+  }
+)
+
+function getFieldValidationError(data) {
+  if (!isObject(data) || !isObject(data.data)) {
+    return null
+  }
+
+  const errorDetail = data.data
+
+  return Object.keys(errorDetail).map(key => errorDetail[key])
+}
+
+haloRestApiClient.interceptors.response.use(
+  response => {
+    return response
+  },
+  error => {
+    const response = error.response
+    const data = response ? response.data : null
+
+    if (data) {
+      if (data.status === 400) {
+        const errorDetails = getFieldValidationError(data)
+        notification.error({
+          message: data.message,
+          description: h => {
+            const errorNodes = errorDetails.map(errorDetail => {
+              return h('a-alert', {
+                props: {
+                  message: errorDetail,
+                  banner: true,
+                  showIcon: false,
+                  type: 'error'
+                }
+              })
+            })
+            return h('div', errorNodes)
+          },
+          duration: 10
         })
+      }
+    } else {
+      message.error('网络异常')
     }
+
+    return Promise.reject(error)
   }
 )
 
 export default apiClient
 
-export { haloRestApiClient, authorizedClient }
+export { haloRestApiClient }

@@ -144,6 +144,16 @@ export default {
     },
     handleCreateOrUpdateTag() {
       const _this = this
+      apiClient.tag
+        .create(_this.form.model)
+        .catch(() => {
+          this.form.errored = true
+        })
+        .finally(() => {
+          setTimeout(() => {
+            _this.form.saving = false
+          }, 400)
+        })
       _this.$refs.tagForm.validate(valid => {
         if (valid) {
           this.form.saving = true
