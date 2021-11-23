@@ -6,10 +6,7 @@ import Vue from 'vue'
 
 const apiUrl = process.env.VUE_APP_API_URL ? process.env.VUE_APP_API_URL : 'http://localhost:8080'
 const haloRestApiClient = new HaloRestAPIClient({
-  baseUrl: apiUrl,
-  auth: {
-    adminToken: ''
-  }
+  baseUrl: apiUrl
 })
 const apiClient = new AdminApiClient(haloRestApiClient)
 const authorizatedClient = new AuthorizedClient(apiUrl)
@@ -18,7 +15,7 @@ haloRestApiClient.interceptors.request.use(
   config => {
     const storedToken = Vue.ls.get(ACCESS_TOKEN)
     if (storedToken) {
-      config.headers['ADMIN-Authorization'] = storedToken.accessToken
+      config.headers['Admin-Authorization'] = storedToken.access_token
     }
     return config
   },
