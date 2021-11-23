@@ -37,7 +37,7 @@
 </template>
 <script>
 import { mapActions } from 'vuex'
-import apiClient, { doAuthorize } from '@/utils/api-client'
+import apiClient, { authorizatedClient } from '@/utils/api-client'
 import store from '@/store'
 
 export default {
@@ -106,9 +106,10 @@ export default {
       _this.$refs.loginForm.validate(valid => {
         if (valid) {
           _this.form.logging = true
-          doAuthorize(_this.form.model)
+          authorizatedClient
+            .login(_this.form.model)
             .then(response => {
-              store.commit('SET_TOKEN', response)
+              store.commit('SET_TOKEN', response.data)
               _this.$emit('success')
             })
             .finally(() => {

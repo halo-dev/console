@@ -1,75 +1,42 @@
-import {
-  AdminApiClient,
-  DefaultTokenProvider,
-  HaloRestAPIClient,
-  LocalStorageTokenStore,
-  AuthorizedClient
-} from '@halo-dev/admin-api'
-import encrypt from '@/utils/encrypt'
+import { AdminApiClient, HaloRestAPIClient, AuthorizedClient } from '@halo-dev/admin-api'
 import './axios-interceptors'
-
-const CREDENTIALS_KEY = 'UserCredentials'
+import store from '@/store'
+import { ACCESS_TOKEN } from '@/store/mutation-types'
+import Vue from 'vue'
 
 const apiUrl = process.env.VUE_APP_API_URL ? process.env.VUE_APP_API_URL : 'http://localhost:8080'
-
-class HaloSdkHelper {
-  constructor(baseUrl) {
-    this.baseUrl = baseUrl
-    this.authorizatedClient = new AuthorizedClient(baseUrl)
-    this.tokenProvider = this.createTokenProvider()
-    this.haloRestApiClient = new HaloRestAPIClient({
-      baseUrl: baseUrl,
-      tokenProvider: this.tokenProvider
-    })
-    this.apiClient = new AdminApiClient(this.haloRestApiClient)
+const haloRestApiClient = new HaloRestAPIClient({
+  baseUrl: apiUrl,
+  auth: {
+    adminToken: ''
   }
-
-  buildTokenProvider(credentials) {
-    return new DefaultTokenProvider(credentials, this.baseUrl, new LocalStorageTokenStore())
-  }
-
-  doAuthorize(credentials) {
-    this.setCredentials(credentials)
-    this.tokenProvider = this.buildTokenProvider(credentials)
-    this.haloRestApiClient.setTokenProvider(this.tokenProvider)
-    return this.tokenProvider.getToken()
-  }
-
-  createTokenProvider() {
-    const localStorageCredentials = this.getDecryptedCredentials()
-    if (localStorageCredentials) {
-      const tokenProvider = this.buildTokenProvider(localStorageCredentials)
-      return tokenProvider
-    }
-    return null
-  }
-
-  getDecryptedCredentials() {
-    return encrypt.decrypt(localStorage.getItem(CREDENTIALS_KEY))
-  }
-
-  setCredentials(credentials) {
-    const encodedCredentials = encrypt.encrypt({ ...credentials })
-    localStorage.setItem(CREDENTIALS_KEY, encodedCredentials)
-  }
-
-  useAuthRequestInterceptor(resolve, reject) {
-    if (!this.tokenProvider) {
-      return
-    }
-    this.tokenProvider.useAuthenticateRequestInterceptor(resolve, reject)
-  }
-}
-
-const haloSdk = new HaloSdkHelper(apiUrl)
-
-haloSdk.useAuthRequestInterceptor(async credentials => {
-  // 校验NFA
-  // const { data } = haloSdk.authorizatedClient.needMFACode(credentials)
-  // console.log(data)
-  return credentials
 })
+const apiClient = new AdminApiClient(haloRestApiClient)
+const authorizatedClient = new AuthorizedClient(apiUrl)
 
-export default haloSdk.apiClient
-export const haloRestApiClient = haloSdk.haloRestApiClient
-export const doAuthorize = haloSdk.doAuthorize
+haloRestApiClient.interceptors.request.use(
+  config => {
+    const storedToken = Vue.ls.get(ACCESS_TOKEN)
+    if (storedToken) {
+      config.headers['ADMIN-Authorization'] = storedToken.accessToken
+    }
+    return config
+  },
+  () => {
+    const storedToken = Vue.ls.get(ACCESS_TOKEN)
+    const expireTime = Date.now() + 1000 * storedToken.expired_at
+    if (Date.now() > expireTime) {
+      Vue.$log.warning(`Token has expired at ${storedToken.expired_at}, ready to refresh token.`)
+      // token过期
+      store
+        .dispatch('refreshToken', storedToken.refresh_token)
+        .then(() => {})
+        .catch(() => {
+          window.location.reload()
+        })
+    }
+  }
+)
+
+export default apiClient
+export { haloRestApiClient, authorizatedClient }
