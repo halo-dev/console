@@ -37,13 +37,12 @@
 </template>
 <script>
 import { mapActions } from 'vuex'
-import apiClient, { authorizatedClient } from '@/utils/api-client'
-import store from '@/store'
+import apiClient from '@/utils/api-client'
 
 export default {
   name: 'LoginForm',
   data() {
-    const authcodeValidate = (rule, value, callback) => {
+    const mfaValidate = (rule, value, callback) => {
       if (!value && this.form.needAuthCode) {
         callback(new Error('* 请输入两步验证码'))
       } else {
@@ -60,7 +59,7 @@ export default {
         rules: {
           username: [{ required: true, message: '* 用户名/邮箱不能为空', trigger: ['change'] }],
           password: [{ required: true, message: '* 密码不能为空', trigger: ['change'] }],
-          authcode: [{ validator: authcodeValidate, trigger: ['change'] }]
+          authcode: [{ validator: mfaValidate, trigger: ['change'] }]
         },
         needAuthCode: false,
         logging: false
@@ -73,7 +72,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['refreshUserCache', 'refreshOptionsCache']),
+    ...mapActions(['login', 'refreshUserCache', 'refreshOptionsCache']),
     handleLoginClick() {
       const _this = this
       _this.$refs.loginForm.validate(valid => {
@@ -106,10 +105,9 @@ export default {
       _this.$refs.loginForm.validate(valid => {
         if (valid) {
           _this.form.logging = true
-          authorizatedClient
+          _this
             .login(_this.form.model)
-            .then(response => {
-              store.commit('SET_TOKEN', response.data)
+            .then(() => {
               _this.$emit('success')
             })
             .finally(() => {

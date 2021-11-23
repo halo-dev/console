@@ -48,6 +48,36 @@ const user = {
           })
       })
     },
+    login({ commit }, { username, password, authcode }) {
+      return new Promise((resolve, reject) => {
+        apiClient
+          .login({ username, password, authcode })
+          .then(response => {
+            const token = response.data
+            Vue.$log.debug('Got token', token)
+            commit('SET_TOKEN', token)
+
+            resolve(response)
+          })
+          .catch(error => {
+            reject(error)
+          })
+      })
+    },
+    logout({ commit }) {
+      return new Promise(resolve => {
+        apiClient
+          .logout()
+          .then(() => {
+            commit('CLEAR_TOKEN')
+            commit('SET_USER', {})
+            resolve()
+          })
+          .catch(() => {
+            resolve()
+          })
+      })
+    },
     refreshToken({ commit }, refreshToken) {
       return new Promise((resolve, reject) => {
         apiClient
@@ -62,7 +92,7 @@ const user = {
           .catch(error => {
             const data = error.response.data
             Vue.$log.debug('Refresh error data', data)
-            if (/登录状态已失效，请重新登录/.test(error.message)) {
+            if (data && data.status === 400 && data.data === refreshToken) {
               // The refresh token expired
               commit('CLEAR_TOKEN')
             }
