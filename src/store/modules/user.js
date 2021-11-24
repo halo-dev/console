@@ -90,7 +90,7 @@ const user = {
             resolve(response)
           })
           .catch(error => {
-            const data = error.response.data
+            const data = error.data
             Vue.$log.debug('Refresh error data', data)
             if (data && data.status === 400 && data.data === refreshToken) {
               // The refresh token expired
