@@ -133,9 +133,9 @@
       title="更新主题"
     >
       <FilePondUpload
-        ref="updateByupload"
+        ref="updateByFile"
         :accepts="['application/x-zip', 'application/x-zip-compressed', 'application/zip']"
-        :filed="localUpdateModel.selected.id"
+        :field="localUpdateModel.selected.id"
         :multiple="false"
         :uploadHandler="localUpdateModel.uploadHandler"
         label="点击选择主题更新包或将主题更新包拖拽到此处<br>仅支持 ZIP 格式的文件"
@@ -210,7 +210,7 @@ export default {
 
       localUpdateModel: {
         visible: false,
-        uploadHandler: apiClient.theme.updateByUpload,
+        uploadHandler: (file, options, field) => apiClient.theme.updateByUpload(file, options, field),
         selected: {}
       },
 
@@ -368,8 +368,8 @@ export default {
       if (this.$refs.upload) {
         this.$refs.upload.handleClearFileList()
       }
-      if (this.$refs.updateByupload) {
-        this.$refs.updateByupload.handleClearFileList()
+      if (this.$refs.updateByFile) {
+        this.$refs.updateByFile.handleClearFileList()
       }
       this.installModal.remote.url = null
       this.handleListThemes()

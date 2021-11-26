@@ -50,7 +50,7 @@ export default {
       required: false,
       default: 'file'
     },
-    filed: {
+    field: {
       type: String,
       required: false,
       default: ''
@@ -104,14 +104,18 @@ export default {
         process: (fieldName, file, metadata, load, error, progress, abort) => {
           const CancelToken = Axios.CancelToken
           const source = CancelToken.source()
-          this.uploadHandler(file, {
-            onUploadProgress: progressEvent => {
-              if (progressEvent.total > 0) {
-                progress(progressEvent.lengthComputable, progressEvent.loaded, progressEvent.total)
-              }
+          this.uploadHandler(
+            file,
+            {
+              onUploadProgress: progressEvent => {
+                if (progressEvent.total > 0) {
+                  progress(progressEvent.lengthComputable, progressEvent.loaded, progressEvent.total)
+                }
+              },
+              cancelToken: source.token
             },
-            cancelToken: source.token
-          })
+            this.field
+          )
             .then(response => {
               load(response)
               this.$log.debug('Uploaded successfully', response)

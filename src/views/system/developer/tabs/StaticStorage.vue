@@ -68,7 +68,7 @@
     >
       <FilePondUpload
         ref="upload"
-        :filed="list.selected.relativePath"
+        :field="list.selected.relativePath"
         :uploadHandler="uploadModal.uploadHandler"
         name="file"
       ></FilePondUpload>
@@ -190,7 +190,7 @@ export default {
 
       uploadModal: {
         visible: false,
-        uploadHandler: apiClient.staticStorage.upload
+        uploadHandler: (file, options, field) => apiClient.staticStorage.upload(file, options, field)
       },
 
       directoryForm: {

@@ -59,9 +59,7 @@
       </div>
     </a-drawer>
 
-    <a-modal v-model="uploadVisible" :afterClose="onUploadClose" :footer="null" destroyOnClose title="上传附件">
-      <FilePondUpload ref="upload" :uploadHandler="uploadHandler"></FilePondUpload>
-    </a-modal>
+    <AttachmentUploadModal :visible.sync="uploadVisible" @close="onUploadClose" />
   </div>
 </template>
 
@@ -144,8 +142,7 @@ export default {
         keyword: null
       },
       attachments: [],
-      selectedAttachment: {},
-      uploadHandler: apiClient.attachment.upload
+      selectedAttachment: {}
     }
   },
   computed: {
@@ -227,7 +224,6 @@ export default {
       this.handleListAttachments()
     },
     onUploadClose() {
-      this.$refs.upload.handleClearFileList()
       this.handlePaginationChange(1, this.pagination.size)
     },
     handleAfterVisibleChanged(visible) {

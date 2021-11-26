@@ -120,9 +120,9 @@
         @showSizeChange="handlePageSizeChange"
       />
     </div>
-    <a-modal v-model="upload.visible" :afterClose="onUploadClose" :footer="null" destroyOnClose title="上传附件">
-      <FilePondUpload ref="upload" :uploadHandler="upload.handler"></FilePondUpload>
-    </a-modal>
+
+    <AttachmentUploadModal :visible.sync="upload.visible" @close="onUploadClose" />
+
     <AttachmentDetailModal
       :addToPhoto="true"
       :attachment="list.selected"
@@ -223,7 +223,6 @@ export default {
       },
 
       upload: {
-        handler: (file, options) => apiClient.attachment.upload(file, options),
         visible: false
       },
 
@@ -432,7 +431,6 @@ export default {
       this.handlePageChange()
     },
     onUploadClose() {
-      this.$refs.upload.handleClearFileList()
       this.handlePageChange()
       this.handleListMediaTypes()
       this.handleListTypes()
