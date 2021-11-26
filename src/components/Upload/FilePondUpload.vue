@@ -31,6 +31,7 @@ import axios from 'axios'
 
 import vueFilePond from 'vue-filepond'
 import 'filepond/dist/filepond.min.css'
+import apiClient from '@/utils/api-client'
 
 // Plugins
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview'
@@ -102,23 +103,17 @@ export default {
     return {
       server: {
         process: (fieldName, file, metadata, load, error, progress, abort) => {
-          const formData = new FormData()
-          formData.append(fieldName, file, file.name)
-
           const CancelToken = axios.CancelToken
           const source = CancelToken.source()
-
-          this.uploadHandler(
-            formData,
-            progressEvent => {
-              if (progressEvent.total > 0) {
-                progress(progressEvent.lengthComputable, progressEvent.loaded, progressEvent.total)
-              }
-            },
-            source.token,
-            this.filed,
-            file
-          )
+          apiClient.attachment
+            .upload(file, {
+              onUploadProgress: progressEvent => {
+                if (progressEvent.total > 0) {
+                  progress(progressEvent.lengthComputable, progressEvent.loaded, progressEvent.total)
+                }
+              },
+              cancelToken: source.token
+            })
             .then(response => {
               load(response)
               this.$log.debug('Uploaded successfully', response)
