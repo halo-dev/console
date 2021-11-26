@@ -27,11 +27,10 @@
 </template>
 <script>
 import { mapGetters } from 'vuex'
-import axios from 'axios'
+import { Axios } from '@halo-dev/admin-api'
 
 import vueFilePond from 'vue-filepond'
 import 'filepond/dist/filepond.min.css'
-import apiClient from '@/utils/api-client'
 
 // Plugins
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview'
@@ -103,17 +102,16 @@ export default {
     return {
       server: {
         process: (fieldName, file, metadata, load, error, progress, abort) => {
-          const CancelToken = axios.CancelToken
+          const CancelToken = Axios.CancelToken
           const source = CancelToken.source()
-          apiClient.attachment
-            .upload(file, {
-              onUploadProgress: progressEvent => {
-                if (progressEvent.total > 0) {
-                  progress(progressEvent.lengthComputable, progressEvent.loaded, progressEvent.total)
-                }
-              },
-              cancelToken: source.token
-            })
+          this.uploadHandler(file, {
+            onUploadProgress: progressEvent => {
+              if (progressEvent.total > 0) {
+                progress(progressEvent.lengthComputable, progressEvent.loaded, progressEvent.total)
+              }
+            },
+            cancelToken: source.token
+          })
             .then(response => {
               load(response)
               this.$log.debug('Uploaded successfully', response)

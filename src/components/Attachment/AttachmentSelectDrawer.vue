@@ -110,7 +110,7 @@ export default {
         keyword: null
       },
       attachments: [],
-      uploadHandler: apiClient.attachment.upload
+      uploadHandler: (file, options) => apiClient.attachment.upload(file, options)
     }
   },
   methods: {

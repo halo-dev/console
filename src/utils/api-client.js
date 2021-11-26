@@ -33,6 +33,10 @@ haloRestApiClient.interceptors.response.use(
     return response
   },
   async error => {
+    if (Axios.isCancel(error)) {
+      return Promise.reject(error)
+    }
+
     if (/Network Error/.test(error.message)) {
       message.error('网络错误，请检查网络连接')
       return Promise.reject(error)

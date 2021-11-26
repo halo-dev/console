@@ -193,7 +193,7 @@ export default {
       installModal: {
         visible: false,
         local: {
-          uploadHandler: apiClient.theme.upload
+          uploadHandler: (file, options) => apiClient.theme.upload(file, options)
         },
 
         remote: {

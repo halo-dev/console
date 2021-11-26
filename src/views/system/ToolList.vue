@@ -86,7 +86,7 @@ export default {
       exportDataDrawerVisible: false,
       exportMarkdownDrawerVisible: false,
       markdownUpload: false,
-      uploadHandler: apiClient.backup.importMarkdown
+      uploadHandler: (file, options) => apiClient.backup.importMarkdown(file, options)
     }
   },
   computed: {

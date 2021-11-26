@@ -223,7 +223,7 @@ export default {
       },
 
       upload: {
-        handler: apiClient.attachment.upload,
+        handler: (file, options) => apiClient.attachment.upload(file, options),
         visible: false
       },
 
