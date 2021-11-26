@@ -277,8 +277,9 @@ export default {
       this.$refs.directoryForm.validate(valid => {
         if (valid) {
           this.directoryForm.saving = true
+          const basePath = this.list.selected.relativePath || '/'
           apiClient.staticStorage
-            .createFolder(this.list.selected.relativePath, this.directoryForm.model.name)
+            .createFolder(basePath, this.directoryForm.model.name)
             .catch(() => {
               this.directoryForm.saveErrored = true
             })
