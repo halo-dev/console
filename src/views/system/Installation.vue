@@ -257,7 +257,7 @@ export default {
         this.form.importErrored = false
       } else {
         this.$message.success('导入成功！')
-        this.$router.push({ name: 'Login' })
+        this.$router.replace({ name: 'Login' })
       }
     }
   }

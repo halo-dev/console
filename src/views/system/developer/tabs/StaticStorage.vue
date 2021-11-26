@@ -149,6 +149,7 @@
 import { mapGetters } from 'vuex'
 import apiClient from '@/utils/api-client'
 import Codemirror from '@/components/Codemirror/Codemirror'
+import { Axios } from '@halo-dev/admin-api'
 
 const columns = [
   {
@@ -341,13 +342,13 @@ export default {
     },
     handleOpenEditContentModal(file) {
       this.list.selected = file
-      // staticApi.getContent(this.options.blog_url + file.relativePath).then(response => {
-      //   this.editContentForm.model.content = response.data
-      //   this.editContentForm.visible = true
-      //   this.$nextTick(() => {
-      //     this.$refs.editor.handleInitCodemirror()
-      //   })
-      // })
+      Axios.get(this.options.blog_url + file.relativePath).then(response => {
+        this.editContentForm.model.content = response.data + ''
+        this.editContentForm.visible = true
+        this.$nextTick(() => {
+          this.$refs.editor.handleInitCodemirror()
+        })
+      })
     },
     handleContentEdit() {
       this.editContentForm.saving = true
