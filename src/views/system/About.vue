@@ -79,6 +79,16 @@ import axios from 'axios'
 import marked from 'marked'
 import { PageView } from '@/layouts'
 
+const axiosInstance = axios.create({
+  baseURL: 'https://api.github.com',
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+    Accept: 'application/vnd.github.v3+json'
+  },
+  withCredentials: false
+})
+
 export default {
   components: {
     PageView
@@ -162,8 +172,8 @@ User Agent：${navigator.userAgent}`
     fetchContributors() {
       const _this = this
       _this.contributorsLoading = true
-      axios
-        .get('https://api.github.com/repos/halo-dev/halo/contributors?per_page=100')
+      axiosInstance
+        .get('/repos/halo-dev/halo/contributors?per_page=100')
         .then(response => {
           _this.contributors = response.data
         })
@@ -177,8 +187,8 @@ User Agent：${navigator.userAgent}`
     checkServerUpdate() {
       const _this = this
       _this.checking = true
-      axios
-        .get('https://api.github.com/repos/halo-dev/halo/releases/latest')
+      axiosInstance
+        .get('/repos/halo-dev/halo/releases/latest')
         .then(response => {
           const data = response.data
           _this.latestData = data
