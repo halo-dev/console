@@ -231,7 +231,7 @@ export default {
     handleFetchAll() {
       this.loading = true
       Promise.all([
-        apiClient.option.list(),
+        apiClient.option.listAsMapView(),
         apiClient.category.list({ sort: [], more: false }),
         apiClient.tag.list({ more: false }),
         apiClient.sheet.listIndependents()
