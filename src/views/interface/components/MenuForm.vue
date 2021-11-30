@@ -23,13 +23,13 @@
             <a-input v-model="menuModel.icon" />
           </a-form-model-item>
         </a-col>
-        
-        <a-col :lg='8' :md='12' :sm='12' :xl='6' :xs='12'>
-          <a-form-model-item help='* 菜单栏排序编号' label='排序编号' prop='priority'>
-            <a-input v-model='menuModel.priority' />
+
+        <a-col :lg="8" :md="12" :sm="12" :xl="6" :xs="12">
+          <a-form-model-item help="* 菜单栏排序编号" label="排序编号" prop="priority">
+            <a-input v-model="menuModel.priority" />
           </a-form-model-item>
         </a-col>
-        
+
         <a-col :lg="8" :md="12" :sm="12" :xl="8" :xs="12">
           <a-form-model-item label="打开方式" prop="target">
             <a-radio-group v-model="menuModel.target" :options="targets" />
@@ -111,7 +111,7 @@ export default {
             { max: 1023, message: '* 菜单地址的字符长度不能超过 1023', trigger: ['change'] }
           ],
           icon: [{ max: 50, message: '* 菜单图标的字符长度不能超过 50', trigger: ['change'] }],
-          priority:[{ max: 2, message: '* 排序编号的字符长度不能超过 2', trigger: ['change'] }]
+          priority: [{ max: 2, message: '* 排序编号的字符长度不能超过 2', trigger: ['change'] }]
         },
         saving: false,
         errored: false

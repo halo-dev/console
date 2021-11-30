@@ -177,7 +177,9 @@
 import ThemeSettingDrawer from './components/ThemeSettingDrawer'
 import { PageView } from '@/layouts'
 import apiClient from '@/utils/api-client'
-import store from '@/store'
+
+const storedApiUrl = localStorage.getItem('apiUrl')
+const apiUrl = storedApiUrl ? storedApiUrl : process.env.VUE_APP_API_URL
 
 export default {
   components: {
@@ -233,10 +235,10 @@ export default {
     sortedThemes() {
       const data = this.list.data.slice(0)
 
-      data.forEach(item=>{
-        item.screenshots = store.getters.apiUrl + item.screenshots
+      data.forEach(item => {
+        item.screenshots = apiUrl + item.screenshots
       })
-      
+
       return data.sort((a, b) => {
         return b.activated - a.activated
       })
