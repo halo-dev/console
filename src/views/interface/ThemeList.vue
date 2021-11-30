@@ -177,6 +177,7 @@
 import ThemeSettingDrawer from './components/ThemeSettingDrawer'
 import { PageView } from '@/layouts'
 import apiClient from '@/utils/api-client'
+import store from '@/store'
 
 export default {
   components: {
@@ -231,6 +232,11 @@ export default {
   computed: {
     sortedThemes() {
       const data = this.list.data.slice(0)
+
+      data.forEach(item=>{
+        item.screenshots = store.getters.apiUrl + item.screenshots
+      })
+      
       return data.sort((a, b) => {
         return b.activated - a.activated
       })
