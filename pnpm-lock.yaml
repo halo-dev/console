@@ -17,6 +17,7 @@ specifiers:
   babel-eslint: ^10.1.0
   babel-jest: ^26.6.3
   babel-plugin-import: ^1.13.3
+  color: ^4.1.0
   crypto-js: ^4.1.1
   dayjs: ^1.10.7
   enquire.js: ^2.1.6
@@ -56,6 +57,7 @@ dependencies:
   '@codemirror/lang-java': 0.19.1
   '@halo-dev/admin-api': 1.0.0-alpha.44
   ant-design-vue: 1.7.8_9065e7474e033a8e4b95615fc8e6c36c
+  color: 4.1.0
   crypto-js: 4.1.1
   dayjs: 1.10.7
   enquire.js: 2.1.6
@@ -3817,7 +3819,6 @@ packages:
     engines: {node: '>=7.0.0'}
     dependencies:
       color-name: 1.1.4
-    dev: true
 
   /color-fns/0.0.10:
     resolution: {integrity: sha512-QFKowTE9CXCLp09Gz5cQo8VPUP55hf73iHEI52JC3NyKfMpQG2VoLWmTxYeTKH6ngkEnoMrCdEX//M6J4PVQBA==}
@@ -3829,7 +3830,6 @@ packages:
 
   /color-name/1.1.4:
     resolution: {integrity: sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==}
-    dev: true
 
   /color-string/1.6.0:
     resolution: {integrity: sha512-c/hGS+kRWJutUBEngKKmk4iH3sD59MBkoxVapS/0wgpCz2u7XsNloxknyvBhzwEs1IbV36D9PwqLPJ2DTu3vMA==}
@@ -3838,12 +3838,26 @@ packages:
       simple-swizzle: 0.2.2
     dev: true
 
+  /color-string/1.9.0:
+    resolution: {integrity: sha512-9Mrz2AQLefkH1UvASKj6v6hj/7eWgjnT/cVsR8CumieLoT+g900exWeNogqtweI8dxloXN9BDQTYro1oWu/5CQ==}
+    dependencies:
+      color-name: 1.1.4
+      simple-swizzle: 0.2.2
+    dev: false
+
   /color/3.2.1:
     resolution: {integrity: sha512-aBl7dZI9ENN6fUGC7mWpMTPNHmWUSNan9tuWN6ahh5ZLNk9baLJOnSMlrQkHcrfFgz2/RigjUVAjdx36VcemKA==}
     dependencies:
       color-convert: 1.9.3
       color-string: 1.6.0
     dev: true
+
+  /color/4.1.0:
+    resolution: {integrity: sha512-o2rkkxyLGgYoeUy1OodXpbPAQNmlNBrirQ8ODO8QutzDiDMNdezSOZLNnusQ6pUpCQJUsaJIo9DZJKqa2HgH7A==}
+    dependencies:
+      color-convert: 2.0.1
+      color-string: 1.9.0
+    dev: false
 
   /colorette/1.4.0:
     resolution: {integrity: sha512-Y2oEozpomLn7Q3HFP7dpww7AtMJplbM9lGZP6RDfHqmbeRjiwRg4n6VM6j4KLmRke85uWEI7JqF17f3pqdRA0g==}
@@ -6398,7 +6412,6 @@ packages:
 
   /is-arrayish/0.3.2:
     resolution: {integrity: sha512-eVRqCvVlZbuw3GrM63ovNSNAeA1K16kaR/LRY/92w0zxQ5/1YzwblUX652i4Xs9RwAGjW9d9y6X88t8OaAJfWQ==}
-    dev: true
 
   /is-bigint/1.0.4:
     resolution: {integrity: sha512-zB9CruMamjym81i2JZ3UMn54PKGsQzsJeo6xvN3HJJ4CAsQNB6iRutp2To77OfCNuoxspsIhzaPoO1zyCEhFOg==}
@@ -10082,7 +10095,6 @@ packages:
     resolution: {integrity: sha1-pNprY1/8zMoz9w0Xy5JZLeleVXo=}
     dependencies:
       is-arrayish: 0.3.2
-    dev: true
 
   /sisteransi/1.0.5:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}

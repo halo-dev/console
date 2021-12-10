@@ -10,6 +10,9 @@
             <a-form-model-item help="* 一般为单个标签页面的标识，最好为英文" label="别名：" prop="slug">
               <a-input v-model="form.model.slug" />
             </a-form-model-item>
+            <a-form-model-item label="颜色：" prop="color">
+              <a-input v-model="form.model.color" />
+            </a-form-model-item>
             <a-form-model-item help="* 在标签页面可展示，需要主题支持" label="封面图：" prop="thumbnail">
               <a-input v-model="form.model.thumbnail">
                 <a slot="addonAfter" href="javascript:void(0);" @click="thumbnailDrawer.visible = true">
@@ -63,9 +66,10 @@
               <template slot="title">
                 <span>{{ tag.postCount }} 篇文章</span>
               </template>
-              <a-tag color="blue" style="margin-bottom: 8px;cursor:pointer;" @click="form.model = tag"
-                >{{ tag.name }}
+              <a-tag :color="tag.color" style="margin-bottom: 8px;cursor:pointer;" @click="form.model = tag">
+                {{ tag.name }}
               </a-tag>
+              <PostTag :tag="tag" />
             </a-tooltip>
           </a-spin>
         </a-card>
