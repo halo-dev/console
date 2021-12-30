@@ -4,6 +4,7 @@
   </a-tag>
 </template>
 <script>
+import { labelColor } from '@/utils/colorUtil'
 export default {
   name: 'PostTag',
   props: {
@@ -14,11 +15,7 @@ export default {
   },
   computed: {
     labelColor() {
-      // if (this.tag.color) {
-      //   const color = Color(this.tag.color)
-      //   return color.isLight() ? '#000' : '#fff'
-      // }
-      return '#fff'
+      return labelColor(this.tag.color)
     }
   }
 }
