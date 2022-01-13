@@ -3,7 +3,7 @@
     <template slot="extra">
       <a-dropdown>
         <a-menu slot="overlay">
-          <a-menu-item key="1">
+          <a-menu-item key="1" @click="handleRemoteUpdate">
             <a-icon type="cloud" />
             在线更新
           </a-menu-item>
@@ -29,7 +29,39 @@
     <a-spin :spinning="theme.loading">
       <div v-if="theme.configurations.length > 0" class="card-container">
         <a-tabs defaultActiveKey="0" type="card">
-          <a-tab-pane :key="0" tab="关于"></a-tab-pane>
+          <a-tab-pane :key="0" tab="关于">
+            <a-avatar :alt="theme.current.name" :size="72" :src="theme.current.logo" shape="square" />
+            <a-divider />
+            <a-descriptions :column="1" layout="horizontal">
+              <a-descriptions-item label="主题标识">
+                {{ theme.current.id }}
+              </a-descriptions-item>
+              <a-descriptions-item label="存储位置">
+                {{ theme.current.themePath }}
+              </a-descriptions-item>
+              <a-descriptions-item label="作者">
+                <a :href="theme.current.author.website || '#'">
+                  {{ theme.current.author.name }}
+                </a>
+              </a-descriptions-item>
+              <a-descriptions-item label="介绍">
+                {{ theme.current.description || '-' }}
+              </a-descriptions-item>
+              <a-descriptions-item label="官网">
+                <a :href="theme.current.website || '#'">
+                  {{ theme.current.website || '-' }}
+                </a>
+              </a-descriptions-item>
+              <a-descriptions-item label="Git 远程仓库">
+                <a :href="theme.current.repo || '#'">
+                  {{ theme.current.repo || '-' }}
+                </a>
+              </a-descriptions-item>
+              <a-descriptions-item label="当前版本">
+                {{ theme.current.version }}
+              </a-descriptions-item>
+            </a-descriptions>
+          </a-tab-pane>
           <a-tab-pane v-for="(group, index) in theme.configurations" :key="index + 1" :tab="group.label">
             <a-form
               :wrapperCol="{
@@ -137,6 +169,7 @@ import Verte from 'verte'
 import 'verte/dist/verte.css'
 import { PageView } from '@/layouts'
 import ThemeDeleteConfirmModal from './components/ThemeDeleteConfirmModal'
+
 // utils
 import apiClient from '@/utils/api-client'
 
@@ -166,23 +199,26 @@ export default {
     // Get post id from query
     const themeId = to.query.themeId
     next(async vm => {
-      try {
-        vm.theme.loading = true
-        if (themeId) {
-          const { data } = await apiClient.theme.get(themeId)
-          vm.theme.current = data
-        } else {
-          const { data } = await apiClient.theme.getActivatedTheme()
-          vm.theme.current = data
-        }
-        await vm.handleGetConfigurations()
-        await vm.handleGetSettings()
-      } finally {
-        vm.theme.loading = false
-      }
+      await vm.handleGetTheme(themeId)
     })
   },
   methods: {
+    async handleGetTheme(themeId) {
+      try {
+        this.theme.loading = true
+        if (themeId) {
+          const { data } = await apiClient.theme.get(themeId)
+          this.theme.current = data
+        } else {
+          const { data } = await apiClient.theme.getActivatedTheme()
+          this.theme.current = data
+        }
+        await this.handleGetConfigurations()
+        await this.handleGetSettings()
+      } finally {
+        this.theme.loading = false
+      }
+    },
     async handleGetConfigurations() {
       try {
         const { data } = await apiClient.theme.listConfigurations(this.theme.current.id)
@@ -214,6 +250,26 @@ export default {
     },
     onThemeDeleteSucceed() {
       this.$router.replace({ name: 'ThemeList' })
+    },
+    handleRemoteUpdate() {
+      const _this = this
+      _this.$confirm({
+        title: '提示',
+        maskClosable: true,
+        content: '确定更新【' + _this.theme.current.name + '】主题？',
+        async onOk() {
+          const hideLoading = _this.$message.loading('更新中...', 0)
+          try {
+            await apiClient.theme.updateThemeByFetching(_this.theme.current.id)
+            _this.$message.success('更新成功！')
+          } catch (e) {
+            _this.$log.error('Failed to update theme: ', e)
+          } finally {
+            hideLoading()
+            await _this.handleGetTheme(_this.theme.current.id)
+          }
+        }
+      })
     }
   }
 }
