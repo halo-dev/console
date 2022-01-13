@@ -29,7 +29,7 @@
                   <a-icon style="margin-right:3px" type="lock" />
                   启用
                 </div>
-                <div @click="handleOpenThemeSettingDrawer(item)">
+                <div @click="handleRouteToThemeSetting(item)">
                   <a-icon style="margin-right:3px" type="setting" />
                   设置
                 </div>
@@ -49,7 +49,7 @@
                     </a-menu-item>
                     <a-menu-item :key="3" @click="handleOpenLocalUpdateModal(item)">
                       <a-icon style="margin-right:3px" type="file" />
-                      从主题包更新
+                      本地更新
                     </a-menu-item>
                   </a-menu>
                 </a-dropdown>
@@ -143,45 +143,27 @@
         @success="handleUploadSucceed"
       ></FilePondUpload>
     </a-modal>
-    <a-modal
-      v-model="themeDeleteModal.visible"
-      :afterClose="onThemeDeleteModalClose"
-      :closable="false"
-      :width="416"
-      destroyOnClose
-      title="提示"
-    >
-      <template slot="footer">
-        <a-button @click="themeDeleteModal.visible = false">
-          取消
-        </a-button>
-        <ReactiveButton
-          :errored="themeDeleteModal.deleteErrored"
-          :loading="themeDeleteModal.deleting"
-          erroredText="删除失败"
-          loadedText="删除成功"
-          text="确定"
-          @callback="handleDeleteThemeCallback"
-          @click="handleDeleteTheme(themeDeleteModal.selected.id, themeDeleteModal.deleteSettings)"
-        ></ReactiveButton>
-      </template>
-      <p>确定删除【{{ themeDeleteModal.selected.name }}】主题？</p>
-      <a-checkbox v-model="themeDeleteModal.deleteSettings">
-        同时删除主题配置
-      </a-checkbox>
-    </a-modal>
+
+    <ThemeDeleteConfirmModal
+      :theme="themeDeleteModal.selected"
+      :visible.sync="themeDeleteModal.visible"
+      @onAfterClose="themeDeleteModal.selected = {}"
+      @success="handleListThemes"
+    />
   </page-view>
 </template>
 
 <script>
 import ThemeSettingDrawer from './components/ThemeSettingDrawer'
+import ThemeDeleteConfirmModal from './components/ThemeDeleteConfirmModal'
 import { PageView } from '@/layouts'
 import apiClient from '@/utils/api-client'
 
 export default {
   components: {
     PageView,
-    ThemeSettingDrawer
+    ThemeSettingDrawer,
+    ThemeDeleteConfirmModal
   },
   data() {
     return {
@@ -216,10 +198,7 @@ export default {
 
       themeDeleteModal: {
         visible: false,
-        deleteSettings: false,
-        selected: {},
-        deleting: false,
-        deleteErrored: false
+        selected: {}
       },
 
       themeSettingDrawer: {
@@ -281,27 +260,6 @@ export default {
         this.handleListThemes()
       })
     },
-    handleDeleteTheme(themeId, deleteSettings) {
-      this.themeDeleteModal.deleting = true
-      apiClient.theme
-        .delete(themeId, deleteSettings)
-        .catch(() => {
-          this.themeDeleteModal.deleteErrored = false
-        })
-        .finally(() => {
-          setTimeout(() => {
-            this.themeDeleteModal.deleting = false
-          }, 400)
-        })
-    },
-    handleDeleteThemeCallback() {
-      if (this.themeDeleteModal.deleteErrored) {
-        this.themeDeleteModal.deleteErrored = false
-      } else {
-        this.themeDeleteModal.visible = false
-        this.handleListThemes()
-      }
-    },
     handleUploadSucceed() {
       this.installModal.visible = false
       this.localUpdateModel.visible = false
@@ -336,9 +294,8 @@ export default {
       this.localUpdateModel.selected = item
       this.localUpdateModel.visible = true
     },
-    handleOpenThemeSettingDrawer(theme) {
-      this.themeSettingDrawer.selected = theme
-      this.themeSettingDrawer.visible = true
+    handleRouteToThemeSetting(theme) {
+      this.$router.push({ name: 'ThemeSetting', query: { themeId: theme.id } })
     },
     handleOpenThemeDeleteModal(item) {
       this.themeDeleteModal.visible = true
@@ -377,11 +334,6 @@ export default {
     onThemeSettingsDrawerClose() {
       this.themeSettingDrawer.visible = false
       this.themeSettingDrawer.selected = {}
-    },
-    onThemeDeleteModalClose() {
-      this.themeDeleteModal.visible = false
-      this.themeDeleteModal.deleteSettings = false
-      this.themeDeleteModal.selected = {}
     }
   }
 }
