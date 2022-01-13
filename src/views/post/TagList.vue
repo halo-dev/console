@@ -11,15 +11,11 @@
               <a-input v-model="form.model.slug" />
             </a-form-model-item>
             <a-form-model-item label="颜色：" prop="color">
-              <a-input-group compact style="display:flex">
-                <a-dropdown :trigger="['click']">
-                  <a-input v-model="form.model.color" :maxLength="7" style="flex:1" />
-                  <color-picker slot="overlay" :value="colorPicker.colors" @input="onColorPick"></color-picker>
-                </a-dropdown>
-                <a-button :style="{ backgroundColor: form.model.color }" @click="refreshColor">
-                  <a-icon type="sync" :style="{ color: iconColorOfRefresh }" />
-                </a-button>
-              </a-input-group>
+              <a-input v-model="form.model.color">
+                <template #addonAfter>
+                  <verte v-model="form.model.color" model="hex" picker="square" style="cursor: pointer"></verte>
+                </template>
+              </a-input>
             </a-form-model-item>
             <a-form-model-item help="* 在标签页面可展示，需要主题支持" label="封面图：" prop="thumbnail">
               <a-input v-model="form.model.thumbnail">
@@ -70,11 +66,11 @@
         <a-card :bodyStyle="{ padding: '16px' }" title="所有标签">
           <a-spin :spinning="list.loading">
             <a-empty v-if="list.data.length === 0" />
-            <a-tooltip placement="topLeft" v-for="tag in list.data" v-else :key="tag.id">
+            <a-tooltip v-for="tag in list.data" v-else :key="tag.id" placement="topLeft">
               <template slot="title">
                 <span>{{ tag.postCount }} 篇文章</span>
               </template>
-              <post-tag :tag="tag" />
+              <post-tag :tag="tag" style="margin-bottom: 8px;cursor:pointer;" @click.native="form.model = tag" />
             </a-tooltip>
           </a-spin>
         </a-card>
@@ -92,34 +88,25 @@
 <script>
 import { PageView } from '@/layouts'
 import apiClient from '@/utils/api-client'
-import ColorPicker from '@/components/ColorPicker'
-import { labelColor, hexRegExp, randomHex } from '@/utils/colorUtil'
-
-const colors = {
-  hex: '#194d33',
-  hex8: '#194D33A8',
-  hsl: { h: 150, s: 0.5, l: 0.2, a: 1 },
-  hsv: { h: 150, s: 0.66, v: 0.3, a: 1 },
-  rgba: { r: 25, g: 77, b: 51, a: 1 },
-  a: 1
-}
+import { hexRegExp } from '@/utils/colorUtil'
+import Verte from 'verte'
+import 'verte/dist/verte.css'
 
 export default {
   components: {
     PageView,
-    ColorPicker
+    Verte
   },
   data() {
     return {
-      colorPicker: {
-        colors: colors
-      },
       list: {
         data: [],
         loading: false
       },
       form: {
-        model: {},
+        model: {
+          color: '#cfd3d7'
+        },
         saving: false,
         errored: false,
         rules: {
@@ -139,30 +126,16 @@ export default {
   },
   computed: {
     title() {
-      if (this.isUpdateMode) {
-        return '修改标签'
-      }
-      return '添加标签'
+      return this.isUpdateMode ? '修改标签' : '添加标签'
     },
     isUpdateMode() {
       return !!this.form.model.id
-    },
-    iconColorOfRefresh() {
-      return labelColor(this.form.model.color)
     }
   },
   created() {
     this.handleListTags()
-    this.refreshColor()
   },
   methods: {
-    refreshColor() {
-      const color = randomHex()
-      this.$set(this.form.model, 'color', color)
-    },
-    onColorPick(color) {
-      this.$set(this.form.model, 'color', color.hex)
-    },
     handleListTags() {
       this.list.loading = true
       apiClient.tag
@@ -176,9 +149,10 @@ export default {
     },
     handleDeleteTag(tagId) {
       apiClient.tag.delete(tagId).finally(() => {
-        this.form.model = {}
+        this.form.model = {
+          color: '#cfd3d7'
+        }
         this.handleListTags()
-        this.refreshColor()
       })
     },
     handleCreateOrUpdateTag() {
@@ -217,8 +191,9 @@ export default {
       if (_this.form.errored) {
         _this.form.errored = false
       } else {
-        _this.form.model = {}
-        _this.refreshColor()
+        _this.form.model = {
+          color: '#cfd3d7'
+        }
         _this.handleListTags()
       }
     },

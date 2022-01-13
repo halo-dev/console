@@ -4,7 +4,8 @@
   </a-tag>
 </template>
 <script>
-import { labelColor } from '@/utils/colorUtil'
+import { isHex, isLight } from '@/utils/colorUtil'
+
 export default {
   name: 'PostTag',
   props: {
@@ -15,7 +16,12 @@ export default {
   },
   computed: {
     labelColor() {
-      return labelColor(this.tag.color)
+      const { color } = this.tag || {}
+      if (!color) return 'inherit'
+      if (!isHex(color)) {
+        return 'inherit'
+      }
+      return !isLight(color) ? '#fff' : 'inherit'
     }
   }
 }

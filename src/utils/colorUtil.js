@@ -25,11 +25,7 @@ const isLight = color => {
   hsp = Math.sqrt(0.299 * (r * r) + 0.587 * (g * g) + 0.114 * (b * b))
 
   // Using the HSP value, determine whether the color is light or dark
-  if (hsp > 127.5) {
-    return true
-  } else {
-    return false
-  }
+  return hsp > 127.5
 }
 
 const randomHex = () => {
@@ -48,11 +44,4 @@ const isHsl = color => {
   return /^hsl/.test(color)
 }
 
-const labelColor = color => {
-  if (!isHex(color)) {
-    return 'inherit'
-  }
-  return !isLight(color) ? '#fff' : 'inherit'
-}
-
-export { labelColor, isLight, randomHex, isHex, hexRegExp, isRgb, isHsl }
+export { isLight, randomHex, isHex, hexRegExp, isRgb, isHsl }
