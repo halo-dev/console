@@ -7,7 +7,7 @@
             <a-icon type="cloud" />
             在线更新
           </a-menu-item>
-          <a-menu-item key="2">
+          <a-menu-item key="2" @click="localUpgradeModel.visible = true">
             <a-icon type="file" />
             本地更新
           </a-menu-item>
@@ -27,7 +27,7 @@
       </a-button>
     </template>
     <a-spin :spinning="theme.loading">
-      <div v-if="theme.configurations.length > 0" class="card-container">
+      <div v-if="theme.current.id" class="card-container">
         <a-tabs defaultActiveKey="0" type="card">
           <a-tab-pane :key="0" tab="关于">
             <a-avatar :alt="theme.current.name" :size="72" :src="theme.current.logo" shape="square" />
@@ -153,13 +153,18 @@
           </a-tab-pane>
         </a-tabs>
       </div>
-      <a-empty v-if="theme.configurations.length <= 0 && !theme.loading" description="当前主题无设置选项" />
     </a-spin>
 
     <ThemeDeleteConfirmModal
       :theme="theme.current"
       :visible.sync="themeDeleteModal.visible"
       @success="onThemeDeleteSucceed"
+    />
+
+    <ThemeLocalUpgradeModal
+      :theme="theme.current"
+      :visible.sync="localUpgradeModel.visible"
+      @success="handleGetTheme"
     />
   </page-view>
 </template>
@@ -169,6 +174,7 @@ import Verte from 'verte'
 import 'verte/dist/verte.css'
 import { PageView } from '@/layouts'
 import ThemeDeleteConfirmModal from './components/ThemeDeleteConfirmModal'
+import ThemeLocalUpgradeModal from './components/ThemeLocalUpgradeModal'
 
 // utils
 import apiClient from '@/utils/api-client'
@@ -178,7 +184,8 @@ export default {
   components: {
     PageView,
     Verte,
-    ThemeDeleteConfirmModal
+    ThemeDeleteConfirmModal,
+    ThemeLocalUpgradeModal
   },
   data() {
     return {
@@ -191,6 +198,9 @@ export default {
         saveErrored: false
       },
       themeDeleteModal: {
+        visible: false
+      },
+      localUpgradeModel: {
         visible: false
       }
     }

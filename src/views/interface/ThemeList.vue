@@ -125,29 +125,18 @@
         </a-tabs>
       </div>
     </a-modal>
-    <a-modal
-      v-model="localUpdateModel.visible"
-      :afterClose="onThemeInstallModalClose"
-      :footer="null"
-      destroyOnClose
-      title="更新主题"
-    >
-      <FilePondUpload
-        ref="updateByFile"
-        :accepts="['application/x-zip', 'application/x-zip-compressed', 'application/zip']"
-        :field="localUpdateModel.selected.id"
-        :multiple="false"
-        :uploadHandler="localUpdateModel.uploadHandler"
-        label="点击选择主题更新包或将主题更新包拖拽到此处<br>仅支持 ZIP 格式的文件"
-        name="file"
-        @success="handleUploadSucceed"
-      ></FilePondUpload>
-    </a-modal>
 
     <ThemeDeleteConfirmModal
       :theme="themeDeleteModal.selected"
       :visible.sync="themeDeleteModal.visible"
       @onAfterClose="themeDeleteModal.selected = {}"
+      @success="handleListThemes"
+    />
+
+    <ThemeLocalUpgradeModal
+      :theme="localUpgradeModel.selected"
+      :visible.sync="localUpgradeModel.visible"
+      @onAfterClose="localUpgradeModel.selected = {}"
       @success="handleListThemes"
     />
   </page-view>
@@ -156,6 +145,7 @@
 <script>
 import ThemeSettingDrawer from './components/ThemeSettingDrawer'
 import ThemeDeleteConfirmModal from './components/ThemeDeleteConfirmModal'
+import ThemeLocalUpgradeModal from './components/ThemeLocalUpgradeModal'
 import { PageView } from '@/layouts'
 import apiClient from '@/utils/api-client'
 
@@ -163,7 +153,8 @@ export default {
   components: {
     PageView,
     ThemeSettingDrawer,
-    ThemeDeleteConfirmModal
+    ThemeDeleteConfirmModal,
+    ThemeLocalUpgradeModal
   },
   data() {
     return {
@@ -190,9 +181,8 @@ export default {
         }
       },
 
-      localUpdateModel: {
+      localUpgradeModel: {
         visible: false,
-        uploadHandler: (file, options, field) => apiClient.theme.updateByUpload(file, options, field),
         selected: {}
       },
 
@@ -224,20 +214,6 @@ export default {
   beforeMount() {
     this.handleListThemes()
   },
-  destroyed() {
-    this.$log.debug('Theme list destroyed.')
-    this.themeSettingDrawer.visible = false
-    this.installModal.visible = false
-    this.localUpdateModel.visible = false
-    this.themeDeleteModal.visible = false
-  },
-  beforeRouteLeave(to, from, next) {
-    this.themeSettingDrawer.visible = false
-    this.installModal.visible = false
-    this.localUpdateModel.visible = false
-    this.themeDeleteModal.visible = false
-    next()
-  },
   methods: {
     handleListThemes() {
       this.list.loading = true
@@ -262,7 +238,6 @@ export default {
     },
     handleUploadSucceed() {
       this.installModal.visible = false
-      this.localUpdateModel.visible = false
       this.handleListThemes()
     },
     handleRemoteFetching() {
@@ -291,8 +266,8 @@ export default {
       }
     },
     handleOpenLocalUpdateModal(item) {
-      this.localUpdateModel.selected = item
-      this.localUpdateModel.visible = true
+      this.localUpgradeModel.selected = item
+      this.localUpgradeModel.visible = true
     },
     handleRouteToThemeSetting(theme) {
       this.$router.push({ name: 'ThemeSetting', query: { themeId: theme.id } })
@@ -324,9 +299,6 @@ export default {
     onThemeInstallModalClose() {
       if (this.$refs.upload) {
         this.$refs.upload.handleClearFileList()
-      }
-      if (this.$refs.updateByFile) {
-        this.$refs.updateByFile.handleClearFileList()
       }
       this.installModal.remote.url = null
       this.handleListThemes()
