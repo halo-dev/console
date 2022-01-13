@@ -33,12 +33,6 @@
             <a-avatar :alt="theme.current.name" :size="72" :src="theme.current.logo" shape="square" />
             <a-divider />
             <a-descriptions :column="1" layout="horizontal">
-              <a-descriptions-item label="主题标识">
-                {{ theme.current.id }}
-              </a-descriptions-item>
-              <a-descriptions-item label="存储位置">
-                {{ theme.current.themePath }}
-              </a-descriptions-item>
               <a-descriptions-item label="作者">
                 <a :href="theme.current.author.website || '#'">
                   {{ theme.current.author.name }}
@@ -52,13 +46,19 @@
                   {{ theme.current.website || '-' }}
                 </a>
               </a-descriptions-item>
-              <a-descriptions-item label="Git 远程仓库">
+              <a-descriptions-item label="Git 仓库">
                 <a :href="theme.current.repo || '#'">
                   {{ theme.current.repo || '-' }}
                 </a>
               </a-descriptions-item>
+              <a-descriptions-item label="主题标识">
+                {{ theme.current.id }}
+              </a-descriptions-item>
               <a-descriptions-item label="当前版本">
                 {{ theme.current.version }}
+              </a-descriptions-item>
+              <a-descriptions-item label="存储位置">
+                {{ theme.current.themePath }}
               </a-descriptions-item>
             </a-descriptions>
           </a-tab-pane>
