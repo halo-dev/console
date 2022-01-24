@@ -196,14 +196,6 @@
       </a-col>
     </a-row>
 
-    <AttachmentSelectDrawer
-      v-model="attachmentDrawer.visible"
-      isChooseAvatar
-      title="选择头像"
-      @listenToSelect="handleSelectAvatar"
-      @listenToSelectGravatar="handleSelectGravatar"
-    />
-
     <a-modal
       :centered="true"
       :closable="false"
@@ -250,6 +242,13 @@
         </a-form-model-item>
       </a-form-model>
     </a-modal>
+
+    <AttachmentSelectModal
+      title="选择头像"
+      :multiSelect="false"
+      :visible.sync="attachmentDrawer.visible"
+      @confirm="handleSelectAvatar"
+    />
   </div>
 </template>
 
@@ -432,8 +431,10 @@ export default {
         this.userForm.errored = false
       }
     },
-    handleSelectAvatar(data) {
-      this.userForm.model.avatar = encodeURI(data.path)
+    handleSelectAvatar({ raw }) {
+      if (raw.length) {
+        this.userForm.model.avatar = encodeURI(raw[0].path)
+      }
       this.attachmentDrawer.visible = false
     },
     handleSelectGravatar() {

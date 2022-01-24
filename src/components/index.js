@@ -3,7 +3,6 @@ import Vue from 'vue'
 import Ellipsis from '@/components/Ellipsis'
 import FooterToolbar from '@/components/FooterToolbar'
 import FilePondUpload from '@/components/Upload/FilePondUpload'
-import AttachmentSelectDrawer from './Attachment/AttachmentSelectDrawer'
 import AttachmentUploadModal from './Attachment/AttachmentUploadModal'
 import AttachmentSelectModal from './Attachment/AttachmentSelectModal'
 import AttachmentDetailModal from './Attachment/AttachmentDetailModal'
@@ -15,7 +14,6 @@ const _components = {
   Ellipsis,
   FooterToolbar,
   FilePondUpload,
-  AttachmentSelectDrawer,
   AttachmentUploadModal,
   AttachmentSelectModal,
   AttachmentDetailModal,
