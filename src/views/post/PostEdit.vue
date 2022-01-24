@@ -39,25 +39,26 @@
       @onUpdate="onUpdateFromSetting"
     />
 
-    <AttachmentDrawer v-model="attachmentDrawerVisible" />
+    <!--    <AttachmentDrawer v-model="attachmentDrawerVisible" />-->
+    <AttachmentSelectModal :visible.sync="attachmentDrawerVisible" @confirm="handleSelectAttachment" />
   </page-view>
 </template>
 
 <script>
-import { mixin, mixinDevice, mixinPostEdit } from '@/mixins/mixin.js'
-import { datetimeFormat } from '@/utils/datetime'
-
+// components
 import PostSettingModal from './components/PostSettingModal'
-import AttachmentDrawer from '../attachment/components/AttachmentDrawer'
 import MarkdownEditor from '@/components/Editor/MarkdownEditor'
 import { PageView } from '@/layouts'
+
+// libs
+import { mixin, mixinDevice, mixinPostEdit } from '@/mixins/mixin.js'
+import { datetimeFormat } from '@/utils/datetime'
 import apiClient from '@/utils/api-client'
 
 export default {
   mixins: [mixin, mixinDevice, mixinPostEdit],
   components: {
     PostSettingModal,
-    AttachmentDrawer,
     MarkdownEditor,
     PageView
   },
@@ -218,6 +219,9 @@ export default {
             })
         })
       }
+    },
+    handleSelectAttachment({ markdown }) {
+      this.postToStage.originalContent += markdown.join(`\n`)
     },
     handleRestoreSavedStatus() {
       this.contentChanges = 0
