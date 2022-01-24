@@ -140,15 +140,13 @@
 <script>
 import { mixin, mixinDevice } from '@/mixins/mixin.js'
 import { PageView } from '@/layouts'
-import AttachmentDetailModal from './components/AttachmentDetailModal.vue'
 import apiClient from '@/utils/api-client'
 import { mapGetters } from 'vuex'
 import { attachmentTypes } from '@/core/constant'
 
 export default {
   components: {
-    PageView,
-    AttachmentDetailModal
+    PageView
   },
   mixins: [mixin, mixinDevice],
   filters: {

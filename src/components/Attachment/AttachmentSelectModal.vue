@@ -6,7 +6,14 @@
       :loading="list.loading"
       class="attachments-group"
     >
-      <a-list-item :key="index" slot="renderItem" slot-scope="item, index" @click="handleItemClick(item)">
+      <a-list-item
+        @mouseenter="$set(item, 'hover', true)"
+        @mouseleave="$set(item, 'hover', false)"
+        :key="index"
+        slot="renderItem"
+        slot-scope="item, index"
+        @click="handleItemClick(item)"
+      >
         <div :class="itemClass(item)" class="border border-solid">
           <div class="attach-thumb attachments-group-item">
             <span v-if="!isImage(item)" class="attachments-group-item-type">{{ item.suffix }}</span>
@@ -24,6 +31,13 @@
               </a-tooltip>
             </template>
           </a-card-meta>
+          <a-icon
+            v-if="item.hover"
+            type="profile"
+            class="absolute top-1 right-2 cursor-pointer hover:text-blue-400 transition-all"
+            @click.stop="handleOpenDetail(item)"
+            :style="{ fontSize: '18px' }"
+          />
         </div>
       </a-list-item>
     </a-list>
@@ -72,6 +86,16 @@
       <a-button @click="modalVisible = false">取消</a-button>
       <a-button type="primary" @click="handleConfirm">确定</a-button>
     </template>
+
+    <AttachmentDetailModal :attachment="list.current" :visible.sync="detailVisible" @delete="handleListAttachments()">
+      <template #extraFooter>
+        <a-button @click="handleItemClick(list.current)" type="primary">
+          {{ list.selected.findIndex(item => item.id === list.current.id) > -1 ? '取消选择' : '选择' }}
+        </a-button>
+        <a-button :disabled="selectPreviousButtonDisabled" @click="handleSelectPrevious">上一项</a-button>
+        <a-button :disabled="selectNextButtonDisabled" @click="handleSelectNext">下一项</a-button>
+      </template>
+    </AttachmentDetailModal>
   </a-modal>
 </template>
 <script>
@@ -98,13 +122,17 @@ export default {
       list: {
         data: [],
         total: 0,
+        hasNext: false,
+        hasPrevious: false,
         loading: false,
         params: {
           page: 0,
           size: 12
         },
-        selected: []
-      }
+        selected: [],
+        current: {}
+      },
+      detailVisible: false
     }
   },
   computed: {
@@ -122,6 +150,14 @@ export default {
         size: this.list.params.size,
         total: this.list.total
       }
+    },
+    selectPreviousButtonDisabled() {
+      const index = this.list.data.findIndex(attachment => attachment.id === this.list.current.id)
+      return index === 0 && !this.list.hasPrevious
+    },
+    selectNextButtonDisabled() {
+      const index = this.list.data.findIndex(attachment => attachment.id === this.list.current.id)
+      return index === this.list.data.length - 1 && !this.list.hasNext
     },
     isImage() {
       return function (attachment) {
@@ -171,6 +207,8 @@ export default {
 
         this.list.data = response.data.content
         this.list.total = response.data.total
+        this.list.hasNext = response.data.hasNext
+        this.list.hasPrevious = response.data.hasPrevious
       } catch (error) {
         this.$log.error(error)
       } finally {
@@ -227,6 +265,45 @@ export default {
         html: this.htmlSyntaxList
       })
       this.modalVisible = false
+    },
+
+    handleOpenDetail(attachment) {
+      this.list.current = attachment
+      this.detailVisible = true
+    },
+
+    /**
+     * Select previous attachment
+     */
+    async handleSelectPrevious() {
+      const index = this.list.data.findIndex(item => item.id === this.list.current.id)
+      if (index > 0) {
+        this.list.current = this.list.data[index - 1]
+        return
+      }
+      if (index === 0 && this.list.hasPrevious) {
+        this.list.params.page--
+        await this.handleListAttachments()
+
+        this.list.current = this.list.data[this.list.data.length - 1]
+      }
+    },
+
+    /**
+     * Select next attachment
+     */
+    async handleSelectNext() {
+      const index = this.list.data.findIndex(item => item.id === this.list.current.id)
+      if (index < this.list.data.length - 1) {
+        this.list.current = this.list.data[index + 1]
+        return
+      }
+      if (index === this.list.data.length - 1 && this.list.hasNext) {
+        this.list.params.page++
+        await this.handleListAttachments()
+
+        this.list.current = this.list.data[0]
+      }
     },
 
     onAfterClose() {
