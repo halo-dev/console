@@ -14,7 +14,7 @@
         ></ReactiveButton>
         <a-button :loading="previewSaving" @click="handlePreview">预览</a-button>
         <a-button type="primary" @click="postSettingVisible = true">发布</a-button>
-        <a-button type="dashed" @click="attachmentDrawerVisible = true">附件库</a-button>
+        <a-button type="dashed" @click="attachmentSelectVisible = true">附件库</a-button>
       </a-space>
     </template>
     <a-row :gutter="12">
@@ -39,8 +39,7 @@
       @onUpdate="onUpdateFromSetting"
     />
 
-    <!--    <AttachmentDrawer v-model="attachmentDrawerVisible" />-->
-    <AttachmentSelectModal :visible.sync="attachmentDrawerVisible" @confirm="handleSelectAttachment" />
+    <AttachmentSelectModal :visible.sync="attachmentSelectVisible" @confirm="handleSelectAttachment" />
   </page-view>
 </template>
 
@@ -64,7 +63,7 @@ export default {
   },
   data() {
     return {
-      attachmentDrawerVisible: false,
+      attachmentSelectVisible: false,
       postSettingVisible: false,
       postToStage: {},
       contentChanges: 0,
@@ -85,18 +84,11 @@ export default {
     })
   },
   destroyed() {
-    if (this.attachmentDrawerVisible) {
-      this.attachmentDrawerVisible = false
-    }
     if (window.onbeforeunload) {
       window.onbeforeunload = null
     }
   },
   beforeRouteLeave(to, from, next) {
-    if (this.attachmentDrawerVisible) {
-      this.attachmentDrawerVisible = false
-    }
-
     if (this.contentChanges <= 1) {
       next()
     } else {

@@ -124,7 +124,7 @@
 
     <AttachmentSelectModal
       :multiSelect="false"
-      :visible.sync="attachmentDrawerVisible"
+      :visible.sync="attachmentSelectVisible"
       @confirm="handleSelectAttachment"
     />
 
@@ -167,7 +167,7 @@ export default {
   },
   data() {
     return {
-      attachmentDrawerVisible: false,
+      attachmentSelectVisible: false,
       themeConfigurations: [],
       themeSettings: [],
       settingLoading: true,
@@ -251,14 +251,14 @@ export default {
     },
     handleShowSelectAttachment(field) {
       this.selectedField = field
-      this.attachmentDrawerVisible = true
+      this.attachmentSelectVisible = true
     },
     handleSelectAttachment({ raw }) {
       if (raw.length) {
         this.$set(this.themeSettings, this.selectedField, encodeURI(raw[0].path))
       }
       // this.themeSettings[this.selectedField] = encodeURI(data.path)
-      this.attachmentDrawerVisible = false
+      this.attachmentSelectVisible = false
     },
     handleAfterVisibleChanged(visible) {
       if (visible) {
