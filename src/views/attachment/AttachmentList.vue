@@ -92,8 +92,12 @@
                   loading="lazy"
                 />
               </div>
-              <a-card-meta class="p-3">
-                <ellipsis slot="description" :length="isMobile() ? 12 : 16" tooltip>{{ item.name }}</ellipsis>
+              <a-card-meta class="p-2">
+                <template #description>
+                  <a-tooltip :title="item.name">
+                    <div class="truncate">{{ item.name }}</div>
+                  </a-tooltip>
+                </template>
               </a-card-meta>
               <a-checkbox
                 v-show="supportMultipleSelection"

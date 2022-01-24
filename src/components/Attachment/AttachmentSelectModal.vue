@@ -32,9 +32,17 @@
             </template>
           </a-card-meta>
           <a-icon
-            v-if="item.hover"
+            v-show="isItemSelect(item) && !item.hover"
+            type="check-circle"
+            theme="twoTone"
+            class="absolute top-1 right-2 font-bold transition-all"
+            :style="{ fontSize: '18px', color: 'rgb(37 99 235)' }"
+          />
+          <a-icon
+            v-show="item.hover"
             type="profile"
-            class="absolute top-1 right-2 cursor-pointer hover:text-blue-400 transition-all"
+            theme="twoTone"
+            class="absolute top-1 right-2 font-bold cursor-pointer hover:text-blue-400 transition-all"
             @click.stop="handleOpenDetail(item)"
             :style="{ fontSize: '18px' }"
           />
@@ -84,16 +92,16 @@
 
     <template slot="footer">
       <a-button @click="modalVisible = false">取消</a-button>
-      <a-button type="primary" @click="handleConfirm">确定</a-button>
+      <a-button type="primary" :disabled="!list.selected.length" @click="handleConfirm">确定</a-button>
     </template>
 
     <AttachmentDetailModal :attachment="list.current" :visible.sync="detailVisible" @delete="handleListAttachments()">
       <template #extraFooter>
+        <a-button :disabled="selectPreviousButtonDisabled" @click="handleSelectPrevious">上一项</a-button>
+        <a-button :disabled="selectNextButtonDisabled" @click="handleSelectNext">下一项</a-button>
         <a-button @click="handleItemClick(list.current)" type="primary">
           {{ list.selected.findIndex(item => item.id === list.current.id) > -1 ? '取消选择' : '选择' }}
         </a-button>
-        <a-button :disabled="selectPreviousButtonDisabled" @click="handleSelectPrevious">上一项</a-button>
-        <a-button :disabled="selectNextButtonDisabled" @click="handleSelectNext">下一项</a-button>
       </template>
     </AttachmentDetailModal>
   </a-modal>
@@ -171,6 +179,11 @@ export default {
       return function (attachment) {
         const isSelect = this.list.selected.findIndex(item => item.id === attachment.id) > -1
         return isSelect ? 'border-blue-600' : 'border-slate-200'
+      }
+    },
+    isItemSelect() {
+      return function (attachment) {
+        return this.list.selected.findIndex(item => item.id === attachment.id) > -1
       }
     },
     markdownSyntaxList() {
