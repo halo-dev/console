@@ -170,7 +170,7 @@
       @close="onJournalCommentsDrawerClose"
     />
 
-    <AttachmentSelectModal :visible.sync="attachmentSelect.visible" />
+    <AttachmentSelectModal :visible.sync="attachmentSelect.visible" @confirm="handleSelectAttachment" />
   </page-view>
 </template>
 
@@ -376,6 +376,9 @@ export default {
           this.handleListOptions()
           this.refreshOptionsCache()
         })
+    },
+    handleSelectAttachment({ markdown }) {
+      this.$set(this.form.model, 'sourceContent', (this.form.model.sourceContent || '') + '\n' + markdown.join('\n'))
     }
   }
 }

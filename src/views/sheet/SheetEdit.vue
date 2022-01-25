@@ -40,7 +40,7 @@
       @onUpdate="onUpdateFromSetting"
     />
 
-    <AttachmentSelectModal :visible.sync="attachmentSelectVisible" />
+    <AttachmentSelectModal :visible.sync="attachmentSelectVisible" @confirm="handleSelectAttachment" />
   </page-view>
 </template>
 
@@ -206,6 +206,13 @@ export default {
             })
         })
       }
+    },
+    handleSelectAttachment({ markdown }) {
+      this.$set(
+        this.sheetToStage,
+        'originalContent',
+        (this.sheetToStage.originalContent || '') + '\n' + markdown.join(`\n`)
+      )
     },
     handleRestoreSavedStatus() {
       this.contentChanges = 0

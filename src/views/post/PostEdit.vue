@@ -213,7 +213,11 @@ export default {
       }
     },
     handleSelectAttachment({ markdown }) {
-      this.postToStage.originalContent += markdown.join(`\n`)
+      this.$set(
+        this.postToStage,
+        'originalContent',
+        (this.postToStage.originalContent || '') + '\n' + markdown.join(`\n`)
+      )
     },
     handleRestoreSavedStatus() {
       this.contentChanges = 0
