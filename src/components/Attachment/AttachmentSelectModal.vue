@@ -150,6 +150,8 @@
       <a-button type="primary" :disabled="!list.selected.length" @click="handleConfirm">确定</a-button>
     </template>
 
+    <AttachmentUploadModal :visible.sync="upload.visible" @close="handleSearch" />
+
     <AttachmentDetailModal :attachment="list.current" :visible.sync="detailVisible" @delete="handleListAttachments()">
       <template #extraFooter>
         <a-button :disabled="selectPreviousButtonDisabled" @click="handleSelectPrevious">上一项</a-button>
