@@ -1,5 +1,59 @@
 <template>
   <a-modal v-model="modalVisible" :afterClose="onAfterClose" :title="title" :width="1024" destroyOnClose>
+    <div class="table-page-search-wrapper">
+      <a-form layout="inline">
+        <a-row :gutter="24">
+          <a-col :md="6" :sm="24">
+            <a-form-item label="关键词：">
+              <a-input v-model="list.params.keyword" @keyup.enter="handleSearch()" />
+            </a-form-item>
+          </a-col>
+          <a-col :md="6" :sm="24">
+            <a-form-item label="存储位置：">
+              <a-select
+                v-model="list.params.attachmentType"
+                :loading="types.loading"
+                allowClear
+                @change="handleSearch()"
+              >
+                <a-select-option v-for="item in types.data" :key="item" :value="item">
+                  {{ item | typeText }}
+                </a-select-option>
+              </a-select>
+            </a-form-item>
+          </a-col>
+          <a-col :md="6" :sm="24">
+            <a-form-item label="文件类型：">
+              <a-select
+                v-model="list.params.mediaType"
+                :loading="mediaTypes.loading"
+                allowClear
+                @change="handleSearch()"
+              >
+                <a-select-option v-for="(item, index) in mediaTypes.data" :key="index" :value="item">
+                  {{ item }}
+                </a-select-option>
+              </a-select>
+            </a-form-item>
+          </a-col>
+          <a-col :md="6" :sm="24">
+            <span class="table-page-search-submitButtons">
+              <a-space>
+                <a-button type="primary" @click="handleSearch()">查询</a-button>
+                <a-button @click="handleResetParam(), handleListAttachments()">重置</a-button>
+              </a-space>
+            </span>
+          </a-col>
+        </a-row>
+      </a-form>
+    </div>
+
+    <div class="mb-0 table-operator">
+      <a-button icon="cloud-upload" type="primary" @click="upload.visible = true">上传</a-button>
+    </div>
+
+    <a-divider />
+
     <a-list
       :dataSource="list.data"
       :grid="{ gutter: 6, xs: 2, sm: 2, md: 4, lg: 6, xl: 6, xxl: 6 }"
@@ -14,7 +68,7 @@
         slot-scope="item, index"
         @click="handleItemClick(item)"
       >
-        <div :class="itemClass(item)" class="border border-solid">
+        <div :class="`${isItemSelect(item) ? 'border-blue-600' : 'border-slate-200'}`" class="border border-solid">
           <div class="attach-thumb attachments-group-item">
             <span v-if="!isImage(item)" class="attachments-group-item-type">{{ item.suffix }}</span>
             <span
@@ -49,6 +103,7 @@
         </div>
       </a-list-item>
     </a-list>
+
     <div class="page-wrapper"></div>
 
     <div class="flex justify-between">
@@ -108,6 +163,7 @@
 </template>
 <script>
 import apiClient from '@/utils/api-client'
+import { attachmentTypes } from '@/core/constant'
 
 export default {
   name: 'AttachmentSelectModal',
@@ -135,11 +191,29 @@ export default {
         loading: false,
         params: {
           page: 0,
-          size: 12
+          size: 12,
+          keyword: undefined,
+          mediaType: undefined,
+          attachmentType: undefined
         },
         selected: [],
         current: {}
       },
+
+      mediaTypes: {
+        data: [],
+        loading: false
+      },
+
+      types: {
+        data: [],
+        loading: false
+      },
+
+      upload: {
+        visible: false
+      },
+
       detailVisible: false
     }
   },
@@ -175,12 +249,6 @@ export default {
         return attachment.mediaType.startsWith('image')
       }
     },
-    itemClass() {
-      return function (attachment) {
-        const isSelect = this.list.selected.findIndex(item => item.id === attachment.id) > -1
-        return isSelect ? 'border-blue-600' : 'border-slate-200'
-      }
-    },
     isItemSelect() {
       return function (attachment) {
         return this.list.selected.findIndex(item => item.id === attachment.id) > -1
@@ -205,7 +273,11 @@ export default {
   },
   watch: {
     modalVisible(value) {
-      value && this.handleListAttachments()
+      if (value) {
+        this.handleListAttachments()
+        this.handleListMediaTypes()
+        this.handleListTypes()
+      }
     }
   },
   methods: {
@@ -230,11 +302,65 @@ export default {
     },
 
     /**
+     * List attachment media types
+     */
+    async handleListMediaTypes() {
+      try {
+        this.mediaTypes.loading = true
+
+        const response = await apiClient.attachment.listMediaTypes()
+
+        this.mediaTypes.data = response.data
+      } catch (error) {
+        this.$log.error(error)
+      } finally {
+        this.mediaTypes.loading = false
+      }
+    },
+
+    /**
+     * List attachment upload types
+     */
+    async handleListTypes() {
+      try {
+        this.types.loading = true
+
+        const response = await apiClient.attachment.listTypes()
+
+        this.types.data = response.data
+      } catch (error) {
+        this.$log.error(error)
+      } finally {
+        this.types.loading = false
+      }
+    },
+
+    /**
      * Handle page change
      */
     handlePageChange(page = 1) {
       this.list.params.page = page - 1
       this.handleListAttachments()
+    },
+
+    /**
+     * Search attachments
+     */
+    handleSearch() {
+      this.handlePageChange(1)
+    },
+
+    /**
+     * Reset search params
+     */
+    handleResetParam() {
+      this.list.params = {
+        page: 0,
+        size: 12,
+        keyword: undefined,
+        mediaType: undefined,
+        attachmentType: undefined
+      }
     },
 
     /**
@@ -320,7 +446,13 @@ export default {
     },
 
     onAfterClose() {
+      this.handleResetParam()
       this.list.selected = []
+    }
+  },
+  filters: {
+    typeText(type) {
+      return attachmentTypes[type].text
     }
   }
 }
