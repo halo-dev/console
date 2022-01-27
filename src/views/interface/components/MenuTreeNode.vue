@@ -143,8 +143,6 @@ export default {
       this.$set(item, 'formVisible', false)
     },
     async handleMoveMenu(item, team) {
-      console.log(item, team)
-
       const menu = deepClone(item)
       menu.team = team
       menu.parentId = 0
