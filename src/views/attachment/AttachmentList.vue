@@ -52,6 +52,9 @@
           </div>
           <div class="mb-0 table-operator">
             <a-button icon="cloud-upload" type="primary" @click="upload.visible = true">上传</a-button>
+            <a-button v-show="list.selected.length" icon="check-circle" type="primary" @click="handleSelectAll">
+              全选
+            </a-button>
             <a-button v-show="list.selected.length" icon="delete" type="danger" @click="handleDeleteAttachmentInBatch">
               删除
             </a-button>
@@ -318,6 +321,10 @@ export default {
 
     handleUnselect(attachment) {
       this.list.selected = this.list.selected.filter(item => item.id !== attachment.id)
+    },
+
+    handleSelectAll() {
+      this.list.selected = this.list.data
     },
 
     /**
