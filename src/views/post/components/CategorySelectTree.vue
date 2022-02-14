@@ -19,9 +19,6 @@ export default {
     event: 'change'
   },
   props: {
-    /**
-     * Category id.
-     */
     categoryId: {
       type: Number,
       required: true,
@@ -35,14 +32,22 @@ export default {
   },
   computed: {
     categoryTreeData() {
-      return this.categories.map(category => {
-        return {
-          id: category.id,
-          title: category.name,
-          value: category.id.toString(),
-          pId: category.parentId
-        }
-      })
+      return [
+        {
+          id: 0,
+          title: '根目录',
+          value: '0',
+          pId: -1
+        },
+        ...this.categories.map(category => {
+          return {
+            id: category.id,
+            title: category.name,
+            value: category.id.toString(),
+            pId: category.parentId
+          }
+        })
+      ]
     },
     categoryIdString() {
       return this.categoryId.toString()
