@@ -19,6 +19,9 @@
             <a-form-model-item help="* 分类密码" label="密码：" prop="password">
               <a-input-password v-model="form.model.password" autocomplete="new-password" />
             </a-form-model-item>
+            <a-form-model-item help="* 排序编号不能低于 0" label="排序：" prop="sort">
+              <a-input-number style="width: 100%" :min="0" defaultValue="100" v-model="form.model.sort" />
+            </a-form-model-item>
             <a-form-model-item help="* 分类描述，需要主题支持" label="描述：" prop="description">
               <a-input v-model="form.model.description" :autoSize="{ minRows: 3 }" type="textarea" />
             </a-form-model-item>
@@ -102,8 +105,8 @@
                   "
                 >
                   {{ item.name }}{{ item.password ? '（加密）' : '' }}
-                </span></a-list-item-meta
-              >
+                </span>
+              </a-list-item-meta>
               <span>
                 {{ item.description }}
               </span>
@@ -177,6 +180,11 @@ const columns = [
     scopedSlots: { customRender: 'postCount' }
   },
   {
+    title: '排序',
+    dataIndex: 'sort',
+    scopedSlots: { customRender: 'sort' }
+  },
+  {
     title: '操作',
     key: 'action',
     scopedSlots: { customRender: 'action' }
@@ -194,7 +202,9 @@ export default {
         loading: false
       },
       form: {
-        model: {},
+        model: {
+          sort: 100
+        },
         saving: false,
         errored: false,
         rules: {
@@ -204,7 +214,8 @@ export default {
           ],
           slug: [{ max: 255, message: '* 分类别名的字符长度不能超过 255', trigger: ['change'] }],
           thumbnail: [{ max: 1023, message: '* 封面图链接的字符长度不能超过 1023', trigger: ['change'] }],
-          description: [{ max: 100, message: '* 分类描述的字符长度不能超过 100', trigger: ['change'] }]
+          description: [{ max: 100, message: '* 分类描述的字符长度不能超过 100', trigger: ['change'] }],
+          sort: [{ min: 0, message: '* 排序编号不能低于 0', trigger: ['change'], type: 'number' }]
         }
       }
     }
@@ -227,7 +238,7 @@ export default {
     handleListCategories() {
       this.table.loading = true
       apiClient.category
-        .list({ sort: [], more: true })
+        .list({ sort: ['sort'], more: true })
         .then(response => {
           this.table.data = response.data
         })
@@ -240,7 +251,9 @@ export default {
         .delete(id)
         .then(() => {
           this.$message.success('删除成功！')
-          this.form.model = {}
+          this.form.model = {
+            sort: 100
+          }
         })
         .finally(() => {
           this.handleListCategories()
@@ -286,7 +299,9 @@ export default {
         this.form.errored = false
       } else {
         const _this = this
-        _this.form.model = {}
+        _this.form.model = {
+          sort: 100
+        }
         _this.handleListCategories()
       }
     },
