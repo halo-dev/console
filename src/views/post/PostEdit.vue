@@ -2,17 +2,7 @@
   <page-view :title="postToStage.title ? postToStage.title : '新文章'" affix>
     <template slot="extra">
       <a-space>
-        <ReactiveButton
-          :errored="draftSaveErrored"
-          :loading="draftSaving"
-          erroredText="保存失败"
-          loadedText="保存成功"
-          text="保存草稿"
-          type="danger"
-          @callback="draftSaveErrored = false"
-          @click="handleSaveDraft(false)"
-        ></ReactiveButton>
-        <a-button :loading="previewSaving" @click="handlePreview">预览</a-button>
+        <a-button :loading="previewSaving" @click="handlePreviewClick">预览</a-button>
         <a-button type="primary" @click="postSettingVisible = true">发布</a-button>
       </a-space>
     </template>
@@ -25,7 +15,7 @@
           <MarkdownEditor
             :originalContent="postToStage.originalContent"
             @onContentChange="onContentChange"
-            @onSaveDraft="handleSaveDraft(true)"
+            @onSaveDraft="handleSaveDraft()"
           />
         </div>
       </a-col>
@@ -110,104 +100,60 @@ export default {
     }
   },
   methods: {
-    handleSaveDraft(draftOnly = false) {
-      this.$log.debug('Draft only: ' + draftOnly)
-      this.postToStage.status = 'DRAFT'
-      if (!this.postToStage.title) {
-        this.postToStage.title = datetimeFormat(new Date(), 'YYYY-MM-DD-HH-mm-ss')
-      }
-      this.draftSaving = true
+    async handleSaveDraft() {
       if (this.postToStage.id) {
-        // Update the post
-        if (draftOnly) {
-          apiClient.post
-            .updateDraftById(this.postToStage.id, this.postToStage.originalContent)
-            .then(() => {
-              this.handleRestoreSavedStatus()
-            })
-            .catch(() => {
-              this.draftSaveErrored = true
-            })
-            .finally(() => {
-              setTimeout(() => {
-                this.draftSaving = false
-              }, 400)
-            })
-        } else {
-          apiClient.post
-            .update(this.postToStage.id, this.postToStage)
-            .then(response => {
-              this.postToStage = response.data
-              this.handleRestoreSavedStatus()
-            })
-            .catch(() => {
-              this.draftSaveErrored = true
-            })
-            .finally(() => {
-              setTimeout(() => {
-                this.draftSaving = false
-              }, 400)
-            })
+        // Update the post content
+        try {
+          await apiClient.post.updateDraftById(this.postToStage.id, this.postToStage.originalContent)
+          this.handleRestoreSavedStatus()
+        } catch (e) {
+          this.$log.error('Failed to update post content', e)
         }
       } else {
-        // Create the post
-        apiClient.post
-          .create(this.postToStage)
-          .then(response => {
-            this.postToStage = response.data
-            this.handleRestoreSavedStatus()
-          })
-          .catch(() => {
-            this.draftSaveErrored = true
-          })
-          .finally(() => {
-            setTimeout(() => {
-              this.draftSaving = false
-            }, 400)
-          })
+        await this.handleCreatePost()
       }
     },
-    handlePreview() {
-      this.postToStage.status = 'DRAFT'
+
+    async handleCreatePost() {
       if (!this.postToStage.title) {
         this.postToStage.title = datetimeFormat(new Date(), 'YYYY-MM-DD-HH-mm-ss')
       }
-      this.previewSaving = true
-      if (this.postToStage.id) {
-        // Update the post
-        apiClient.post.update(this.postToStage.id, this.postToStage).then(response => {
-          this.$log.debug('Updated post', response.data)
-          apiClient.post
-            .getPreviewLinkById(this.postToStage.id)
-            .then(response => {
-              window.open(response, '_blank')
-              this.handleRestoreSavedStatus()
-            })
-            .finally(() => {
-              setTimeout(() => {
-                this.previewSaving = false
-              }, 400)
-            })
-        })
-      } else {
-        // Create the post
-        apiClient.post.create(this.postToStage).then(response => {
-          this.$log.debug('Created post', response.data)
-          this.postToStage = response.data
-          apiClient.post
-            .getPreviewLinkById(this.postToStage.id)
-            .then(response => {
-              window.open(response, '_blank')
-              this.handleRestoreSavedStatus()
-            })
-            .finally(() => {
-              setTimeout(() => {
-                this.previewSaving = false
-              }, 400)
-            })
-        })
+      // Create the post
+      try {
+        const { data } = await apiClient.post.create(this.postToStage)
+        this.postToStage = data
+        this.handleRestoreSavedStatus()
+      } catch (e) {
+        this.$log.error('Failed to create post', e)
       }
     },
+
+    async handlePreviewClick() {
+      this.previewSaving = true
+      if (this.postToStage.id) {
+        // Update the post content
+        await apiClient.post.updateDraftById(this.postToStage.id, this.postToStage.originalContent)
+        await this.handleOpenPreview()
+      } else {
+        await this.handleCreatePost()
+        await this.handleOpenPreview()
+      }
+    },
+
+    async handleOpenPreview() {
+      try {
+        const response = await apiClient.post.getPreviewLinkById(this.postToStage.id)
+        window.open(response, '_blank')
+        this.handleRestoreSavedStatus()
+      } catch (e) {
+        this.$log.error('Failed to get preview link', e)
+      } finally {
+        setTimeout(() => {
+          this.previewSaving = false
+        }, 400)
+      }
+    },
+
     handleRestoreSavedStatus() {
       this.contentChanges = 0
     },
