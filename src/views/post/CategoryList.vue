@@ -11,7 +11,7 @@
               <a-input v-model="form.model.slug" />
             </a-form-model-item>
             <a-form-model-item label="上级目录：" prop="parentId">
-              <category-select-tree v-model="form.model.parentId" :categories="flatCategoryList" />
+              <category-select-tree :category-id.sync="form.model.parentId" :categories="flatCategoryList" />
             </a-form-model-item>
             <a-form-model-item help="* 在分类页面可展示，需要主题支持" label="封面图：" prop="thumbnail">
               <AttachmentInput v-model="form.model.thumbnail" title="选择封面图" />
@@ -54,7 +54,12 @@
       <a-col :lg="16" :md="16" :xl="16" :sm="24" :xs="24" class="pb-3">
         <a-card :bodyStyle="{ padding: '16px' }" title="分类列表">
           <a-spin :spinning="list.loading">
-            <CategoryTreeNode v-model="list.data" @reload="handleListCategories" />
+            <CategoryTreeNode
+              v-model="list.data"
+              @reload="handleListCategories"
+              @edit="handleEdit"
+              @select="handleSelect"
+            />
           </a-spin>
         </a-card>
       </a-col>
@@ -157,6 +162,21 @@ export default {
         this.$log.error('Failed to get categories', e)
       } finally {
         this.list.loading = false
+      }
+    },
+
+    async handleEdit(category) {
+      try {
+        const { data } = await apiClient.category.get(category.id)
+        this.form.model = data
+      } catch (e) {
+        this.$log.error('Failed to get category', e)
+      }
+    },
+
+    handleSelect(category) {
+      this.form.model = {
+        parentId: category.id
       }
     },
 

@@ -23,7 +23,7 @@
           <a-list-item class="menu-item">
             <a-list-item-meta>
               <span slot="title" class="inline-block font-bold title">
-                <a-icon class="cursor-move mover mr-1" type="bars" />
+                <!--                <a-icon class="cursor-move mover mr-1" type="bars" />-->
                 {{ item.name }}
               </span>
               <span slot="description" class="inline-block">
@@ -31,13 +31,18 @@
               </span>
             </a-list-item-meta>
             <template #actions>
-              <a-button v-if="!item.formVisible" class="!p-0" type="link">编辑</a-button>
-              <a-button v-else class="!p-0" type="link">取消编辑</a-button>
+              <a-button class="!p-0" type="link" @click="handleSelect(item)">新增</a-button>
+              <a-button class="!p-0" type="link" @click="handleEdit(item)">编辑</a-button>
               <a-button class="!p-0" type="link" @click="handleDelete(item)">删除</a-button>
             </template>
           </a-list-item>
           <div class="a-list-nested" style="margin-left: 44px">
-            <CategoryTreeNode :list="item.children" />
+            <CategoryTreeNode
+              :list="item.children"
+              @edit="handleEdit"
+              @select="handleSelect"
+              @reload="$emit('reload')"
+            />
           </div>
         </div>
       </transition-group>
@@ -94,6 +99,12 @@ export default {
           }
         }
       })
+    },
+    handleEdit(item) {
+      this.$emit('edit', item)
+    },
+    handleSelect(item) {
+      this.$emit('select', item)
     }
   }
 }
