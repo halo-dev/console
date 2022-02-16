@@ -2,17 +2,7 @@
   <page-view :title="sheetToStage.title ? sheetToStage.title : '新页面'" affix>
     <template slot="extra">
       <a-space>
-        <ReactiveButton
-          :errored="draftSaveErrored"
-          :loading="draftSaving"
-          erroredText="保存失败"
-          loadedText="保存成功"
-          text="保存草稿"
-          type="danger"
-          @callback="draftSaveErrored = false"
-          @click="handleSaveDraft(false)"
-        ></ReactiveButton>
-        <a-button :loading="previewSaving" @click="handlePreview">预览</a-button>
+        <a-button :loading="previewSaving" @click="handlePreviewClick">预览</a-button>
         <a-button type="primary" @click="sheetSettingVisible = true">发布</a-button>
       </a-space>
     </template>
@@ -26,7 +16,7 @@
           <MarkdownEditor
             :originalContent="sheetToStage.originalContent"
             @onContentChange="onContentChange"
-            @onSaveDraft="handleSaveDraft(true)"
+            @onSaveDraft="handleSaveDraft()"
           />
         </div>
       </a-col>
@@ -109,100 +99,58 @@ export default {
     }
   },
   methods: {
-    handleSaveDraft(draftOnly = false) {
-      this.$log.debug('Draft only: ' + draftOnly)
-      this.sheetToStage.status = 'DRAFT'
-      if (!this.sheetToStage.title) {
-        this.sheetToStage.title = datetimeFormat(new Date(), 'YYYY-MM-DD-HH-mm-ss')
-      }
-      this.draftSaving = true
+    async handleSaveDraft() {
       if (this.sheetToStage.id) {
-        if (draftOnly) {
-          apiClient.sheet
-            .updateDraftById(this.sheetToStage.id, this.sheetToStage.originalContent)
-            .then(() => {
-              this.handleRestoreSavedStatus()
-            })
-            .catch(() => {
-              this.draftSaveErrored = true
-            })
-            .finally(() => {
-              setTimeout(() => {
-                this.draftSaving = false
-              }, 400)
-            })
-        } else {
-          apiClient.sheet
-            .update(this.sheetToStage.id, this.sheetToStage)
-            .then(response => {
-              this.sheetToStage = response.data
-              this.handleRestoreSavedStatus()
-            })
-            .catch(() => {
-              this.draftSaveErrored = true
-            })
-            .finally(() => {
-              setTimeout(() => {
-                this.draftSaving = false
-              }, 400)
-            })
+        try {
+          await apiClient.sheet.updateDraftById(this.sheetToStage.id, this.sheetToStage.originalContent)
+          this.handleRestoreSavedStatus()
+        } catch (e) {
+          this.$log.error('Failed to update sheet content', e)
         }
       } else {
-        apiClient.sheet
-          .create(this.sheetToStage)
-          .then(response => {
-            this.sheetToStage = response.data
-            this.handleRestoreSavedStatus()
-          })
-          .catch(() => {
-            this.draftSaveErrored = true
-          })
-          .finally(() => {
-            setTimeout(() => {
-              this.draftSaving = false
-            }, 400)
-          })
+        await this.handleCreateSheet()
       }
     },
-    handlePreview() {
-      this.sheetToStage.status = 'DRAFT'
+
+    async handleCreateSheet() {
       if (!this.sheetToStage.title) {
         this.sheetToStage.title = datetimeFormat(new Date(), 'YYYY-MM-DD-HH-mm-ss')
       }
-      this.previewSaving = true
-      if (this.sheetToStage.id) {
-        apiClient.sheet.update(this.sheetToStage.id, this.sheetToStage).then(response => {
-          this.$log.debug('Updated sheet', response.data)
-          apiClient.sheet
-            .getPreviewLinkById(this.sheetToStage.id)
-            .then(response => {
-              window.open(response, '_blank')
-              this.handleRestoreSavedStatus()
-            })
-            .finally(() => {
-              setTimeout(() => {
-                this.previewSaving = false
-              }, 400)
-            })
-        })
-      } else {
-        apiClient.sheet.create(this.sheetToStage).then(response => {
-          this.$log.debug('Created sheet', response.data)
-          this.sheetToStage = response.data
-          apiClient.sheet
-            .getPreviewLinkById(this.sheetToStage.id)
-            .then(response => {
-              window.open(response, '_blank')
-              this.handleRestoreSavedStatus()
-            })
-            .finally(() => {
-              setTimeout(() => {
-                this.previewSaving = false
-              }, 400)
-            })
-        })
+      try {
+        const { data } = await apiClient.sheet.create(this.sheetToStage)
+        this.sheetToStage = data
+        this.handleRestoreSavedStatus()
+      } catch (e) {
+        this.$log.error('Failed to create sheet', e)
       }
     },
+
+    async handlePreviewClick() {
+      this.previewSaving = true
+      if (this.sheetToStage.id) {
+        // Update the sheet content
+        await apiClient.sheet.updateDraftById(this.sheetToStage.id, this.sheetToStage.originalContent)
+        await this.handleOpenPreview()
+      } else {
+        await this.handleCreateSheet()
+        await this.handleOpenPreview()
+      }
+    },
+
+    async handleOpenPreview() {
+      try {
+        const response = await apiClient.sheet.getPreviewLinkById(this.sheetToStage.id)
+        window.open(response, '_blank')
+        this.handleRestoreSavedStatus()
+      } catch (e) {
+        this.$log.error('Failed to get preview link', e)
+      } finally {
+        setTimeout(() => {
+          this.previewSaving = false
+        }, 400)
+      }
+    },
+
     handleRestoreSavedStatus() {
       this.contentChanges = 0
     },
