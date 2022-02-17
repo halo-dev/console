@@ -106,8 +106,8 @@ export default {
       if (this.postToStage.id) {
         // Update the post content
         try {
-          await apiClient.post.updateDraftById(this.postToStage.id, this.postToStage.originalContent)
-          this.postToStage.isInProcess = true
+          const { data } = await apiClient.post.updateDraftById(this.postToStage.id, this.postToStage.originalContent)
+          this.postToStage.isInProcess = data.isInProcess
           this.handleRestoreSavedStatus()
           this.$message.success({
             content: '内容已保存',
@@ -148,8 +148,8 @@ export default {
       this.previewSaving = true
       if (this.postToStage.id) {
         // Update the post content
-        await apiClient.post.updateDraftById(this.postToStage.id, this.postToStage.originalContent)
-        this.postToStage.isInProcess = true
+        const { data } = await apiClient.post.updateDraftById(this.postToStage.id, this.postToStage.originalContent)
+        this.postToStage.isInProcess = data.isInProcess
       } else {
         await this.handleCreatePost()
       }
