@@ -43,6 +43,7 @@ import { PageView } from '@/layouts'
 import { mixin, mixinDevice, mixinPostEdit } from '@/mixins/mixin.js'
 import { datetimeFormat } from '@/utils/datetime'
 import apiClient from '@/utils/api-client'
+import debounce from 'lodash.debounce'
 
 export default {
   mixins: [mixin, mixinDevice, mixinPostEdit],
@@ -101,7 +102,7 @@ export default {
     }
   },
   methods: {
-    async handleSaveDraft() {
+    handleSaveDraft: debounce(async function () {
       if (this.postToStage.id) {
         // Update the post content
         try {
@@ -113,7 +114,7 @@ export default {
       } else {
         await this.handleCreatePost()
       }
-    },
+    }, 300),
 
     async handleCreatePost() {
       if (!this.postToStage.title) {
