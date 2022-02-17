@@ -1,7 +1,7 @@
 <template>
   <page-view
     :title="postToStage.title ? postToStage.title : '新文章'"
-    :sub-title="postToStage.isInProcess && '当前内容已保存，但还未发布。'"
+    :sub-title="postToStage.isInProcess ? '当前内容已保存，但还未发布。' : ''"
     affix
   >
     <template slot="extra">
