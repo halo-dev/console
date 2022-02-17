@@ -8,6 +8,9 @@
     </template>
     <a-row :gutter="12">
       <a-col :span="24">
+        <div v-show="postToStage.isInProcess && !isCreateMode" class="mb-4">
+          <a-alert message="当前内容已保存，但还未发布。" banner closable />
+        </div>
         <div class="mb-4">
           <a-input v-model="postToStage.title" placeholder="请输入文章标题" size="large" />
         </div>
@@ -53,19 +56,17 @@ export default {
       postSettingVisible: false,
       postToStage: {},
       contentChanges: 0,
-      draftSaving: false,
       previewSaving: false,
-      draftSaveErrored: false
+      isCreateMode: false
     }
   },
   beforeRouteEnter(to, from, next) {
     // Get post id from query
     const postId = to.query.postId
-    next(vm => {
+    next(async vm => {
       if (postId) {
-        apiClient.post.get(postId).then(response => {
-          vm.postToStage = response.data
-        })
+        const { data } = await apiClient.post.get(Number(postId))
+        vm.postToStage = data
       }
     })
   },
@@ -123,6 +124,13 @@ export default {
         const { data } = await apiClient.post.create(this.postToStage)
         this.postToStage = data
         this.handleRestoreSavedStatus()
+
+        // add params to url
+        const path = this.$router.history.current.path
+        this.$router.push({ path, query: { postId: this.postToStage.id } }).catch(err => err)
+
+        // create mode does not need show alert
+        this.isCreateMode = true
       } catch (e) {
         this.$log.error('Failed to create post', e)
       }
@@ -133,11 +141,10 @@ export default {
       if (this.postToStage.id) {
         // Update the post content
         await apiClient.post.updateDraftById(this.postToStage.id, this.postToStage.originalContent)
-        await this.handleOpenPreview()
       } else {
         await this.handleCreatePost()
-        await this.handleOpenPreview()
       }
+      await this.handleOpenPreview()
     },
 
     async handleOpenPreview() {
