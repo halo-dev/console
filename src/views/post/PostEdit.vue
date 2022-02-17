@@ -1,5 +1,9 @@
 <template>
-  <page-view :title="postToStage.title ? postToStage.title : '新文章'" affix>
+  <page-view
+    :title="postToStage.title ? postToStage.title : '新文章'"
+    :sub-title="postToStage.isInProcess && '当前内容已保存，但还未发布。'"
+    affix
+  >
     <template slot="extra">
       <a-space>
         <a-button :loading="previewSaving" @click="handlePreviewClick">预览</a-button>
@@ -8,9 +12,6 @@
     </template>
     <a-row :gutter="12">
       <a-col :span="24">
-        <div v-show="postToStage.isInProcess && !isCreateMode" class="mb-4">
-          <a-alert message="当前内容已保存，但还未发布。" banner closable />
-        </div>
         <div class="mb-4">
           <a-input v-model="postToStage.title" placeholder="请输入文章标题" size="large" />
         </div>
@@ -57,8 +58,7 @@ export default {
       postSettingVisible: false,
       postToStage: {},
       contentChanges: 0,
-      previewSaving: false,
-      isCreateMode: false
+      previewSaving: false
     }
   },
   beforeRouteEnter(to, from, next) {
@@ -108,6 +108,10 @@ export default {
         try {
           await apiClient.post.updateDraftById(this.postToStage.id, this.postToStage.originalContent)
           this.handleRestoreSavedStatus()
+          this.$message.success({
+            content: '内容已保存',
+            duration: 0.5
+          })
         } catch (e) {
           this.$log.error('Failed to update post content', e)
         }
@@ -130,8 +134,10 @@ export default {
         const path = this.$router.history.current.path
         this.$router.push({ path, query: { postId: this.postToStage.id } }).catch(err => err)
 
-        // create mode does not need show alert
-        this.isCreateMode = true
+        this.$message.success({
+          content: '文章已创建',
+          duration: 0.5
+        })
       } catch (e) {
         this.$log.error('Failed to create post', e)
       }
