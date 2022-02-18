@@ -1,7 +1,7 @@
 <template>
   <page-view
     :title="postToStage.title ? postToStage.title : '新文章'"
-    :sub-title="postToStage.isInProcess ? '当前内容已保存，但还未发布。' : ''"
+    :sub-title="postToStage.inProgress ? '当前内容已保存，但还未发布。' : ''"
     affix
   >
     <template slot="extra">
@@ -107,7 +107,7 @@ export default {
         // Update the post content
         try {
           const { data } = await apiClient.post.updateDraftById(this.postToStage.id, this.postToStage.originalContent)
-          this.postToStage.isInProcess = data.isInProcess
+          this.postToStage.inProgress = data.inProgress
           this.handleRestoreSavedStatus()
           this.$message.success({
             content: '内容已保存',
@@ -149,7 +149,7 @@ export default {
       if (this.postToStage.id) {
         // Update the post content
         const { data } = await apiClient.post.updateDraftById(this.postToStage.id, this.postToStage.originalContent)
-        this.postToStage.isInProcess = data.isInProcess
+        this.postToStage.inProgress = data.inProgress
       } else {
         await this.handleCreatePost()
       }

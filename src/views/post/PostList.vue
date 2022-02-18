@@ -243,7 +243,7 @@
               twoToneColor="red"
               type="pushpin"
             />
-            <a-tooltip v-if="record.isInProcess" title="当前有内容已保存，但还未发布。" placement="top">
+            <a-tooltip v-if="record.inProgress" title="当前有内容已保存，但还未发布。" placement="top">
               <a-icon
                 class="cursor-pointer"
                 style="margin-right: 3px"
