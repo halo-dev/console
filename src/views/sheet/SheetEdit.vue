@@ -1,5 +1,9 @@
 <template>
-  <page-view :title="sheetToStage.title ? sheetToStage.title : '新页面'" affix>
+  <page-view
+    :sub-title="sheetToStage.inProgress ? '当前内容已保存，但还未发布。' : ''"
+    :title="sheetToStage.title ? sheetToStage.title : '新页面'"
+    affix
+  >
     <template slot="extra">
       <a-space>
         <a-button :loading="previewSaving" @click="handlePreviewClick">预览</a-button>
@@ -51,8 +55,6 @@ export default {
       sheetSettingVisible: false,
       sheetToStage: {},
       contentChanges: 0,
-      draftSaving: false,
-      draftSaveErrored: false,
       previewSaving: false
     }
   },
@@ -60,11 +62,10 @@ export default {
     // Get sheetId id from query
     const sheetId = to.query.sheetId
 
-    next(vm => {
+    next(async vm => {
       if (sheetId) {
-        apiClient.sheet.get(sheetId).then(response => {
-          vm.sheetToStage = response.data
-        })
+        const { data } = await apiClient.sheet.get(Number(sheetId))
+        vm.sheetToStage = data
       }
     })
   },
@@ -102,8 +103,16 @@ export default {
     async handleSaveDraft() {
       if (this.sheetToStage.id) {
         try {
-          await apiClient.sheet.updateDraftById(this.sheetToStage.id, this.sheetToStage.originalContent)
+          const { data } = await apiClient.sheet.updateDraftById(
+            this.sheetToStage.id,
+            this.sheetToStage.originalContent
+          )
+          this.sheetToStage.inProgress = data.inProgress
           this.handleRestoreSavedStatus()
+          this.$message.success({
+            content: '内容已保存',
+            duration: 0.5
+          })
         } catch (e) {
           this.$log.error('Failed to update sheet content', e)
         }
@@ -120,6 +129,14 @@ export default {
         const { data } = await apiClient.sheet.create(this.sheetToStage)
         this.sheetToStage = data
         this.handleRestoreSavedStatus()
+
+        // add params to url
+        const path = this.$router.history.current.path
+        this.$router.replace({ path, query: { sheetId: this.sheetToStage.id } }).catch(err => err)
+        this.$message.success({
+          content: '页面已创建',
+          duration: 0.5
+        })
       } catch (e) {
         this.$log.error('Failed to create sheet', e)
       }
@@ -129,12 +146,12 @@ export default {
       this.previewSaving = true
       if (this.sheetToStage.id) {
         // Update the sheet content
-        await apiClient.sheet.updateDraftById(this.sheetToStage.id, this.sheetToStage.originalContent)
-        await this.handleOpenPreview()
+        const { data } = await apiClient.sheet.updateDraftById(this.sheetToStage.id, this.sheetToStage.originalContent)
+        this.sheetToStage.inProgress = data.inProgress
       } else {
         await this.handleCreateSheet()
-        await this.handleOpenPreview()
       }
+      await this.handleOpenPreview()
     },
 
     async handleOpenPreview() {
