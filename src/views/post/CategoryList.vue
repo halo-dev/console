@@ -1,7 +1,7 @@
 <template>
   <page-view>
     <a-row :gutter="12">
-      <a-col :lg="8" :md="8" :xl="8" :sm="24" :xs="24" class="pb-3">
+      <a-col :lg="8" :md="8" :sm="24" :xl="8" :xs="24" class="pb-3">
         <a-card :bodyStyle="{ padding: '16px' }" :title="title">
           <a-form-model ref="categoryForm" :model="form.model" :rules="form.rules" layout="horizontal">
             <a-form-model-item help="* 页面上所显示的名称" label="名称：" prop="name">
@@ -11,7 +11,7 @@
               <a-input v-model="form.model.slug" />
             </a-form-model-item>
             <a-form-model-item label="上级目录：" prop="parentId">
-              <category-select-tree :category-id.sync="form.model.parentId" :categories="flatCategoryList" />
+              <category-select-tree :categories="list.data" :category-id.sync="form.model.parentId" />
             </a-form-model-item>
             <a-form-model-item help="* 在分类页面可展示，需要主题支持" label="封面图：" prop="thumbnail">
               <AttachmentInput v-model="form.model.thumbnail" title="选择封面图" />
@@ -51,13 +51,13 @@
           </a-form-model>
         </a-card>
       </a-col>
-      <a-col :lg="16" :md="16" :xl="16" :sm="24" :xs="24" class="pb-3">
+      <a-col :lg="16" :md="16" :sm="24" :xl="16" :xs="24" class="pb-3">
         <a-card :bodyStyle="{ padding: '16px' }" title="分类列表">
           <a-spin :spinning="list.loading">
             <CategoryTreeNode
-              v-model="list.data"
-              @reload="handleListCategories"
+              v-model="list.treeData"
               @edit="handleEdit"
+              @reload="handleListCategories"
               @select="handleSelect"
             />
           </a-spin>
@@ -77,38 +77,14 @@ import CategoryTreeNode from './components/CategoryTreeNode'
 import apiClient from '@/utils/api-client'
 import { mixin, mixinDevice } from '@/mixins/mixin.js'
 
-const columns = [
-  {
-    title: '名称',
-    ellipsis: true,
-    dataIndex: 'name',
-    scopedSlots: { customRender: 'name' }
-  },
-  {
-    title: '别名',
-    ellipsis: true,
-    dataIndex: 'slug'
-  },
-  {
-    title: '文章数',
-    dataIndex: 'postCount',
-    scopedSlots: { customRender: 'postCount' }
-  },
-  {
-    title: '操作',
-    key: 'action',
-    scopedSlots: { customRender: 'action' }
-  }
-]
-
 export default {
   components: { PageView, CategorySelectTree, CategoryTreeNode },
   mixins: [mixin, mixinDevice],
   data() {
     return {
       list: {
-        columns,
         data: [],
+        treeData: [],
         loading: false
       },
       form: {
@@ -136,16 +112,6 @@ export default {
     },
     isUpdateMode() {
       return !!this.form.model.id
-    },
-    flatCategoryList() {
-      const toFlatList = data => {
-        if (!data || data.length === 0) return []
-        return data.reduce((prev, current) => {
-          const children = current.children.length > 0 ? toFlatList(current.children) : []
-          return [...prev, current, ...children]
-        }, [])
-      }
-      return toFlatList(this.list.data)
     }
   },
   created() {
@@ -156,13 +122,40 @@ export default {
       try {
         this.list.loading = true
 
-        const { data } = await apiClient.category.listAsTree([])
+        const { data } = await apiClient.category.list({})
         this.list.data = data
+        this.list.treeData = this.convertDataToTree(data)
       } catch (e) {
         this.$log.error('Failed to get categories', e)
       } finally {
         this.list.loading = false
       }
+    },
+
+    convertDataToTree(categories) {
+      const hashMap = {}
+      const treeData = []
+      categories.forEach(category => (hashMap[category.id] = { ...category, children: [] }))
+      console.log(hashMap)
+      categories.forEach(category => {
+        const current = hashMap[category.id]
+        const parent = hashMap[category.parentId]
+
+        if (current.password) {
+          current.hasPassword = true
+        }
+
+        if (parent && (parent.password || parent.hasPassword)) {
+          current.hasPassword = true
+        }
+
+        if (category.parentId) {
+          hashMap[category.parentId].children.push(current)
+        } else {
+          treeData.push(current)
+        }
+      })
+      return treeData
     },
 
     async handleEdit(category) {

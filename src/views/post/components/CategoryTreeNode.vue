@@ -15,16 +15,16 @@
         emptyInsertThreshold: 20
       }"
       @end="isDragging = false"
-      @start="isDragging = true"
       @input="emitter"
+      @start="isDragging = true"
     >
       <transition-group>
         <div v-for="item in realValue" :key="item.id">
           <a-list-item class="menu-item">
             <a-list-item-meta>
               <span slot="title" class="inline-block font-bold title">
-                <!--                <a-icon class="cursor-move mover mr-1" type="bars" />-->
-                {{ item.name }}
+                <!--                                <a-icon class="cursor-move mover mr-1" type="bars" />-->
+                {{ item.name }}{{ item.hasPassword ? '（加密）' : '' }}
               </span>
               <span slot="description" class="inline-block">
                 <a :href="item.fullPath" class="ant-anchor-link-title" target="_blank"> {{ item.fullPath }} </a>
@@ -40,8 +40,8 @@
             <CategoryTreeNode
               :list="item.children"
               @edit="handleEdit"
-              @select="handleSelect"
               @reload="$emit('reload')"
+              @select="handleSelect"
             />
           </div>
         </div>
