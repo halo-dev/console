@@ -136,7 +136,6 @@ export default {
       const hashMap = {}
       const treeData = []
       categories.forEach(category => (hashMap[category.id] = { ...category, children: [] }))
-      console.log(hashMap)
       categories.forEach(category => {
         const current = hashMap[category.id]
         const parent = hashMap[category.parentId]
