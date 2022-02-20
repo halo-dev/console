@@ -36,12 +36,16 @@
 </template>
 
 <script>
-import { mixin, mixinDevice, mixinPostEdit } from '@/mixins/mixin.js'
-import { datetimeFormat } from '@/utils/datetime'
+// components
 import { PageView } from '@/layouts'
 import SheetSettingModal from './components/SheetSettingModal'
 import MarkdownEditor from '@/components/Editor/MarkdownEditor'
+
+// libs
+import { mixin, mixinDevice, mixinPostEdit } from '@/mixins/mixin.js'
+import { datetimeFormat } from '@/utils/datetime'
 import apiClient from '@/utils/api-client'
+import debounce from 'lodash.debounce'
 
 export default {
   components: {
@@ -100,7 +104,7 @@ export default {
     }
   },
   methods: {
-    async handleSaveDraft() {
+    handleSaveDraft: debounce(async function () {
       if (this.sheetToStage.id) {
         try {
           const { data } = await apiClient.sheet.updateDraftById(
@@ -119,7 +123,7 @@ export default {
       } else {
         await this.handleCreateSheet()
       }
-    },
+    }, 300),
 
     async handleCreateSheet() {
       if (!this.sheetToStage.title) {
