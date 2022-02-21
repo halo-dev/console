@@ -124,7 +124,8 @@ export default {
           const { data } = await apiClient.sheet.updateDraftById(
             this.sheetToStage.id,
             this.sheetToStage.originalContent,
-            this.sheetToStage.content
+            this.sheetToStage.content,
+            true
           )
           this.sheetToStage.inProgress = data.inProgress
           this.handleRestoreSavedStatus()
@@ -145,6 +146,7 @@ export default {
         this.sheetToStage.title = datetimeFormat(new Date(), 'YYYY-MM-DD-HH-mm-ss')
       }
       try {
+        this.sheetToStage.keepRaw = true
         const { data } = await apiClient.sheet.create(this.sheetToStage)
         this.sheetToStage = data
         this.handleRestoreSavedStatus()
@@ -168,7 +170,8 @@ export default {
         const { data } = await apiClient.sheet.updateDraftById(
           this.sheetToStage.id,
           this.sheetToStage.originalContent,
-          this.sheetToStage.content
+          this.sheetToStage.content,
+          true
         )
         this.sheetToStage.inProgress = data.inProgress
       } else {

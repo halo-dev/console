@@ -123,7 +123,8 @@ export default {
           const { data } = await apiClient.post.updateDraftById(
             this.postToStage.id,
             this.postToStage.originalContent,
-            this.postToStage.content
+            this.postToStage.content,
+            true
           )
           this.postToStage.inProgress = data.inProgress
           this.handleRestoreSavedStatus()
@@ -145,6 +146,8 @@ export default {
       }
       // Create the post
       try {
+        this.postToStage.keepRaw = true
+
         const { data } = await apiClient.post.create(this.postToStage)
         this.postToStage = data
         this.handleRestoreSavedStatus()
@@ -169,7 +172,8 @@ export default {
         const { data } = await apiClient.post.updateDraftById(
           this.postToStage.id,
           this.postToStage.originalContent,
-          this.postToStage.content
+          this.postToStage.content,
+          true
         )
         this.postToStage.inProgress = data.inProgress
       } else {
