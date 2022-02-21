@@ -194,9 +194,10 @@ export default {
     handleRestoreSavedStatus() {
       this.contentChanges = 0
     },
-    onContentChange({ originalContent }) {
+    onContentChange({ originalContent, renderContent }) {
       this.contentChanges++
       this.sheetToStage.originalContent = originalContent
+      this.sheetToStage.content = renderContent
     },
     onSheetSavedCallback() {
       this.contentChanges = 0
