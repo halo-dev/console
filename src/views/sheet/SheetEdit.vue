@@ -123,7 +123,8 @@ export default {
         try {
           const { data } = await apiClient.sheet.updateDraftById(
             this.sheetToStage.id,
-            this.sheetToStage.originalContent
+            this.sheetToStage.originalContent,
+            this.sheetToStage.content
           )
           this.sheetToStage.inProgress = data.inProgress
           this.handleRestoreSavedStatus()
@@ -164,7 +165,11 @@ export default {
       this.previewSaving = true
       if (this.sheetToStage.id) {
         // Update the sheet content
-        const { data } = await apiClient.sheet.updateDraftById(this.sheetToStage.id, this.sheetToStage.originalContent)
+        const { data } = await apiClient.sheet.updateDraftById(
+          this.sheetToStage.id,
+          this.sheetToStage.originalContent,
+          this.sheetToStage.content
+        )
         this.sheetToStage.inProgress = data.inProgress
       } else {
         await this.handleCreateSheet()

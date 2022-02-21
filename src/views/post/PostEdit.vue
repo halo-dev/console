@@ -120,7 +120,11 @@ export default {
       if (this.postToStage.id) {
         // Update the post content
         try {
-          const { data } = await apiClient.post.updateDraftById(this.postToStage.id, this.postToStage.originalContent)
+          const { data } = await apiClient.post.updateDraftById(
+            this.postToStage.id,
+            this.postToStage.originalContent,
+            this.postToStage.content
+          )
           this.postToStage.inProgress = data.inProgress
           this.handleRestoreSavedStatus()
           this.$message.success({
@@ -162,7 +166,11 @@ export default {
       this.previewSaving = true
       if (this.postToStage.id) {
         // Update the post content
-        const { data } = await apiClient.post.updateDraftById(this.postToStage.id, this.postToStage.originalContent)
+        const { data } = await apiClient.post.updateDraftById(
+          this.postToStage.id,
+          this.postToStage.originalContent,
+          this.postToStage.content
+        )
         this.postToStage.inProgress = data.inProgress
       } else {
         await this.handleCreatePost()
@@ -187,9 +195,10 @@ export default {
     handleRestoreSavedStatus() {
       this.contentChanges = 0
     },
-    onContentChange({ originalContent }) {
+    onContentChange({ originalContent, renderContent }) {
       this.contentChanges++
       this.postToStage.originalContent = originalContent
+      this.postToStage.content = renderContent
     },
     onPostSavedCallback() {
       this.contentChanges = 0
