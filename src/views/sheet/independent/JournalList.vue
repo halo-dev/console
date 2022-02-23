@@ -154,11 +154,10 @@
       </a-form-model>
     </a-modal>
 
-    <TargetCommentDrawer
-      :id="list.selected.id"
-      :description="list.selected.content"
-      :target="`journals`"
-      :visible="journalCommentDrawer.visible"
+    <TargetCommentListModal
+      :target-id="list.selected.id"
+      :visible.sync="journalCommentDrawer.visible"
+      target="journal"
       @close="onJournalCommentsDrawerClose"
     />
 
@@ -169,7 +168,7 @@
 <script>
 // components
 import { PageView } from '@/layouts'
-import TargetCommentDrawer from '../../comment/components/TargetCommentDrawer'
+import TargetCommentListModal from '@/components/Comment/TargetCommentListModal'
 
 // libs
 import { mixin, mixinDevice } from '@/mixins/mixin.js'
@@ -178,7 +177,7 @@ import apiClient from '@/utils/api-client'
 
 export default {
   mixins: [mixin, mixinDevice],
-  components: { PageView, TargetCommentDrawer },
+  components: { PageView, TargetCommentListModal },
   data() {
     return {
       list: {

@@ -408,12 +408,10 @@
       </template>
     </PostSettingModal>
 
-    <TargetCommentDrawer
-      :id="selectedPost.id"
-      :description="selectedPost.summary"
-      :target="`posts`"
-      :title="selectedPost.title"
-      :visible="postCommentVisible"
+    <TargetCommentListModal
+      :target-id="selectedPost.id"
+      :visible.sync="postCommentVisible"
+      target="post"
       @close="onPostCommentsClose"
     />
   </page-view>
@@ -423,7 +421,7 @@
 import { mixin, mixinDevice } from '@/mixins/mixin.js'
 import { PageView } from '@/layouts'
 import PostSettingModal from './components/PostSettingModal.vue'
-import TargetCommentDrawer from '../comment/components/TargetCommentDrawer'
+import TargetCommentListModal from '@/components/Comment/TargetCommentListModal'
 import apiClient from '@/utils/api-client'
 import { postStatuses } from '@/core/constant'
 
@@ -480,7 +478,7 @@ export default {
   components: {
     PageView,
     PostSettingModal,
-    TargetCommentDrawer
+    TargetCommentListModal
   },
   mixins: [mixin, mixinDevice],
   data() {
@@ -733,12 +731,11 @@ export default {
     onPostSavedCallback() {
       this.handleListPosts(false)
     },
+
     onPostCommentsClose() {
       this.postCommentVisible = false
       this.selectedPost = {}
-      setTimeout(() => {
-        this.handleListPosts(false)
-      }, 500)
+      this.handleListPosts(false)
     },
 
     /**

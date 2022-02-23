@@ -254,12 +254,10 @@
         <a-button :disabled="selectNextButtonDisabled" @click="handleSelectNext"> 下一篇</a-button>
       </template>
     </SheetSettingModal>
-    <TargetCommentDrawer
-      :id="selectedSheet.id"
-      :description="selectedSheet.summary"
-      :target="`sheets`"
-      :title="selectedSheet.title"
-      :visible="sheetCommentVisible"
+    <TargetCommentListModal
+      :target-id="selectedSheet.id"
+      :visible.sync="sheetCommentVisible"
+      target="sheet"
       @close="onSheetCommentsClose"
     />
   </div>
@@ -267,7 +265,7 @@
 <script>
 import { mixin, mixinDevice } from '@/mixins/mixin.js'
 import SheetSettingModal from './SheetSettingModal'
-import TargetCommentDrawer from '../../comment/components/TargetCommentDrawer'
+import TargetCommentListModal from '@/components/Comment/TargetCommentListModal'
 import apiClient from '@/utils/api-client'
 import { sheetStatuses } from '@/core/constant'
 
@@ -310,7 +308,7 @@ export default {
   mixins: [mixin, mixinDevice],
   components: {
     SheetSettingModal,
-    TargetCommentDrawer
+    TargetCommentListModal
   },
   data() {
     return {
@@ -445,9 +443,7 @@ export default {
     onSheetCommentsClose() {
       this.sheetCommentVisible = false
       this.selectedSheet = {}
-      setTimeout(() => {
-        this.handleListSheets(false)
-      }, 500)
+      this.handleListSheets(false)
     },
     onSheetSavedCallback() {
       this.handleListSheets(false)
