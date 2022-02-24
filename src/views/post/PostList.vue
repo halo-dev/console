@@ -414,7 +414,12 @@
       :visible.sync="postCommentVisible"
       target="post"
       @close="onPostCommentsClose"
-    />
+    >
+      <template #extraFooter>
+        <a-button :disabled="selectPreviousButtonDisabled" @click="handleSelectPrevious"> 上一篇</a-button>
+        <a-button :disabled="selectNextButtonDisabled" @click="handleSelectNext"> 下一篇</a-button>
+      </template>
+    </TargetCommentListModal>
   </page-view>
 </template>
 

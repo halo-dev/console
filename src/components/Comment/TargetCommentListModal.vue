@@ -112,6 +112,9 @@ export default {
       if (value) {
         this.handleGetComments()
       }
+    },
+    targetId() {
+      this.handleGetComments()
     }
   },
   methods: {
