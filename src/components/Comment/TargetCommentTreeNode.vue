@@ -31,7 +31,7 @@
         <template #overlay>
           <a-menu>
             <a-menu-item key="1" @click="handleChangeStatus('PUBLISHED')"> 通过</a-menu-item>
-            <a-menu-item key="2"> 通过并回复</a-menu-item>
+            <a-menu-item key="2" @click="handlePublishAndReply"> 通过并回复</a-menu-item>
           </a-menu>
         </template>
       </a-dropdown>
@@ -125,6 +125,11 @@ export default {
       } finally {
         this.$emit('reload')
       }
+    },
+
+    async handlePublishAndReply() {
+      await this.handleChangeStatus('PUBLISHED')
+      this.replyModalVisible = true
     },
 
     async handleDelete() {
