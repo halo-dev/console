@@ -144,8 +144,12 @@
               <a-list-item-meta>
                 <template #description>
                   发表在
-                  <a v-if="type === 'posts'" :href="item.post.fullPath" target="_blank">《{{ item.post.title }}》</a>
-                  <a v-if="type === 'sheets'" :href="item.sheet.fullPath" target="_blank">《{{ item.sheet.title }}》</a>
+                  <a v-if="targetName === 'posts'" :href="item.post.fullPath" target="_blank"
+                    >《{{ item.post.title }}》</a
+                  >
+                  <a v-if="targetName === 'sheets'" :href="item.sheet.fullPath" target="_blank"
+                    >《{{ item.sheet.title }}》</a
+                  >
                 </template>
 
                 <template #avatar>
@@ -198,13 +202,13 @@
             <a-badge :status="commentStatuses[status].status" :text="status | statusText" />
           </template>
 
-          <template v-if="type === 'posts'" #post="post">
+          <template v-if="targetName === 'posts'" #post="post">
             <a :href="post.fullPath" target="_blank">
               {{ post.title }}
             </a>
           </template>
 
-          <template v-if="type === 'sheets'" #sheet="sheet">
+          <template v-if="targetName === 'sheets'" #sheet="sheet">
             <a :href="sheet.fullPath" target="_blank">
               {{ sheet.title }}
             </a>
@@ -291,34 +295,19 @@
       </div>
     </a-card>
 
-    <a-modal
-      v-if="selectedComment"
-      v-model="replyCommentVisible"
-      :title="'回复给：' + selectedComment.author"
-      destroyOnClose
-      @close="onReplyClose"
-    >
-      <template slot="footer">
-        <ReactiveButton
-          :errored="replyErrored"
-          :loading="replying"
-          erroredText="回复失败"
-          loadedText="回复成功"
-          text="回复"
-          type="primary"
-          @callback="handleRepliedCallback"
-          @click="handleCreateClick"
-        ></ReactiveButton>
-      </template>
-      <a-form-model ref="replyCommentForm" :model="replyComment" :rules="replyCommentRules" layout="vertical">
-        <a-form-model-item prop="content">
-          <a-input ref="contentInput" v-model="replyComment.content" :autoSize="{ minRows: 8 }" type="textarea" />
-        </a-form-model-item>
-      </a-form-model>
-    </a-modal>
+    <CommentReplyModal
+      :comment="selectedComment"
+      :target="target"
+      :target-id="targetId"
+      :visible.sync="replyModalVisible"
+      @succeed="onReplyModalClose"
+    />
   </div>
 </template>
 <script>
+// components
+import CommentReplyModal from '@/components/Comment/CommentReplyModal'
+
 import { mixin, mixinDevice } from '@/mixins/mixin.js'
 import apiClient from '@/utils/api-client'
 import { commentStatuses } from '@/core/constant'
@@ -404,21 +393,21 @@ const sheetColumns = [
 
 export default {
   name: 'CommentTab',
+  components: { CommentReplyModal },
   mixins: [mixin, mixinDevice],
   props: {
-    type: {
+    target: {
       type: String,
       required: false,
-      default: 'posts',
+      default: 'post',
       validator: function (value) {
-        return ['posts', 'sheets', 'journals'].indexOf(value) !== -1
+        return ['post', 'sheet', 'journal'].indexOf(value) !== -1
       }
     }
   },
   data() {
     return {
       commentStatuses,
-      replyCommentVisible: false,
 
       list: {
         data: [],
@@ -437,12 +426,7 @@ export default {
       selectedRowKeys: [],
       selectedRows: [],
       selectedComment: {},
-      replyComment: {},
-      replyCommentRules: {
-        content: [{ required: true, message: '* 内容不能为空', trigger: ['change'] }]
-      },
-      replying: false,
-      replyErrored: false
+      replyModalVisible: false
     }
   },
   created() {
@@ -457,7 +441,22 @@ export default {
       }
     },
     columns() {
-      return this.type === 'posts' ? postColumns : sheetColumns
+      return this.targetName === 'posts' ? postColumns : sheetColumns
+    },
+    targetName() {
+      return `${this.target}s`
+    },
+    targetId() {
+      if (Object.keys(this.selectedComment).length === 0) {
+        return 0
+      }
+      if (this.targetName === 'posts') {
+        return this.selectedComment.post.id
+      }
+      if (this.targetName === 'sheets') {
+        return this.selectedComment.sheet.id
+      }
+      return 0
     }
   },
   methods: {
@@ -465,7 +464,7 @@ export default {
       try {
         this.list.loading = true
 
-        const response = await apiClient.comment.list(this.type, this.list.params)
+        const response = await apiClient.comment.list(this.targetName, this.list.params)
 
         this.list.data = response.data.content
         this.list.total = response.data.total
@@ -485,7 +484,7 @@ export default {
 
     async handleChangeStatus(commentId, status) {
       try {
-        await apiClient.comment.updateStatusById(this.type, commentId, status)
+        await apiClient.comment.updateStatusById(this.targetName, commentId, status)
         this.$message.success('操作成功！')
       } catch (e) {
         this.$log.error('Failed to change comment status', e)
@@ -502,7 +501,7 @@ export default {
 
       try {
         this.$log.debug(`commentIds: ${this.selectedRowKeys}, status: ${status}`)
-        await apiClient.comment.updateStatusInBatch(this.type, this.selectedRowKeys, status)
+        await apiClient.comment.updateStatusInBatch(this.targetName, this.selectedRowKeys, status)
         this.selectedRowKeys = []
       } catch (e) {
         this.$log.error('Failed to change comment status in batch', e)
@@ -513,7 +512,7 @@ export default {
 
     async handleDelete(commentId) {
       try {
-        await apiClient.comment.delete(this.type, commentId)
+        await apiClient.comment.delete(this.targetName, commentId)
         this.$message.success('删除成功！')
       } catch (e) {
         this.$log.error('Failed to delete comment', e)
@@ -530,7 +529,7 @@ export default {
 
       try {
         this.$log.debug(`delete: ${this.selectedRowKeys}`)
-        await apiClient.comment.deleteInBatch(this.type, this.selectedRowKeys)
+        await apiClient.comment.deleteInBatch(this.targetName, this.selectedRowKeys)
         this.selectedRowKeys = []
       } catch (e) {
         this.$log.error('Failed to delete comments in batch', e)
@@ -546,46 +545,7 @@ export default {
 
     handleOpenReplyModal(comment) {
       this.selectedComment = comment
-      this.replyCommentVisible = true
-      this.replyComment.parentId = comment.id
-      if (this.type === 'posts') {
-        this.replyComment.postId = comment.post.id
-      } else {
-        this.replyComment.postId = comment.sheet.id
-      }
-      this.$nextTick(() => {
-        this.$refs.contentInput.focus()
-      })
-    },
-
-    handleCreateClick() {
-      const _this = this
-      _this.$refs.replyCommentForm.validate(valid => {
-        if (valid) {
-          _this.replying = true
-          apiClient.comment
-            .create(_this.type, _this.replyComment)
-            .catch(() => {
-              _this.replyErrored = true
-            })
-            .finally(() => {
-              setTimeout(() => {
-                _this.replying = false
-              }, 400)
-            })
-        }
-      })
-    },
-
-    handleRepliedCallback() {
-      if (this.replyErrored) {
-        this.replyErrored = false
-      } else {
-        this.replyComment = {}
-        this.selectedComment = {}
-        this.replyCommentVisible = false
-        this.handleListComments()
-      }
+      this.replyModalVisible = true
     },
 
     /**
@@ -612,18 +572,22 @@ export default {
       this.handleClearRowKeys()
       this.handlePageChange(1)
     },
+
     handleClearRowKeys() {
       this.selectedRowKeys = []
     },
-    onReplyClose() {
-      this.replyComment = {}
+
+    onReplyModalClose() {
       this.selectedComment = {}
-      this.replyCommentVisible = false
+      this.replyModalVisible = false
+      this.handleListComments()
     },
+
     onSelectionChange(selectedRowKeys) {
       this.selectedRowKeys = selectedRowKeys
       this.$log.debug(`SelectedRowKeys: ${selectedRowKeys}`)
     },
+
     getCheckboxProps(comment) {
       return {
         props: {
