@@ -41,17 +41,31 @@
         @showSizeChange="handlePageSizeChange"
       />
     </div>
+
+    <template #footer>
+      <a-button type="primary" @click="replyModalVisible = true">创建评论</a-button>
+      <a-button @click="modalVisible = false">关闭</a-button>
+    </template>
+
+    <CommentReplyModal
+      :target="target"
+      :target-id="targetId"
+      :visible.sync="replyModalVisible"
+      @succeed="handleGetComments"
+    />
   </a-modal>
 </template>
 <script>
 import apiClient from '@/utils/api-client'
 
 import TargetCommentTreeNode from './TargetCommentTreeNode'
+import CommentReplyModal from './CommentReplyModal'
 
 export default {
   name: 'TargetCommentListModal',
   components: {
-    TargetCommentTreeNode
+    TargetCommentTreeNode,
+    CommentReplyModal
   },
   props: {
     visible: {
@@ -82,7 +96,8 @@ export default {
           size: 10
         },
         total: 0
-      }
+      },
+      replyModalVisible: false
     }
   },
   computed: {
