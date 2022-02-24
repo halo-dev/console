@@ -156,6 +156,7 @@
 
     <TargetCommentListModal
       :target-id="list.selected.id"
+      :title="`「${$options.filters.moment(list.selected.createTime)}」的评论`"
       :visible.sync="journalCommentDrawer.visible"
       target="journal"
       @close="onJournalCommentsDrawerClose"

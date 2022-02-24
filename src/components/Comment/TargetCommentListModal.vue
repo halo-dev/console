@@ -1,25 +1,8 @@
 <template>
-  <a-modal v-model="modalVisible" :afterClose="onClose" :width="1024" destroyOnClose title="评论列表">
-    <a-list itemLayout="horizontal">
-      <a-list-item>
-        <a-list-item-meta>
-          <template #description>
-            <p class="comment-drawer-content" v-html="description"></p>
-          </template>
-          <template #title>
-            <h3>{{ title }}</h3>
-          </template>
-        </a-list-item-meta>
-      </a-list-item>
-    </a-list>
-
-    <a-divider />
-
+  <a-modal v-model="modalVisible" :afterClose="onClose" :title="title" :width="1024" destroyOnClose>
     <a-spin :spinning="list.loading">
-      <a-empty v-if="list.data.length === 0" />
       <TargetCommentTreeNode
         v-for="(comment, index) in list.data"
-        v-else
         :key="index"
         :comment="comment"
         :target="target"
@@ -27,6 +10,8 @@
         @reload="handleGetComments"
       />
     </a-spin>
+
+    <a-empty v-if="!list.loading && !list.data.length" />
 
     <div class="page-wrapper">
       <a-pagination
@@ -43,6 +28,7 @@
     </div>
 
     <template #footer>
+      <slot name="extraFooter" />
       <a-button type="primary" @click="replyModalVisible = true">创建评论</a-button>
       <a-button @click="modalVisible = false">关闭</a-button>
     </template>
@@ -56,10 +42,11 @@
   </a-modal>
 </template>
 <script>
-import apiClient from '@/utils/api-client'
-
+// components
 import TargetCommentTreeNode from './TargetCommentTreeNode'
 import CommentReplyModal from './CommentReplyModal'
+
+import apiClient from '@/utils/api-client'
 
 export default {
   name: 'TargetCommentListModal',
@@ -71,6 +58,10 @@ export default {
     visible: {
       type: Boolean,
       default: true
+    },
+    title: {
+      type: String,
+      default: '评论'
     },
     target: {
       type: String,
@@ -87,7 +78,6 @@ export default {
   },
   data() {
     return {
-      model: undefined,
       list: {
         data: [],
         loading: false,
@@ -115,41 +105,16 @@ export default {
         size: this.list.params.size,
         total: this.list.total
       }
-    },
-    title() {
-      if (!this.model) return ''
-      if (['post', 'sheet'].includes(this.target)) {
-        return this.model.title
-      }
-      return this.model.createTime
-    },
-    description() {
-      if (!this.model) return ''
-      if (['post', 'sheet'].includes(this.target)) {
-        return this.model.summary
-      }
-      return this.model.content
     }
   },
   watch: {
     modalVisible(value) {
       if (value) {
-        this.handleGetTargetModal()
+        this.handleGetComments()
       }
     }
   },
   methods: {
-    async handleGetTargetModal() {
-      try {
-        const { data } = await apiClient[this.target].get(this.targetId)
-        this.model = data
-
-        await this.handleGetComments()
-      } catch (e) {
-        this.$log.error('Failed to get target data', e)
-      }
-    },
-
     async handleGetComments() {
       try {
         this.list.loading = true

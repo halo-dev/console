@@ -256,6 +256,7 @@
     </SheetSettingModal>
     <TargetCommentListModal
       :target-id="selectedSheet.id"
+      :title="`「${selectedSheet.title}」的评论`"
       :visible.sync="sheetCommentVisible"
       target="sheet"
       @close="onSheetCommentsClose"

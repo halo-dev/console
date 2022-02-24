@@ -410,6 +410,7 @@
 
     <TargetCommentListModal
       :target-id="selectedPost.id"
+      :title="`「${selectedPost.title}」的评论`"
       :visible.sync="postCommentVisible"
       target="post"
       @close="onPostCommentsClose"
