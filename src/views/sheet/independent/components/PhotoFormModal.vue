@@ -170,7 +170,8 @@ export default {
             if (_this.form.model.id) {
               await apiClient.photo.update(_this.form.model.id, _this.form.model)
             } else {
-              await apiClient.photo.create(_this.form.model)
+              const { data } = await apiClient.photo.create(_this.form.model)
+              this.form.model = data
             }
           } catch (e) {
             _this.form.saveErrored = true
@@ -188,7 +189,7 @@ export default {
       if (this.form.saveErrored) {
         this.form.saveErrored = false
       } else {
-        this.$emit('succeed')
+        this.$emit('succeed', this.form.model)
       }
     }
   }

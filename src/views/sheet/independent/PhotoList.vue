@@ -8,12 +8,12 @@
               <a-row :gutter="48">
                 <a-col :md="6" :sm="24">
                   <a-form-item label="关键词：">
-                    <a-input v-model="list.params.keyword" />
+                    <a-input v-model="list.params.keyword" allowClear @keyup.enter="handleQuery" />
                   </a-form-item>
                 </a-col>
                 <a-col :md="6" :sm="24">
                   <a-form-item label="分组：">
-                    <a-select v-model="list.params.team" @change="handleQuery()">
+                    <a-select v-model="list.params.team" allowClear @change="handleQuery()">
                       <a-select-option v-for="(item, index) in computedTeams" :key="index" :value="item">
                         {{ item }}
                       </a-select-option>
@@ -32,7 +32,25 @@
             </a-form>
           </div>
           <div class="mb-0 table-operator">
-            <a-button icon="plus" type="primary" @click="handleOpenEditForm({})">添加</a-button>
+            <a-dropdown>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item key="single" @click="handleOpenForm({})"> 添加</a-menu-item>
+                  <a-menu-item key="batch" @click="attachmentSelectModal.visible = true"> 批量添加</a-menu-item>
+                </a-menu>
+              </template>
+              <a-button icon="plus" type="primary">
+                添加
+                <a-icon type="down" />
+              </a-button>
+            </a-dropdown>
+            <a-button v-show="list.selected.length" icon="check-circle" type="primary" @click="handleSelectAll">
+              全选
+            </a-button>
+            <a-button v-show="list.selected.length" icon="delete" type="danger" @click="handleDeletePhotoInBatch">
+              删除
+            </a-button>
+            <a-button v-show="list.selected.length" icon="close" @click="list.selected = []"> 取消</a-button>
           </div>
         </a-card>
       </a-col>
@@ -46,11 +64,14 @@
           <template #renderItem="item, index">
             <a-list-item
               :key="index"
-              @click="handleOpenEditForm(item)"
+              @click="handleItemClick(item)"
               @mouseenter="$set(item, 'hover', true)"
               @mouseleave="$set(item, 'hover', false)"
             >
-              <div class="border border-solid">
+              <div
+                :class="`${isItemSelect(item) ? 'border-blue-600' : 'border-slate-200'}`"
+                class="border border-solid"
+              >
                 <div class="photo-thumb photos-group-item">
                   <span
                     :style="`background-image:url(${encodeURI(item.thumbnail)})`"
@@ -61,10 +82,29 @@
                 <a-card-meta class="p-2 cursor-pointer">
                   <template #description>
                     <a-tooltip :title="item.name">
-                      <div class="truncate">{{ item.name }}</div>
+                      <div class="truncate">
+                        <span class="mr-1">{{ item.name }}</span>
+                        <span v-if="item.team" class="text-gray-500 text-xs">#{{ item.team }}</span>
+                      </div>
                     </a-tooltip>
                   </template>
                 </a-card-meta>
+
+                <a-icon
+                  v-show="!isItemSelect(item) && item.hover"
+                  :style="{ fontSize: '18px', color: 'rgb(37 99 235)' }"
+                  class="absolute top-1 right-2 font-bold cursor-pointer transition-all"
+                  theme="twoTone"
+                  type="plus-circle"
+                  @click.stop="handleSelect(item)"
+                />
+                <a-icon
+                  v-show="isItemSelect(item)"
+                  :style="{ fontSize: '18px', color: 'rgb(37 99 235)' }"
+                  class="absolute top-1 right-2 font-bold cursor-pointer transition-all"
+                  theme="twoTone"
+                  type="check-circle"
+                />
               </div>
             </a-list-item>
           </template>
@@ -103,12 +143,9 @@
       </a-form>
     </a-modal>
 
-    <PhotoFormModal
-      :photo="list.selected"
-      :teams="computedTeams"
-      :visible.sync="formVisible"
-      @succeed="onSaveSucceed"
-    />
+    <PhotoFormModal :photo="list.current" :teams="computedTeams" :visible.sync="formVisible" @succeed="onSaveSucceed" />
+
+    <AttachmentSelectModal :visible.sync="attachmentSelectModal.visible" @confirm="handleAttachmentSelected" />
   </page-view>
 </template>
 
@@ -119,7 +156,7 @@ import PhotoFormModal from './components/PhotoFormModal'
 
 import { mapActions } from 'vuex'
 import { mixin, mixinDevice } from '@/mixins/mixin.js'
-import apiClient from '@/utils/api-client'
+import apiClient, { haloRestApiClient } from '@/utils/api-client'
 
 export default {
   mixins: [mixin, mixinDevice],
@@ -139,7 +176,8 @@ export default {
         total: 0,
         hasPrevious: false,
         hasNext: false,
-        selected: {}
+        selected: [],
+        current: {}
       },
 
       attachmentSelectModal: {
@@ -170,6 +208,11 @@ export default {
       return this.teams.filter(item => {
         return item !== ''
       })
+    },
+    isItemSelect() {
+      return function (photo) {
+        return this.list.selected.findIndex(item => item.id === photo.id) > -1
+      }
     }
   },
   methods: {
@@ -227,13 +270,84 @@ export default {
       this.handleListPhotoTeams()
     },
 
-    handleOpenEditForm(photo) {
-      this.list.selected = photo
+    handleItemClick(photo) {
+      if (this.list.selected.length <= 0) {
+        this.handleOpenForm(photo)
+        return
+      }
+      this.isItemSelect(photo) ? this.handleUnselect(photo) : this.handleSelect(photo)
+    },
+
+    handleOpenForm(photo) {
+      this.list.current = photo
       this.formVisible = true
     },
 
-    onSaveSucceed() {
-      this.handleListPhotos()
+    handleSelect(photo) {
+      this.list.selected = [...this.list.selected, photo]
+    },
+
+    handleUnselect(photo) {
+      this.list.selected = this.list.selected.filter(item => item.id !== photo.id)
+    },
+
+    handleSelectAll() {
+      this.list.selected = this.list.data
+    },
+
+    async handleAttachmentSelected({ raw }) {
+      if (!raw.length) {
+        return
+      }
+      const photosToStage = raw.map(attachment => {
+        return {
+          name: attachment.name,
+          url: attachment.path,
+          thumbnail: attachment.thumbPath
+        }
+      })
+      try {
+        await apiClient.photo.createInBatch(photosToStage)
+        this.$message.success('添加成功')
+      } catch (e) {
+        this.$log.error('Failed to create photos in batch', e)
+      } finally {
+        await this.handleListPhotos()
+        this.handleListPhotoTeams()
+      }
+    },
+
+    async handleDeletePhotoInBatch() {
+      const _this = this
+      if (this.list.selected.length <= 0) {
+        this.$message.warn('你还未选择任何图片，请至少选择一个！')
+        return
+      }
+      this.$confirm({
+        title: '确定要批量删除选中的图片吗？',
+        content: '一旦删除不可恢复，请谨慎操作',
+        async onOk() {
+          try {
+            const photoIds = _this.list.selected.map(photo => photo.id)
+
+            // TODO use admin-api sdk instead
+            const httpClient = haloRestApiClient.buildHttpClient()
+            await httpClient.delete('/api/admin/photos', photoIds)
+            _this.list.selected = []
+            _this.$message.success('删除成功')
+          } catch (e) {
+            _this.$log.error('Failed to delete selected photos', e)
+          } finally {
+            await _this.handleListPhotos()
+            _this.handleListPhotoTeams()
+          }
+        }
+      })
+    },
+
+    async onSaveSucceed(photo) {
+      await this.handleListPhotos()
+      this.list.current = photo
       this.handleListPhotoTeams()
     },
 
