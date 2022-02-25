@@ -191,7 +191,7 @@ import PhotoFormModal from './components/PhotoFormModal'
 
 import { mapActions } from 'vuex'
 import { mixin, mixinDevice } from '@/mixins/mixin.js'
-import apiClient, { haloRestApiClient } from '@/utils/api-client'
+import apiClient from '@/utils/api-client'
 
 export default {
   mixins: [mixin, mixinDevice],
@@ -368,11 +368,11 @@ export default {
     },
 
     async handleDeletePhotoInBatch() {
-      const _this = this
       if (this.list.selected.length <= 0) {
         this.$message.warn('你还未选择任何图片，请至少选择一个！')
         return
       }
+      const _this = this
       this.$confirm({
         title: '确定要批量删除选中的图片吗？',
         content: '一旦删除不可恢复，请谨慎操作',
@@ -380,9 +380,8 @@ export default {
           try {
             const photoIds = _this.list.selected.map(photo => photo.id)
 
-            // TODO use admin-api sdk instead
-            const httpClient = haloRestApiClient.buildHttpClient()
-            await httpClient.delete('/api/admin/photos', photoIds)
+            await apiClient.photo.deleteInBatch(photoIds)
+
             _this.list.selected = []
             _this.$message.success('删除成功')
           } catch (e) {
@@ -405,9 +404,7 @@ export default {
       try {
         this.updateTeamForm.saving = true
 
-        // TODO use admin-api sdk instead
-        const httpClient = haloRestApiClient.buildHttpClient()
-        await httpClient.put('/api/admin/photos/batch', photosToStage)
+        await apiClient.photo.updateInBatch(photosToStage)
 
         this.$message.success('更改成功')
       } catch (e) {
