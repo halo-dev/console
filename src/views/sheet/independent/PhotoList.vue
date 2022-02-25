@@ -50,6 +50,9 @@
             <a-button v-show="list.selected.length" icon="delete" type="danger" @click="handleDeletePhotoInBatch">
               删除
             </a-button>
+            <a-button v-show="list.selected.length" icon="delete" @click="handleOpenUpdateTeamForm">
+              更改分组
+            </a-button>
             <a-button v-show="list.selected.length" icon="close" @click="list.selected = []"> 取消</a-button>
           </div>
         </a-card>
@@ -143,6 +146,33 @@
       </a-form>
     </a-modal>
 
+    <a-modal v-model="updateTeamForm.visible" title="更改分组">
+      <a-form layout="vertical">
+        <a-form-item label="分组名称：">
+          <a-auto-complete
+            ref="teamInput"
+            v-model="updateTeamForm.team"
+            :dataSource="computedTeams"
+            allowClear
+            style="width: 100%"
+          />
+        </a-form-item>
+      </a-form>
+
+      <template #footer>
+        <ReactiveButton
+          :errored="updateTeamForm.saveErrored"
+          :loading="updateTeamForm.saving"
+          erroredText="更改失败"
+          loadedText="更改成功"
+          text="确定"
+          @callback="handleUpdateTeamInBatchCallback"
+          @click="handleUpdateTeamInBatch"
+        ></ReactiveButton>
+        <a-button @click="updateTeamForm.visible = false">关闭</a-button>
+      </template>
+    </a-modal>
+
     <PhotoFormModal :photo="list.current" :teams="computedTeams" :visible.sync="formVisible" @succeed="onSaveSucceed">
       <template #extraFooter>
         <a-button :disabled="selectPreviousButtonDisabled" @click="handleSelectPrevious">上一项</a-button>
@@ -174,7 +204,7 @@ export default {
         params: {
           page: 0,
           size: 18,
-          sort: null,
+          sort: ['createTime,desc', 'id,asc'],
           keyword: null,
           team: undefined
         },
@@ -187,6 +217,13 @@ export default {
 
       attachmentSelectModal: {
         visible: false
+      },
+
+      updateTeamForm: {
+        team: undefined,
+        visible: false,
+        saving: false,
+        saveErrored: false
       },
 
       formVisible: false,
@@ -355,6 +392,49 @@ export default {
             _this.handleListPhotoTeams()
           }
         }
+      })
+    },
+
+    async handleUpdateTeamInBatch() {
+      const photosToStage = this.list.selected.map(photo => {
+        return {
+          ...photo,
+          team: this.updateTeamForm.team
+        }
+      })
+      try {
+        this.updateTeamForm.saving = true
+
+        // TODO use admin-api sdk instead
+        const httpClient = haloRestApiClient.buildHttpClient()
+        await httpClient.put('/api/admin/photos/batch', photosToStage)
+
+        this.$message.success('更改成功')
+      } catch (e) {
+        this.updateTeamForm.saveErrored = true
+        this.$log.error('Failed to change team in batch', e)
+      } finally {
+        setTimeout(() => {
+          this.updateTeamForm.saving = false
+        }, 400)
+      }
+    },
+
+    handleUpdateTeamInBatchCallback() {
+      if (this.updateTeamForm.saveErrored) {
+        this.updateTeamForm.saveErrored = false
+      } else {
+        this.updateTeamForm.visible = false
+        this.updateTeamForm.team = undefined
+        this.list.selected = []
+        this.handleListPhotos()
+      }
+    },
+
+    handleOpenUpdateTeamForm() {
+      this.updateTeamForm.visible = true
+      this.$nextTick(() => {
+        this.$refs.teamInput.focus()
       })
     },
 
