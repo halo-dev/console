@@ -143,7 +143,12 @@
       </a-form>
     </a-modal>
 
-    <PhotoFormModal :photo="list.current" :teams="computedTeams" :visible.sync="formVisible" @succeed="onSaveSucceed" />
+    <PhotoFormModal :photo="list.current" :teams="computedTeams" :visible.sync="formVisible" @succeed="onSaveSucceed">
+      <template #extraFooter>
+        <a-button :disabled="selectPreviousButtonDisabled" @click="handleSelectPrevious">上一项</a-button>
+        <a-button :disabled="selectNextButtonDisabled" @click="handleSelectNext">下一项</a-button>
+      </template>
+    </PhotoFormModal>
 
     <AttachmentSelectModal :visible.sync="attachmentSelectModal.visible" @confirm="handleAttachmentSelected" />
   </page-view>
@@ -213,6 +218,14 @@ export default {
       return function (photo) {
         return this.list.selected.findIndex(item => item.id === photo.id) > -1
       }
+    },
+    selectPreviousButtonDisabled() {
+      const index = this.list.data.findIndex(photo => photo.id === this.list.current.id)
+      return index === 0 && !this.list.hasPrevious
+    },
+    selectNextButtonDisabled() {
+      const index = this.list.data.findIndex(photo => photo.id === this.list.current.id)
+      return index === this.list.data.length - 1 && !this.list.hasNext
     }
   },
   methods: {
@@ -368,6 +381,40 @@ export default {
           this.handleListOptions()
           this.refreshOptionsCache()
         })
+    },
+
+    /**
+     * Select previous photo
+     */
+    async handleSelectPrevious() {
+      const index = this.list.data.findIndex(item => item.id === this.list.current.id)
+      if (index > 0) {
+        this.list.current = this.list.data[index - 1]
+        return
+      }
+      if (index === 0 && this.list.hasPrevious) {
+        this.list.params.page--
+        await this.handleListPhotos()
+
+        this.list.current = this.list.data[this.list.data.length - 1]
+      }
+    },
+
+    /**
+     * Select next photo
+     */
+    async handleSelectNext() {
+      const index = this.list.data.findIndex(item => item.id === this.list.current.id)
+      if (index < this.list.data.length - 1) {
+        this.list.current = this.list.data[index + 1]
+        return
+      }
+      if (index === this.list.data.length - 1 && this.list.hasNext) {
+        this.list.params.page++
+        await this.handleListPhotos()
+
+        this.list.current = this.list.data[0]
+      }
     }
   }
 }

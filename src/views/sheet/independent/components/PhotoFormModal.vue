@@ -53,7 +53,6 @@
 
     <template #footer>
       <slot name="extraFooter" />
-      <a-button :disabled="loading" @click="modalVisible = false"> 关闭</a-button>
       <ReactiveButton
         :errored="form.saveErrored"
         :loading="form.saving"
@@ -63,6 +62,7 @@
         @callback="handleSaveCallback"
         @click="handleSave"
       ></ReactiveButton>
+      <a-button :disabled="loading" @click="modalVisible = false"> 关闭</a-button>
     </template>
 
     <AttachmentSelectModal
