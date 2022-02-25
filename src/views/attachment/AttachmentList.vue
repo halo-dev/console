@@ -144,6 +144,7 @@
     <AttachmentUploadModal :visible.sync="upload.visible" @close="onUploadClose" />
 
     <AttachmentDetailModal
+      :class="isMobile() ? 'mobile' : 'desktop'"
       :addToPhoto="true"
       :attachment="list.current"
       :visible.sync="detailVisible"

@@ -312,6 +312,56 @@ body {
   }
 }
 
+// Attachment
+.ant-modal-root {
+  &.mobile {
+    .ant-modal {
+      top: 0;
+    }
+
+    .ant-modal-content {
+      height: calc(100vh - 16px);
+    }
+  }
+
+  &.desktop {
+    .ant-modal-content {
+      height: calc(100vh - 200px);
+    }
+  }
+
+  .ant-modal {
+    padding: 0;
+  }
+
+  .ant-modal-content {
+    position: relative;
+  }
+
+  .ant-modal-header {
+    width: 100%;
+    top: 0;
+    position: absolute;
+    z-index: 2;
+  }
+
+  .ant-modal-body {
+    padding-top: 56px;
+    padding-bottom: 54px;
+    height: 100%;
+    overflow: hidden;
+    overflow-y: scroll;
+  }
+
+  .ant-modal-footer {
+    width: 100%;
+    bottom: 0;
+    background: #fff;
+    position: absolute;
+    z-index: 2;
+  }
+}
+
 .topmenu {
   .page-header-index-wide {
     max-width: 1200px;

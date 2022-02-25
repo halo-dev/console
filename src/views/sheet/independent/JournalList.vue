@@ -157,6 +157,7 @@
     <AttachmentSelectModal :visible.sync="attachmentSelect.visible" @confirm="handleSelectAttachment" />
 
     <TargetCommentListModal
+      :class="isMobile() ? 'mobile' : 'desktop'"
       :target-id="list.selected.id"
       :title="`「${$options.filters.moment(list.selected.createTime)}」的评论`"
       :visible.sync="journalCommentDrawer.visible"
