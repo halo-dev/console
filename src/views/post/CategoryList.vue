@@ -82,8 +82,8 @@
 <script>
 // components
 import { PageView } from '@/layouts'
-import CategorySelectTree from './components/CategorySelectTree'
-import CategoryTreeNode from './components/CategoryTreeNode'
+import CategorySelectTree from '@/components/Category/CategorySelectTree'
+import CategoryTreeNode from '@/components/Category/CategoryTreeNode'
 
 // libs
 import apiClient from '@/utils/api-client'

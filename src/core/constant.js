@@ -122,32 +122,122 @@ export const attachmentTypes = {
   }
 }
 
-export const postStatuses = {
+export const normalPostStatuses = {
   PUBLISHED: {
     value: 'PUBLISHED',
     color: 'green',
     status: 'success',
     text: '已发布'
   },
-  DRAFT: {
-    value: 'DRAFT',
-    color: 'yellow',
-    status: 'warning',
-    text: '草稿'
-  },
-  RECYCLE: {
-    value: 'RECYCLE',
-    color: 'red',
-    status: 'error',
-    text: '回收站'
-  },
   INTIMATE: {
     value: 'INTIMATE',
     color: 'blue',
     status: 'success',
     text: '私密'
+  },
+  DRAFT: {
+    value: 'DRAFT',
+    color: 'yellow',
+    status: 'warning',
+    text: '草稿'
   }
 }
+
+export const postStatuses = {
+  ...normalPostStatuses,
+  RECYCLE: {
+    value: 'RECYCLE',
+    color: 'red',
+    status: 'error',
+    text: '回收站'
+  }
+}
+
+export const postColumns = [
+  {
+    title: '标题',
+    dataIndex: 'title',
+    width: '200px',
+    ellipsis: true,
+    scopedSlots: { customRender: 'postTitle' }
+  },
+  {
+    title: '状态',
+    dataIndex: 'status',
+    width: '100px',
+    scopedSlots: { customRender: 'status' }
+  },
+  {
+    title: '分类',
+    dataIndex: 'categories',
+    scopedSlots: { customRender: 'categories' }
+  },
+  {
+    title: '标签',
+    dataIndex: 'tags',
+    scopedSlots: { customRender: 'tags' }
+  },
+  {
+    title: '评论',
+    width: '70px',
+    dataIndex: 'commentCount',
+    scopedSlots: { customRender: 'commentCount' }
+  },
+  {
+    title: '访问',
+    width: '70px',
+    dataIndex: 'visits',
+    scopedSlots: { customRender: 'visits' }
+  },
+  {
+    title: '发布时间',
+    dataIndex: 'createTime',
+    width: '170px',
+    scopedSlots: { customRender: 'createTime' }
+  },
+  {
+    title: '操作',
+    width: '180px',
+    scopedSlots: { customRender: 'action' }
+  }
+]
+
+export const recyclePostColumns = [
+  {
+    title: '标题',
+    dataIndex: 'title',
+    width: '200px',
+    ellipsis: true,
+    scopedSlots: { customRender: 'postTitle' }
+  },
+  {
+    title: '分类',
+    dataIndex: 'categories',
+    scopedSlots: { customRender: 'categories' }
+  },
+  {
+    title: '标签',
+    dataIndex: 'tags',
+    scopedSlots: { customRender: 'tags' }
+  },
+  {
+    title: '评论',
+    width: '70px',
+    dataIndex: 'commentCount',
+    scopedSlots: { customRender: 'commentCount' }
+  },
+  {
+    title: '访问',
+    width: '70px',
+    dataIndex: 'visits',
+    scopedSlots: { customRender: 'visits' }
+  },
+  {
+    title: '操作',
+    width: '180px',
+    scopedSlots: { customRender: 'action' }
+  }
+]
 
 export const sheetStatuses = {
   PUBLISHED: {

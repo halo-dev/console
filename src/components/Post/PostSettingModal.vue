@@ -155,8 +155,8 @@
 </template>
 <script>
 // components
-import CategoryTree from './CategoryTree'
-import TagSelect from './TagSelect'
+import CategoryTree from '../Category/CategoryTree'
+import TagSelect from '../Tag/TagSelect'
 import MetaEditor from '@/components/Post/MetaEditor'
 
 // libs
