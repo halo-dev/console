@@ -36,7 +36,7 @@
 
 <script>
 // components
-import PostSettingModal from './components/PostSettingModal'
+import PostSettingModal from '../../components/Post/PostSettingModal'
 import MarkdownEditor from '@/components/Editor/MarkdownEditor'
 import { PageView } from '@/layouts'
 
