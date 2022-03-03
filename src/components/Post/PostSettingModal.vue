@@ -122,27 +122,37 @@
         </a-tab-pane>
       </a-tabs>
     </div>
-    <template slot="footer">
+    <template #footer>
       <slot name="extraFooter" />
       <ReactiveButton
-        v-if="!form.model.id"
+        v-if="draftSaveVisible"
         :errored="form.draftSaveErrored"
         :loading="form.draftSaving"
+        :text="`${hasId ? '转为' : '保存'}草稿`"
         erroredText="保存失败"
         loadedText="保存成功"
-        text="保存草稿"
         type="danger"
-        @callback="handleSavedCallback"
-        @click="handleCreateOrUpdate('DRAFT')"
+        @callback="handleSavedCallback()"
+        @click="handleSaveDraft()"
+      ></ReactiveButton>
+      <ReactiveButton
+        v-if="publishVisible"
+        :errored="form.publishErrored"
+        :loading="form.publishing"
+        erroredText="发布失败"
+        loadedText="发布成功"
+        text="转为发布"
+        @callback="handleSavedCallback()"
+        @click="handlePublish()"
       ></ReactiveButton>
       <ReactiveButton
         :errored="form.saveErrored"
-        :erroredText="`${form.model.id ? '保存' : '发布'}失败`"
-        :loadedText="`${form.model.id ? '保存' : '发布'}成功`"
+        :erroredText="`${hasId ? '保存' : '发布'}失败`"
+        :loadedText="`${hasId ? '保存' : '发布'}成功`"
         :loading="form.saving"
-        :text="`${form.model.id ? '保存' : '发布'}`"
-        @callback="handleSavedCallback"
-        @click="handleCreateOrUpdate()"
+        :text="`${hasId ? '保存' : '发布'}`"
+        @callback="handleSavedCallback()"
+        @click="handleSave()"
       ></ReactiveButton>
       <a-button :disabled="loading" @click="modalVisible = false">关闭</a-button>
     </template>
@@ -164,6 +174,7 @@ import { mixin, mixinDevice } from '@/mixins/mixin.js'
 import { datetimeFormat } from '@/utils/datetime'
 import pinyin from 'tiny-pinyin'
 import { mapGetters } from 'vuex'
+import { postStatuses } from '@/core/constant'
 
 // apis
 import apiClient from '@/utils/api-client'
@@ -196,12 +207,15 @@ export default {
   },
   data() {
     return {
+      postStatuses,
       form: {
         model: {},
         saving: false,
         saveErrored: false,
         draftSaving: false,
-        draftSaveErrored: false
+        draftSaveErrored: false,
+        publishing: false,
+        publishErrored: false
       },
 
       templates: [],
@@ -238,29 +252,36 @@ export default {
       }
     },
     fullPath() {
-      const permalinkType = this.options.post_permalink_type
-      const blogUrl = this.options.blog_url
-      const archivesPrefix = this.options.archives_prefix
-      const pathSuffix = this.options.path_suffix || ''
-      const slug = this.form.model.slug || '{slug}'
-      const createTime = this.form.model.createTime || new Date()
-      const id = this.form.model.id || '{id}'
-      switch (permalinkType) {
+      const { post_permalink_type, archives_prefix, blog_url, path_suffix: path_suffix = '' } = this.options
+      const { slug: slug = '{slug}', createTime: createTime = new Date(), id: id = '{id}' } = this.form.model
+
+      switch (post_permalink_type) {
         case 'DEFAULT':
-          return `${blogUrl}/${archivesPrefix}/${slug}${pathSuffix}`
+          return `${blog_url}/${archives_prefix}/${slug}${path_suffix}`
         case 'YEAR':
-          return `${blogUrl}${datetimeFormat(createTime, '/YYYY/')}${slug}${pathSuffix}`
+          return `${blog_url}${datetimeFormat(createTime, '/YYYY/')}${slug}${path_suffix}`
         case 'DATE':
-          return `${blogUrl}${datetimeFormat(createTime, '/YYYY/MM/')}${slug}${pathSuffix}`
+          return `${blog_url}${datetimeFormat(createTime, '/YYYY/MM/')}${slug}${path_suffix}`
         case 'DAY':
-          return `${blogUrl}${datetimeFormat(createTime, '/YYYY/MM/DD/')}${slug}${pathSuffix}`
+          return `${blog_url}${datetimeFormat(createTime, '/YYYY/MM/DD/')}${slug}${path_suffix}`
         case 'ID':
-          return `${blogUrl}/?p=${id}`
+          return `${blog_url}/?p=${id}`
         case 'ID_SLUG':
-          return `${blogUrl}/${archivesPrefix}/${id}${pathSuffix}`
+          return `${blog_url}/${archives_prefix}/${id}${path_suffix}`
         default:
           return ''
       }
+    },
+    hasId() {
+      return !!this.form.model.id
+    },
+    draftSaveVisible() {
+      const { draftSaving, publishing } = this.form
+      return (this.form.model.status !== postStatuses.DRAFT.value || !this.hasId || draftSaving) && !publishing
+    },
+    publishVisible() {
+      const { draftSaving, publishing } = this.form
+      return ((this.form.model.status === postStatuses.DRAFT.value && this.hasId) || publishing) && !draftSaving
     }
   },
   watch: {
@@ -287,32 +308,76 @@ export default {
     /**
      * Creates or updates a post
      */
-    async handleCreateOrUpdate(preStatus = 'PUBLISHED') {
+    async handleCreateOrUpdate() {
       if (!this.form.model.title) {
         this.$notification['error']({
           message: '提示',
           description: '文章标题不能为空！'
         })
-        return
+        throw new Error('文章标题不能为空！')
       }
 
-      this.form.model.status = preStatus
       this.form.model.keepRaw = true
-      const { id, status } = this.form.model
       try {
-        this.form[status === 'PUBLISHED' ? 'saving' : 'draftSaving'] = true
-
-        if (id) {
-          await apiClient.post.update(id, this.form.model)
+        if (this.hasId) {
+          await apiClient.post.update(this.form.model.id, this.form.model)
         } else {
           await apiClient.post.create(this.form.model)
         }
       } catch (error) {
-        this.form[status === 'PUBLISHED' ? 'saveErrored' : 'draftSaveErrored'] = true
         this.$log.error(error)
+        throw new Error(error)
+      }
+    },
+
+    async handleSave() {
+      try {
+        this.form.saving = true
+
+        const { status } = this.form.model
+
+        if (!status) {
+          this.form.model.status = this.postStatuses.PUBLISHED.value
+        }
+
+        await this.handleCreateOrUpdate()
+      } catch (e) {
+        this.form.saveErrored = true
+        this.$log.error('Failed to save post', e)
       } finally {
         setTimeout(() => {
           this.form.saving = false
+        }, 400)
+      }
+    },
+
+    async handlePublish() {
+      try {
+        this.form.publishing = true
+        this.form.model.status = this.postStatuses.PUBLISHED.value
+
+        await this.handleCreateOrUpdate()
+      } catch (e) {
+        this.form.publishErrored = true
+        this.$log.error('Failed to publish post', e)
+      } finally {
+        setTimeout(() => {
+          this.form.publishing = false
+        }, 400)
+      }
+    },
+
+    async handleSaveDraft() {
+      try {
+        this.form.draftSaving = true
+        this.form.model.status = this.postStatuses.DRAFT.value
+
+        await this.handleCreateOrUpdate()
+      } catch (e) {
+        this.form.draftSaveErrored = true
+        this.$log.error('Failed to save draft post', e)
+      } finally {
+        setTimeout(() => {
           this.form.draftSaving = false
         }, 400)
       }
@@ -322,9 +387,10 @@ export default {
      * Handle saved callback event
      */
     handleSavedCallback() {
-      if (this.form.saveErrored || this.form.draftSaveErrored) {
+      if (this.form.saveErrored || this.form.draftSaveErrored || this.form.publishErrored) {
         this.form.saveErrored = false
         this.form.draftSaveErrored = false
+        this.form.publishErrored = false
       } else {
         this.savedCallback && this.savedCallback()
       }
