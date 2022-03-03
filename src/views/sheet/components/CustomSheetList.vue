@@ -16,7 +16,7 @@
               <a-icon type="eye" />
               {{ item.visits }}
             </span>
-            <span @click="handleShowSheetComments(item)">
+            <span @click="handleOpenSheetComments(item)">
               <a-icon type="message" />
               {{ item.commentCount }}
             </span>
@@ -37,19 +37,19 @@
                       :title="'你确定要发布【' + item.title + '】页面？'"
                       cancelText="取消"
                       okText="确定"
-                      @confirm="handleEditStatusClick(item.id, 'PUBLISHED')"
+                      @confirm="handleChangeStatus(item.id, 'PUBLISHED')"
                     >
                       还原
                     </a-popconfirm>
                   </a-menu-item>
                   <a-menu-item v-if="item.status === 'PUBLISHED' || item.status === 'DRAFT'">
                     <a-popconfirm
-                      :title="'你确定要将【' + item.title + '】页面移到回收站？'"
+                      :title="'你确定要删除【' + item.title + '】页面？'"
                       cancelText="取消"
                       okText="确定"
-                      @confirm="handleEditStatusClick(item.id, 'RECYCLE')"
+                      @confirm="handleChangeStatus(item.id, 'RECYCLE')"
                     >
-                      回收站
+                      删除
                     </a-popconfirm>
                   </a-menu-item>
                   <a-menu-item v-else-if="item.status === 'RECYCLE'">
@@ -57,12 +57,12 @@
                       :title="'你确定要永久删除【' + item.title + '】页面？'"
                       cancelText="取消"
                       okText="确定"
-                      @confirm="handleDeleteClick(item.id)"
+                      @confirm="handleDelete(item.id)"
                     >
-                      删除
+                      永久删除
                     </a-popconfirm>
                   </a-menu-item>
-                  <a-menu-item @click="handleShowSheetSettings(item)">设置</a-menu-item>
+                  <a-menu-item @click="handleOpenSheetSettings(item)">设置</a-menu-item>
                 </a-menu>
               </template>
             </a-dropdown>
@@ -167,7 +167,7 @@
           :overflowCount="999"
           :showZero="true"
           class="cursor-pointer"
-          @click="handleShowSheetComments(record)"
+          @click="handleOpenSheetComments(record)"
         />
       </template>
 
@@ -199,7 +199,7 @@
           :title="'你确定要发布【' + sheet.title + '】？'"
           cancelText="取消"
           okText="确定"
-          @confirm="handleEditStatusClick(sheet.id, 'PUBLISHED')"
+          @confirm="handleChangeStatus(sheet.id, 'PUBLISHED')"
         >
           <a-button class="!p-0" type="link">还原</a-button>
         </a-popconfirm>
@@ -208,12 +208,12 @@
 
         <a-popconfirm
           v-if="sheet.status === 'PUBLISHED' || sheet.status === 'DRAFT'"
-          :title="'你确定要将【' + sheet.title + '】页面移到回收站？'"
+          :title="'你确定要删除【' + sheet.title + '】页面？'"
           cancelText="取消"
           okText="确定"
-          @confirm="handleEditStatusClick(sheet.id, 'RECYCLE')"
+          @confirm="handleChangeStatus(sheet.id, 'RECYCLE')"
         >
-          <a-button class="!p-0" type="link">回收站</a-button>
+          <a-button class="!p-0" type="link">删除</a-button>
         </a-popconfirm>
 
         <a-popconfirm
@@ -221,12 +221,12 @@
           :title="'你确定要永久删除【' + sheet.title + '】页面？'"
           cancelText="取消"
           okText="确定"
-          @confirm="handleDeleteClick(sheet.id)"
+          @confirm="handleDelete(sheet.id)"
         >
-          <a-button class="!p-0" type="link">删除</a-button>
+          <a-button class="!p-0" type="link">永久删除</a-button>
         </a-popconfirm>
         <a-divider type="vertical" />
-        <a-button class="!p-0" type="link" @click="handleShowSheetSettings(sheet)">设置</a-button>
+        <a-button class="!p-0" type="link" @click="handleOpenSheetSettings(sheet)">设置</a-button>
       </template>
     </a-table>
     <div class="page-wrapper">
@@ -244,10 +244,10 @@
     </div>
     <SheetSettingModal
       :loading="sheetSettingLoading"
-      :sheet="selectedSheet"
       :savedCallback="onSheetSavedCallback"
+      :sheet="list.selected"
       :visible.sync="sheetSettingVisible"
-      @onClose="selectedSheet = {}"
+      @onClose="list.selected = {}"
     >
       <template #extraFooter>
         <a-button :disabled="selectPreviousButtonDisabled" @click="handleSelectPrevious"> 上一篇</a-button>
@@ -255,8 +255,8 @@
       </template>
     </SheetSettingModal>
     <TargetCommentListModal
-      :target-id="selectedSheet.id"
-      :title="`「${selectedSheet.title}」的评论`"
+      :target-id="list.selected.id"
+      :title="`「${list.selected.title}」的评论`"
       :visible.sync="sheetCommentVisible"
       target="sheet"
       @close="onSheetCommentsClose"
@@ -269,9 +269,11 @@
   </div>
 </template>
 <script>
-import { mixin, mixinDevice } from '@/mixins/mixin.js'
+// components
 import SheetSettingModal from './SheetSettingModal'
 import TargetCommentListModal from '@/components/Comment/TargetCommentListModal'
+
+import { mixin, mixinDevice } from '@/mixins/mixin.js'
 import apiClient from '@/utils/api-client'
 import { sheetStatuses } from '@/core/constant'
 
@@ -304,7 +306,7 @@ const customColumns = [
   },
   {
     title: '操作',
-    width: '180px',
+    width: '200px',
     scopedSlots: { customRender: 'action' }
   }
 ]
@@ -330,9 +332,10 @@ export default {
         params: {
           page: 0,
           size: 10
-        }
+        },
+        selected: {}
       },
-      selectedSheet: {},
+
       sheetSettingVisible: false,
       sheetSettingLoading: false,
       sheetCommentVisible: false
@@ -347,27 +350,16 @@ export default {
       }
     },
     selectPreviousButtonDisabled() {
-      const index = this.list.data.findIndex(sheet => sheet.id === this.selectedSheet.id)
+      const index = this.list.data.findIndex(sheet => sheet.id === this.list.selected.id)
       return index === 0 && !this.list.hasPrevious
     },
     selectNextButtonDisabled() {
-      const index = this.list.data.findIndex(sheet => sheet.id === this.selectedSheet.id)
+      const index = this.list.data.findIndex(sheet => sheet.id === this.list.selected.id)
       return index === this.list.data.length - 1 && !this.list.hasNext
     }
   },
   created() {
     this.handleListSheets()
-  },
-  destroyed() {
-    if (this.sheetSettingVisible) {
-      this.sheetSettingVisible = false
-    }
-  },
-  beforeRouteLeave(to, from, next) {
-    if (this.sheetSettingVisible) {
-      this.sheetSettingVisible = false
-    }
-    next()
   },
   methods: {
     async handleListSheets(enableLoading = true) {
@@ -388,41 +380,52 @@ export default {
         this.list.loading = false
       }
     },
+
     handleEditClick(sheet) {
       this.$router.push({ name: 'SheetEdit', query: { sheetId: sheet.id } })
     },
-    handleEditStatusClick(sheetId, status) {
-      apiClient.sheet
-        .updateStatusById(sheetId, status)
-        .then(() => {
-          this.$message.success('操作成功！')
-        })
-        .finally(() => {
-          this.handleListSheets()
-        })
+
+    async handleChangeStatus(sheetId, status) {
+      try {
+        await apiClient.sheet.updateStatusById(sheetId, status)
+        this.$message.success('操作成功！')
+      } catch (e) {
+        this.$log.error('Failed to change sheet status', e)
+      } finally {
+        await this.handleListSheets()
+      }
     },
-    handleDeleteClick(sheetId) {
-      apiClient.sheet
-        .delete(sheetId)
-        .then(() => {
-          this.$message.success('删除成功！')
-        })
-        .finally(() => {
-          this.handleListSheets()
-        })
+
+    async handleDelete(sheetId) {
+      try {
+        await apiClient.sheet.delete(sheetId)
+        this.$message.success('删除成功！')
+      } catch (e) {
+        this.$log.error('Failed to delete sheet', e)
+      } finally {
+        await this.handleListSheets()
+      }
     },
-    handleShowSheetSettings(sheet) {
-      apiClient.sheet.get(sheet.id).then(response => {
-        this.selectedSheet = response.data
+
+    async handleOpenSheetSettings(sheet) {
+      try {
         this.sheetSettingVisible = true
-      })
+        this.sheetSettingLoading = true
+
+        const { data } = await apiClient.sheet.get(sheet.id)
+        this.list.selected = data
+      } catch (e) {
+        this.$log.error('Failed to open sheet settings', e)
+      } finally {
+        this.sheetSettingLoading = false
+      }
     },
-    handleShowSheetComments(sheet) {
-      apiClient.sheet.get(sheet.id).then(response => {
-        this.selectedSheet = response.data
-        this.sheetCommentVisible = true
-      })
+
+    handleOpenSheetComments(sheet) {
+      this.list.selected = sheet
+      this.sheetCommentVisible = true
     },
+
     handlePreview(sheetId) {
       apiClient.sheet.getPreviewLinkById(sheetId).then(response => {
         window.open(response, '_blank')
@@ -446,23 +449,26 @@ export default {
       this.list.params.size = size
       this.handleListSheets()
     },
+
     onSheetCommentsClose() {
       this.sheetCommentVisible = false
-      this.selectedSheet = {}
+      this.list.selected = {}
       this.handleListSheets(false)
     },
+
     onSheetSavedCallback() {
       this.handleListSheets(false)
     },
+
     /**
      * Select previous sheet
      */
     async handleSelectPrevious() {
-      const index = this.list.data.findIndex(post => post.id === this.selectedSheet.id)
+      const index = this.list.data.findIndex(post => post.id === this.list.selected.id)
       if (index > 0) {
         this.sheetSettingLoading = true
         const response = await apiClient.sheet.get(this.list.data[index - 1].id)
-        this.selectedSheet = response.data
+        this.list.selected = response.data
         this.sheetSettingLoading = false
         return
       }
@@ -471,19 +477,20 @@ export default {
         await this.handleListPosts()
         this.sheetSettingLoading = true
         const response = await apiClient.sheet.get(this.list.data[this.list.data.length - 1].id)
-        this.selectedSheet = response.data
+        this.list.selected = response.data
         this.sheetSettingLoading = false
       }
     },
+
     /**
      * Select next sheet
      */
     async handleSelectNext() {
-      const index = this.list.data.findIndex(post => post.id === this.selectedSheet.id)
+      const index = this.list.data.findIndex(post => post.id === this.list.selected.id)
       if (index < this.list.data.length - 1) {
         this.sheetSettingLoading = true
         const response = await apiClient.sheet.get(this.list.data[index + 1].id)
-        this.selectedSheet = response.data
+        this.list.selected = response.data
         this.sheetSettingLoading = false
         return
       }
@@ -492,7 +499,7 @@ export default {
         await this.handleListPosts()
         this.sheetSettingLoading = true
         const response = await apiClient.sheet.get(this.list.data[0].id)
-        this.selectedSheet = response.data
+        this.list.selected = response.data
         this.sheetSettingLoading = false
       }
     }
