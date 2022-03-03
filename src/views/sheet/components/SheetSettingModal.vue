@@ -110,27 +110,37 @@
         </a-tab-pane>
       </a-tabs>
     </div>
-    <template slot="footer">
+    <template #footer>
       <slot name="extraFooter" />
       <ReactiveButton
-        v-if="!form.model.id"
+        v-if="draftSaveVisible"
         :errored="form.draftSaveErrored"
         :loading="form.draftSaving"
+        :text="`${hasId ? '转为' : '保存'}草稿`"
         erroredText="保存失败"
         loadedText="保存成功"
-        text="保存草稿"
         type="danger"
-        @callback="handleSavedCallback"
-        @click="handleCreateOrUpdate('DRAFT')"
+        @callback="handleSavedCallback()"
+        @click="handleSaveDraft()"
+      ></ReactiveButton>
+      <ReactiveButton
+        v-if="publishVisible"
+        :errored="form.publishErrored"
+        :loading="form.publishing"
+        erroredText="发布失败"
+        loadedText="发布成功"
+        text="转为发布"
+        @callback="handleSavedCallback()"
+        @click="handlePublish()"
       ></ReactiveButton>
       <ReactiveButton
         :errored="form.saveErrored"
-        :erroredText="`${form.model.id ? '保存' : '发布'}失败`"
-        :loadedText="`${form.model.id ? '保存' : '发布'}成功`"
+        :erroredText="`${hasId ? '保存' : '发布'}失败`"
+        :loadedText="`${hasId ? '保存' : '发布'}成功`"
         :loading="form.saving"
-        :text="`${form.model.id ? '保存' : '发布'}`"
-        @callback="handleSavedCallback"
-        @click="handleCreateOrUpdate()"
+        :text="`${hasId ? '保存' : '发布'}`"
+        @callback="handleSavedCallback()"
+        @click="handleSave()"
       ></ReactiveButton>
       <a-button :disabled="loading" @click="modalVisible = false">关闭</a-button>
     </template>
@@ -144,11 +154,14 @@
 <script>
 // components
 import MetaEditor from '@/components/Post/MetaEditor'
+
 // libs
 import { mixin, mixinDevice } from '@/mixins/mixin.js'
 import { datetimeFormat } from '@/utils/datetime'
 import pinyin from 'tiny-pinyin'
 import { mapGetters } from 'vuex'
+import { sheetStatuses } from '@/core/constant'
+
 // apis
 import apiClient from '@/utils/api-client'
 
@@ -178,12 +191,15 @@ export default {
   },
   data() {
     return {
+      sheetStatuses,
       form: {
         model: {},
         saving: false,
         saveErrored: false,
         draftSaving: false,
-        draftSaveErrored: false
+        draftSaveErrored: false,
+        publishing: false,
+        publishErrored: false
       },
       templates: [],
       attachmentSelectVisible: false
@@ -210,19 +226,28 @@ export default {
       return datetimeFormat(new Date(), 'YYYY-MM-DD HH:mm:ss')
     },
     fullPath() {
-      const permalinkType = this.options.sheet_permalink_type
-      const blogUrl = this.options.blog_url
-      const sheetPrefix = this.options.sheet_prefix
-      const pathSuffix = this.options.path_suffix ? this.options.path_suffix : ''
-      const slug = this.form.model.slug || '{slug}'
-      switch (permalinkType) {
+      const { sheet_permalink_type, blog_url, sheet_prefix, path_suffix: path_suffix = '' } = this.options
+      const { slug: slug = '{slug}' } = this.form.model
+
+      switch (sheet_permalink_type) {
         case 'SECONDARY':
-          return `${blogUrl}/${sheetPrefix}/${slug}${pathSuffix}`
+          return `${blog_url}/${sheet_prefix}/${slug}${path_suffix}`
         case 'ROOT':
-          return `${blogUrl}/${slug}${pathSuffix}`
+          return `${blog_url}/${slug}${path_suffix}`
         default:
           return ''
       }
+    },
+    hasId() {
+      return !!this.form.model.id
+    },
+    draftSaveVisible() {
+      const { draftSaving, publishing } = this.form
+      return (this.form.model.status !== sheetStatuses.DRAFT.value || !this.hasId || draftSaving) && !publishing
+    },
+    publishVisible() {
+      const { draftSaving, publishing } = this.form
+      return ((this.form.model.status === sheetStatuses.DRAFT.value && this.hasId) || publishing) && !draftSaving
     }
   },
   watch: {
@@ -248,30 +273,75 @@ export default {
     /**
      * Creates or updates a sheet
      */
-    async handleCreateOrUpdate(preStatus = 'PUBLISHED') {
+    async handleCreateOrUpdate() {
       if (!this.form.model.title) {
         this.$notification['error']({
           message: '提示',
           description: '页面标题不能为空！'
         })
-        return
+        throw new Error('文章标题不能为空！')
       }
-      this.form.model.status = preStatus
       this.form.model.keepRaw = true
-      const { id, status } = this.form.model
       try {
-        this.form[status === 'PUBLISHED' ? 'saving' : 'draftSaving'] = true
-        if (id) {
-          await apiClient.sheet.update(id, this.form.model)
+        if (this.hasId) {
+          await apiClient.sheet.update(this.form.model.id, this.form.model)
         } else {
           await apiClient.sheet.create(this.form.model)
         }
       } catch (error) {
-        this.form[status === 'PUBLISHED' ? 'saveErrored' : 'draftSaveErrored'] = true
         this.$log.error(error)
+        throw new Error(error)
+      }
+    },
+
+    async handleSave() {
+      try {
+        this.form.saving = true
+
+        const { status } = this.form.model
+
+        if (!status) {
+          this.form.model.status = this.sheetStatuses.PUBLISHED.value
+        }
+
+        await this.handleCreateOrUpdate()
+      } catch (e) {
+        this.form.saveErrored = true
+        this.$log.error('Failed to save sheet', e)
       } finally {
         setTimeout(() => {
           this.form.saving = false
+        }, 400)
+      }
+    },
+
+    async handlePublish() {
+      try {
+        this.form.publishing = true
+        this.form.model.status = this.sheetStatuses.PUBLISHED.value
+
+        await this.handleCreateOrUpdate()
+      } catch (e) {
+        this.form.publishErrored = true
+        this.$log.error('Failed to publish sheet', e)
+      } finally {
+        setTimeout(() => {
+          this.form.publishing = false
+        }, 400)
+      }
+    },
+
+    async handleSaveDraft() {
+      try {
+        this.form.draftSaving = true
+        this.form.model.status = this.sheetStatuses.DRAFT.value
+
+        await this.handleCreateOrUpdate()
+      } catch (e) {
+        this.form.draftSaveErrored = true
+        this.$log.error('Failed to save draft sheet', e)
+      } finally {
+        setTimeout(() => {
           this.form.draftSaving = false
         }, 400)
       }
@@ -280,9 +350,10 @@ export default {
      * Handle saved callback event
      */
     handleSavedCallback() {
-      if (this.form.saveErrored || this.form.draftSaveErrored) {
+      if (this.form.saveErrored || this.form.draftSaveErrored || this.form.publishErrored) {
         this.form.saveErrored = false
         this.form.draftSaveErrored = false
+        this.form.publishErrored = false
       } else {
         this.savedCallback && this.savedCallback()
       }

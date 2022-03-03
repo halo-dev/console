@@ -243,17 +243,20 @@ export const sheetStatuses = {
   PUBLISHED: {
     color: 'green',
     status: 'success',
-    text: '已发布'
+    text: '已发布',
+    value: 'PUBLISHED'
   },
   DRAFT: {
     color: 'yellow',
     status: 'warning',
-    text: '草稿'
+    text: '草稿',
+    value: 'DRAFT'
   },
   RECYCLE: {
     color: 'red',
     status: 'error',
-    text: '回收站'
+    text: '回收站',
+    value: 'RECYCLE'
   }
 }
 
