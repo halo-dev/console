@@ -144,12 +144,15 @@
               <a-list-item-meta>
                 <template #description>
                   发表在
-                  <a v-if="targetName === 'posts'" :href="item.post.fullPath" target="_blank"
-                    >《{{ item.post.title }}》</a
-                  >
-                  <a v-if="targetName === 'sheets'" :href="item.sheet.fullPath" target="_blank"
-                    >《{{ item.sheet.title }}》</a
-                  >
+                  <a v-if="targetName === 'posts'" :href="item.post.fullPath" target="_blank">
+                    《{{ item.post.title }}》
+                  </a>
+                  <a v-if="targetName === 'sheets'" :href="item.sheet.fullPath" target="_blank">
+                    《{{ item.sheet.title }}》
+                  </a>
+                  <a v-if="targetName === 'journals'" href="javascript:void(0);">
+                    《{{ item.journal.createTime | moment }}》
+                  </a>
                 </template>
 
                 <template #avatar>
@@ -169,7 +172,7 @@
                   </div>
                 </template>
               </a-list-item-meta>
-              <p v-html="$options.filters.markdownRender(item.content)"></p>
+              <div class="comment-content-wrapper" v-html="$options.filters.markdownRender(item.content)"></div>
             </a-list-item>
           </template>
         </a-list>
@@ -195,7 +198,7 @@
           </template>
 
           <template #content="content">
-            <p class="comment-content-wrapper" v-html="$options.filters.markdownRender(content)"></p>
+            <div class="comment-content-wrapper" v-html="$options.filters.markdownRender(content)"></div>
           </template>
 
           <template #status="status">
@@ -212,6 +215,10 @@
             <a :href="sheet.fullPath" target="_blank">
               {{ sheet.title }}
             </a>
+          </template>
+
+          <template v-if="targetName === 'journals'" #journal="journal">
+            <p class="comment-content-wrapper" v-html="journal.content"></p>
           </template>
 
           <template #createTime="createTime">
@@ -391,6 +398,46 @@ const sheetColumns = [
   }
 ]
 
+const journalColumns = [
+  {
+    title: '昵称',
+    dataIndex: 'author',
+    width: '150px',
+    ellipsis: true,
+    scopedSlots: { customRender: 'author' }
+  },
+  {
+    title: '内容',
+    dataIndex: 'content',
+    scopedSlots: { customRender: 'content' }
+  },
+  {
+    title: '状态',
+    dataIndex: 'status',
+    width: '100px',
+    scopedSlots: { customRender: 'status' }
+  },
+  {
+    title: '评论日志',
+    dataIndex: 'journal',
+    width: '400px',
+    ellipsis: true,
+    scopedSlots: { customRender: 'journal' }
+  },
+  {
+    title: '日期',
+    dataIndex: 'createTime',
+    width: '170px',
+    scopedSlots: { customRender: 'createTime' }
+  },
+  {
+    title: '操作',
+    dataIndex: 'action',
+    width: '180px',
+    scopedSlots: { customRender: 'action' }
+  }
+]
+
 export default {
   name: 'CommentTab',
   components: { CommentReplyModal },
@@ -441,7 +488,10 @@ export default {
       }
     },
     columns() {
-      return this.targetName === 'posts' ? postColumns : sheetColumns
+      if (this.targetName === 'posts') return postColumns
+      if (this.targetName === 'sheets') return sheetColumns
+      if (this.targetName === 'journals') return journalColumns
+      return {}
     },
     targetName() {
       return `${this.target}s`
@@ -455,6 +505,9 @@ export default {
       }
       if (this.targetName === 'sheets') {
         return this.selectedComment.sheet.id
+      }
+      if (this.targetName === 'journals') {
+        return this.selectedComment.journal.id
       }
       return 0
     }

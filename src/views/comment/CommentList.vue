@@ -2,11 +2,14 @@
   <page-view>
     <div class="card-container">
       <a-tabs type="card">
-        <a-tab-pane key="1" tab="文章">
+        <a-tab-pane key="post" tab="文章">
           <comment-tab target="post"></comment-tab>
         </a-tab-pane>
-        <a-tab-pane key="2" tab="页面">
+        <a-tab-pane key="sheet" tab="页面">
           <comment-tab target="sheet"></comment-tab>
+        </a-tab-pane>
+        <a-tab-pane key="journal" tab="日志">
+          <comment-tab target="journal"></comment-tab>
         </a-tab-pane>
       </a-tabs>
     </div>

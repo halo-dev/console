@@ -70,7 +70,7 @@
 
                 <a-list-item-meta>
                   <template slot="description">
-                    <p class="journal-list-content" v-html="item.content"></p>
+                    <div class="journal-list-content" v-html="item.content"></div>
                   </template>
                   <span slot="title">{{ item.createTime | moment }}</span>
                   <a-avatar slot="avatar" :src="user.avatar" size="large" />
