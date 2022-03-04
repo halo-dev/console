@@ -12,7 +12,7 @@
     </template>
 
     <template #content>
-      <p v-html="$options.filters.markdownRender(comment.content)"></p>
+      <div class="comment-modal-content" v-html="$options.filters.markdownRender(comment.content)"></div>
     </template>
 
     <template #datetime>
