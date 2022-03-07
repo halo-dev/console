@@ -35,7 +35,10 @@
               </a-input>
             </a-form-item>
             <a-form-item label="分类目录">
-              <category-tree v-model="form.model.categoryIds" />
+              <a-space direction="vertical">
+                <category-tree ref="categoryTree" v-model="form.model.categoryIds" />
+                <a-button type="dashed" @click="categoryCreateModalVisible = true">新增</a-button>
+              </a-space>
             </a-form-item>
             <a-form-item label="标签">
               <TagSelect v-model="form.model.tagIds" />
@@ -161,6 +164,7 @@
       :visible.sync="attachmentSelectVisible"
       @confirm="handleSelectPostThumbnail"
     />
+    <CategoryCreateModal :visible.sync="categoryCreateModalVisible" @close="onCategoryCreateModalClose" />
   </a-modal>
 </template>
 <script>
@@ -168,6 +172,7 @@
 import CategoryTree from '../Category/CategoryTree'
 import TagSelect from '../Tag/TagSelect'
 import MetaEditor from '@/components/Post/MetaEditor'
+import CategoryCreateModal from '@/components/Category/CategoryCreateModal'
 
 // libs
 import { mixin, mixinDevice } from '@/mixins/mixin.js'
@@ -185,7 +190,8 @@ export default {
   components: {
     CategoryTree,
     TagSelect,
-    MetaEditor
+    MetaEditor,
+    CategoryCreateModal
   },
   props: {
     visible: {
@@ -220,7 +226,8 @@ export default {
 
       templates: [],
 
-      attachmentSelectVisible: false
+      attachmentSelectVisible: false,
+      categoryCreateModalVisible: false
     }
   },
   computed: {
@@ -456,6 +463,10 @@ export default {
     onClosed() {
       this.$emit('onClose')
       this.$emit('onUpdate', this.form.model)
+    },
+
+    onCategoryCreateModalClose() {
+      this.$refs.categoryTree.handleListCategories()
     }
   }
 }
