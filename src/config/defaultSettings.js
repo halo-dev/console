@@ -7,7 +7,7 @@ export default {
   fixedSidebar: true,
   autoHideHeader: false,
   storageOptions: {
-    namespace: 'halo__',
+    namespace: 'HALO__',
     name: 'ls',
     storage: 'local'
   }
