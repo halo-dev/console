@@ -22,11 +22,11 @@ export default {
       switch (deviceType) {
         case DEVICE_TYPE.DESKTOP:
           $store.commit('TOGGLE_DEVICE', 'desktop')
-          $store.dispatch('setSidebar', true)
+          $store.dispatch('setSidebar', this.$store.getters.sidebar)
           break
         case DEVICE_TYPE.TABLET:
           $store.commit('TOGGLE_DEVICE', 'tablet')
-          $store.dispatch('setSidebar', false)
+          $store.dispatch('setSidebar', this.$store.getters.sidebar)
           break
         case DEVICE_TYPE.MOBILE:
         default:

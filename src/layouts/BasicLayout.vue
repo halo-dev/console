@@ -131,15 +131,6 @@ export default {
       this.setSidebar(!this.collapsed)
       triggerWindowResizeEvent()
     },
-    paddingCalc() {
-      let left = ''
-      if (this.sidebarOpened) {
-        left = this.isDesktop() ? '256px' : '80px'
-      } else {
-        left = (this.isMobile() && '0') || (this.fixedSidebar && '80px') || '0'
-      }
-      return left
-    },
     menuSelect() {
       if (!this.isDesktop()) {
         this.collapsed = false
