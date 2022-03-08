@@ -62,10 +62,10 @@
     >
       <template #renderItem="item, index">
         <a-list-item
-          @mouseenter="$set(item, 'hover', true)"
-          @mouseleave="$set(item, 'hover', false)"
           :key="index"
           @click="handleItemClick(item)"
+          @mouseenter="item.hover = true"
+          @mouseleave="item.hover = false"
         >
           <div :class="`${isItemSelect(item) ? 'border-blue-600' : 'border-slate-200'}`" class="border border-solid">
             <div class="attach-thumb attachments-group-item">
@@ -86,18 +86,18 @@
             </a-card-meta>
             <a-icon
               v-show="isItemSelect(item) && !item.hover"
-              type="check-circle"
-              theme="twoTone"
-              class="absolute top-1 right-2 font-bold cursor-pointer transition-all"
               :style="{ fontSize: '18px', color: 'rgb(37 99 235)' }"
+              class="absolute top-1 right-2 font-bold cursor-pointer transition-all"
+              theme="twoTone"
+              type="check-circle"
             />
             <a-icon
               v-show="item.hover"
-              type="profile"
-              theme="twoTone"
-              class="absolute top-1 right-2 font-bold cursor-pointer transition-all"
-              @click.stop="handleOpenDetail(item)"
               :style="{ fontSize: '18px' }"
+              class="absolute top-1 right-2 font-bold cursor-pointer transition-all"
+              theme="twoTone"
+              type="profile"
+              @click.stop="handleOpenDetail(item)"
             />
           </div>
         </a-list-item>
@@ -145,7 +145,7 @@
 
     <template slot="footer">
       <a-button @click="modalVisible = false">取消</a-button>
-      <a-button type="primary" :disabled="!list.selected.length" @click="handleConfirm">确定</a-button>
+      <a-button :disabled="!list.selected.length" type="primary" @click="handleConfirm">确定</a-button>
     </template>
 
     <AttachmentUploadModal :visible.sync="upload.visible" @close="handleSearch" />
@@ -154,7 +154,7 @@
       <template #extraFooter>
         <a-button :disabled="selectPreviousButtonDisabled" @click="handleSelectPrevious">上一项</a-button>
         <a-button :disabled="selectNextButtonDisabled" @click="handleSelectNext">下一项</a-button>
-        <a-button @click="handleItemClick(list.current)" type="primary">
+        <a-button type="primary" @click="handleItemClick(list.current)">
           {{ list.selected.findIndex(item => item.id === list.current.id) > -1 ? '取消选择' : '选择' }}
         </a-button>
       </template>
@@ -290,7 +290,14 @@ export default {
 
         const response = await apiClient.attachment.list(this.list.params)
 
-        this.list.data = response.data.content
+        this.list.data = response.data.content.map(item => {
+          return {
+            ...item,
+            hover: false,
+            thumbPath: item.thumbPath + `?nocache=${Math.random()}`
+          }
+        })
+
         this.list.total = response.data.total
         this.list.hasNext = response.data.hasNext
         this.list.hasPrevious = response.data.hasPrevious

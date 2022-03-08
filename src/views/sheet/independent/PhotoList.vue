@@ -68,8 +68,8 @@
             <a-list-item
               :key="index"
               @click="handleItemClick(item)"
-              @mouseenter="$set(item, 'hover', true)"
-              @mouseleave="$set(item, 'hover', false)"
+              @mouseenter="item.hover = true"
+              @mouseleave="item.hover = false"
             >
               <div
                 :class="`${isItemSelect(item) ? 'border-blue-600' : 'border-slate-200'}`"
@@ -274,7 +274,14 @@ export default {
 
         const response = await apiClient.photo.list(this.list.params)
 
-        this.list.data = response.data.content
+        this.list.data = response.data.content.map(item => {
+          return {
+            ...item,
+            hover: false,
+            thumbnail: item.thumbnail + `?nocache=${Math.random()}`
+          }
+        })
+
         this.list.total = response.data.total
         this.list.hasPrevious = response.data.hasPrevious
         this.list.hasNext = response.data.hasNext

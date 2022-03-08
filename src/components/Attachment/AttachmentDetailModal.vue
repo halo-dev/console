@@ -4,7 +4,12 @@
       <a-col :lg="9" :md="24" :sm="24" :xl="9" :xs="24">
         <div class="attach-detail-img pb-3">
           <a v-if="isImage" :href="attachment.path" target="_blank">
-            <img :src="attachment.path" class="w-full" loading="lazy" />
+            <img
+              :alt="attachment.name"
+              :src="`${attachment.path}?nocache=${Math.random()}`"
+              class="w-full"
+              loading="lazy"
+            />
           </a>
           <div v-else>此文件不支持预览</div>
         </div>

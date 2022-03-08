@@ -71,10 +71,10 @@
         >
           <template #renderItem="item, index">
             <a-list-item
-              @mouseenter="$set(item, 'hover', true)"
-              @mouseleave="$set(item, 'hover', false)"
               :key="index"
               @click="handleItemClick(item)"
+              @mouseenter="item.hover = true"
+              @mouseleave="item.hover = false"
               @contextmenu.prevent="handleContextMenu($event, item)"
             >
               <div
@@ -99,26 +99,26 @@
                 </a-card-meta>
                 <a-icon
                   v-show="!isItemSelect(item) && item.hover"
-                  type="plus-circle"
-                  theme="twoTone"
-                  class="absolute top-1 right-2 font-bold cursor-pointer transition-all"
                   :style="{ fontSize: '18px', color: 'rgb(37 99 235)' }"
+                  class="absolute top-1 right-2 font-bold cursor-pointer transition-all"
+                  theme="twoTone"
+                  type="plus-circle"
                   @click.stop="handleSelect(item)"
                 />
                 <a-icon
                   v-show="isItemSelect(item)"
-                  type="check-circle"
-                  theme="twoTone"
-                  class="absolute top-1 right-2 font-bold cursor-pointer transition-all"
                   :style="{ fontSize: '18px', color: 'rgb(37 99 235)' }"
+                  class="absolute top-1 right-2 font-bold cursor-pointer transition-all"
+                  theme="twoTone"
+                  type="check-circle"
                 />
                 <a-icon
                   v-show="item.hover && list.selected.length > 0"
-                  type="profile"
-                  theme="twoTone"
-                  class="absolute top-1 left-2 font-bold cursor-pointer transition-all"
-                  @click.stop="handleOpenDetail(item)"
                   :style="{ fontSize: '18px' }"
+                  class="absolute top-1 left-2 font-bold cursor-pointer transition-all"
+                  theme="twoTone"
+                  type="profile"
+                  @click.stop="handleOpenDetail(item)"
                 />
               </div>
             </a-list-item>
@@ -254,7 +254,14 @@ export default {
 
         const response = await apiClient.attachment.list(this.list.params)
 
-        this.list.data = response.data.content
+        this.list.data = response.data.content.map(item => {
+          return {
+            ...item,
+            hover: false,
+            thumbPath: item.thumbPath + `?nocache=${Math.random()}`
+          }
+        })
+
         this.list.total = response.data.total
         this.list.hasNext = response.data.hasNext
         this.list.hasPrevious = response.data.hasPrevious
