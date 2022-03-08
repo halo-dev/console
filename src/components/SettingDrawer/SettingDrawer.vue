@@ -176,6 +176,7 @@ export default {
       } else {
         this.handleSetFixedHeader(true)
         this.handleSetFixedSidebar(false)
+        this.$store.dispatch('setSidebar', true)
       }
     },
     handleContentWidthChange(type) {

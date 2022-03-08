@@ -1,6 +1,7 @@
 <template>
   <div class="logo">
     <img
+      :style="{ width: sidebarOpened ? '64px' : '48px' }"
       alt="Halo Logo"
       class="select-none cursor-pointer hover:brightness-125 transition-all"
       src="/images/logo.svg"
@@ -13,9 +14,11 @@
 import { mapActions, mapGetters } from 'vuex'
 import apiClient from '@/utils/api-client'
 import throttle from 'lodash.throttle'
+import { mixin } from '@/mixins/mixin'
 
 export default {
   name: 'Logo',
+  mixins: [mixin],
   data() {
     return {
       clickCount: 0

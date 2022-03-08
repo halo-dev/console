@@ -27,12 +27,8 @@ const app = {
   },
   mutations: {
     SET_SIDEBAR_TYPE: (state, type) => {
-      state.sidebar = type
       Vue.ls.set(SIDEBAR_TYPE, type)
-    },
-    CLOSE_SIDEBAR: state => {
-      Vue.ls.set(SIDEBAR_TYPE, true)
-      state.sidebar = false
+      state.sidebar = type
     },
     TOGGLE_DEVICE: (state, device) => {
       state.device = device
