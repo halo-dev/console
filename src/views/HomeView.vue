@@ -1,5 +1,3 @@
 <template>
-  <main>
-    Hello Halo!
-  </main>
+  <main>Hello Halo!</main>
 </template>
