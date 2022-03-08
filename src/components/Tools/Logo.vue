@@ -12,6 +12,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import apiClient from '@/utils/api-client'
+import throttle from 'lodash.throttle'
 
 export default {
   name: 'Logo',
@@ -25,7 +26,7 @@ export default {
   },
   methods: {
     ...mapActions(['refreshOptionsCache']),
-    async onLogoClick() {
+    onLogoClick: throttle(async function () {
       this.clickCount++
       if (this.clickCount === 10) {
         try {
@@ -48,7 +49,7 @@ export default {
           this.$message.info(`再点击 ${10 - this.clickCount} 次即可启用开发者选项！`)
         }
       }
-    }
+    }, 200)
   }
 }
 </script>
