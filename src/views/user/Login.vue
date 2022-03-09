@@ -16,7 +16,6 @@
 import { mapActions } from 'vuex'
 
 import LoginForm from '@/components/Login/LoginForm'
-import apiClient from '@/utils/api-client'
 
 export default {
   components: {
@@ -28,7 +27,6 @@ export default {
     }
   },
   beforeMount() {
-    this.handleVerifyIsInstall()
     document.addEventListener('keydown', this.onRegisterResetPasswordKeydown)
   },
   beforeDestroy() {
@@ -42,12 +40,6 @@ export default {
       if (e.keyCode === 72 && (e.altKey || e.metaKey) && e.shiftKey) {
         e.preventDefault()
         this.resetPasswordButtonVisible = !this.resetPasswordButtonVisible
-      }
-    },
-    async handleVerifyIsInstall() {
-      const response = await apiClient.isInstalled()
-      if (!response.data) {
-        await this.$router.push({ name: 'Install' })
       }
     },
     onLoginSucceed() {
