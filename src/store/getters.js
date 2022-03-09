@@ -5,6 +5,7 @@ const getters = {
   layoutSetting: state => state.app.layoutSetting,
   sidebar: state => state.app.sidebar,
   loginModal: state => state.app.loginModal,
+  isInstalled: state => state.app.isInstalled,
   token: state => state.user.token,
   user: state => state.user.user,
   options: state => state.option.options

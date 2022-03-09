@@ -18,7 +18,7 @@ const keys = [
 ]
 const option = {
   state: {
-    options: []
+    options: undefined
   },
   mutations: {
     SET_OPTIONS: (state, options) => {

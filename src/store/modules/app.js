@@ -10,6 +10,7 @@ import {
   LAYOUT_SETTING,
   SIDEBAR_TYPE
 } from '@/store/mutation-types'
+import apiClient from '@/utils/api-client'
 
 const app = {
   state: {
@@ -23,7 +24,8 @@ const app = {
     autoHideHeader: false,
     color: null,
     layoutSetting: false,
-    loginModal: false
+    loginModal: false,
+    isInstalled: undefined
   },
   mutations: {
     SET_SIDEBAR_TYPE: (state, type) => {
@@ -67,9 +69,25 @@ const app = {
     },
     TOGGLE_LOGIN_MODAL: (state, show) => {
       state.loginModal = show
+    },
+    SET_IS_INSTALLED: (state, isInstalled) => {
+      state.isInstalled = isInstalled
     }
   },
   actions: {
+    fetchIsInstalled({ commit }) {
+      return new Promise((resolve, reject) => {
+        apiClient
+          .isInstalled()
+          .then(response => {
+            commit('SET_IS_INSTALLED', response.data)
+            resolve(response)
+          })
+          .catch(error => {
+            reject(error)
+          })
+      })
+    },
     setSidebar({ commit }, type) {
       commit('SET_SIDEBAR_TYPE', type)
     },

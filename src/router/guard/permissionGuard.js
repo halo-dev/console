@@ -2,7 +2,6 @@ import router from '@/router'
 import store from '@/store'
 import NProgress from 'nprogress'
 import { domTitle, setDocumentTitle } from '@/utils/domUtil'
-import apiClient from '@/utils/api-client'
 
 NProgress.configure({ showSpinner: false, speed: 500 })
 
@@ -11,24 +10,41 @@ const whiteList = ['Login', 'Install', 'NotFound', 'ResetPassword'] // no redire
 let progressTimer = null
 router.beforeEach(async (to, from, next) => {
   onProgressTimerDone()
+
   progressTimer = setTimeout(() => {
     NProgress.start()
   }, 250)
+
+  // set title meta
   to.meta && typeof to.meta.title !== 'undefined' && setDocumentTitle(`${to.meta.title} - ${domTitle}`)
+
+  // check installation status
+  if (store.getters.isInstalled === undefined) {
+    await store.dispatch('fetchIsInstalled')
+  }
+
+  if (!store.getters.isInstalled && to.name !== 'Install') {
+    next({
+      name: 'Install'
+    })
+    onProgressTimerDone()
+    return
+  }
+
+  if (store.getters.isInstalled && to.name === 'Install') {
+    next({
+      name: 'Login'
+    })
+    onProgressTimerDone()
+    return
+  }
+
   if (store.getters.token) {
-    if (to.name === 'Install') {
-      next()
-      return
+    if (!store.getters.options) {
+      await store.dispatch('refreshOptionsCache').then()
     }
-    const response = await apiClient.isInstalled()
-    if (!response.data) {
-      next({
-        name: 'Install'
-      })
-      onProgressTimerDone()
-      return
-    }
-    if (to.name === 'Login') {
+
+    if (['Login', 'Install'].includes(to.name)) {
       next({
         name: 'Dashboard'
       })
@@ -36,10 +52,8 @@ router.beforeEach(async (to, from, next) => {
       return
     }
 
-    if (!store.getters.options) {
-      store.dispatch('refreshOptionsCache').then()
-    }
     next()
+    onProgressTimerDone()
     return
   }
 
@@ -48,6 +62,7 @@ router.beforeEach(async (to, from, next) => {
     next()
     return
   }
+
   next({
     name: 'Login',
     query: {

@@ -14,8 +14,8 @@
           <!-- Blogger info -->
           <div class="mt-5 mb-5">
             <a-radio-group v-model="installationMode">
-              <a-radio-button value="new"> 全新安装 </a-radio-button>
-              <a-radio-button value="import"> 数据导入 </a-radio-button>
+              <a-radio-button value="new"> 全新安装</a-radio-button>
+              <a-radio-button value="import"> 数据导入</a-radio-button>
             </a-radio-group>
           </div>
           <a-form-model
@@ -26,7 +26,7 @@
             class="installationForm animated fadeIn"
             layout="horizontal"
           >
-            <a-divider dashed orientation="left"> 管理员信息 </a-divider>
+            <a-divider dashed orientation="left"> 管理员信息</a-divider>
             <a-form-model-item prop="username">
               <a-input v-model="form.model.username" placeholder="用户名">
                 <a-icon slot="prefix" style="color: rgba(0, 0, 0, 0.25)" type="user" />
@@ -52,7 +52,7 @@
                 <a-icon slot="prefix" style="color: rgba(0, 0, 0, 0.25)" type="lock" />
               </a-input>
             </a-form-model-item>
-            <a-divider dashed orientation="left"> 站点信息 </a-divider>
+            <a-divider dashed orientation="left"> 站点信息</a-divider>
             <a-form-model-item prop="url">
               <a-input v-model="form.model.url" placeholder="博客地址">
                 <a-icon slot="prefix" style="color: rgba(0, 0, 0, 0.25)" type="link" />
@@ -169,7 +169,6 @@ export default {
     }
   },
   beforeMount() {
-    this.handleVerifyIsInstall()
     this.$set(this.form.model, 'url', window.location.protocol + '//' + window.location.host)
   },
   computed: {
@@ -181,13 +180,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['installCleanToken']),
-    async handleVerifyIsInstall() {
-      const response = await apiClient.isInstalled()
-      if (response.data) {
-        await this.$router.push({ name: 'Login' })
-      }
-    },
+    ...mapActions(['installCleanToken', 'fetchIsInstalled']),
     handleInstall() {
       this.$refs.installationForm.validate(valid => {
         if (valid) {
@@ -203,6 +196,7 @@ export default {
               setTimeout(() => {
                 this.form.installing = false
               }, 400)
+              this.fetchIsInstalled()
             })
         }
       })
@@ -241,6 +235,7 @@ export default {
           setTimeout(() => {
             this.form.importing = false
           }, 400)
+          this.fetchIsInstalled()
         })
     },
     handleImportCallback() {
