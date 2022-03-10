@@ -176,6 +176,7 @@ export default {
     async handleEdit(category) {
       try {
         const { data } = await apiClient.category.get(category.id)
+        this.$refs.categoryForm.clearValidate()
         this.form.model = data
 
         this.$refs.nameInput.focus()
