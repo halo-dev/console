@@ -419,6 +419,7 @@ export default {
       } else {
         this.handleListMenus()
         this.handleListTeams()
+        this.updateTeamForm.visible = false
       }
     }
   }
