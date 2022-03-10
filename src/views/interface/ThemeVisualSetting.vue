@@ -41,7 +41,7 @@ export default {
     ...mapGetters(['options'])
   },
   beforeRouteEnter(to, from, next) {
-    // Get post id from query
+    // Get theme id from query
     const themeId = to.query.themeId
     next(async vm => {
       await vm.handleGetTheme(themeId)
