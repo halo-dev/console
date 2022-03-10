@@ -121,7 +121,7 @@
             </template>
             <ellipsis slot="name" slot-scope="text" :length="15" tooltip>{{ text }}</ellipsis>
             <span slot="action" slot-scope="text, record">
-              <a-button class="!p-0" type="link" @click="form.model = record">编辑</a-button>
+              <a-button class="!p-0" type="link" @click="handleEdit(record)">编辑</a-button>
               <a-divider type="vertical" />
               <a-popconfirm
                 :title="'你确定要删除【' + record.name + '】链接？'"
@@ -273,6 +273,10 @@ export default {
       apiClient.option.list().then(response => {
         this.optionsModal.data = response.data
       })
+    },
+    handleEdit(record) {
+      this.form.model = record
+      this.$refs.linkForm.clearValidate()
     },
     handleDeleteLink(id) {
       apiClient.link
