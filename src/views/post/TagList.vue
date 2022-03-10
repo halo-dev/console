@@ -66,7 +66,7 @@
               <template slot="title">
                 <span>{{ tag.postCount }} 篇文章</span>
               </template>
-              <post-tag :tag="tag" style="margin-bottom: 8px; cursor: pointer" @click.native="form.model = tag" />
+              <post-tag :tag="tag" style="margin-bottom: 8px; cursor: pointer" @click.native="handleEdit(tag)" />
             </a-tooltip>
           </a-spin>
         </a-card>
@@ -123,6 +123,10 @@ export default {
     this.handleListTags()
   },
   methods: {
+    handleEdit(tag) {
+      this.form.model = tag
+      this.$refs.tagForm.clearValidate()
+    },
     handleListTags() {
       this.list.loading = true
       apiClient.tag
