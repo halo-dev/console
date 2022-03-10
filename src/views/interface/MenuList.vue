@@ -3,7 +3,7 @@
     <a-row :gutter="12">
       <a-col :lg="6" :md="6" :sm="24" :xl="6" :xs="24" class="mb-3">
         <a-card :bodyStyle="{ padding: '16px' }" title="分组">
-          <template slot="extra">
+          <template #extra>
             <ReactiveButton
               :errored="teams.default.errored"
               :loading="teams.default.saving"
@@ -39,7 +39,7 @@
             trigger="click"
             @visibleChange="handleTeamFormVisibleChange"
           >
-            <template slot="content">
+            <template #content>
               <a-form-model
                 ref="teamForm"
                 :model="teams.form.model"
@@ -50,20 +50,18 @@
                   <a-input v-model="teams.form.model.team" autoFocus />
                 </a-form-model-item>
                 <a-form-model-item style="margin-bottom: 0">
-                  <a-button type="primary" @click="handleCreateTeam"> 新增 </a-button>
+                  <a-button type="primary" @click="handleCreateTeam"> 新增</a-button>
                 </a-form-model-item>
               </a-form-model>
             </template>
-            <a-button block class="mt-3" type="primary"> 新增分组 </a-button>
+            <a-button block class="mt-3" type="primary"> 新增分组</a-button>
           </a-popover>
         </a-card>
       </a-col>
       <a-col :lg="18" :md="18" :sm="24" :xl="18" :xs="24" class="pb-3">
         <a-card :bodyStyle="{ padding: '16px' }">
-          <template slot="title">
-            <span>
-              {{ menuListTitle }}
-            </span>
+          <template #title>
+            {{ menuListTitle }}
             <a-tooltip
               v-if="list.data.length <= 0 && !list.loading"
               slot="action"
@@ -72,7 +70,7 @@
               <a-icon class="cursor-pointer" type="info-circle-o" />
             </a-tooltip>
           </template>
-          <template slot="extra">
+          <template #extra>
             <a-space>
               <ReactiveButton
                 :disabled="list.data.length <= 0"
@@ -84,13 +82,16 @@
                 @callback="formBatch.errored = false"
                 @click="handleUpdateBatch"
               ></ReactiveButton>
-              <a-button v-if="!form.visible" ghost type="primary" @click="handleOpenCreateMenuForm()"> 新增 </a-button>
-              <a-button v-else type="default" @click="handleCloseCreateMenuForm()"> 取消新增 </a-button>
+              <a-button v-if="!form.visible" ghost type="primary" @click="handleOpenCreateMenuForm()"> 新增</a-button>
+              <a-button v-else type="default" @click="handleCloseCreateMenuForm()"> 取消新增</a-button>
               <a-dropdown :trigger="['click']">
-                <a-menu slot="overlay">
-                  <a-menu-item @click="menuInternalLinkSelector.visible = true"> 从系统预设链接添加 </a-menu-item>
-                  <a-menu-item @click="handleDeleteBatch"> 删除当前组 </a-menu-item>
-                </a-menu>
+                <template #overlay>
+                  <a-menu>
+                    <a-menu-item @click="menuInternalLinkSelector.visible = true"> 从系统预设链接添加</a-menu-item>
+                    <a-menu-item @click="handleOpenUpdateTeamForm"> 重命名分组</a-menu-item>
+                    <a-menu-item @click="handleDeleteBatch"> 删除当前组</a-menu-item>
+                  </a-menu>
+                </template>
                 <a-button>
                   其他
                   <a-icon type="down" />
@@ -111,11 +112,33 @@
         </a-card>
       </a-col>
     </a-row>
+
     <MenuInternalLinkSelector
       v-model="menuInternalLinkSelector.visible"
       :team="teams.selected"
       @reload="handleListMenus"
     />
+
+    <a-modal v-model="updateTeamForm.visible" title="重命名分组">
+      <a-form layout="vertical">
+        <a-form-item label="分组名称：">
+          <a-input ref="teamInput" v-model="updateTeamForm.team" allowClear style="width: 100%" />
+        </a-form-item>
+      </a-form>
+
+      <template #footer>
+        <ReactiveButton
+          :errored="updateTeamForm.saveErrored"
+          :loading="updateTeamForm.saving"
+          erroredText="更改失败"
+          loadedText="更改成功"
+          text="确定"
+          @callback="handleUpdateTeamInBatchCallback"
+          @click="handleUpdateTeamInBatch"
+        ></ReactiveButton>
+        <a-button @click="updateTeamForm.visible = false">关闭</a-button>
+      </template>
+    </a-modal>
   </page-view>
 </template>
 
@@ -165,6 +188,12 @@ export default {
           saving: false,
           errored: false
         }
+      },
+      updateTeamForm: {
+        team: undefined,
+        visible: false,
+        saving: false,
+        saveErrored: false
       },
       menuInternalLinkSelector: {
         visible: false
@@ -342,6 +371,55 @@ export default {
         this.teams.default.errored = false
       } else {
         this.refreshOptionsCache()
+      }
+    },
+
+    handleOpenUpdateTeamForm() {
+      this.updateTeamForm.team = this.teams.selected
+      this.updateTeamForm.visible = true
+      this.$nextTick(() => {
+        this.$refs.teamInput.focus()
+      })
+    },
+
+    async handleUpdateTeamInBatch() {
+      try {
+        this.updateTeamForm.saving = true
+        await apiClient.menu.updateInBatch(
+          this.computedMenusWithoutLevel.map(menu => {
+            return {
+              ...menu,
+              team: this.updateTeamForm.team
+            }
+          })
+        )
+
+        if (this.teams.selected === this.defaultMenuTeam) {
+          await apiClient.option.saveMapView({
+            default_menu_team: this.updateTeamForm.team
+          })
+
+          await this.refreshOptionsCache()
+        }
+
+        this.teams.selected = this.updateTeamForm.team
+      } catch (e) {
+        this.updateTeamForm.saveErrored = true
+        this.$log.debug('Failed update menus team', e)
+      } finally {
+        setTimeout(() => {
+          this.updateTeamForm.saving = false
+        }, 400)
+      }
+    },
+
+    handleUpdateTeamInBatchCallback() {
+      if (this.updateTeamForm.saveErrored) {
+        this.updateTeamForm.saveErrored = false
+      } else {
+        this.handleListMenus()
+        this.handleListTeams()
+        this.updateTeamForm.visible = false
       }
     }
   }
