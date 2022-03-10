@@ -223,6 +223,13 @@ export const asyncRouterMap = [
     ]
   },
   {
+    path: '/interface/themes/setting/visual',
+    name: 'ThemeVisualSetting',
+    hidden: true,
+    component: () => import('@/views/interface/ThemeVisualSetting'),
+    meta: { title: '主题设置', hiddenHeaderContent: false }
+  },
+  {
     path: '*',
     redirect: '/404',
     hidden: true
