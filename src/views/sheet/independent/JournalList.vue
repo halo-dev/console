@@ -126,13 +126,7 @@
     </a-modal>
 
     <!-- 编辑日志弹窗 -->
-    <a-modal v-model="form.visible" :width="820">
-      <template #title>
-        {{ formTitle }}
-        <a-tooltip title="只能输入250字">
-          <a-icon type="info-circle-o" />
-        </a-tooltip>
-      </template>
+    <a-modal v-model="form.visible" :title="formTitle" :width="820">
       <template #footer>
         <ReactiveButton
           :errored="form.saveErrored"
@@ -187,6 +181,7 @@ import TargetCommentListModal from '@/components/Comment/TargetCommentListModal'
 import { mixin, mixinDevice } from '@/mixins/mixin.js'
 import { mapActions, mapGetters } from 'vuex'
 import { simpleEditorToolbars } from '@/core/constant'
+import { deepClone } from '@/utils/util'
 import apiClient from '@/utils/api-client'
 import MarkdownEditor from '@/components/Editor/MarkdownEditor'
 
@@ -296,10 +291,13 @@ export default {
     },
     handleOpenPublishModal() {
       this.form.visible = true
-      this.form.model = {}
+      this.form.model = {
+        sourceContent: '',
+        content: ''
+      }
     },
     handleOpenEditModal(item) {
-      this.form.model = item
+      this.form.model = deepClone(item)
       this.form.isPublic = item.type !== 'INTIMATE'
       this.form.visible = true
     },
@@ -323,6 +321,7 @@ export default {
       _this.$refs.journalForm.validate(valid => {
         if (valid) {
           _this.form.model.type = _this.form.isPublic ? 'PUBLIC' : 'INTIMATE'
+          _this.form.model.keepRaw = true
           _this.form.saving = true
           if (_this.form.model.id) {
             apiClient.journal
