@@ -1,6 +1,12 @@
 <template>
   <div>
-    <a-input :defaultValue="defaultValue" :placeholder="placeholder" :value="value" @change="onInputChange">
+    <a-input
+      ref="attachmentInput"
+      :defaultValue="defaultValue"
+      :placeholder="placeholder"
+      :value="value"
+      @change="onInputChange"
+    >
       <template #addonAfter>
         <a-button class="!p-0 !h-auto" type="link" @click="attachmentModalVisible = true">
           <a-icon type="picture" />
@@ -48,6 +54,9 @@ export default {
       if (raw.length) {
         this.$emit('input', encodeURI(raw[0].path))
       }
+    },
+    focus() {
+      this.$refs.attachmentInput.focus()
     }
   }
 }
