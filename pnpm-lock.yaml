@@ -6,7 +6,7 @@ specifiers:
   '@codemirror/basic-setup': ^0.19.1
   '@codemirror/lang-html': ^0.19.4
   '@codemirror/lang-java': ^0.19.1
-  '@halo-dev/admin-api': 1.0.0-alpha.51
+  '@halo-dev/admin-api': ^1.0.0-alpha.51
   '@halo-dev/editor': ^3.0.0-alpha.2
   '@vue/cli-plugin-babel': ~5.0.1
   '@vue/cli-plugin-eslint': ~5.0.1
