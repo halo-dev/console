@@ -9,7 +9,7 @@
                 :size="104"
                 :src="userForm.model.avatar || '//cn.gravatar.com/avatar/?s=256&d=mm'"
                 class="cursor-pointer"
-                @click="attachmentSelect.visible = true"
+                @click="handleOpenUpdateAvatarForm"
               />
             </a-tooltip>
             <div class="mt-4 mb-1 text-xl font-medium leading-5" style="color: rgba(0, 0, 0, 0.85)">
@@ -207,7 +207,7 @@
       :width="400"
       icon="safety-certificate"
     >
-      <template slot="footer">
+      <template #footer>
         <a-button key="back" @click="handleCloseMFAuthModal"> 取消</a-button>
         <ReactiveButton
           key="submit"
@@ -224,38 +224,47 @@
       <a-form-model ref="mfaForm" :model="mfaParam" :rules="mfaParam.rules" layout="vertical">
         <a-form-model-item v-if="mfaUsed" label="两步验证码" prop="authcode">
           <a-input v-model="mfaParam.authcode" :maxLength="6">
-            <a-icon slot="prefix" style="color: rgba(0, 0, 0, 0.25)" type="safety-certificate" />
+            <template #prefix>
+              <a-icon style="color: rgba(0, 0, 0, 0.25)" type="safety-certificate" />
+            </template>
           </a-input>
         </a-form-model-item>
         <a-form-model-item v-if="!mfaUsed" :help="`MFAKey:${mfaParam.mfaKey}`" label="1. 请扫描二维码或导入 key">
-          <template slot="extra">
-            <span class="text-red-600"
-              >* 建议保存此二维码或 MFAKey，验证设备丢失将无法找回，只能通过重置密码关闭二步验证。</span
-            >
+          <template #extra>
+            <span class="text-red-600">
+              * 建议保存此二维码或 MFAKey，验证设备丢失将无法找回，只能通过重置密码关闭二步验证。
+            </span>
           </template>
           <img :src="mfaParam.qrImage" width="100%" />
         </a-form-model-item>
         <a-form-model-item v-if="!mfaUsed" label="2. 验证两步验证码" prop="authcode">
           <a-input v-model="mfaParam.authcode" :maxLength="6">
-            <a-icon slot="prefix" style="color: rgba(0, 0, 0, 0.25)" type="safety-certificate" />
+            <template #prefix>
+              <a-icon style="color: rgba(0, 0, 0, 0.25)" type="safety-certificate" />
+            </template>
           </a-input>
         </a-form-model-item>
       </a-form-model>
     </a-modal>
 
-    <AttachmentSelectModal
-      :multiSelect="false"
-      :visible.sync="attachmentSelect.visible"
-      title="选择头像"
-      @confirm="handleSelectAvatar"
-    />
+    <a-modal v-model="updateAvatarForm.visible" title="修改头像">
+      <a-form layout="vertical">
+        <a-form-item label="头像链接：">
+          <AttachmentInput ref="avatarInput" v-model="updateAvatarForm.avatar" />
+        </a-form-item>
+      </a-form>
+
+      <template #footer>
+        <a-button type="primary" @click="handleUpdateAvatar">确定</a-button>
+        <a-button @click="updateAvatarForm.visible = false">关闭</a-button>
+      </template>
+    </a-modal>
   </div>
 </template>
 
 <script>
 import apiClient from '@/utils/api-client'
 import { mapGetters, mapMutations } from 'vuex'
-import MD5 from 'md5.js'
 
 export default {
   data() {
@@ -269,6 +278,12 @@ export default {
     return {
       attachmentSelect: {
         visible: false
+      },
+      updateAvatarForm: {
+        avatar: undefined,
+        visible: false,
+        saving: false,
+        saveErrored: false
       },
       userForm: {
         model: {},
@@ -431,17 +446,6 @@ export default {
         this.userForm.errored = false
       }
     },
-    handleSelectAvatar({ raw }) {
-      if (raw.length) {
-        this.userForm.model.avatar = encodeURI(raw[0].path)
-      }
-      this.attachmentSelect.visible = false
-    },
-    handleSelectGravatar() {
-      this.userForm.model.avatar =
-        '//cn.gravatar.com/avatar/' + new MD5().update(this.userForm.model.email).digest('hex') + '&d=mm'
-      this.attachmentSelect.visible = false
-    },
     handleMFASwitch(useMFAuth) {
       this.mfaParam.switch.loading = true
       if (!useMFAuth && this.mfaUsed) {
@@ -508,6 +512,17 @@ export default {
       this.mfaParam.authcode = null
       this.mfaParam.qrImage = null
       this.mfaParam.mfaKey = null
+    },
+    handleOpenUpdateAvatarForm() {
+      this.updateAvatarForm.avatar = this.userForm.model.avatar
+      this.updateAvatarForm.visible = true
+      this.$nextTick(() => {
+        this.$refs.avatarInput.focus()
+      })
+    },
+    handleUpdateAvatar() {
+      this.userForm.model.avatar = this.updateAvatarForm.avatar
+      this.updateAvatarForm.visible = false
     }
   }
 }
