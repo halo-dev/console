@@ -1,4 +1,4 @@
-export const markdownEditorToolbars = {
+export const editorToolbars = {
   bold: true,
   italic: true,
   header: true,
@@ -20,6 +20,28 @@ export const markdownEditorToolbars = {
   subfield: true,
   fullscreen: true,
   readmodel: true,
+  htmlcode: true,
+  preview: true
+}
+
+export const simpleEditorToolbars = {
+  bold: true,
+  italic: true,
+  header: true,
+  underline: true,
+  strikethrough: true,
+  superscript: true,
+  subscript: true,
+  quote: true,
+  ol: true,
+  ul: true,
+  link: true,
+  imagelink: true,
+  code: true,
+  table: true,
+  undo: true,
+  redo: true,
+  subfield: true,
   htmlcode: true,
   preview: true
 }
