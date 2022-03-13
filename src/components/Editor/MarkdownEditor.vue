@@ -4,7 +4,8 @@
       ref="editor"
       v-model="originalContentData"
       :boxShadow="false"
-      :toolbars="markdownEditorToolbars"
+      :subfield="subfield"
+      :toolbars="toolbars"
       :uploadRequest="handleAttachmentUpload"
       autofocus
       @change="handleChange"
@@ -19,7 +20,7 @@
 import haloEditor from '@halo-dev/editor'
 import '@halo-dev/editor/dist/lib/style.css'
 import apiClient from '@/utils/api-client'
-import { markdownEditorToolbars } from '@/core/constant'
+import { editorToolbars } from '@/core/constant'
 
 export default {
   name: 'MarkdownEditor',
@@ -31,11 +32,20 @@ export default {
       type: String,
       required: false,
       default: ''
+    },
+    toolbars: {
+      type: Object,
+      default: () => {
+        return editorToolbars
+      }
+    },
+    subfield: {
+      type: Boolean,
+      default: true
     }
   },
   data() {
     return {
-      markdownEditorToolbars,
       attachmentSelectVisible: false
     }
   },

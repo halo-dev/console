@@ -1,9 +1,11 @@
 <template>
   <a-card :bodyStyle="{ padding: '16px' }" :bordered="false">
-    <template slot="title">
+    <template #title>
       速记
-      <a-tooltip slot="action" title="内容将保存到页面/所有页面/日志页面">
-        <a-icon class="cursor-pointer" type="info-circle-o" />
+      <a-tooltip title="内容将保存到页面/所有页面/日志页面">
+        <router-link :to="{ name: 'JournalList' }" style="color: inherit">
+          <a-icon class="cursor-pointer hover:text-blue-400 transition-all" type="info-circle-o" />
+        </router-link>
       </a-tooltip>
     </template>
     <a-form-model ref="journalForm" :model="form.model" :rules="form.rules" layout="vertical">

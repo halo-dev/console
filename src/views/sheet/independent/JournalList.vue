@@ -38,44 +38,50 @@
           <div class="mt-4">
             <a-empty v-if="!list.loading && list.data.length === 0" />
             <a-list v-else :dataSource="list.data" :loading="list.loading" :pagination="false" itemLayout="vertical">
-              <a-list-item :key="index" slot="renderItem" slot-scope="item, index">
-                <template slot="actions">
-                  <a-button class="!p-0" type="link">
-                    <a-icon type="like-o" />
-                    {{ item.likes }}
-                  </a-button>
-                  <a-button class="!p-0" type="link" @click="handleOpenJournalCommentsDrawer(item)">
-                    <a-icon type="message" />
-                    {{ item.commentCount }}
-                  </a-button>
-                  <a-button v-if="item.type === 'INTIMATE'" class="!p-0" disabled type="link">
-                    <a-icon type="lock" />
-                  </a-button>
-                  <a-button v-else class="!p-0" type="link">
-                    <a-icon type="unlock" />
-                  </a-button>
-                </template>
-                <template slot="extra">
-                  <a-button class="!p-0" type="link" @click="handleOpenEditModal(item)">编辑</a-button>
-                  <a-divider type="vertical" />
-                  <a-popconfirm
-                    cancelText="取消"
-                    okText="确定"
-                    title="你确定要删除这条日志？"
-                    @confirm="handleDelete(item.id)"
-                  >
-                    <a-button class="!p-0" type="link">删除</a-button>
-                  </a-popconfirm>
-                </template>
-
-                <a-list-item-meta>
-                  <template slot="description">
-                    <div class="journal-list-content" v-html="item.content"></div>
+              <template #renderItem="item, index">
+                <a-list-item :key="index">
+                  <template #actions>
+                    <a-button class="!p-0" type="link">
+                      <a-icon type="like-o" />
+                      {{ item.likes }}
+                    </a-button>
+                    <a-button class="!p-0" type="link" @click="handleOpenJournalCommentsDrawer(item)">
+                      <a-icon type="message" />
+                      {{ item.commentCount }}
+                    </a-button>
+                    <a-button v-if="item.type === 'INTIMATE'" class="!p-0" disabled type="link">
+                      <a-icon type="lock" />
+                    </a-button>
+                    <a-button v-else class="!p-0" type="link">
+                      <a-icon type="unlock" />
+                    </a-button>
                   </template>
-                  <span slot="title">{{ item.createTime | moment }}</span>
-                  <a-avatar slot="avatar" :src="user.avatar" size="large" />
-                </a-list-item-meta>
-              </a-list-item>
+                  <template #extra>
+                    <a-button class="!p-0" type="link" @click="handleOpenEditModal(item)">编辑</a-button>
+                    <a-divider type="vertical" />
+                    <a-popconfirm
+                      cancelText="取消"
+                      okText="确定"
+                      title="你确定要删除这条日志？"
+                      @confirm="handleDelete(item.id)"
+                    >
+                      <a-button class="!p-0" type="link">删除</a-button>
+                    </a-popconfirm>
+                  </template>
+
+                  <a-list-item-meta>
+                    <template #description>
+                      <div class="journal-list-content" v-html="item.content"></div>
+                    </template>
+                    <template #title>
+                      <span>{{ item.createTime | moment }}</span>
+                    </template>
+                    <template #avatar>
+                      <a-avatar :src="user.avatar" size="large" />
+                    </template>
+                  </a-list-item-meta>
+                </a-list-item>
+              </template>
               <div class="page-wrapper">
                 <a-pagination
                   :current="pagination.page"
@@ -104,8 +110,9 @@
         @click="optionModal.visible = true"
       ></a-button>
     </div>
+
     <a-modal v-model="optionModal.visible" :afterClose="() => (optionModal.visible = false)" title="页面设置">
-      <template slot="footer">
+      <template #footer>
         <a-button key="submit" type="primary" @click="handleSaveOptions()">保存</a-button>
       </template>
       <a-form layout="vertical">
@@ -119,15 +126,8 @@
     </a-modal>
 
     <!-- 编辑日志弹窗 -->
-    <a-modal v-model="form.visible">
-      <template slot="title">
-        {{ formTitle }}
-        <a-tooltip slot="action" title="只能输入250字">
-          <a-icon type="info-circle-o" />
-        </a-tooltip>
-      </template>
-      <template slot="footer">
-        <a-button type="dashed" @click="attachmentSelect.visible = true">附件库</a-button>
+    <a-modal v-model="form.visible" :title="formTitle" :width="820">
+      <template #footer>
         <ReactiveButton
           :errored="form.saveErrored"
           :loading="form.saving"
@@ -141,20 +141,21 @@
       </template>
       <a-form-model ref="journalForm" :model="form.model" :rules="form.rules" layout="vertical">
         <a-form-model-item prop="sourceContent">
-          <a-input
-            ref="sourceContentInput"
-            v-model="form.model.sourceContent"
-            :autoSize="{ minRows: 8 }"
-            type="textarea"
-          />
+          <div id="editor" style="height: 520px">
+            <MarkdownEditor
+              v-if="form.visible"
+              :originalContent.sync="form.model.sourceContent"
+              :subfield="false"
+              :toolbars="simpleEditorToolbars"
+              @change="onContentChange"
+            />
+          </div>
         </a-form-model-item>
         <a-form-model-item>
           <a-switch v-model="form.isPublic" checkedChildren="公开" defaultChecked unCheckedChildren="私密" />
         </a-form-model-item>
       </a-form-model>
     </a-modal>
-
-    <AttachmentSelectModal :visible.sync="attachmentSelect.visible" @confirm="handleSelectAttachment" />
 
     <TargetCommentListModal
       :target-id="list.selected.id"
@@ -179,13 +180,17 @@ import TargetCommentListModal from '@/components/Comment/TargetCommentListModal'
 // libs
 import { mixin, mixinDevice } from '@/mixins/mixin.js'
 import { mapActions, mapGetters } from 'vuex'
+import { simpleEditorToolbars } from '@/core/constant'
+import { deepClone } from '@/utils/util'
 import apiClient from '@/utils/api-client'
+import MarkdownEditor from '@/components/Editor/MarkdownEditor'
 
 export default {
   mixins: [mixin, mixinDevice],
-  components: { PageView, TargetCommentListModal },
+  components: { MarkdownEditor, PageView, TargetCommentListModal },
   data() {
     return {
+      simpleEditorToolbars,
       list: {
         data: [],
         loading: false,
@@ -212,7 +217,7 @@ export default {
       form: {
         model: {},
         rules: {
-          sourceContent: [{ required: true, message: '* 内容不能为空', trigger: ['change'] }]
+          sourceContent: [{ required: true, message: '* 内容不能为空', trigger: [] }]
         },
         visible: false,
         saving: false,
@@ -220,9 +225,6 @@ export default {
         isPublic: true
       },
       journalCommentDrawer: {
-        visible: false
-      },
-      attachmentSelect: {
         visible: false
       },
       optionModal: {
@@ -289,18 +291,15 @@ export default {
     },
     handleOpenPublishModal() {
       this.form.visible = true
-      this.form.model = {}
-      this.$nextTick(() => {
-        this.$refs.sourceContentInput.focus()
-      })
+      this.form.model = {
+        sourceContent: '',
+        content: ''
+      }
     },
     handleOpenEditModal(item) {
-      this.form.model = item
+      this.form.model = deepClone(item)
       this.form.isPublic = item.type !== 'INTIMATE'
       this.form.visible = true
-      this.$nextTick(() => {
-        this.$refs.sourceContentInput.focus()
-      })
     },
     handleDelete(id) {
       apiClient.journal.delete(id).finally(() => {
@@ -311,11 +310,18 @@ export default {
       this.list.selected = journal
       this.journalCommentDrawer.visible = true
     },
+
+    onContentChange({ originalContent, renderContent }) {
+      this.form.model.sourceContent = originalContent
+      this.form.model.content = renderContent
+    },
+
     handleSaveOrUpdate() {
       const _this = this
       _this.$refs.journalForm.validate(valid => {
         if (valid) {
           _this.form.model.type = _this.form.isPublic ? 'PUBLIC' : 'INTIMATE'
+          _this.form.model.keepRaw = true
           _this.form.saving = true
           if (_this.form.model.id) {
             apiClient.journal
@@ -343,6 +349,7 @@ export default {
         }
       })
     },
+
     handleSaveOrUpdateCallback() {
       if (this.form.saveErrored) {
         this.form.saveErrored = false
@@ -370,11 +377,13 @@ export default {
       this.list.params.size = size
       this.handleListJournals()
     },
+
     onJournalCommentsDrawerClose() {
       this.form.model = {}
       this.journalCommentDrawer.visible = false
       this.handleListJournals()
     },
+
     handleSaveOptions() {
       apiClient.option
         .save(this.optionModal.options)
@@ -386,9 +395,6 @@ export default {
           this.handleListOptions()
           this.refreshOptionsCache()
         })
-    },
-    handleSelectAttachment({ markdown }) {
-      this.$set(this.form.model, 'sourceContent', (this.form.model.sourceContent || '') + '\n' + markdown.join('\n'))
     },
 
     /**

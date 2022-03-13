@@ -6,7 +6,7 @@ specifiers:
   '@codemirror/basic-setup': ^0.19.1
   '@codemirror/lang-html': ^0.19.4
   '@codemirror/lang-java': ^0.19.1
-  '@halo-dev/admin-api': ^1.0.0-alpha.50
+  '@halo-dev/admin-api': ^1.0.0-alpha.51
   '@halo-dev/editor': ^3.0.0-alpha.2
   '@vue/cli-plugin-babel': ~5.0.1
   '@vue/cli-plugin-eslint': ~5.0.1
@@ -52,7 +52,7 @@ dependencies:
   '@codemirror/basic-setup': 0.19.1
   '@codemirror/lang-html': 0.19.4
   '@codemirror/lang-java': 0.19.1
-  '@halo-dev/admin-api': 1.0.0-alpha.50
+  '@halo-dev/admin-api': 1.0.0-alpha.51
   '@halo-dev/editor': 3.0.0-alpha.2
   ant-design-vue: 1.7.8_9065e7474e033a8e4b95615fc8e6c36c
   dayjs: 1.10.7
@@ -1577,8 +1577,8 @@ packages:
       - supports-color
     dev: true
 
-  /@halo-dev/admin-api/1.0.0-alpha.50:
-    resolution: {integrity: sha512-/kfkBPRqnhMRCMhKWMWz+rboUAxGCM5Tcv13BaBKlG04wEY7ewgrXrFMvxfYd0luIik+knluwKj1OwWix+2ZhA==}
+  /@halo-dev/admin-api/1.0.0-alpha.51:
+    resolution: {integrity: sha512-xREMnlN9GNTiw4Y2qJvpRu3SgmqhJ9l2e4ctfJ3vzG4AJacttHku5hKUxdOFE95sL7UFXEcE3MlNQqVJkHPksw==}
     engines: {node: '>=12'}
     dependencies:
       '@halo-dev/rest-api-client': 1.0.0-alpha.50
