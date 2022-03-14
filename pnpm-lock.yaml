@@ -7,7 +7,7 @@ specifiers:
   '@codemirror/lang-html': ^0.19.4
   '@codemirror/lang-java': ^0.19.1
   '@halo-dev/admin-api': ^1.0.0-alpha.51
-  '@halo-dev/editor': ^3.0.0-alpha.2
+  '@halo-dev/editor': ^3.0.0-alpha.3
   '@vue/cli-plugin-babel': ~5.0.1
   '@vue/cli-plugin-eslint': ~5.0.1
   '@vue/cli-plugin-router': ~5.0.1
@@ -53,7 +53,7 @@ dependencies:
   '@codemirror/lang-html': 0.19.4
   '@codemirror/lang-java': 0.19.1
   '@halo-dev/admin-api': 1.0.0-alpha.51
-  '@halo-dev/editor': 3.0.0-alpha.2
+  '@halo-dev/editor': 3.0.0-alpha.3
   ant-design-vue: 1.7.8_9065e7474e033a8e4b95615fc8e6c36c
   dayjs: 1.10.7
   enquire.js: 2.1.6
@@ -1329,6 +1329,7 @@ packages:
 
   /@braintree/sanitize-url/3.1.0:
     resolution: {integrity: sha512-GcIY79elgB+azP74j8vqkiXz8xLFfIzbQJdlwOPisgbKT00tviJQuEghOXSMVxJ00HoYJbGswr4kcllUc4xCcg==}
+    deprecated: Potential XSS vulnerability patched in v6.0.0.
     dev: false
 
   /@codemirror/autocomplete/0.19.12:
@@ -1587,33 +1588,22 @@ packages:
       - debug
     dev: false
 
-  /@halo-dev/editor/3.0.0-alpha.2:
-    resolution: {integrity: sha512-er9X+WP0vBpbDdGVMu9k/aUd3pQIeV047YHXONIp5GWnueJcBxg4jvNa4UPLWIBttsWNVeto7/maYiYVzz69IA==}
+  /@halo-dev/editor/3.0.0-alpha.3:
+    resolution: {integrity: sha512-c3I9AE86FuoeYD0sm0KZRQmNtS453yowxaT5JQeU6OUexAGkZuK1p4tfb2MZ3VWfRBRoB6/0uF2yAbFVW89D0w==}
     dependencies:
-      '@iktakahiro/markdown-it-katex': 4.0.1
+      '@halo-dev/markdown-renderer': 1.0.0-alpha.51
       '@susisu/mte-kernel': 2.1.1
-      codemirror: 5.65.1
+      codemirror: 5.65.2
       github-markdown-css: 5.1.0
       highlight.js: 11.4.0
       katex: 0.12.0
       lodash.debounce: 4.0.8
-      lodash.escape: 4.0.1
       lodash.flatten: 4.4.0
       lodash.last: 3.0.0
       lodash.times: 4.3.2
-      markdown-it: 10.0.0
-      markdown-it-abbr: 1.0.4
-      markdown-it-anchor: 5.3.0_markdown-it@10.0.0
-      markdown-it-emoji: 1.4.0
-      markdown-it-footnote: 3.0.3
-      markdown-it-images-preview: 1.0.1
-      markdown-it-ins: 3.0.1
-      markdown-it-sub: 1.0.0
-      markdown-it-sup: 1.0.0
-      markdown-it-table-of-contents: 0.4.4
-      markdown-it-task-lists: 2.1.1
-      mermaid: 8.14.0
       vue: 2.6.14
+    transitivePeerDependencies:
+      - '@types/markdown-it'
     dev: false
 
   /@halo-dev/logger/1.0.0-alpha.50:
@@ -1621,6 +1611,30 @@ packages:
     engines: {node: '>=12.0.0'}
     dependencies:
       tslib: 2.3.1
+    dev: false
+
+  /@halo-dev/markdown-renderer/1.0.0-alpha.51:
+    resolution: {integrity: sha512-6bberXvYZEVLh5G5xrErSuudU3x15F5PZ4uy7ssvd4+0MyXJr+y7WPZgg3jgZEt+5oSUEglFc+ent5Dv2IKISg==}
+    engines: {node: '>=12'}
+    dependencies:
+      '@iktakahiro/markdown-it-katex': 4.0.1
+      lodash.escape: 4.0.1
+      markdown-it: 12.3.2
+      markdown-it-abbr: 1.0.4
+      markdown-it-anchor: 8.4.1_markdown-it@12.3.2
+      markdown-it-attrs: 4.1.3_markdown-it@12.3.2
+      markdown-it-emoji: 2.0.0
+      markdown-it-footnote: 3.0.3
+      markdown-it-images-preview: 1.0.1
+      markdown-it-ins: 3.0.1
+      markdown-it-mark: 3.0.1
+      markdown-it-sub: 1.0.0
+      markdown-it-sup: 1.0.0
+      markdown-it-table-of-contents: 0.6.0
+      markdown-it-task-lists: 2.1.1
+      mermaid: 8.14.0
+    transitivePeerDependencies:
+      - '@types/markdown-it'
     dev: false
 
   /@halo-dev/rest-api-client/1.0.0-alpha.50:
@@ -2645,6 +2659,11 @@ packages:
     resolution: {integrity: sha512-o5Roy6tNG4SL/FOkCAN6RzjiakZS25RLYFrcMttJqbdd8BWrnA+fGz57iN5Pb06pvBGvl5gQ0B48dJlslXvoTg==}
     dependencies:
       sprintf-js: 1.0.3
+    dev: true
+
+  /argparse/2.0.1:
+    resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
+    dev: false
 
   /array-flatten/1.1.1:
     resolution: {integrity: sha1-ml9pkFGx5wczKPKgCJaLZOopVdI=}
@@ -3094,8 +3113,8 @@ packages:
     engines: {node: '>=0.8'}
     dev: true
 
-  /codemirror/5.65.1:
-    resolution: {integrity: sha512-s6aac+DD+4O2u1aBmdxhB7yz2XU7tG3snOyQ05Kxifahz7hoxnfxIRHxiCSEv3TUC38dIVH8G+lZH9UWSfGQxA==}
+  /codemirror/5.65.2:
+    resolution: {integrity: sha512-SZM4Zq7XEC8Fhroqe3LxbEEX1zUPWH1wMr5zxiBuiUF64iYOUH/JI88v4tBag8MiBS8B8gRv8O1pPXGYXQ4ErA==}
     dev: false
 
   /color-convert/1.9.3:
@@ -4328,8 +4347,8 @@ packages:
       ansi-colors: 4.1.1
     dev: true
 
-  /entities/2.0.3:
-    resolution: {integrity: sha512-MyoZ0jgnLvB2X3Lg5HqpFmn1kybDiIfEQmKzTb5apr51Rb+T3KdmMiqa70T+bhGnyv7bQ6WMj2QMHpGMmlrUYQ==}
+  /entities/2.1.0:
+    resolution: {integrity: sha512-hCx1oky9PFrJ611mf0ifBLBRW8lUUVRlFolb5gWRfIELabBlbp9xZvrqZLZAs+NxFnbfQoeGd8wDkygjg7U85w==}
     dev: false
 
   /entities/2.2.0:
@@ -5647,8 +5666,8 @@ packages:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
     dev: true
 
-  /linkify-it/2.2.0:
-    resolution: {integrity: sha512-GnAl/knGn+i1U/wjBz3akz2stz+HrHLsxMwHQGofCDfPvlf+gDKN58UtfmUquTY4/MXeE2x7k19KQmeoZi94Iw==}
+  /linkify-it/3.0.3:
+    resolution: {integrity: sha512-ynTsyrFSdE5oZ/O9GEf00kPngmOfVwazR5GKDq6EYfhlpFug3J2zybX56a2PRRpc9P+FuSoGNAwjlbDs9jJBPQ==}
     dependencies:
       uc.micro: 1.0.6
     dev: false
@@ -5852,16 +5871,26 @@ packages:
     resolution: {integrity: sha1-1mtTZFIcuz3Yqlna37ovtoZcj9g=}
     dev: false
 
-  /markdown-it-anchor/5.3.0_markdown-it@10.0.0:
-    resolution: {integrity: sha512-/V1MnLL/rgJ3jkMWo84UR+K+jF1cxNG1a+KwqeXqTIJ+jtA8aWSHuigx8lTzauiIjBDbwF3NcWQMotd0Dm39jA==}
+  /markdown-it-anchor/8.4.1_markdown-it@12.3.2:
+    resolution: {integrity: sha512-sLODeRetZ/61KkKLJElaU3NuU2z7MhXf12Ml1WJMSdwpngeofneCRF+JBbat8HiSqhniOMuTemXMrsI7hA6XyA==}
     peerDependencies:
+      '@types/markdown-it': '*'
       markdown-it: '*'
     dependencies:
-      markdown-it: 10.0.0
+      markdown-it: 12.3.2
     dev: false
 
-  /markdown-it-emoji/1.4.0:
-    resolution: {integrity: sha1-m+4OmpkKljupbfaYDE/dsF37Tcw=}
+  /markdown-it-attrs/4.1.3_markdown-it@12.3.2:
+    resolution: {integrity: sha512-d5yg/lzQV2KFI/4LPsZQB3uxQrf0/l2/RnMPCPm4lYLOZUSmFlpPccyojnzaHkfQpAD8wBHfnfUW0aMhpKOS2g==}
+    engines: {node: '>=6'}
+    peerDependencies:
+      markdown-it: '>= 9.0.0 < 13.0.0'
+    dependencies:
+      markdown-it: 12.3.2
+    dev: false
+
+  /markdown-it-emoji/2.0.0:
+    resolution: {integrity: sha512-39j7/9vP/CPCKbEI44oV8yoPJTpvfeReTn/COgRhSpNrjWF3PfP/JUxxB0hxV6ynOY8KH8Y8aX9NMDdo6z+6YQ==}
     dev: false
 
   /markdown-it-footnote/3.0.3:
@@ -5876,6 +5905,10 @@ packages:
     resolution: {integrity: sha512-32SSfZqSzqyAmmQ4SHvhxbFqSzPDqsZgMHDwxqPzp+v+t8RsmqsBZRG+RfRQskJko9PfKC2/oxyOs4Yg/CfiRw==}
     dev: false
 
+  /markdown-it-mark/3.0.1:
+    resolution: {integrity: sha512-HyxjAu6BRsdt6Xcv6TKVQnkz/E70TdGXEFHRYBGLncRE9lBFwDNLVtFojKxjJWgJ+5XxUwLaHXy+2sGBbDn+4A==}
+    dev: false
+
   /markdown-it-sub/1.0.0:
     resolution: {integrity: sha1-N1/WAm6ufdywEkl/ZBEZXqHjr+g=}
     dev: false
@@ -5884,8 +5917,8 @@ packages:
     resolution: {integrity: sha1-y5yf+RpSVawI8/09YyhuFd8KH8M=}
     dev: false
 
-  /markdown-it-table-of-contents/0.4.4:
-    resolution: {integrity: sha512-TAIHTHPwa9+ltKvKPWulm/beozQU41Ab+FIefRaQV1NRnpzwcV9QOe6wXQS5WLivm5Q/nlo0rl6laGkMDZE7Gw==}
+  /markdown-it-table-of-contents/0.6.0:
+    resolution: {integrity: sha512-jHvEjZVEibyW97zEYg19mZCIXO16lHbvRaPDkEuOfMPBmzlI7cYczMZLMfUvwkhdOVQpIxu3gx6mgaw46KsNsQ==}
     engines: {node: '>6.4.0'}
     dev: false
 
@@ -5893,13 +5926,13 @@ packages:
     resolution: {integrity: sha512-TxFAc76Jnhb2OUu+n3yz9RMu4CwGfaT788br6HhEDlvWfdeJcLUsxk1Hgw2yJio0OXsxv7pyIPmvECY7bMbluA==}
     dev: false
 
-  /markdown-it/10.0.0:
-    resolution: {integrity: sha512-YWOP1j7UbDNz+TumYP1kpwnP0aEa711cJjrAQrzd0UXlbJfc5aAq0F/PZHjiioqDC1NKgvIMX+o+9Bk7yuM2dg==}
+  /markdown-it/12.3.2:
+    resolution: {integrity: sha512-TchMembfxfNVpHkbtriWltGWc+m3xszaRD0CZup7GFFhzIgQqxIfn3eGj1yZpfuflzPvfkt611B2Q/Bsk1YnGg==}
     hasBin: true
     dependencies:
-      argparse: 1.0.10
-      entities: 2.0.3
-      linkify-it: 2.2.0
+      argparse: 2.0.1
+      entities: 2.1.0
+      linkify-it: 3.0.3
       mdurl: 1.0.1
       uc.micro: 1.0.6
     dev: false
@@ -7865,6 +7898,7 @@ packages:
 
   /sprintf-js/1.0.3:
     resolution: {integrity: sha1-BOaSb2YolTVPPdAVIDYzuFcpfiw=}
+    dev: true
 
   /ssri/8.0.1:
     resolution: {integrity: sha512-97qShzy1AiyxvPNIkLWoGua7xoQzzPjQ0HAH4B0rWKo7SZ6USuPcrUiAFrws0UH8RrbWmgq3LMTObhPIHbbBeQ==}
