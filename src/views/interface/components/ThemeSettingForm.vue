@@ -34,6 +34,7 @@
           <a-descriptions-item label="存储位置">
             {{ theme.themePath }}
           </a-descriptions-item>
+          <slot name="descriptions-item" />
         </a-descriptions>
       </a-tab-pane>
       <a-tab-pane v-for="(group, index) in form.configurations" :key="index + 1" :tab="group.label">
