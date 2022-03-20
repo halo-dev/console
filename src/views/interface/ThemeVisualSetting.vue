@@ -1,11 +1,17 @@
 <template>
   <a-row :gutter="0">
-    <a-col :md="6" :sm="24" class="h-screen" style="border-right: 1px solid #f2f2f2">
+    <a-col :md="5" :sm="24" class="h-screen" style="border-right: 1px solid #f2f2f2">
       <a-spin :spinning="theme.loading" class="h-full">
-        <ThemeSettingForm :theme="theme.data" :wrapperCol="{ span: 24 }" @saved="onSettingsSaved" />
+        <ThemeSettingForm :theme="theme.data" :wrapperCol="{ span: 24 }" @saved="onSettingsSaved">
+          <template #descriptions-item>
+            <a-descriptions-item>
+              <a-button @click="handleRouteToThemeSetting()">返回</a-button>
+            </a-descriptions-item>
+          </template>
+        </ThemeSettingForm>
       </a-spin>
     </a-col>
-    <a-col :md="18" :sm="24" class="h-screen">
+    <a-col :md="19" :sm="24" class="h-screen">
       <iframe
         id="themeViewIframe"
         :src="options.blog_url"
@@ -56,6 +62,9 @@ export default {
       } finally {
         this.theme.loading = false
       }
+    },
+    handleRouteToThemeSetting() {
+      this.$router.push({ name: 'ThemeSetting', query: { themeId: this.theme.id } })
     },
     onSettingsSaved() {
       document.getElementById('themeViewIframe').contentWindow.location.reload()
