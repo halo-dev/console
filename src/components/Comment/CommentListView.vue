@@ -1,7 +1,12 @@
 <template>
   <a-list :dataSource="comments" :loading="loading" item-layout="vertical">
     <template #renderItem="item, index">
-      <a-list-item :key="index" class="!p-0">
+      <a-list-item
+        :key="index"
+        class="!p-0"
+        :class="{ 'hover:bg-gray-100 hover:!px-1 hover:rounded transition-all cursor-pointer': clickable }"
+        @click="handleClick(item)"
+      >
         <a-comment :avatar="item.avatar">
           <template #author>
             <a v-if="item.authorUrl" :href="item.authorUrl" class="!text-gray-800 hover:!text-blue-500" target="_blank">
@@ -40,6 +45,10 @@ export default {
     loading: {
       type: Boolean,
       default: false
+    },
+    clickable: {
+      type: Boolean,
+      default: false
     }
   },
   computed: {
@@ -72,6 +81,11 @@ export default {
           const link = await apiClient[target].getPreviewLinkById(id)
           window.open(link, '_blank')
         }
+      }
+    },
+    handleClick(item) {
+      if (this.clickable) {
+        this.$emit('click', item)
       }
     }
   }

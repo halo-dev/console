@@ -450,6 +450,10 @@ export default {
       validator: function (value) {
         return ['post', 'sheet', 'journal'].indexOf(value) !== -1
       }
+    },
+    defaultStatus: {
+      type: String,
+      default: undefined
     }
   },
   data() {
@@ -466,7 +470,7 @@ export default {
           page: 0,
           size: 10,
           keyword: null,
-          status: null
+          status: undefined
         }
       },
 
@@ -475,9 +479,6 @@ export default {
       selectedComment: {},
       replyModalVisible: false
     }
-  },
-  created() {
-    this.handleListComments()
   },
   computed: {
     pagination() {
@@ -511,6 +512,20 @@ export default {
       }
       return 0
     }
+  },
+  watch: {
+    defaultStatus(status) {
+      this.list.params.status = status
+      this.$nextTick(() => {
+        this.handleListComments()
+      })
+    }
+  },
+  mounted() {
+    this.list.params.status = this.defaultStatus
+    this.$nextTick(() => {
+      this.handleListComments()
+    })
   },
   methods: {
     async handleListComments() {
@@ -621,7 +636,7 @@ export default {
 
     handleResetParam() {
       this.list.params.keyword = null
-      this.list.params.status = null
+      this.list.params.status = undefined
       this.handleClearRowKeys()
       this.handlePageChange(1)
     },

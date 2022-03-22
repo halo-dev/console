@@ -1,6 +1,6 @@
 <template>
   <a-modal v-model="modalVisible" :afterClose="onClose" :title="title" :width="1024" destroyOnClose>
-    <a-spin :spinning="list.loading">
+    <a-list :loading="list.loading" item-layout="vertical">
       <TargetCommentTreeNode
         v-for="(comment, index) in list.data"
         :key="index"
@@ -9,9 +9,7 @@
         :target-id="targetId"
         @reload="handleGetComments"
       />
-    </a-spin>
-
-    <a-empty v-if="!list.loading && !list.data.length" />
+    </a-list>
 
     <div class="page-wrapper">
       <a-pagination
