@@ -12,7 +12,12 @@
       <div class="custom-tab-wrapper">
         <a-tabs v-model="activeKey" :animated="{ inkBar: true, tabPane: false }" @change="handleListAuditingComments">
           <a-tab-pane v-for="target in targets" :key="target.key" :tab="target.label">
-            <CommentListView :comments="comments[target.dataKey]" :loading="comments.loading" />
+            <CommentListView
+              :comments="comments[target.dataKey]"
+              :loading="comments.loading"
+              clickable
+              @click="handleRouteToCommentList(arguments[0], target)"
+            />
           </a-tab-pane>
         </a-tabs>
       </div>
@@ -30,6 +35,7 @@
 
 <script>
 import apiClient from '@/utils/api-client'
+import { commentStatuses } from '@/core/constant'
 
 const targets = [
   {
@@ -86,6 +92,21 @@ export default {
         this.$log.error('Failed to get auditing comments', e)
       } finally {
         this.comments.loading = false
+      }
+    },
+
+    handleRouteToCommentList(comment, target) {
+      this.$log.debug('Handle click auditing comment', comment, target)
+
+      const { name } = this.$router.currentRoute
+
+      this.$router.push({
+        name: 'Comments',
+        query: { activeKey: target.dataKey, defaultStatus: commentStatuses.AUDITING.value }
+      })
+
+      if (name === 'Comments') {
+        this.$router.go(0)
       }
     }
   }
