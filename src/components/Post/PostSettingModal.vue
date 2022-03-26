@@ -215,7 +215,9 @@ export default {
     return {
       postStatuses,
       form: {
-        model: {},
+        model: {
+          topPriority: 0
+        },
         saving: false,
         saveErrored: false,
         draftSaving: false,
