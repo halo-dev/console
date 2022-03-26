@@ -18,7 +18,7 @@
             <a-tooltip>
               <template #title>亮色菜单风格</template>
               <div class="setting-drawer-index-item" @click="handleSetMenuTheme('light')">
-                <img alt="light" src="/images/dark.svg" />
+                <img alt="light" src="/images/light.svg" />
                 <div v-if="navTheme !== 'dark'" class="setting-drawer-index-selectIcon">
                   <a-icon type="check" />
                 </div>
