@@ -151,7 +151,7 @@ export default {
           apiClient.mail
             .testSmtpService(this.mailParam)
             .then(response => {
-              this.$message.info(response.data)
+              this.$message.info(response.message)
             })
             .catch(() => {
               this.sendErrored = true
