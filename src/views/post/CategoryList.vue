@@ -154,22 +154,23 @@ export default {
       categories.forEach(category => (hashMap[category.id] = { ...category, children: [] }))
       categories.forEach(category => {
         const current = hashMap[category.id]
-        const parent = hashMap[category.parentId]
-
-        if (current.password) {
-          current.hasPassword = true
-        }
-
-        if (parent && (parent.password || parent.hasPassword)) {
-          current.hasPassword = true
-        }
-
         if (category.parentId) {
           hashMap[category.parentId].children.push(current)
         } else {
           treeData.push(current)
         }
       })
+
+      // set hasPassword field for tree node
+      const setHasPasswordField = (categories, hasPassword = false) => {
+        categories.forEach(category => {
+          category.hasPassword = !!category.password || hasPassword
+          if (category.children && category.children.length) {
+            setHasPasswordField(category.children, category.hasPassword)
+          }
+        })
+      }
+      setHasPasswordField(treeData)
       return treeData
     },
 
