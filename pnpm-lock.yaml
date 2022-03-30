@@ -7,7 +7,7 @@ specifiers:
   '@codemirror/lang-html': ^0.19.4
   '@codemirror/lang-java': ^0.19.1
   '@halo-dev/admin-api': ^1.0.0
-  '@halo-dev/editor': ^3.0.0
+  '@halo-dev/editor': ^3.0.2
   '@vue/cli-plugin-babel': ~5.0.3
   '@vue/cli-plugin-eslint': ~5.0.3
   '@vue/cli-plugin-router': ~5.0.3
@@ -53,7 +53,7 @@ dependencies:
   '@codemirror/lang-html': 0.19.4
   '@codemirror/lang-java': 0.19.1
   '@halo-dev/admin-api': 1.0.0
-  '@halo-dev/editor': 3.0.0
+  '@halo-dev/editor': 3.0.2
   ant-design-vue: 1.7.8_9065e7474e033a8e4b95615fc8e6c36c
   dayjs: 1.11.0
   enquire.js: 2.1.6
@@ -1601,14 +1601,14 @@ packages:
       - debug
     dev: false
 
-  /@halo-dev/editor/3.0.0:
-    resolution: {integrity: sha512-w/INn6mi4wnrFWEkHgPBpiFmBA8ItuLrSUmUepqnDrkL4rpbpmnbb6U0x8uZmGySTeD0HVkYnCtiTbattMhg9Q==}
+  /@halo-dev/editor/3.0.2:
+    resolution: {integrity: sha512-cel1Tj5G0DXsjqUtlS2VUmGZ0wBGn6iI5GJakpbIj10eiblO3VbqW5WUCZWsOhXfiNvsQo/xdvQ6XB8D6TSR6w==}
     dependencies:
-      '@halo-dev/markdown-renderer': 1.0.0-alpha.51
+      '@halo-dev/markdown-renderer': 1.0.0
       '@susisu/mte-kernel': 2.1.1
       codemirror: 5.65.2
       github-markdown-css: 5.1.0
-      highlight.js: 11.4.0
+      highlight.js: 11.5.0
       katex: 0.12.0
       lodash.debounce: 4.0.8
       lodash.flatten: 4.4.0
@@ -1626,8 +1626,8 @@ packages:
       tslib: 2.3.1
     dev: false
 
-  /@halo-dev/markdown-renderer/1.0.0-alpha.51:
-    resolution: {integrity: sha512-6bberXvYZEVLh5G5xrErSuudU3x15F5PZ4uy7ssvd4+0MyXJr+y7WPZgg3jgZEt+5oSUEglFc+ent5Dv2IKISg==}
+  /@halo-dev/markdown-renderer/1.0.0:
+    resolution: {integrity: sha512-EycEmxmL6fQF0HVMCH9pJvdDhfZFLWC+EB7eq5qEEbGNqqOi267Il//DxanI/CbbGAk43cMPARqfaLE7EMXMNw==}
     engines: {node: '>=12'}
     dependencies:
       '@iktakahiro/markdown-it-katex': 4.0.1
@@ -3561,8 +3561,8 @@ packages:
     resolution: {integrity: sha512-p2sTHSLCJI2QKunbGb7ocOh7DgTAn8IrLx21QRc/BSnodXM4sv6aLQlnfpvehFMLZEfBc6g9pH9SWQccFYfJ9Q==}
     dev: false
 
-  /d3-color/3.0.1:
-    resolution: {integrity: sha512-6/SlHkDOBLyQSJ1j1Ghs82OIUXpKWlR0hCsw0XrLSQhuUPuCSmLQ1QPH98vpnQxMUQM2/gfAkUEWsupVpd9JGw==}
+  /d3-color/3.1.0:
+    resolution: {integrity: sha512-zg/chbXyeBtMQ1LbD/WSoW2DpC3I0mpmPdW+ynRTj/x2DAWYrIY7qeZIHidozwV24m4iavr15lNwIwLxRmOxhA==}
     engines: {node: '>=12'}
     dev: false
 
@@ -3710,7 +3710,7 @@ packages:
     resolution: {integrity: sha512-3bYs1rOD33uo8aqJfKP3JWPAibgw8Zm2+L9vBKEHJ2Rg+viTR7o5Mmv5mZcieN+FRYaAOWX5SJATX6k1PWz72g==}
     engines: {node: '>=12'}
     dependencies:
-      d3-color: 3.0.1
+      d3-color: 3.1.0
     dev: false
 
   /d3-path/1.0.9:
@@ -3760,7 +3760,7 @@ packages:
     resolution: {integrity: sha512-Lx9thtxAKrO2Pq6OO2Ua474opeziKr279P/TKZsMAhYyNDD3EnCffdbgeSYN5O7m2ByQsxtuP2CSDczNUIZ22g==}
     engines: {node: '>=12'}
     dependencies:
-      d3-color: 3.0.1
+      d3-color: 3.1.0
       d3-interpolate: 3.0.1
     dev: false
 
@@ -3858,7 +3858,7 @@ packages:
     peerDependencies:
       d3-selection: 2 - 3
     dependencies:
-      d3-color: 3.0.1
+      d3-color: 3.1.0
       d3-dispatch: 3.0.1
       d3-ease: 3.0.1
       d3-interpolate: 3.0.1
@@ -3927,15 +3927,15 @@ packages:
       d3-zoom: 1.8.3
     dev: false
 
-  /d3/7.3.0:
-    resolution: {integrity: sha512-MDRLJCMK232OJQRqGljQ/gCxtB8k3/sLKFjftMjzPB3nKVUODpdW9Rb3vcq7U8Ka5YKoZkAmp++Ur6I+6iNWIw==}
+  /d3/7.4.0:
+    resolution: {integrity: sha512-/xKyIYpKzd+I2DhiS2ANYJtEfHkE9lHKBFwqsplKsazPcXy2N1KIJSMTJsRk42jHbHCH0KPJGd0RnBt6NBJ1MA==}
     engines: {node: '>=12'}
     dependencies:
       d3-array: 3.1.1
       d3-axis: 3.0.0
       d3-brush: 3.0.0
       d3-chord: 3.0.1
-      d3-color: 3.0.1
+      d3-color: 3.1.0
       d3-contour: 3.0.1
       d3-delaunay: 6.0.2
       d3-dispatch: 3.0.1
@@ -5009,8 +5009,8 @@ packages:
     resolution: {integrity: sha512-tzcUFauisWKNHaRkN4Wjl/ZA07gENAjFl3J/c480dprkGTg5EQstgaNFqBfUqCq54kZRIEcreTsAgF/m2quD7A==}
     dev: true
 
-  /highlight.js/11.4.0:
-    resolution: {integrity: sha512-nawlpCBCSASs7EdvZOYOYVkJpGmAOKMYZgZtUqSRqodZE0GRVcFKwo1RcpeOemqh9hyttTdd5wDBwHkuSyUfnA==}
+  /highlight.js/11.5.0:
+    resolution: {integrity: sha512-SM6WDj5/C+VfIY8pZ6yW6Xa0Fm1tniYVYWYW1Q/DcMnISZFrC3aQAZZZFAAZtybKNrGId3p/DNbFTtcTXXgYBw==}
     engines: {node: '>=12.0.0'}
     dev: false
 
@@ -5943,7 +5943,7 @@ packages:
     resolution: {integrity: sha512-ITSHjwVaby1Li738sxhF48sLTxcNyUAoWfoqyztL1f7J6JOLpHOuQPNLBb6lxGPUA0u7xP9IRULgvod0dKu35A==}
     dependencies:
       '@braintree/sanitize-url': 3.1.0
-      d3: 7.3.0
+      d3: 7.4.0
       dagre: 0.8.5
       dagre-d3: 0.6.4
       dompurify: 2.3.5
