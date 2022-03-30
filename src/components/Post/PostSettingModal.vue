@@ -215,9 +215,7 @@ export default {
     return {
       postStatuses,
       form: {
-        model: {
-          topPriority: 0
-        },
+        model: {},
         saving: false,
         saveErrored: false,
         draftSaving: false,
@@ -254,10 +252,13 @@ export default {
     },
     topPriority: {
       get() {
+        if (this.form.model.topPriority === undefined) {
+          return false
+        }
         return this.form.model.topPriority !== 0
       },
       set(value) {
-        this.form.model.topPriority = value ? 1 : 0
+        this.$set(this.form.model, 'topPriority', value ? 1 : 0)
       }
     },
     fullPath() {
