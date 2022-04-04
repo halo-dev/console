@@ -12,8 +12,8 @@ describe("Menu", () => {
       render() {
         return (
           <VMenu>
-            <VMenuItem key="1">Menu Item 1</VMenuItem>
-            <VMenuItem key="2">Menu Item 2</VMenuItem>
+            <VMenuItem key="1" title="Menu Item 1" />
+            <VMenuItem key="2" title="Menu Item 2" />
           </VMenu>
         );
       },
@@ -22,20 +22,30 @@ describe("Menu", () => {
     expect(wrapper.html()).toMatchSnapshot();
   });
 
+  it("should work with sub menus", function () {
+    const wrapper = mount({
+      setup() {
+        return () => (
+          <VMenu>
+            <VMenuItem id="1" title="Menu Item 1" />
+            <VMenuItem id="2" title="Menu Item 2" />
+            <VMenuItem id="3" title="Menu Item 3" />
+            <VMenuItem id="4" title="Menu Item 4" />
+          </VMenu>
+        );
+      },
+    });
+  });
+
   it("should work with openIds prop", function () {
     const wrapper = mount({
       setup() {
         return () => (
           <VMenu openIds={["3"]}>
-            <VMenuItem id="1">Menu Item 1</VMenuItem>
-            <VMenuItem id="2">Menu Item 2</VMenuItem>
-            <VMenuItem
-              id="3"
-              v-slots={{
-                submenus: () => <VMenuItem key="4">Menu Item 4</VMenuItem>,
-              }}
-            >
-              Menu Item 3
+            <VMenuItem id="1" title="Menu Item 1" />
+            <VMenuItem id="2" title="Menu Item 2" />
+            <VMenuItem id="3" title="Menu Item 3">
+              <VMenuItem key="4" title="Menu Item 4" />
             </VMenuItem>
           </VMenu>
         );

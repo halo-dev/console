@@ -14,14 +14,18 @@ exports[`Menu > should render 2`] = `
         <!--v-if--><span class=\\"menu-title self-center flex-1\\">Menu Item 1</span>
         <!--v-if-->
       </div>
-      <!--v-if-->
+      <transition-stub>
+        <ul class=\\"sub-menu-items transition-all\\" style=\\"display: none;\\"></ul>
+      </transition-stub>
     </li>
     <li class=\\"menu-item\\">
       <div class=\\"menu-item-title\\">
         <!--v-if--><span class=\\"menu-title self-center flex-1\\">Menu Item 2</span>
         <!--v-if-->
       </div>
-      <!--v-if-->
+      <transition-stub>
+        <ul class=\\"sub-menu-items transition-all\\" style=\\"display: none;\\"></ul>
+      </transition-stub>
     </li>
   </ul>
 </div>"
@@ -35,14 +39,18 @@ exports[`Menu > should work with openIds prop 1`] = `
         <!--v-if--><span class=\\"menu-title self-center flex-1\\">Menu Item 1</span>
         <!--v-if-->
       </div>
-      <!--v-if-->
+      <transition-stub>
+        <ul class=\\"sub-menu-items transition-all\\" style=\\"display: none;\\"></ul>
+      </transition-stub>
     </li>
     <li class=\\"menu-item\\">
       <div class=\\"menu-item-title\\">
         <!--v-if--><span class=\\"menu-title self-center flex-1\\">Menu Item 2</span>
         <!--v-if-->
       </div>
-      <!--v-if-->
+      <transition-stub>
+        <ul class=\\"sub-menu-items transition-all\\" style=\\"display: none;\\"></ul>
+      </transition-stub>
     </li>
     <li class=\\"menu-item\\">
       <div class=\\"menu-item-title\\">
@@ -55,7 +63,9 @@ exports[`Menu > should work with openIds prop 1`] = `
               <!--v-if--><span class=\\"menu-title self-center flex-1\\">Menu Item 4</span>
               <!--v-if-->
             </div>
-            <!--v-if-->
+            <transition-stub>
+              <ul class=\\"sub-menu-items transition-all\\" style=\\"display: none;\\"></ul>
+            </transition-stub>
           </li>
         </ul>
       </transition-stub>

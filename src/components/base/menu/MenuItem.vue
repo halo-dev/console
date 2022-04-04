@@ -7,6 +7,10 @@ const props = defineProps({
     type: String,
     default: "",
   },
+  title: {
+    type: String,
+    default: "",
+  },
 });
 
 const emit = defineEmits(["select"]);
@@ -22,7 +26,7 @@ if (openIds?.includes(props.id)) {
 }
 
 function handleClick() {
-  if (slots.submenus) {
+  if (slots.default) {
     open.value = !open.value;
     return;
   }
@@ -37,10 +41,10 @@ function handleClick() {
         <slot name="icon" />
       </span>
       <span class="menu-title self-center flex-1">
-        <slot />
+        {{ title }}
       </span>
       <span
-        v-if="$slots.submenus"
+        v-if="$slots.default"
         class="menu-icon-collapse self-center transition-all"
         :class="{ open }"
       >
@@ -48,9 +52,9 @@ function handleClick() {
       </span>
     </div>
 
-    <Transition v-if="$slots.submenus && open" name="submenus-show">
-      <ul class="sub-menu-items transition-all">
-        <slot name="submenus" />
+    <Transition name="submenus-show">
+      <ul v-show="$slots.default && open" class="sub-menu-items transition-all">
+        <slot />
       </ul>
     </Transition>
   </li>

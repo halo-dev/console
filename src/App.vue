@@ -9,71 +9,55 @@ import { IconDashboard } from "@/core/icons";
     <div class="navbar h-screen w-72 p-4" style="background: #fff">
       <VMenu :open-ids="['dashboard']">
         <VMenuLabel>首页</VMenuLabel>
-        <VMenuItem id="dashboard">
+        <VMenuItem id="dashboard" title="仪表盘">
           <template #icon>
             <Component :is="IconDashboard" />
           </template>
-          <template #submenus>
-            <VMenuItem>
+          <VMenuItem title="子菜单">
+            <template #icon>
+              <Component :is="IconDashboard" />
+            </template>
+          </VMenuItem>
+          <VMenuItem title="子菜单">
+            <template #icon>
+              <Component :is="IconDashboard" />
+            </template>
+            <VMenuItem title="子菜单">
               <template #icon>
                 <Component :is="IconDashboard" />
               </template>
-              子菜单
             </VMenuItem>
-            <VMenuItem>
-              <template #icon>
-                <Component :is="IconDashboard" />
-              </template>
-              <template #submenus>
-                <VMenuItem>
-                  <template #icon>
-                    <Component :is="IconDashboard" />
-                  </template>
-                  子菜单
-                </VMenuItem>
-              </template>
-              子菜单
-            </VMenuItem>
-            <VMenuItem>
-              <template #icon>
-                <Component :is="IconDashboard" />
-              </template>
-              子菜单
-            </VMenuItem>
-          </template>
-          仪表盘
+          </VMenuItem>
+          <VMenuItem title="子菜单">
+            <template #icon>
+              <Component :is="IconDashboard" />
+            </template>
+          </VMenuItem>
         </VMenuItem>
-        <VMenuItem>
+        <VMenuItem title="仪表盘">
           <template #icon>
             <Component :is="IconDashboard" />
           </template>
-          仪表盘
         </VMenuItem>
-        <VMenuItem>
+        <VMenuItem title="仪表盘">
           <template #icon>
             <Component :is="IconDashboard" />
           </template>
-          <template #submenus>
-            <VMenuItem>
-              <template #icon>
-                <Component :is="IconDashboard" />
-              </template>
-              子菜单1
-            </VMenuItem>
-            <VMenuItem>
-              <template #icon>
-                <Component :is="IconDashboard" />
-              </template>
-              子菜单1
-            </VMenuItem>
-            <VMenuItem>
-              <template #icon>
-                <Component :is="IconDashboard" />
-              </template>
-              子菜单1
-            </VMenuItem>
-          </template>
-          仪表盘
+          <VMenuItem title="子菜单1">
+            <template #icon>
+              <Component :is="IconDashboard" />
+            </template>
+          </VMenuItem>
+          <VMenuItem title="子菜单1">
+            <template #icon>
+              <Component :is="IconDashboard" />
+            </template>
+          </VMenuItem>
+          <VMenuItem title="子菜单1">
+            <template #icon>
+              <Component :is="IconDashboard" />
+            </template>
+          </VMenuItem>
         </VMenuItem>
       </VMenu>
     </div>
