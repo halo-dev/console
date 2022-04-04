@@ -35,6 +35,8 @@ describe("Menu", () => {
         );
       },
     });
+
+    expect(wrapper.html()).toMatchSnapshot();
   });
 
   it("should work with openIds prop", function () {
