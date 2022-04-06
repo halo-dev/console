@@ -66,6 +66,7 @@
             ></ReactiveButton>
           </template>
           <a-spin :spinning="list.loading">
+            <a-empty v-if="list.data.length === 0" />
             <CategoryTreeNode
               v-model="list.treeData"
               @edit="handleEdit"
