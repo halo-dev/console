@@ -15,9 +15,6 @@ router.beforeEach(async (to, from, next) => {
     NProgress.start()
   }, 250)
 
-  // set title meta
-  to.meta && typeof to.meta.title !== 'undefined' && setDocumentTitle(`${to.meta.title} - ${domTitle}`)
-
   // check installation status
   if (store.getters.isInstalled === undefined) {
     await store.dispatch('fetchIsInstalled')
@@ -53,7 +50,6 @@ router.beforeEach(async (to, from, next) => {
     }
 
     next()
-    onProgressTimerDone()
     return
   }
 
@@ -72,7 +68,10 @@ router.beforeEach(async (to, from, next) => {
   onProgressTimerDone()
 })
 
-router.afterEach(() => {
+router.afterEach(to => {
+  // set title meta
+  to.meta && typeof to.meta.title !== 'undefined' && setDocumentTitle(`${to.meta.title} - ${domTitle}`)
+
   onProgressTimerDone()
 })
 
@@ -80,6 +79,6 @@ function onProgressTimerDone() {
   if (progressTimer && progressTimer !== 0) {
     clearTimeout(progressTimer)
     progressTimer = null
-    NProgress.done()
   }
+  NProgress.done()
 }
