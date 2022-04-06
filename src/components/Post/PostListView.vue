@@ -209,9 +209,9 @@
                         {{ item.title }}
                       </a>
                     </a-tooltip>
-                    <a-button v-else class="!p-0" disabled type="link">
+                    <a v-else class="no-underline" href="javascript:void(0);" disabled>
                       {{ item.title }}
-                    </a-button>
+                    </a>
                   </div>
                 </template>
               </a-list-item-meta>
@@ -285,9 +285,9 @@
                 {{ text }}
               </a>
             </a-tooltip>
-            <a-button v-else class="!p-0" disabled type="link">
+            <a v-else class="no-underline" href="javascript:void(0);" disabled>
               {{ text }}
-            </a-button>
+            </a>
           </template>
 
           <template #status="status">
