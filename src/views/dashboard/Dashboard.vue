@@ -3,40 +3,48 @@
     <a-row :gutter="12">
       <a-col :lg="6" :md="12" :sm="12" :xl="6" :xs="12" class="mb-3">
         <analysis-card :number="statisticsData.postCount" title="文章">
-          <router-link slot="action" :to="{ name: 'PostWrite' }">
-            <a-icon v-if="statisticsLoading" type="loading" />
-            <a-icon v-else type="plus" />
-          </router-link>
+          <template #action>
+            <router-link :to="{ name: 'PostWrite' }">
+              <a-icon v-if="statisticsLoading" type="loading" />
+              <a-icon v-else type="plus" />
+            </router-link>
+          </template>
         </analysis-card>
       </a-col>
       <a-col :lg="6" :md="12" :sm="12" :xl="6" :xs="12" class="mb-3">
         <analysis-card :number="statisticsData.commentCount" title="评论">
-          <router-link slot="action" :to="{ name: 'Comments' }">
-            <a-icon v-if="statisticsLoading" type="loading" />
-            <a-icon v-else type="unordered-list" />
-          </router-link>
+          <template #action>
+            <router-link :to="{ name: 'Comments' }">
+              <a-icon v-if="statisticsLoading" type="loading" />
+              <a-icon v-else type="unordered-list" />
+            </router-link>
+          </template>
         </analysis-card>
       </a-col>
       <a-col :lg="6" :md="12" :sm="12" :xl="6" :xs="12" class="mb-3">
         <analysis-card :number="statisticsData.visitCount" title="阅读量">
-          <a-tooltip slot="action">
-            <template slot="title"> 文章阅读共 {{ statisticsData.visitCount }} 次</template>
-            <a-button class="!p-0" type="link">
-              <a-icon v-if="statisticsLoading" type="loading" />
-              <a-icon v-else type="info-circle-o" />
-            </a-button>
-          </a-tooltip>
+          <template #action>
+            <a-tooltip>
+              <template #title>文章阅读共 {{ statisticsData.visitCount }} 次</template>
+              <span>
+                <a-icon v-if="statisticsLoading" type="loading" />
+                <a-icon v-else type="info-circle-o" />
+              </span>
+            </a-tooltip>
+          </template>
         </analysis-card>
       </a-col>
       <a-col :lg="6" :md="12" :sm="12" :xl="6" :xs="12" class="mb-3">
         <analysis-card :number="statisticsData.establishDays" title="建立天数">
-          <a-tooltip slot="action">
-            <template slot="title">博客建立于 {{ statisticsData.birthday | moment }}</template>
-            <a-button class="!p-0" type="link">
-              <a-icon v-if="statisticsLoading" type="loading" />
-              <a-icon v-else type="info-circle-o" />
-            </a-button>
-          </a-tooltip>
+          <template #action>
+            <a-tooltip>
+              <template #title>博客建立于 {{ statisticsData.birthday | moment }}</template>
+              <span>
+                <a-icon v-if="statisticsLoading" type="loading" />
+                <a-icon v-else type="info-circle-o" />
+              </span>
+            </a-tooltip>
+          </template>
         </analysis-card>
       </a-col>
     </a-row>
