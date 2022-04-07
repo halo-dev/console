@@ -25,17 +25,17 @@
             </a-col>
             <a-col :md="6" :sm="24">
               <a-form-item label="分类目录：">
-                <a-select
-                  v-model="list.params.categoryId"
-                  :loading="categories.loading"
-                  allowClear
-                  placeholder="请选择分类"
-                  @change="handleQuery()"
-                >
-                  <a-select-option v-for="category in categories.data" :key="category.id">
-                    {{ category.name }}({{ category.postCount }})
-                  </a-select-option>
-                </a-select>
+                <CategorySelectTree
+                  :categories="categories.data"
+                  :category-id.sync="list.params.categoryId"
+                  :root="{
+                    id: 0,
+                    title: '全部',
+                    value: '0',
+                    pId: -1
+                  }"
+                  @change="handleQuery"
+                />
               </a-form-item>
             </a-col>
 
@@ -437,6 +437,7 @@
 // components
 import PostSettingModal from './PostSettingModal.vue'
 import TargetCommentListModal from '@/components/Comment/TargetCommentListModal'
+import CategorySelectTree from '@/components/Category/CategorySelectTree'
 
 // libs
 import { mixinDevice } from '@/mixins/mixin.js'
@@ -447,7 +448,8 @@ export default {
   name: 'PostListView',
   components: {
     PostSettingModal,
-    TargetCommentListModal
+    TargetCommentListModal,
+    CategorySelectTree
   },
   mixins: [mixinDevice],
   props: {
@@ -542,6 +544,9 @@ export default {
         if (enableLoading) {
           this.list.loading = true
         }
+
+        const { categoryId } = this.list.params
+        this.list.params.categoryId = categoryId === 0 ? undefined : categoryId
         const response = await apiClient.post.list(this.list.params)
 
         this.list.data = response.data.content
