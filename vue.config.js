@@ -1,6 +1,7 @@
 const pkg = require('./package.json')
 
 const { defineConfig } = require('@vue/cli-service')
+const dynamicThemePlugin = require('./src/webpack/dynamicTheme.js')
 
 module.exports = defineConfig({
   publicPath: process.env.PUBLIC_PATH,
@@ -10,6 +11,10 @@ module.exports = defineConfig({
       args[0].version = pkg.version
       return args
     })
+  },
+
+  configureWebpack: {
+    plugins: [dynamicThemePlugin()]
   },
 
   css: {

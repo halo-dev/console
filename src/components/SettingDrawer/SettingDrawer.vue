@@ -136,9 +136,10 @@
 
 <script>
 import config from '@/config/defaultSettings'
-import { colorList, updateTheme } from './setting'
+import { colorList } from './setting'
 import { mixin, mixinDevice } from '@/mixins/mixin'
 import { mapActions, mapGetters } from 'vuex'
+import { updateTheme } from '@/utils/dynamicTheme'
 
 export default {
   mixins: [mixin, mixinDevice],
