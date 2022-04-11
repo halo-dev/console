@@ -15,6 +15,7 @@ specifiers:
   '@vue/cli-plugin-vuex': ~5.0.4
   '@vue/cli-service': ~5.0.4
   ant-design-vue: ^1.7.8
+  compression-webpack-plugin: ^9.2.0
   dayjs: ^1.11.0
   enquire.js: ^2.1.6
   eslint: ^7.32.0
@@ -89,6 +90,7 @@ devDependencies:
   '@vue/cli-plugin-router': 5.0.4_@vue+cli-service@5.0.4
   '@vue/cli-plugin-vuex': 5.0.4_@vue+cli-service@5.0.4
   '@vue/cli-service': 5.0.4_5d13c34fbb1c7f04d8fb86bfe0fd54c5
+  compression-webpack-plugin: 9.2.0
   eslint: 7.32.0
   eslint-config-prettier: 8.5.0_eslint@7.32.0
   eslint-plugin-prettier: 4.0.0_2544802fe0b6e1e28814bd742f96f471
@@ -3213,6 +3215,16 @@ packages:
     engines: {node: '>= 0.6'}
     dependencies:
       mime-db: 1.51.0
+    dev: true
+
+  /compression-webpack-plugin/9.2.0:
+    resolution: {integrity: sha512-R/Oi+2+UHotGfu72fJiRoVpuRifZT0tTC6UqFD/DUo+mv8dbOow9rVOuTvDv5nPPm3GZhHL/fKkwxwIHnJ8Nyw==}
+    engines: {node: '>= 12.13.0'}
+    peerDependencies:
+      webpack: ^5.1.0
+    dependencies:
+      schema-utils: 4.0.0
+      serialize-javascript: 6.0.0
     dev: true
 
   /compression/1.7.4:
