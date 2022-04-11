@@ -66,7 +66,7 @@
                           {{ item.title }}
                         </a>
 
-                        <a  herf="javascript:void(0)" v-else-if="item.status === 'RECYCLE'" disabled>
+                        <a herf="javascript:void(0)" v-else-if="item.status === 'RECYCLE'" disabled>
                           {{ item.title }}
                         </a>
                       </template>
