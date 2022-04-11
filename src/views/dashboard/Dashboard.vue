@@ -62,18 +62,13 @@
                           {{ item.title }}
                         </a>
 
-                        <a-button
-                          v-else-if="item.status === 'DRAFT'"
-                          class="!p-0"
-                          type="link"
-                          @click="handlePostPreview(item.id)"
-                        >
+                        <a herf="javascript:void(0)" v-else-if="item.status === 'DRAFT'" @click="handlePostPreview(item.id)">
                           {{ item.title }}
-                        </a-button>
+                        </a>
 
-                        <a-button v-else-if="item.status === 'RECYCLE'" class="!p-0" disabled type="link">
+                        <a herf="javascript:void(0)" v-else-if="item.status === 'RECYCLE'" disabled>
                           {{ item.title }}
-                        </a-button>
+                        </a>
                       </template>
                     </a-list-item-meta>
                     <div>{{ item.createTime | timeAgo }}</div>
