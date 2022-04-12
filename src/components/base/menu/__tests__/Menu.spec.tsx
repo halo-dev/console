@@ -63,4 +63,38 @@ describe("Menu", () => {
       "Menu Item 4"
     );
   });
+
+  it("should work with select emit", async () => {
+    const wrapper = mount({
+      setup() {
+        return () => (
+          <VMenu openIds={["3"]}>
+            <VMenuItem id="1" title="Menu Item 1" />
+            <VMenuItem id="2" title="Menu Item 2" />
+            <VMenuItem id="3" title="Menu Item 3">
+              <VMenuItem id="4" title="Menu Item 4" />
+            </VMenuItem>
+          </VMenu>
+        );
+      },
+    });
+
+    wrapper.findAllComponents(VMenuItem).forEach((item) => {
+      // has not sub menu
+      if (item.props().id === "1") {
+        item.trigger("click");
+        expect(item.emitted().select[0]).toEqual(["1"]);
+      }
+      // has sub menu
+      if (item.props().id === "3") {
+        item.trigger("click");
+        expect(item.emitted().select).toBeUndefined();
+
+        expect(item.vm.open).toBe(false);
+
+        item.trigger("click");
+        expect(item.vm.open).toBe(true);
+      }
+    });
+  });
 });
