@@ -7,36 +7,39 @@ describe("Menu", () => {
     expect(VMenu).toBeDefined();
     expect(VMenuItem).toBeDefined();
     expect(mount(VMenu).html()).toMatchSnapshot();
-
-    const wrapper = mount({
-      render() {
-        return (
-          <VMenu>
-            <VMenuItem key="1" title="Menu Item 1" />
-            <VMenuItem key="2" title="Menu Item 2" />
-          </VMenu>
-        );
-      },
-    });
-
-    expect(wrapper.html()).toMatchSnapshot();
+    expect(mount(VMenuItem).html()).toMatchSnapshot();
   });
 
-  it("should work with sub menus", function () {
-    const wrapper = mount({
+  it("should work with sub menus", async () => {
+    const wrapper = await mount({
       setup() {
         return () => (
-          <VMenu>
+          <VMenu openIds={["3"]}>
             <VMenuItem id="1" title="Menu Item 1" />
             <VMenuItem id="2" title="Menu Item 2" />
-            <VMenuItem id="3" title="Menu Item 3" />
-            <VMenuItem id="4" title="Menu Item 4" />
+            <VMenuItem id="3" title="Menu Item 3">
+              <VMenuItem key="4" title="Menu Item 4" />
+            </VMenuItem>
           </VMenu>
         );
       },
     });
-
     expect(wrapper.html()).toMatchSnapshot();
+
+    // toggling sub menu
+    expect(
+      wrapper.find(".has-submenus .sub-menu-items").attributes().style
+    ).toBeUndefined(); // visible
+
+    await wrapper.find(".has-submenus").trigger("click");
+    expect(
+      wrapper.find(".has-submenus .sub-menu-items").attributes().style
+    ).toBe("display: none;");
+
+    await wrapper.find(".has-submenus").trigger("click");
+    expect(
+      wrapper.find(".has-submenus .sub-menu-items").attributes().style
+    ).toBeUndefined(); // visible
   });
 
   it("should work with openIds prop", function () {

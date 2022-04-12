@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { IconArrowRight } from "@/core/icons";
-import { inject, ref, useSlots } from "vue";
+import { computed, inject, ref, useSlots } from "vue";
 
 const props = defineProps({
   id: {
@@ -25,8 +25,12 @@ if (openIds?.includes(props.id)) {
   open.value = true;
 }
 
+const hasSubmenus = computed(() => {
+  return slots.default;
+});
+
 function handleClick() {
-  if (slots.default) {
+  if (hasSubmenus.value) {
     open.value = !open.value;
     return;
   }
@@ -35,7 +39,11 @@ function handleClick() {
 </script>
 
 <template>
-  <li class="menu-item" @click.stop="handleClick">
+  <li
+    class="menu-item"
+    :class="{ 'has-submenus': hasSubmenus }"
+    @click.stop="handleClick"
+  >
     <div class="menu-item-title">
       <span v-if="$slots.icon" class="menu-icon self-center mr-3">
         <slot name="icon" />
@@ -45,8 +53,8 @@ function handleClick() {
       </span>
       <span
         v-if="$slots.default"
-        class="menu-icon-collapse self-center transition-all"
         :class="{ open }"
+        class="menu-icon-collapse self-center transition-all"
       >
         <IconArrowRight />
       </span>
@@ -64,6 +72,7 @@ function handleClick() {
 .menu-item {
   @apply cursor-pointer;
 }
+
 .menu-item-title {
   @apply transition-all;
   @apply text-base;
@@ -73,6 +82,7 @@ function handleClick() {
 
   border-radius: 4px;
   padding: 8px 10px;
+
   &:hover,
   &.active {
     background: #f4f5f7;

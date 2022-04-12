@@ -5,6 +5,7 @@ import { provide } from "vue";
 const props = defineProps({
   openIds: {
     type: Object as PropType<string[]>,
+    required: false,
   },
 });
 
