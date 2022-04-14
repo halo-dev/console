@@ -1,6 +1,6 @@
 <template>
   <div v-if="theme.id" class="card-container h-full">
-    <a-tabs class="h-full" defaultActiveKey="0" type="card">
+    <a-tabs class="h-full" defaultActiveKey="0" :activeKey="activeKey" @change="handleChangeActiveKey" type="card">
       <a-tab-pane :key="0" tab="关于">
         <div v-if="theme.logo">
           <a-avatar :alt="theme.name" :size="72" :src="theme.logo" shape="square" />
@@ -148,18 +148,26 @@ export default {
           xs: { span: 24 }
         }
       }
+    },
+    activeKey: {
+      type: Number,
+      default: () => 0
+    },
+    form: {
+      type: Object,
+      default: () => {
+        return {
+          settings: [],
+          configurations: [],
+          loading: false,
+          saving: false,
+          saveErrored: false
+        }
+      }
     }
   },
   data() {
-    return {
-      form: {
-        settings: [],
-        configurations: [],
-        loading: false,
-        saving: false,
-        saveErrored: false
-      }
-    }
+    return {}
   },
   watch: {
     theme(value) {
@@ -207,6 +215,9 @@ export default {
         this.handleGetSettings()
         this.$emit('saved')
       }
+    },
+    handleChangeActiveKey(key) {
+      this.$emit('update:activeKey', key)
     }
   }
 }
