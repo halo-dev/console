@@ -6,9 +6,8 @@
         :loading="form.saving"
         erroredText="保存失败"
         loadedText="保存成功"
-        text="保存"
+        text="保存设置"
         type="primary"
-        :disabled="!themeSettingForm.activeKey"
         @click="handleSaveSettings"
       ></ReactiveButton>
       <a-dropdown>
@@ -56,12 +55,7 @@
     </template>
 
     <a-spin :spinning="theme.loading">
-      <ThemeSettingForm
-        :theme="theme.current"
-        ref="themeSettingForm"
-        :activeKey.sync="themeSettingForm.activeKey"
-        :form.sync="form"
-      />
+      <ThemeSettingForm :theme="theme.current" ref="themeSettingForm" :formStatus.sync="form" />
     </a-spin>
 
     <ThemeDeleteConfirmModal
@@ -107,13 +101,7 @@ export default {
       localUpgradeModel: {
         visible: false
       },
-      themeSettingForm: {
-        activeKey: 0
-      },
       form: {
-        settings: [],
-        configurations: [],
-        loading: false,
         saving: false,
         saveErrored: false
       }

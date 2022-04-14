@@ -1,6 +1,6 @@
 <template>
   <div v-if="theme.id" class="card-container h-full">
-    <a-tabs class="h-full" defaultActiveKey="0" :activeKey="activeKey" @change="handleChangeActiveKey" type="card">
+    <a-tabs class="h-full" defaultActiveKey="0" type="card">
       <a-tab-pane :key="0" tab="关于">
         <div v-if="theme.logo">
           <a-avatar :alt="theme.name" :size="72" :src="theme.logo" shape="square" />
@@ -106,8 +106,8 @@
           </a-form-item>
           <a-form-item>
             <ReactiveButton
-              :errored="form.saveErrored"
-              :loading="form.saving"
+              :errored="formStatus.saveErrored"
+              :loading="formStatus.saving"
               erroredText="保存失败"
               loadedText="保存成功"
               text="保存"
@@ -149,17 +149,10 @@ export default {
         }
       }
     },
-    activeKey: {
-      type: Number,
-      default: () => 0
-    },
-    form: {
+    formStatus: {
       type: Object,
       default: () => {
         return {
-          settings: [],
-          configurations: [],
-          loading: false,
           saving: false,
           saveErrored: false
         }
@@ -167,7 +160,13 @@ export default {
     }
   },
   data() {
-    return {}
+    return {
+      form: {
+        settings: [],
+        configurations: [],
+        loading: false
+      }
+    }
   },
   watch: {
     theme(value) {
@@ -197,27 +196,24 @@ export default {
     },
     async handleSaveSettings() {
       try {
-        this.form.saving = true
+        this.formStatus.saving = true
         await apiClient.theme.saveSettings(this.theme.id, this.form.settings)
       } catch (error) {
         this.$log.error(error)
-        this.form.saveErrored = true
+        this.formStatus.saveErrored = true
       } finally {
         setTimeout(() => {
-          this.form.saving = false
+          this.formStatus.saving = false
         }, 400)
       }
     },
     handleSaveSettingsCallback() {
-      if (this.form.saveErrored) {
-        this.form.saveErrored = false
+      if (this.formStatus.saveErrored) {
+        this.formStatus.saveErrored = false
       } else {
         this.handleGetSettings()
         this.$emit('saved')
       }
-    },
-    handleChangeActiveKey(key) {
-      this.$emit('update:activeKey', key)
     }
   }
 }
