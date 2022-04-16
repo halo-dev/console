@@ -533,6 +533,11 @@ export default {
         this.list.loading = true
 
         const response = await apiClient.comment.list(this.targetName, this.list.params)
+        if (response.data.content.length === 0 && this.list.params.page > 0) {
+          this.list.params.page--
+          await this.handleListComments()
+          return
+        }
 
         this.list.data = response.data.content
         this.list.total = response.data.total

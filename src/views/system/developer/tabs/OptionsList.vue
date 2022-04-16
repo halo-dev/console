@@ -227,6 +227,11 @@ export default {
       apiClient.option
         .listAsView(this.queryParam)
         .then(response => {
+          if (response.data.content.length === 0 && this.pagination.page > 0) {
+            this.pagination.page--
+            this.handleListOptions()
+            return
+          }
           this.options = response.data.content
           this.pagination.total = response.data.total
         })

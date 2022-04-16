@@ -62,7 +62,11 @@
                           {{ item.title }}
                         </a>
 
-                        <a herf="javascript:void(0)" v-else-if="item.status === 'DRAFT'" @click="handlePostPreview(item.id)">
+                        <a
+                          herf="javascript:void(0)"
+                          v-else-if="item.status === 'DRAFT'"
+                          @click="handlePostPreview(item.id)"
+                        >
                           {{ item.title }}
                         </a>
 

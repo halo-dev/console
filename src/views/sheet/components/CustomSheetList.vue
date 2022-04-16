@@ -369,7 +369,11 @@ export default {
         }
 
         const { data } = await apiClient.sheet.list(this.list.params)
-
+        if (data.content.length === 0 && this.list.params.page > 0) {
+          this.list.params.page--
+          await this.handleListSheets()
+          return
+        }
         this.list.data = data.content
         this.list.total = data.total
         this.list.hasPrevious = data.hasPrevious
