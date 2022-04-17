@@ -548,6 +548,11 @@ export default {
         const { categoryId } = this.list.params
         this.list.params.categoryId = categoryId === 0 ? undefined : categoryId
         const response = await apiClient.post.list(this.list.params)
+        if (response.data.content.length === 0 && this.list.params.page > 0) {
+          this.list.params.page--
+          await this.handleListPosts()
+          return
+        }
 
         this.list.data = response.data.content
         this.list.total = response.data.total

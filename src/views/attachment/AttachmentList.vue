@@ -254,6 +254,11 @@ export default {
 
         const response = await apiClient.attachment.list(this.list.params)
 
+        if (response.data.content.length === 0 && this.list.params.page > 0) {
+          this.list.params.page--
+          await this.handleListAttachments()
+          return
+        }
         this.list.data = response.data.content
         this.list.total = response.data.total
         this.list.hasNext = response.data.hasNext
