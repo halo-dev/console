@@ -106,8 +106,8 @@
           </a-form-item>
           <a-form-item>
             <ReactiveButton
-              :errored="formStatus.saveErrored"
-              :loading="formStatus.saving"
+              :errored="form.saveErrored"
+              :loading="form.saving"
               erroredText="保存失败"
               loadedText="保存成功"
               text="保存"
@@ -148,15 +148,6 @@ export default {
           xs: { span: 24 }
         }
       }
-    },
-    formStatus: {
-      type: Object,
-      default: () => {
-        return {
-          saving: false,
-          saveErrored: false
-        }
-      }
     }
   },
   data() {
@@ -164,7 +155,9 @@ export default {
       form: {
         settings: [],
         configurations: [],
-        loading: false
+        loading: false,
+        saving: false,
+        saveErrored: false
       }
     }
   },
@@ -194,22 +187,25 @@ export default {
         this.$log.error(error)
       }
     },
-    async handleSaveSettings() {
+    async handleSaveSettings(enableLoading = true) {
       try {
-        this.formStatus.saving = true
+        if (enableLoading) {
+          this.form.saving = true
+        }
         await apiClient.theme.saveSettings(this.theme.id, this.form.settings)
       } catch (error) {
         this.$log.error(error)
-        this.formStatus.saveErrored = true
+        this.form.saveErrored = true
+        throw new Error(error)
       } finally {
         setTimeout(() => {
-          this.formStatus.saving = false
+          this.form.saving = false
         }, 400)
       }
     },
     handleSaveSettingsCallback() {
-      if (this.formStatus.saveErrored) {
-        this.formStatus.saveErrored = false
+      if (this.form.saveErrored) {
+        this.form.saveErrored = false
       } else {
         this.handleGetSettings()
         this.$emit('saved')

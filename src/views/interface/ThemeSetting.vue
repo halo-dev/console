@@ -8,6 +8,7 @@
         loadedText="保存成功"
         text="保存设置"
         type="primary"
+        @callback="handleSaveSettingsCallback"
         @click="handleSaveSettings"
       ></ReactiveButton>
       <a-dropdown>
@@ -55,7 +56,7 @@
     </template>
 
     <a-spin :spinning="theme.loading">
-      <ThemeSettingForm :theme="theme.current" ref="themeSettingForm" :formStatus.sync="form" />
+      <ThemeSettingForm :theme="theme.current" ref="themeSettingForm" />
     </a-spin>
 
     <ThemeDeleteConfirmModal
@@ -173,8 +174,22 @@ export default {
         }
       })
     },
-    handleSaveSettings() {
-      this.$refs.themeSettingForm.handleSaveSettings()
+    async handleSaveSettings() {
+      try {
+        this.form.saving = true
+        await this.$refs.themeSettingForm.handleSaveSettings(false)
+      } catch {
+        this.form.saveErrored = true
+      } finally {
+        setTimeout(() => {
+          this.form.saving = false
+        }, 400)
+      }
+    },
+    handleSaveSettingsCallback() {
+      if (this.form.saveErrored) {
+        this.form.saveErrored = false
+      }
     }
   }
 }
