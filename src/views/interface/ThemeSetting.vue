@@ -6,6 +6,7 @@
         :loading="form.saving"
         erroredText="保存失败"
         loadedText="保存成功"
+        icon="save"
         text="保存设置"
         type="primary"
         @callback="handleSaveSettingsCallback"
