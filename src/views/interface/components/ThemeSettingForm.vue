@@ -187,13 +187,16 @@ export default {
         this.$log.error(error)
       }
     },
-    async handleSaveSettings() {
+    async handleSaveSettings(enableLoading = true) {
       try {
-        this.form.saving = true
+        if (enableLoading) {
+          this.form.saving = true
+        }
         await apiClient.theme.saveSettings(this.theme.id, this.form.settings)
       } catch (error) {
         this.$log.error(error)
         this.form.saveErrored = true
+        throw new Error(error)
       } finally {
         setTimeout(() => {
           this.form.saving = false

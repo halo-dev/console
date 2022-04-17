@@ -1,6 +1,17 @@
 <template>
   <page-view :sub-title="theme.current.version || '-'" :title="theme.current.name || '-'" affix>
     <template slot="extra">
+      <ReactiveButton
+        :errored="form.saveErrored"
+        :loading="form.saving"
+        erroredText="保存失败"
+        loadedText="保存成功"
+        icon="save"
+        text="保存设置"
+        type="primary"
+        @callback="handleSaveSettingsCallback"
+        @click="handleSaveSettings"
+      ></ReactiveButton>
       <a-dropdown>
         <a-menu slot="overlay">
           <a-menu-item key="1" @click="handleRemoteUpdate">
@@ -46,7 +57,7 @@
     </template>
 
     <a-spin :spinning="theme.loading">
-      <ThemeSettingForm :theme="theme.current" />
+      <ThemeSettingForm :theme="theme.current" ref="themeSettingForm" />
     </a-spin>
 
     <ThemeDeleteConfirmModal
@@ -91,6 +102,10 @@ export default {
       },
       localUpgradeModel: {
         visible: false
+      },
+      form: {
+        saving: false,
+        saveErrored: false
       }
     }
   },
@@ -159,6 +174,23 @@ export default {
           }
         }
       })
+    },
+    async handleSaveSettings() {
+      try {
+        this.form.saving = true
+        await this.$refs.themeSettingForm.handleSaveSettings(false)
+      } catch {
+        this.form.saveErrored = true
+      } finally {
+        setTimeout(() => {
+          this.form.saving = false
+        }, 400)
+      }
+    },
+    handleSaveSettingsCallback() {
+      if (this.form.saveErrored) {
+        this.form.saveErrored = false
+      }
     }
   }
 }
