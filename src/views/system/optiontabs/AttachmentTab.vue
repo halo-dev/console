@@ -10,7 +10,7 @@
       <a-form-model-item label="上传图片时预览：">
         <a-switch v-model="options.attachment_upload_image_preview_enable" />
       </a-form-model-item>
-      <a-form-model-item label="是否去除图片EXIF：">
+      <a-form-model-item label="去除图片 EXIF 信息：">
         <a-switch v-model="options.attachment_EXIF_remove_enable" />
       </a-form-model-item>
       <a-form-model-item label="最大上传文件数：">
