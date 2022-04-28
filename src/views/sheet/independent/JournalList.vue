@@ -265,6 +265,11 @@ export default {
         this.list.loading = true
 
         const { data } = await apiClient.journal.list(this.list.params)
+        if (data.content.length === 0 && this.list.params.page > 0) {
+          this.list.params.page--
+          await this.handleListJournals()
+          return
+        }
 
         this.list.data = data.content
         this.list.total = data.total
