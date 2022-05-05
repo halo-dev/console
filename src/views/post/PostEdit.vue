@@ -16,11 +16,17 @@
           <a-input v-model="postToStage.title" placeholder="请输入文章标题" size="large" />
         </div>
         <div id="editor" :style="{ height: editorHeight }">
-          <MarkdownEditor
-            :originalContent.sync="postToStage.originalContent"
-            @change="onContentChange"
-            @save="handleSaveDraft()"
-          />
+          <div style="border: 1px solid #ccc">
+            <Toolbar style="border-bottom: 1px solid #ccc" :editor="editor" :mode="mode" />
+            <Editor
+              style="height: 500px; overflow-y: hidden"
+              v-model="postToStage.originalContent"
+              :defaultConfig="editorConfig"
+              :mode="mode"
+              @onCreated="onCreated"
+              @onChange="onContentChange"
+            />
+          </div>
         </div>
       </a-col>
     </a-row>
@@ -37,7 +43,8 @@
 <script>
 // components
 import PostSettingModal from '../../components/Post/PostSettingModal'
-import MarkdownEditor from '@/components/Editor/MarkdownEditor'
+import '@wangeditor/editor/dist/css/style.css'
+import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import { PageView } from '@/layouts'
 
 // libs
@@ -50,15 +57,19 @@ export default {
   mixins: [mixin, mixinDevice, mixinPostEdit],
   components: {
     PostSettingModal,
-    MarkdownEditor,
+    Editor,
+    Toolbar,
     PageView
   },
   data() {
     return {
+      editor: null,
       postSettingVisible: false,
       postToStage: {},
       contentChanges: 0,
-      previewSaving: false
+      previewSaving: false,
+      editorConfig: { placeholder: '请输入内容...' },
+      mode: 'default'
     }
   },
   beforeRouteEnter(to, from, next) {
@@ -105,9 +116,15 @@ export default {
     document.addEventListener('keydown', this.onRegisterSaveShortcut)
   },
   beforeDestroy() {
+    const editor = this.editor
+    if (editor == null) return
+    editor.destroy()
     document.removeEventListener('keydown', this.onRegisterSaveShortcut)
   },
   methods: {
+    onCreated(editor) {
+      this.editor = Object.seal(editor)
+    },
     onRegisterSaveShortcut(e) {
       if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.keyCode === 83) {
         e.preventDefault()
@@ -199,10 +216,9 @@ export default {
     handleRestoreSavedStatus() {
       this.contentChanges = 0
     },
-    onContentChange({ originalContent, renderContent }) {
+    onContentChange(editor) {
       this.contentChanges++
-      this.postToStage.originalContent = originalContent
-      this.postToStage.content = renderContent
+      this.postToStage.content = editor.getText()
     },
     onPostSavedCallback() {
       this.contentChanges = 0
