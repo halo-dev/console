@@ -16,6 +16,10 @@
 
 ------------------------------
 
+## 问题反馈
+
+此仓库不提供 Issues 追踪，你可以在 [Halo](https://github.com/halo-dev/halo/issues) 主仓库查阅 Issues 或提交新 Issue。
+
 ## 开发环境运行
 
 ```bash
