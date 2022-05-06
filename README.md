@@ -18,7 +18,7 @@
 
 ## 问题反馈
 
-此仓库不提供 Issues 追踪，你可以在 [Halo](https://github.com/halo-dev/halo/issues) 主仓库查阅 Issues 或提交新 Issue。
+此仓库不再提供 Issue 追踪，你可以在 [Halo](https://github.com/halo-dev/halo/issues) 主仓库查阅 Issue 或在[这里](https://github.com/halo-dev/halo/issues/new/choose)提交新的 Issue。
 
 ## 开发环境运行
 
