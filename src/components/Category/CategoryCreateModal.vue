@@ -2,10 +2,10 @@
   <a-modal v-model="modalVisible" :afterClose="onClose" :width="512" destroyOnClose title="新建分类">
     <a-form-model
       ref="categoryForm"
-      :label-col="{ span: 4 }"
+      :label-col="form.labelCol"
       :model="form.model"
       :rules="form.rules"
-      :wrapper-col="{ span: 20 }"
+      :wrapper-col="form.wrapperCol"
       labelAlign="left"
     >
       <a-form-model-item help="* 页面上所显示的名称" label="名称：" prop="name">
@@ -76,7 +76,9 @@ export default {
           slug: [{ max: 255, message: '* 分类别名的字符长度不能超过 255', trigger: ['change'] }],
           thumbnail: [{ max: 1023, message: '* 封面图链接的字符长度不能超过 1023', trigger: ['change'] }],
           description: [{ max: 100, message: '* 分类描述的字符长度不能超过 100', trigger: ['change'] }]
-        }
+        },
+        labelCol: { sm: { span: 4 }, xs: { span: 24 } },
+        wrapperCol: { sm: { span: 20 }, xs: { span: 24 } }
       }
     }
   },
