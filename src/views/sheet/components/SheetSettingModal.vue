@@ -15,7 +15,7 @@
     <div class="card-container">
       <a-tabs type="card">
         <a-tab-pane key="normal" tab="常规">
-          <a-form :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" labelAlign="left">
+          <a-form :label-col="form.labelCol" :wrapper-col="form.wrapperCol" labelAlign="left">
             <a-form-item label="页面标题">
               <a-input v-model="form.model.title" />
             </a-form-item>
@@ -45,7 +45,7 @@
           </a-form>
         </a-tab-pane>
         <a-tab-pane key="advanced" tab="高级">
-          <a-form :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" labelAlign="left">
+          <a-form :label-col="form.labelCol" :wrapper-col="form.wrapperCol" labelAlign="left">
             <a-form-item label="禁止评论">
               <a-switch v-model="form.model.disallowComment" />
             </a-form-item>
@@ -86,7 +86,7 @@
           </a-form>
         </a-tab-pane>
         <a-tab-pane key="seo" tab="SEO">
-          <a-form :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" labelAlign="left">
+          <a-form :label-col="form.labelCol" :wrapper-col="form.wrapperCol" labelAlign="left">
             <a-form-item label="自定义关键词">
               <a-input
                 v-model="form.model.metaKeywords"
@@ -199,7 +199,9 @@ export default {
         draftSaving: false,
         draftSaveErrored: false,
         publishing: false,
-        publishErrored: false
+        publishErrored: false,
+        labelCol: { sm: { span: 4 }, xs: { span: 24 } },
+        wrapperCol: { sm: { span: 20 }, xs: { span: 24 } }
       },
       templates: [],
       attachmentSelectVisible: false
