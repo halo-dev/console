@@ -63,7 +63,7 @@
               </template>
               <span slot="title">
                 普通链接：
-                <a-button class="!p-0" type="link" @click="handleCopyLink(`${encodeURI(attachment.path)}`)">
+                <a-button class="!p-0" type="link" @click="handleCopyLink(`${attachment.path}`)">
                   <a-icon type="copy" />
                 </a-button>
               </span>
@@ -74,11 +74,7 @@
               <span slot="description">![{{ attachment.name }}]({{ attachment.path }})</span>
               <span slot="title">
                 Markdown 格式：
-                <a-button
-                  class="!p-0"
-                  type="link"
-                  @click="handleCopyLink(`![${attachment.name}](${encodeURI(attachment.path)})`)"
-                >
+                <a-button class="!p-0" type="link" @click="handleCopyLink(`![${attachment.name}](${attachment.path})`)">
                   <a-icon type="copy" />
                 </a-button>
               </span>

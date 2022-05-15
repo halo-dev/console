@@ -69,7 +69,7 @@ export default {
             const attachment = response.data
             resolve({
               name: attachment.name,
-              path: encodeURI(attachment.path)
+              path: attachment.path
             })
           })
           .catch(e => {
