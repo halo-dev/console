@@ -77,7 +77,7 @@
               >
                 <div class="photo-thumb photos-group-item">
                   <span
-                    :style="{ backgroundImage: `url('${encodeURI(item.thumbnail)}')` }"
+                    :style="{ backgroundImage: `url('${item.thumbnail}')` }"
                     class="photos-group-item-img"
                     loading="lazy"
                   />

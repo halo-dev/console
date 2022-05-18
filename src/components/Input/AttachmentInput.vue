@@ -52,7 +52,7 @@ export default {
     },
     handleSelectAttachment({ raw }) {
       if (raw.length) {
-        this.$emit('input', encodeURI(raw[0].path))
+        this.$emit('input', raw[0].path)
       }
     },
     focus() {

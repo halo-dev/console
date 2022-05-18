@@ -151,8 +151,8 @@ export default {
     handleAttachmentSelected({ raw }) {
       if (raw.length) {
         const { path, thumbPath, name } = raw[0]
-        this.$set(this.form.model, 'url', encodeURI(path))
-        this.$set(this.form.model, 'thumbnail', encodeURI(thumbPath))
+        this.$set(this.form.model, 'url', path)
+        this.$set(this.form.model, 'thumbnail', thumbPath)
         this.$set(this.form.model, 'name', name)
       }
       this.attachmentSelectModal.visible = false
