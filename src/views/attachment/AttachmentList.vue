@@ -85,7 +85,7 @@
                   <span v-if="!isImage(item)" class="attachments-group-item-type">{{ item.suffix }}</span>
                   <span
                     v-else
-                    :style="{ backgroundImage: `url('${encodeURI(item.thumbPath)}')` }"
+                    :style="{ backgroundImage: `url('${item.thumbPath}')` }"
                     class="attachments-group-item-img"
                     loading="lazy"
                   />

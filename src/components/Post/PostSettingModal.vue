@@ -457,7 +457,7 @@ export default {
      */
     handleSelectPostThumbnail({ raw }) {
       if (raw.length) {
-        this.form.model.thumbnail = encodeURI(raw[0].path)
+        this.form.model.thumbnail = raw[0].path
       }
       this.attachmentSelectVisible = false
     },
