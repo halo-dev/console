@@ -5,13 +5,13 @@
         <a-input v-model="options.blog_title" />
       </a-form-model-item>
       <a-form-model-item label="博客地址：" prop="blog_url">
-        <a-input v-model="options.blog_url" placeholder="如：https://halo.run" />
+        <a-input v-model.trim="options.blog_url" placeholder="如：https://halo.run" />
       </a-form-model-item>
       <a-form-model-item label="Logo：" prop="blog_logo">
-        <AttachmentInput v-model="options.blog_logo" title="选择 Logo" />
+        <AttachmentInput v-model.trim="options.blog_logo" title="选择 Logo" />
       </a-form-model-item>
       <a-form-model-item label="Favicon：" prop="blog_favicon">
-        <AttachmentInput v-model="options.blog_favicon" title="选择 Favicon" />
+        <AttachmentInput v-model.trim="options.blog_favicon" title="选择 Favicon" />
       </a-form-model-item>
       <a-form-model-item label="页脚信息：" prop="blog_footer_info">
         <a-input

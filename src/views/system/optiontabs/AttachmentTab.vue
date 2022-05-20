@@ -40,7 +40,7 @@
           </a-select>
         </a-form-model-item>
         <a-form-model-item label="绑定域名：">
-          <a-input v-model="options.oss_upyun_domain" placeholder="无需再加上 http:// 或者 https://" />
+          <a-input v-model.trim="options.oss_upyun_domain" placeholder="无需再加上 http:// 或者 https://" />
         </a-form-model-item>
         <a-form-model-item label="空间名称：">
           <a-input v-model="options.oss_upyun_bucket" />
@@ -52,7 +52,7 @@
           <a-input-password v-model="options.oss_upyun_password" autocomplete="new-password" />
         </a-form-model-item>
         <a-form-model-item label="文件目录：">
-          <a-input v-model="options.oss_upyun_source" />
+          <a-input v-model.trim="options.oss_upyun_source" />
         </a-form-model-item>
         <a-form-model-item label="图片处理策略：">
           <a-input v-model="options.oss_upyun_style_rule" placeholder="间隔标识符+图片处理版本名称" />
@@ -72,7 +72,7 @@
           </a-select>
         </a-form-model-item>
         <a-form-model-item label="绑定域名：">
-          <a-input v-model="options.oss_qiniu_domain" placeholder="无需再加上 http:// 或者 https://" />
+          <a-input v-model.trim="options.oss_qiniu_domain" placeholder="无需再加上 http:// 或者 https://" />
         </a-form-model-item>
         <a-form-model-item label="区域：">
           <a-auto-complete v-model="options.oss_qiniu_zone" :dataSource="qiniuOssZones" allowClear />
@@ -107,7 +107,7 @@
           </a-select>
         </a-form-model-item>
         <a-form-model-item label="绑定域名：">
-          <a-input v-model="options.oss_ali_domain" placeholder="如不填写，路径根域名将为 Bucket + EndPoint" />
+          <a-input v-model.trim="options.oss_ali_domain" placeholder="如不填写，路径根域名将为 Bucket + EndPoint" />
         </a-form-model-item>
         <a-form-model-item label="Bucket：">
           <a-input v-model="options.oss_ali_bucket_name" placeholder="存储空间名称" />
@@ -122,7 +122,7 @@
           <a-input-password v-model="options.oss_ali_access_secret" autocomplete="new-password" />
         </a-form-model-item>
         <a-form-model-item label="文件目录：">
-          <a-input v-model="options.oss_ali_source" placeholder="不填写则上传到根目录" />
+          <a-input v-model.trim="options.oss_ali_source" placeholder="不填写则上传到根目录" />
         </a-form-model-item>
         <a-form-model-item label="图片处理策略：">
           <a-input v-model="options.oss_ali_style_rule" placeholder="请到阿里云控制台的图片处理获取" />
@@ -142,7 +142,7 @@
           </a-select>
         </a-form-model-item>
         <a-form-model-item label="绑定域名：">
-          <a-input v-model="options.bos_baidu_domain" placeholder="如不填写，路径根域名将为 Bucket + EndPoint" />
+          <a-input v-model.trim="options.bos_baidu_domain" placeholder="如不填写，路径根域名将为 Bucket + EndPoint" />
         </a-form-model-item>
         <a-form-model-item label="Bucket：">
           <a-input v-model="options.bos_baidu_bucket_name" placeholder="存储空间名称" />
@@ -174,7 +174,7 @@
           </a-select>
         </a-form-model-item>
         <a-form-model-item label="绑定域名：">
-          <a-input v-model="options.cos_tencent_domain" placeholder="如不填写，路径根域名将为 Bucket + 区域地址" />
+          <a-input v-model.trim="options.cos_tencent_domain" placeholder="如不填写，路径根域名将为 Bucket + 区域地址" />
         </a-form-model-item>
         <a-form-model-item label="Bucket：">
           <a-input v-model="options.cos_tencent_bucket_name" placeholder="存储桶名称" />
@@ -189,7 +189,7 @@
           <a-input-password v-model="options.cos_tencent_secret_key" autocomplete="new-password" />
         </a-form-model-item>
         <a-form-model-item label="文件目录：">
-          <a-input v-model="options.cos_tencent_source" placeholder="不填写则上传到根目录" />
+          <a-input v-model.trim="options.cos_tencent_source" placeholder="不填写则上传到根目录" />
         </a-form-model-item>
         <a-form-model-item label="图片处理策略：">
           <a-input v-model="options.cos_tencent_style_rule" placeholder="请到腾讯云控制台的图片处理获取" />
@@ -209,7 +209,7 @@
           </a-select>
         </a-form-model-item>
         <a-form-model-item label="绑定域名：">
-          <a-input v-model="options.obs_huawei_domain" placeholder="如不填写，路径根域名将为 Bucket + EndPoint" />
+          <a-input v-model.trim="options.obs_huawei_domain" placeholder="如不填写，路径根域名将为 Bucket + EndPoint" />
         </a-form-model-item>
         <a-form-model-item label="Bucket（桶名称）：">
           <a-input v-model="options.obs_huawei_bucket_name" placeholder="桶名称" />
@@ -224,7 +224,7 @@
           <a-input-password v-model="options.obs_huawei_access_secret" autocomplete="new-password" />
         </a-form-model-item>
         <a-form-model-item label="文件目录：">
-          <a-input v-model="options.obs_huawei_source" placeholder="不填写则上传到根目录" />
+          <a-input v-model.trim="options.obs_huawei_source" placeholder="不填写则上传到根目录" />
         </a-form-model-item>
         <a-form-model-item label="图片处理策略：">
           <a-input v-model="options.obs_huawei_style_rule" placeholder="请到华为云控制台的图片处理创建" />
@@ -253,7 +253,7 @@
           <a-input-password v-model="options.minio_access_secret" autocomplete="new-password" />
         </a-form-model-item>
         <a-form-model-item label="文件目录：">
-          <a-input v-model="options.minio_source" placeholder="不填写则上传到根目录" />
+          <a-input v-model.trim="options.minio_source" placeholder="不填写则上传到根目录" />
         </a-form-model-item>
       </div>
       <a-form-model-item>

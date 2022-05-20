@@ -7,16 +7,16 @@
             <a-switch v-model="options.email_enabled" />
           </a-form-model-item>
           <a-form-model-item label="SMTP 地址：" prop="email_host">
-            <a-input v-model="options.email_host" />
+            <a-input v-model.trim="options.email_host" />
           </a-form-model-item>
           <a-form-model-item label="发送协议：" prop="email_protocol">
-            <a-input v-model="options.email_protocol" />
+            <a-input v-model.trim="options.email_protocol" />
           </a-form-model-item>
           <a-form-model-item label="启用 STARTTLS：">
             <a-switch v-model="options.email_starttls" />
           </a-form-model-item>
           <a-form-model-item label="SSL 端口：" prop="email_ssl_port">
-            <a-input v-model="options.email_ssl_port" />
+            <a-input v-model.number="options.email_ssl_port" />
           </a-form-model-item>
           <a-form-model-item label="邮箱账号：" prop="email_username">
             <a-input v-model="options.email_username" />
@@ -54,7 +54,7 @@
           layout="vertical"
         >
           <a-form-model-item label="收件人地址：" prop="to">
-            <a-input v-model="mailParam.to" />
+            <a-input v-model.trim="mailParam.to" />
           </a-form-model-item>
           <a-form-model-item label="主题：" prop="subject">
             <a-input v-model="mailParam.subject" />
