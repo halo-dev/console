@@ -75,19 +75,18 @@
                 :key="team.team"
               >
                     <span slot="title" class="inline-block font-bold title" style="font-size: 20px">
-                      {{team.team}}
+                      {{team.team?team.team:'默认分组'}}
                       <a-icon class="cursor-move mover mr-1 list-group-item" type="bars"/>
                     </span>
                     <draggable
                       :list="team.links"
                       v-bind="dragOptions"
-                      handle=".mover"
                       group="link"
                       @update="updatePriority"
                       @remove="handleRemove($event, team)"
                       @add="modal.lastAdd=team"
                     >
-                      <transition-group type="transition" :name="!drag ? 'flip-list' : null" display="flex" flex-direction="row">
+                      <transition-group type="transition" :name="!drag ? 'flip-list' : null" style="display:flex; flex-wrap: wrap">
                             <a-popover 
                               trigger="click"
                               class="link"
@@ -106,9 +105,12 @@
                                   <a-button class="!p-0" type="link">删除</a-button>
                                 </a-popconfirm>
                               </template>
-                              <a-tag class="link">
-                                <span class="list-group-item-body">{{link.name}}</span>
-                                <a-icon class="cursor-move mover mr-1 list-group-item" type="bars" style="font-size: 14px; padding-top: 4px"/>
+                              <a-tag class="link" style="height: 50px; width: 150px; display: flex; justify-content: space-around; align-items: center">
+                                <a-card-meta :title="link.name" :description="link.description" style="width: 130px">
+                                  <template #avatar>
+                                    <a-avatar size="large" :src="link.logo" :style="link.description?{'margin-top': '4px'}:null"></a-avatar>
+                                  </template>
+                                </a-card-meta>
                               </a-tag>
                         </a-popover>
                       </transition-group>
@@ -262,7 +264,7 @@ export default {
   
   methods: {
     ...mapActions(['refreshOptionsCache']),
-    updatePriority() {
+    getPriority() {
       const params = []
       for (const team of this.linkTeam) {
         for (const link of team.links) {
@@ -274,6 +276,10 @@ export default {
       for (const link of params) {
         link.priority = priority--
       }
+      return params
+    },
+    updatePriority() {
+      const params = this.getPriority()
       apiClient.link
         .updateInBatch(params)
         .finally(() => {
@@ -373,8 +379,21 @@ export default {
         if (valid) {
           _this.form.saving = true
           if (_this.isUpdateMode) {
+            for (const team of _this.linkTeam) {
+              if (team.team === _this.form.model.team) {
+                team.links.push(_this.form.model)
+              } else {
+                for (let i = 0; i < team.links.length; i++) {
+                  if (team.links[i].id === _this.form.model.id) {
+                    team.links.splice(i, 1)
+                    break
+                  }
+                }
+              }
+            }
+            const params = _this.getPriority()
             apiClient.link
-              .update(_this.form.model.id, _this.form.model)
+              .updateInBatch(params)
               .catch(() => {
                 this.form.errored = true
               })
