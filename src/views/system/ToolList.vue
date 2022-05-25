@@ -55,6 +55,7 @@
         :uploadHandler="uploadHandler"
         label="拖拽或点击选择 Markdown 文件到此处"
         name="file"
+        accepted-file-types=".markdown,.md,.txt"
       ></FilePondUpload>
     </a-modal>
     <BackupWorkDirDrawer v-model="backupWorkDirDrawerVisible"></BackupWorkDirDrawer>

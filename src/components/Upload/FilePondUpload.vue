@@ -3,7 +3,6 @@
     <file-pond
       ref="pond"
       :accepted-file-types="accepts"
-      :allowFileTypeValidation="fileTypeCheck"
       :allow-multiple="multiple"
       :allowImagePreview="allowImagePreview"
       :allowRevert="false"
@@ -65,8 +64,7 @@ export default {
       type: Array,
       required: false,
       default: () => {
-        return ['.md', '.txt']
-        // return null
+        return null
       }
     },
     label: {
@@ -102,7 +100,6 @@ export default {
   },
   data: function () {
     return {
-      fileTypeCheck: false,
       server: {
         process: (fieldName, file, metadata, load, error, progress, abort) => {
           const CancelToken = Axios.CancelToken
