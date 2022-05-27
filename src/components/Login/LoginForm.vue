@@ -37,7 +37,6 @@
 </template>
 <script>
 import { mapActions } from 'vuex'
-import apiClient from '@/utils/api-client'
 
 export default {
   name: 'LoginForm',
@@ -74,31 +73,32 @@ export default {
   methods: {
     ...mapActions(['login', 'refreshUserCache', 'refreshOptionsCache']),
     handleLoginClick() {
-      const _this = this
-      _this.$refs.loginForm.validate(valid => {
-        if (valid) {
-          _this.form.logging = true
-          apiClient
-            .needMFACode({
-              username: _this.form.model.username,
-              password: _this.form.model.password
-            })
-            .then(response => {
-              const data = response.data
-              if (data && data.needMFACode) {
-                _this.form.needAuthCode = true
-                _this.form.model.authcode = null
-              } else {
-                _this.handleLogin()
-              }
-            })
-            .finally(() => {
-              setTimeout(() => {
-                _this.form.logging = false
-              }, 300)
-            })
-        }
-      })
+      this.handleLogin()
+      // const _this = this
+      // _this.$refs.loginForm.validate(valid => {
+      //   if (valid) {
+      //     _this.form.logging = true
+      //     apiClient
+      //       .needMFACode({
+      //         username: _this.form.model.username,
+      //         password: _this.form.model.password
+      //       })
+      //       .then(response => {
+      //         const data = response.data
+      //         if (data && data.needMFACode) {
+      //           _this.form.needAuthCode = true
+      //           _this.form.model.authcode = null
+      //         } else {
+      //           _this.handleLogin()
+      //         }
+      //       })
+      //       .finally(() => {
+      //         setTimeout(() => {
+      //           _this.form.logging = false
+      //         }, 300)
+      //       })
+      //   }
+      // })
     },
     handleLogin() {
       const _this = this

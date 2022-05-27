@@ -3,6 +3,9 @@ import store from '@/store'
 import { message, notification } from 'ant-design-vue'
 import { isObject } from './util'
 
+import storage from 'store'
+import { ACCESS_TOKEN } from '@/store/mutation-types'
+
 const storedApiUrl = localStorage.getItem('apiUrl')
 
 const apiUrl = storedApiUrl ? storedApiUrl : process.env.VUE_APP_API_URL
@@ -18,6 +21,10 @@ haloRestApiClient.interceptors.request.use(
     const token = store.getters.token
     if (token && token.access_token) {
       config.headers['Admin-Authorization'] = token.access_token
+    }
+    const bearerToken = storage.get(ACCESS_TOKEN)
+    if (bearerToken) {
+      config.headers['Authorization'] = `Bearer ${bearerToken}`
     }
     return config
   },

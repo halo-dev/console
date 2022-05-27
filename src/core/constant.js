@@ -162,6 +162,24 @@ export const normalPostStatuses = {
     color: 'yellow',
     status: 'warning',
     text: '草稿'
+  },
+  TO_BE_AUDIT: {
+    value: 'TO_BE_AUDIT',
+    color: 'yellow',
+    status: 'warning',
+    text: '待审核'
+  },
+  APPROVED: {
+    value: 'APPROVED',
+    color: 'green',
+    status: 'success',
+    text: '已审核'
+  },
+  AUDIT_NO_PASS: {
+    value: 'AUDIT_NO_PASS',
+    color: 'red',
+    status: 'error',
+    text: '审核未通过'
   }
 }
 
@@ -186,7 +204,7 @@ export const postColumns = [
   {
     title: '状态',
     dataIndex: 'status',
-    width: '100px',
+    width: '160px',
     scopedSlots: { customRender: 'status' }
   },
   {
@@ -220,6 +238,43 @@ export const postColumns = [
   {
     title: '操作',
     width: '180px',
+    scopedSlots: { customRender: 'action' }
+  }
+]
+
+export const auditPostsColumns = [
+  {
+    title: '标题',
+    dataIndex: 'title',
+    width: '260px',
+    ellipsis: true,
+    scopedSlots: { customRender: 'postTitle' }
+  },
+  {
+    title: '状态',
+    dataIndex: 'status',
+    width: '160px',
+    scopedSlots: { customRender: 'status' }
+  },
+  {
+    title: '分类',
+    dataIndex: 'categories',
+    scopedSlots: { customRender: 'categories' }
+  },
+  {
+    title: '标签',
+    dataIndex: 'tags',
+    scopedSlots: { customRender: 'tags' }
+  },
+  {
+    title: '发布时间',
+    dataIndex: 'createTime',
+    width: '170px',
+    scopedSlots: { customRender: 'createTime' }
+  },
+  {
+    title: '操作',
+    width: '160px',
     scopedSlots: { customRender: 'action' }
   }
 ]

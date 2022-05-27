@@ -8,7 +8,8 @@ const getters = {
   isInstalled: state => state.app.isInstalled,
   token: state => state.user.token,
   user: state => state.user.user,
-  options: state => state.option.options
+  options: state => state.option.options,
+  asyncRouters: state => state.option.asyncRouters
 }
 
 export default getters

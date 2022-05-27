@@ -26,3 +26,6 @@ pnpm-debug.log*
 
 yarn.lock
 package-lock.json
+
+.husky
+*.log

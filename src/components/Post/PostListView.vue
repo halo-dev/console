@@ -57,12 +57,25 @@
           <a-dropdown v-if="selectedRowKeys.length && !isMobile()">
             <template #overlay>
               <a-menu>
-                <a-menu-item @click="handleChangeStatusInBatch(postStatuses.PUBLISHED.value)">发布</a-menu-item>
-                <a-menu-item @click="handleChangeStatusInBatch(postStatuses.DRAFT.value)">转为草稿</a-menu-item>
-                <a-menu-item v-if="defaultStatuses.includes(postStatuses.RECYCLE.value)" @click="handleDeleteInBatch">
+                <a-menu-item v-if="!isAuditPage" @click="handleChangeStatusInBatch(postStatuses.PUBLISHED.value)">
+                  发布
+                </a-menu-item>
+                <a-menu-item v-if="!isAuditPage" @click="handleChangeStatusInBatch(postStatuses.DRAFT.value)">
+                  转为草稿
+                </a-menu-item>
+                <a-menu-item
+                  v-if="defaultStatuses.includes(postStatuses.RECYCLE.value) && !isAuditPage"
+                  @click="handleDeleteInBatch"
+                >
                   永久删除
                 </a-menu-item>
-                <a-menu-item v-else @click="handleChangeStatusInBatch(postStatuses.RECYCLE.value)">删除</a-menu-item>
+                <a-menu-item
+                  v-if="!defaultStatuses.includes(postStatuses.RECYCLE.value) && !isAuditPage"
+                  @click="handleChangeStatusInBatch(postStatuses.RECYCLE.value)"
+                >
+                  删除
+                </a-menu-item>
+                <a-menu-item> 批量审核 </a-menu-item>
               </a-menu>
             </template>
             <a-button>
@@ -285,6 +298,15 @@
                 {{ text }}
               </a>
             </a-tooltip>
+            <a-tooltip
+              v-else-if="record.status === postStatuses.TO_BE_AUDIT.value"
+              :title="'点击预览【' + text + '】'"
+              placement="top"
+            >
+              <a class="no-underline" href="javascript:void(0);" @click="handlePreview(record.id)">
+                {{ text }}
+              </a>
+            </a-tooltip>
             <a v-else class="no-underline" href="javascript:void(0);" disabled>
               {{ text }}
             </a>
@@ -335,58 +357,63 @@
           </template>
 
           <template #action="text, post">
-            <a-button
-              v-if="
-                [postStatuses.PUBLISHED.value, postStatuses.DRAFT.value, postStatuses.INTIMATE.value].includes(
-                  post.status
-                )
-              "
-              class="!p-0"
-              type="link"
-              @click="handleEditClick(post)"
-            >
-              编辑
-            </a-button>
+            <span v-if="!isAuditPage">
+              <a-button
+                v-if="
+                  [postStatuses.PUBLISHED.value, postStatuses.DRAFT.value, postStatuses.INTIMATE.value].includes(
+                    post.status
+                  )
+                "
+                class="!p-0"
+                type="link"
+                @click="handleEditClick(post)"
+              >
+                编辑
+              </a-button>
 
-            <a-popconfirm
-              v-else-if="post.status === postStatuses.RECYCLE.value"
-              :title="'确定要发布【' + post.title + '】文章？'"
-              cancelText="取消"
-              okText="确定"
-              @confirm="handleChangeStatus(post.id, postStatuses.PUBLISHED.value)"
-            >
-              <a-button class="!p-0" type="link">还原</a-button>
-            </a-popconfirm>
+              <a-popconfirm
+                v-else-if="post.status === postStatuses.RECYCLE.value"
+                :title="'确定要发布【' + post.title + '】文章？'"
+                cancelText="取消"
+                okText="确定"
+                @confirm="handleChangeStatus(post.id, postStatuses.PUBLISHED.value)"
+              >
+                <a-button class="!p-0" type="link">还原</a-button>
+              </a-popconfirm>
 
-            <a-divider type="vertical" />
+              <a-divider type="vertical" />
 
-            <a-popconfirm
-              v-if="
-                [postStatuses.PUBLISHED.value, postStatuses.DRAFT.value, postStatuses.INTIMATE.value].includes(
-                  post.status
-                )
-              "
-              :title="'确定要删除【' + post.title + '】文章？'"
-              cancelText="取消"
-              okText="确定"
-              @confirm="handleChangeStatus(post.id, postStatuses.RECYCLE.value)"
-            >
-              <a-button class="!p-0" type="link">删除</a-button>
-            </a-popconfirm>
+              <a-popconfirm
+                v-if="
+                  [postStatuses.PUBLISHED.value, postStatuses.DRAFT.value, postStatuses.INTIMATE.value].includes(
+                    post.status
+                  )
+                "
+                :title="'确定要删除【' + post.title + '】文章？'"
+                cancelText="取消"
+                okText="确定"
+                @confirm="handleChangeStatus(post.id, postStatuses.RECYCLE.value)"
+              >
+                <a-button class="!p-0" type="link">删除</a-button>
+              </a-popconfirm>
 
-            <a-popconfirm
-              v-else-if="post.status === postStatuses.RECYCLE.value"
-              :title="'确定要永久删除【' + post.title + '】文章？'"
-              cancelText="取消"
-              okText="确定"
-              @confirm="handleDelete(post.id)"
-            >
-              <a-button class="!p-0" type="link">删除</a-button>
-            </a-popconfirm>
+              <a-popconfirm
+                v-else-if="post.status === postStatuses.RECYCLE.value"
+                :title="'确定要永久删除【' + post.title + '】文章？'"
+                cancelText="取消"
+                okText="确定"
+                @confirm="handleDelete(post.id)"
+              >
+                <a-button class="!p-0" type="link">删除</a-button>
+              </a-popconfirm>
 
-            <a-divider type="vertical" />
+              <a-divider type="vertical" />
 
-            <a-button class="!p-0" type="link" @click="handleOpenPostSettings(post)">设置</a-button>
+              <a-button class="!p-0" type="link" @click="handleOpenPostSettings(post)">设置</a-button>
+            </span>
+            <span v-else>
+              <a-button @click="handleAudit(post.id)" type="link"> 审核 </a-button>
+            </span>
           </template>
         </a-table>
         <div class="page-wrapper">
@@ -468,6 +495,10 @@ export default {
     columns: {
       type: Array,
       default: () => []
+    },
+    isAuditPage: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -553,7 +584,6 @@ export default {
           await this.handleListPosts()
           return
         }
-
         this.list.data = response.data.content
         this.list.total = response.data.total
         this.list.hasPrevious = response.data.hasPrevious
@@ -573,7 +603,6 @@ export default {
         this.categories.loading = true
 
         const response = await apiClient.category.list({ sort: [], more: true })
-
         this.categories.data = response.data
       } catch (error) {
         this.$log.error(error)
@@ -756,6 +785,15 @@ export default {
     handlePreview(postId) {
       apiClient.post.getPreviewLinkById(postId).then(response => {
         window.open(response, '_blank')
+      })
+    },
+
+    handleAudit(postId) {
+      this.$router.push({
+        path: '/auditPosts/detail/' + postId,
+        query: {
+          id: postId
+        }
       })
     },
 

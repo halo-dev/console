@@ -2,40 +2,46 @@
   <page-view>
     <PostListView
       ref="postListView"
-      :columns="postColumns"
-      :default-statuses="[postStatuses.PUBLISHED.value, postStatuses.DRAFT.value, postStatuses.INTIMATE.value]"
+      :default-statuses="[postStatuses.TO_BE_AUDIT.value]"
+      :isAuditPage="true"
+      :columns="auditPostsColumns"
       @change:params="onChangeParams"
     >
-      <template #operator-before>
-        <router-link :to="{ name: 'PostWrite' }">
-          <a-button icon="plus" type="primary">写文章</a-button>
-        </router-link>
-      </template>
-      <template #operator-after>
-        <a-button icon="delete" @click="recyclePostModalVisible = true">回收站</a-button>
-      </template>
     </PostListView>
-    <RecyclePostModal :visible.sync="recyclePostModalVisible" @close="onRecyclePostModalClose" />
   </page-view>
 </template>
 
 <script>
-// components
 import { PageView } from '@/layouts'
 import PostListView from '@/components/Post/PostListView'
-import RecyclePostModal from '@/components/Post/RecyclePostModal'
-
-import { postColumns, postStatuses } from '@/core/constant'
-
+import { auditPostsColumns, postStatuses } from '@/core/constant'
+import axios from 'axios'
 export default {
-  name: 'PostList',
+  name: 'AuditPosts',
   components: {
     PageView,
-    PostListView,
-    RecyclePostModal
+    PostListView
   },
   data() {
-    return { postStatuses, postColumns, recyclePostModalVisible: false }
+    return {
+      auditPostsColumns,
+      postStatuses
+    }
+  },
+  mounted() {
+    const axiosConfig = {
+      method: 'get',
+      headers: {
+        Authorization: window.localStorage.getItem('Access-Token'),
+        'Content-Type': 'application/json'
+      }
+    }
+    axios({
+      url: '/api/admin/posts/page-to-be-audit?page=0&size=10&more=true',
+      ...axiosConfig
+    }).then(resp => {
+      console.log(resp)
+    })
   },
   beforeRouteEnter(to, from, next) {
     next(vm => {
@@ -60,11 +66,9 @@ export default {
     onChangeParams(params) {
       const path = this.$router.history.current.path
       this.$router.replace({ path, query: params }).catch(err => err)
-    },
-
-    onRecyclePostModalClose() {
-      this.$refs.postListView.handleListPosts()
     }
   }
 }
 </script>
+
+<style scoped></style>

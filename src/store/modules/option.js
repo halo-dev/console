@@ -18,12 +18,16 @@ const keys = [
 ]
 const option = {
   state: {
-    options: undefined
+    options: undefined,
+    asyncRouters: []
   },
   mutations: {
     SET_OPTIONS: (state, options) => {
       Vue.ls.set(OPTIONS, options)
       state.options = options
+    },
+    SET_ASYNC_ROUTERS: (state, routers) => {
+      state.asyncRouters = routers
     }
   },
   actions: {
@@ -39,6 +43,9 @@ const option = {
             reject(error)
           })
       })
+    },
+    refreshAsyncRouters({ commit }, routers) {
+      commit('SET_ASYNC_ROUTERS', routers)
     }
   }
 }

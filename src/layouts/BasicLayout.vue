@@ -66,7 +66,6 @@ import { triggerWindowResizeEvent } from '@/utils/util'
 import { mapActions } from 'vuex'
 import { mixin, mixinDevice } from '@/mixins/mixin'
 import config from '@/config/defaultSettings'
-import { asyncRouterMap } from '@/config/router.config.js'
 
 import RouteView from './RouteView'
 import SideMenu from '@/components/Menu/SideMenu'
@@ -110,7 +109,7 @@ export default {
     }
   },
   created() {
-    this.menus = asyncRouterMap.find(item => item.path === '/').children
+    this.menus = this.$store.getters.asyncRouters.find(item => item.path === '/').children
     this.collapsed = !this.sidebarOpened
   },
   mounted() {

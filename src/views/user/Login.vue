@@ -44,7 +44,7 @@ export default {
     },
     onLoginSucceed() {
       // Refresh the user info
-      this.refreshUserCache()
+      // this.refreshUserCache()
       this.refreshOptionsCache()
       if (this.$route.query.redirect) {
         this.$router.push(this.$route.query.redirect)

@@ -55,6 +55,19 @@ export const asyncRouterMap = [
             name: 'TagList',
             component: () => import('@/views/post/TagList'),
             meta: { title: '标签', hiddenHeaderContent: false }
+          },
+          {
+            path: '/auditPosts',
+            name: 'AuditPosts',
+            component: () => import('@/views/post/AuditPosts'),
+            meta: { title: '文章审核', hiddenHeaderContent: false }
+          },
+          {
+            path: '/auditPosts/detail/:id',
+            name: 'AuditPostsDetail',
+            component: () => import('@/views/post/AuditPostsDetail'),
+            meta: { title: '文章审核', hiddenHeaderContent: false },
+            hidden: true
           }
         ]
       },
@@ -242,6 +255,12 @@ export const constantRouterMap = [
     name: 'Login',
     meta: { title: '登录' },
     component: () => import('@/views/user/Login')
+  },
+  {
+    path: '/authorizationLogin',
+    name: 'AuthorizationLogin',
+    component: () => import('@/views/user/AuthorizationCodeLogin'),
+    meta: { title: '授权码登录' }
   },
   {
     path: '/install',
