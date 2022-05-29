@@ -7,10 +7,10 @@
 
     <a-form-model
       ref="photoForm"
-      :label-col="{ span: 4 }"
+      :label-col="form.labelCol"
       :model="form.model"
       :rules="form.rules"
-      :wrapper-col="{ span: 20 }"
+      :wrapper-col="form.wrapperCol"
       labelAlign="left"
     >
       <a-form-model-item label="图片地址：" prop="url">
@@ -106,7 +106,9 @@ export default {
           name: [{ required: true, message: '* 图片名称不能为空', trigger: ['change'] }]
         },
         saving: false,
-        saveErrored: false
+        saveErrored: false,
+        labelCol: { sm: { span: 4 }, xs: { span: 24 } },
+        wrapperCol: { sm: { span: 20 }, xs: { span: 24 } }
       },
       attachmentSelectModal: {
         visible: false
@@ -149,8 +151,8 @@ export default {
     handleAttachmentSelected({ raw }) {
       if (raw.length) {
         const { path, thumbPath, name } = raw[0]
-        this.$set(this.form.model, 'url', encodeURI(path))
-        this.$set(this.form.model, 'thumbnail', encodeURI(thumbPath))
+        this.$set(this.form.model, 'url', path)
+        this.$set(this.form.model, 'thumbnail', thumbPath)
         this.$set(this.form.model, 'name', name)
       }
       this.attachmentSelectModal.visible = false

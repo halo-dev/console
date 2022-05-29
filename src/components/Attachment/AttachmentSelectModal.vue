@@ -72,7 +72,7 @@
               <span v-if="!isImage(item)" class="attachments-group-item-type">{{ item.suffix }}</span>
               <span
                 v-else
-                :style="{ backgroundImage: `url('${encodeURI(item.thumbPath)}')` }"
+                :style="{ backgroundImage: `url('${item.thumbPath}')` }"
                 class="attachments-group-item-img"
                 loading="lazy"
               />
@@ -259,7 +259,7 @@ export default {
         return []
       }
       return this.list.selected.map(item => {
-        return `![${item.name}](${encodeURI(item.path)})`
+        return `![${item.name}](${item.path})`
       })
     },
     htmlSyntaxList() {
@@ -267,7 +267,7 @@ export default {
         return []
       }
       return this.list.selected.map(item => {
-        return `<img src="${encodeURI(item.path)}" alt="${item.name}">`
+        return `<img src="${item.path}" alt="${item.name}">`
       })
     }
   },
@@ -378,8 +378,8 @@ export default {
       if (!this.multiSelect) {
         this.$emit('confirm', {
           raw: [attachment],
-          markdown: [`![${attachment.name}](${encodeURI(attachment.path)})`],
-          html: [`<img src="${encodeURI(attachment.path)}" alt="${attachment.name}">`]
+          markdown: [`![${attachment.name}](${attachment.path})`],
+          html: [`<img src="${attachment.path}" alt="${attachment.name}">`]
         })
         this.modalVisible = false
         return

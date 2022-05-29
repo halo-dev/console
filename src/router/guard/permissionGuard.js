@@ -20,6 +20,13 @@ router.beforeEach(async (to, from, next) => {
     await store.dispatch('fetchIsInstalled')
   }
 
+  // if it is not installed, empty the dirty data
+  if (!store.getters.isInstalled) {
+    await store.commit('SET_OPTIONS', undefined)
+    await store.commit('CLEAR_TOKEN')
+    await store.commit('SET_USER', {})
+  }
+
   if (!store.getters.isInstalled && to.name !== 'Install') {
     next({
       name: 'Install'
