@@ -4,10 +4,20 @@ import { defineConfig } from "vite";
 import Vue from "@vitejs/plugin-vue";
 import VueJsx from "@vitejs/plugin-vue-jsx";
 import Icons from "unplugin-icons/vite";
+import Dts from "vite-plugin-dts";
 import path from "path";
 
 export default defineConfig({
-  plugins: [Vue(), VueJsx(), Icons()],
+  plugins: [
+    Vue(),
+    VueJsx(),
+    Icons(),
+    Dts({
+      entryRoot: "./src",
+      outputDir: "./dist-typings",
+      insertTypesEntry: true,
+    }),
+  ],
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
