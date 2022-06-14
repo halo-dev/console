@@ -10,8 +10,8 @@ lerna-debug.log*
 node_modules
 .DS_Store
 dist
+!packages/components/dist
 dist-ssr
-dist-typings
 histoire-dist
 coverage
 *.local
