@@ -107,7 +107,6 @@ importers:
       tippy.js: ^6.3.7
       unplugin-icons: ^0.14.3
       vite-plugin-dts: ^1.2.0
-      vue-tsc: ^0.34.17
     dependencies:
       tippy.js: 6.3.7
     devDependencies:
@@ -116,7 +115,6 @@ importers:
       histoire: 0.7.6
       unplugin-icons: 0.14.3
       vite-plugin-dts: 1.2.0
-      vue-tsc: 0.34.17
 
 packages:
 
@@ -6939,15 +6937,6 @@ packages:
     dependencies:
       '@vue/devtools-api': 6.1.4
       vue: 3.2.37
-
-  /vue-tsc/0.34.17:
-    resolution: {integrity: sha512-jzUXky44ZLHC4daaJag7FQr3idlPYN719/K1eObGljz5KaS2UnVGTU/XSYCd7d6ampYYg4OsyalbHyJIxV0aEQ==}
-    hasBin: true
-    peerDependencies:
-      typescript: '*'
-    dependencies:
-      '@volar/vue-typescript': 0.34.17
-    dev: true
 
   /vue-tsc/0.34.17_typescript@4.6.4:
     resolution: {integrity: sha512-jzUXky44ZLHC4daaJag7FQr3idlPYN719/K1eObGljz5KaS2UnVGTU/XSYCd7d6ampYYg4OsyalbHyJIxV0aEQ==}
