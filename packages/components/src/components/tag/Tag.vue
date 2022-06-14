@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { PropType } from "vue";
 import { computed } from "vue";
-import type { Theme } from "@/components/base/tag/interface";
+import type { Theme } from "./interface";
 
 const props = defineProps({
   theme: {
