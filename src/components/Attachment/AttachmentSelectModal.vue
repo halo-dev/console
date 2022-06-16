@@ -1,5 +1,5 @@
 <template>
-  <a-modal v-model="modalVisible" :afterClose="onAfterClose" :title="title" :width="1024" destroyOnClose>
+  <a-modal v-model="modalVisible" :afterClose="onAfterClose" :title="title" :width="1280" destroyOnClose>
     <div class="table-page-search-wrapper">
       <a-form layout="inline">
         <a-row :gutter="24">
@@ -48,63 +48,64 @@
       </a-form>
     </div>
 
-    <div class="mb-0 table-operator">
+    <div class="table-operator mb-0">
       <a-button icon="cloud-upload" type="primary" @click="upload.visible = true">上传</a-button>
     </div>
 
     <a-divider />
 
-    <a-list
-      :dataSource="list.data"
-      :grid="{ gutter: 6, xs: 2, sm: 2, md: 4, lg: 6, xl: 6, xxl: 6 }"
-      :loading="list.loading"
-      class="attachments-group"
-    >
-      <template #renderItem="item, index">
-        <a-list-item
-          @mouseenter="$set(item, 'hover', true)"
-          @mouseleave="$set(item, 'hover', false)"
+    <a-spin :spinning="list.loading">
+      <div
+        class="grid grid-cols-2 gap-x-2 gap-y-3 sm:grid-cols-3 md:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10"
+        role="list"
+      >
+        <div
+          v-for="(attachment, index) in list.data"
           :key="index"
-          @click="handleItemClick(item)"
+          :class="`${isItemSelect(attachment) ? 'border-blue-600' : 'border-slate-200'}`"
+          class="relative cursor-pointer overflow-hidden rounded-sm border-solid bg-white transition-all hover:shadow-sm"
+          @click="handleItemClick(attachment)"
+          @mouseenter="$set(attachment, 'hover', true)"
+          @mouseleave="$set(attachment, 'hover', false)"
         >
-          <div :class="`${isItemSelect(item) ? 'border-blue-600' : 'border-slate-200'}`" class="border border-solid">
-            <div class="attach-thumb attachments-group-item">
-              <span v-if="!isImage(item)" class="attachments-group-item-type">{{ item.suffix }}</span>
-              <span
-                v-else
-                :style="{ backgroundImage: `url('${item.thumbPath}')` }"
-                class="attachments-group-item-img"
-                loading="lazy"
-              />
-            </div>
-            <a-card-meta class="p-2 cursor-pointer">
-              <template #description>
-                <a-tooltip :title="item.name">
-                  <div class="truncate">{{ item.name }}</div>
-                </a-tooltip>
-              </template>
-            </a-card-meta>
-            <a-icon
-              v-show="isItemSelect(item) && !item.hover"
-              type="check-circle"
-              theme="twoTone"
-              class="absolute top-1 right-2 font-bold cursor-pointer transition-all"
-              :style="{ fontSize: '18px', color: 'rgb(37 99 235)' }"
+          <div class="group aspect-w-10 aspect-h-7 block w-full overflow-hidden bg-white">
+            <img
+              v-if="isImage(attachment)"
+              :alt="attachment.name"
+              :src="attachment.thumbPath"
+              class="pointer-events-none overflow-hidden object-cover transition-opacity group-hover:opacity-70"
+              loading="lazy"
             />
-            <a-icon
-              v-show="item.hover"
-              type="profile"
-              theme="twoTone"
-              class="absolute top-1 right-2 font-bold cursor-pointer transition-all"
-              @click.stop="handleOpenDetail(item)"
-              :style="{ fontSize: '18px' }"
-            />
+            <span v-else class="flex items-center justify-center text-2xl text-gray-600">
+              {{ attachment.suffix }}
+            </span>
           </div>
-        </a-list-item>
-      </template>
-    </a-list>
+          <a-tooltip :title="attachment.name">
+            <span class="block truncate p-1.5 text-xs font-medium text-gray-500">
+              {{ attachment.name }}
+            </span>
+          </a-tooltip>
 
-    <div class="flex justify-between">
+          <a-icon
+            v-show="isItemSelect(attachment) && !attachment.hover"
+            :style="{ fontSize: '20px', color: 'rgb(37 99 235)' }"
+            class="absolute top-1 right-1 cursor-pointer font-bold transition-all"
+            theme="twoTone"
+            type="check-circle"
+          />
+          <a-icon
+            v-show="attachment.hover"
+            :style="{ fontSize: '20px' }"
+            class="absolute top-1 right-1 cursor-pointer font-bold transition-all"
+            theme="twoTone"
+            type="profile"
+            @click.stop="handleOpenDetail(attachment)"
+          />
+        </div>
+      </div>
+    </a-spin>
+
+    <div class="mt-4 flex justify-between">
       <a-popover placement="right" title="预览" trigger="click">
         <template slot="content">
           <a-tabs v-if="list.selected.length" default-active-key="markdown" tab-position="left">
@@ -122,7 +123,7 @@
           <div v-else class="text-slate-400">未选择附件</div>
         </template>
         <a-tooltip placement="top" title="点击预览">
-          <div class="self-center text-slate-400 select-none cursor-pointer hover:text-blue-400 transition-all">
+          <div class="cursor-pointer select-none self-center text-slate-400 transition-all hover:text-blue-400">
             已选择 {{ list.selected.length }} 项
           </div>
         </a-tooltip>
@@ -132,7 +133,7 @@
         <a-pagination
           :current="pagination.page"
           :defaultPageSize="pagination.size"
-          :pageSizeOptions="['12', '18', '24', '30', '36', '42']"
+          :pageSizeOptions="['40', '50', '100', '150', '200']"
           :total="pagination.total"
           class="pagination !mt-0"
           showLessItems
@@ -143,9 +144,9 @@
       </div>
     </div>
 
-    <template slot="footer">
+    <template #footer>
       <a-button @click="modalVisible = false">取消</a-button>
-      <a-button type="primary" :disabled="!list.selected.length" @click="handleConfirm">确定</a-button>
+      <a-button :disabled="!list.selected.length" type="primary" @click="handleConfirm">确定</a-button>
     </template>
 
     <AttachmentUploadModal :visible.sync="upload.visible" @close="handleSearch" />
@@ -154,7 +155,7 @@
       <template #extraFooter>
         <a-button :disabled="selectPreviousButtonDisabled" @click="handleSelectPrevious">上一项</a-button>
         <a-button :disabled="selectNextButtonDisabled" @click="handleSelectNext">下一项</a-button>
-        <a-button @click="handleItemClick(list.current)" type="primary">
+        <a-button type="primary" @click="handleItemClick(list.current)">
           {{ list.selected.findIndex(item => item.id === list.current.id) > -1 ? '取消选择' : '选择' }}
         </a-button>
       </template>
@@ -191,7 +192,7 @@ export default {
         loading: false,
         params: {
           page: 0,
-          size: 12,
+          size: 40,
           keyword: undefined,
           mediaType: undefined,
           attachmentType: undefined
@@ -356,7 +357,7 @@ export default {
     handleResetParam() {
       this.list.params = {
         page: 0,
-        size: 12,
+        size: 40,
         keyword: undefined,
         mediaType: undefined,
         attachmentType: undefined

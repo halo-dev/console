@@ -50,7 +50,7 @@
               </a-row>
             </a-form>
           </div>
-          <div class="mb-0 table-operator">
+          <div class="table-operator mb-0">
             <a-button icon="cloud-upload" type="primary" @click="upload.visible = true">上传</a-button>
             <a-button v-show="list.selected.length" icon="check-circle" type="primary" @click="handleSelectAll">
               全选
@@ -63,67 +63,65 @@
         </a-card>
       </a-col>
       <a-col :span="24">
-        <a-list
-          :dataSource="list.data"
-          :grid="{ gutter: 6, xs: 2, sm: 2, md: 4, lg: 6, xl: 6, xxl: 6 }"
-          :loading="list.loading"
-          class="attachments-group"
-        >
-          <template #renderItem="item, index">
-            <a-list-item
+        <a-spin :spinning="list.loading">
+          <div
+            class="grid grid-cols-2 gap-x-2 gap-y-3 sm:grid-cols-3 md:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10"
+            role="list"
+          >
+            <div
+              v-for="(attachment, index) in list.data"
               :key="index"
-              @click="handleItemClick(item)"
-              @mouseenter="$set(item, 'hover', true)"
-              @mouseleave="$set(item, 'hover', false)"
-              @contextmenu.prevent="handleContextMenu($event, item)"
+              :class="`${isItemSelect(attachment) ? 'border-blue-600' : 'border-white'}`"
+              class="relative cursor-pointer overflow-hidden rounded-sm border-solid bg-white transition-all hover:shadow-sm"
+              @click="handleItemClick(attachment)"
+              @mouseenter="$set(attachment, 'hover', true)"
+              @mouseleave="$set(attachment, 'hover', false)"
+              @contextmenu.prevent="handleContextMenu($event, attachment)"
             >
-              <div
-                :class="`${isItemSelect(item) ? 'border-blue-600' : 'border-slate-200'}`"
-                class="border border-solid"
-              >
-                <div class="attach-thumb attachments-group-item">
-                  <span v-if="!isImage(item)" class="attachments-group-item-type">{{ item.suffix }}</span>
-                  <span
-                    v-else
-                    :style="{ backgroundImage: `url('${item.thumbPath}')` }"
-                    class="attachments-group-item-img"
-                    loading="lazy"
-                  />
-                </div>
-                <a-card-meta class="p-2 cursor-pointer">
-                  <template #description>
-                    <a-tooltip :title="item.name">
-                      <div class="truncate">{{ item.name }}</div>
-                    </a-tooltip>
-                  </template>
-                </a-card-meta>
-                <a-icon
-                  v-show="!isItemSelect(item) && item.hover"
-                  :style="{ fontSize: '18px', color: 'rgb(37 99 235)' }"
-                  class="absolute top-1 right-2 font-bold cursor-pointer transition-all"
-                  theme="twoTone"
-                  type="plus-circle"
-                  @click.stop="handleSelect(item)"
+              <div class="group aspect-w-10 aspect-h-7 block w-full overflow-hidden bg-white">
+                <img
+                  v-if="isImage(attachment)"
+                  :alt="attachment.name"
+                  :src="attachment.thumbPath"
+                  class="pointer-events-none overflow-hidden object-cover transition-opacity group-hover:opacity-70"
+                  loading="lazy"
                 />
-                <a-icon
-                  v-show="isItemSelect(item)"
-                  :style="{ fontSize: '18px', color: 'rgb(37 99 235)' }"
-                  class="absolute top-1 right-2 font-bold cursor-pointer transition-all"
-                  theme="twoTone"
-                  type="check-circle"
-                />
-                <a-icon
-                  v-show="item.hover && list.selected.length > 0"
-                  :style="{ fontSize: '18px' }"
-                  class="absolute top-1 left-2 font-bold cursor-pointer transition-all"
-                  theme="twoTone"
-                  type="profile"
-                  @click.stop="handleOpenDetail(item)"
-                />
+                <span v-else class="flex items-center justify-center text-2xl text-gray-600">
+                  {{ attachment.suffix }}
+                </span>
               </div>
-            </a-list-item>
-          </template>
-        </a-list>
+              <a-tooltip :title="attachment.name">
+                <span class="block truncate p-1.5 text-xs font-medium text-gray-500">
+                  {{ attachment.name }}
+                </span>
+              </a-tooltip>
+
+              <a-icon
+                v-show="!isItemSelect(attachment) && attachment.hover"
+                :style="{ fontSize: '20px', color: 'rgb(37 99 235)' }"
+                class="absolute top-1 right-1 cursor-pointer font-bold transition-all"
+                theme="twoTone"
+                type="plus-circle"
+                @click.stop="handleSelect(attachment)"
+              />
+              <a-icon
+                v-show="isItemSelect(attachment)"
+                :style="{ fontSize: '20px', color: 'rgb(37 99 235)' }"
+                class="absolute top-1 right-1 cursor-pointer font-bold transition-all"
+                theme="twoTone"
+                type="check-circle"
+              />
+              <a-icon
+                v-show="attachment.hover && list.selected.length > 0"
+                :style="{ fontSize: '20px' }"
+                class="absolute top-1 left-1 cursor-pointer font-bold transition-all"
+                theme="twoTone"
+                type="profile"
+                @click.stop="handleOpenDetail(attachment)"
+              />
+            </div>
+          </div>
+        </a-spin>
       </a-col>
     </a-row>
 
@@ -131,7 +129,7 @@
       <a-pagination
         :current="pagination.page"
         :defaultPageSize="pagination.size"
-        :pageSizeOptions="['18', '36', '54', '72', '90', '108']"
+        :pageSizeOptions="['50', '100', '150', '200']"
         :total="pagination.total"
         class="pagination"
         showLessItems
@@ -183,7 +181,7 @@ export default {
         hasPrevious: false,
         params: {
           page: 0,
-          size: 18,
+          size: 50,
           keyword: undefined,
           mediaType: undefined,
           attachmentType: undefined

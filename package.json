@@ -53,6 +53,7 @@
     "@ant-design/colors": "3.2.2",
     "@babel/core": "^7.17.9",
     "@babel/eslint-parser": "^7.17.0",
+    "@tailwindcss/aspect-ratio": "^0.4.0",
     "@vue/cli-plugin-babel": "~5.0.4",
     "@vue/cli-plugin-eslint": "~5.0.4",
     "@vue/cli-plugin-router": "~5.0.4",

@@ -31,7 +31,7 @@
               </a-row>
             </a-form>
           </div>
-          <div class="mb-0 table-operator">
+          <div class="table-operator mb-0">
             <a-dropdown>
               <template #overlay>
                 <a-menu>
@@ -58,60 +58,55 @@
         </a-card>
       </a-col>
       <a-col :span="24">
-        <a-list
-          :dataSource="list.data"
-          :grid="{ gutter: 6, xs: 2, sm: 2, md: 4, lg: 6, xl: 6, xxl: 6 }"
-          :loading="list.loading"
-          class="photos-group"
-        >
-          <template #renderItem="item, index">
-            <a-list-item
+        <a-spin :spinning="list.loading">
+          <div
+            class="grid grid-cols-2 gap-x-2 gap-y-3 sm:grid-cols-3 md:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10"
+            role="list"
+          >
+            <div
+              v-for="(photo, index) in list.data"
               :key="index"
-              @click="handleItemClick(item)"
-              @mouseenter="$set(item, 'hover', true)"
-              @mouseleave="$set(item, 'hover', false)"
+              :class="`${isItemSelect(photo) ? 'border-blue-600' : 'border-white'}`"
+              class="relative cursor-pointer overflow-hidden rounded-sm border-solid bg-white transition-all hover:shadow-sm"
+              @click="handleItemClick(photo)"
+              @mouseenter="$set(photo, 'hover', true)"
+              @mouseleave="$set(photo, 'hover', false)"
             >
-              <div
-                :class="`${isItemSelect(item) ? 'border-blue-600' : 'border-slate-200'}`"
-                class="border border-solid"
-              >
-                <div class="photo-thumb photos-group-item">
-                  <span
-                    :style="{ backgroundImage: `url('${item.thumbnail}')` }"
-                    class="photos-group-item-img"
-                    loading="lazy"
-                  />
-                </div>
-                <a-card-meta class="p-2 cursor-pointer">
-                  <template #description>
-                    <a-tooltip :title="item.name">
-                      <div class="truncate">
-                        <span class="mr-1">{{ item.name }}</span>
-                        <span v-if="item.team" class="text-gray-500 text-xs">#{{ item.team }}</span>
-                      </div>
-                    </a-tooltip>
-                  </template>
-                </a-card-meta>
-
-                <a-icon
-                  v-show="!isItemSelect(item) && item.hover"
-                  :style="{ fontSize: '18px', color: 'rgb(37 99 235)' }"
-                  class="absolute top-1 right-2 font-bold cursor-pointer transition-all"
-                  theme="twoTone"
-                  type="plus-circle"
-                  @click.stop="handleSelect(item)"
-                />
-                <a-icon
-                  v-show="isItemSelect(item)"
-                  :style="{ fontSize: '18px', color: 'rgb(37 99 235)' }"
-                  class="absolute top-1 right-2 font-bold cursor-pointer transition-all"
-                  theme="twoTone"
-                  type="check-circle"
+              <div class="group aspect-w-10 aspect-h-7 block w-full overflow-hidden bg-white">
+                <img
+                  :alt="photo.name"
+                  :src="photo.thumbnail"
+                  class="pointer-events-none overflow-hidden object-cover transition-opacity group-hover:opacity-70"
+                  loading="lazy"
                 />
               </div>
-            </a-list-item>
-          </template>
-        </a-list>
+              <a-tooltip :title="photo.name">
+                <div class="block truncate p-1.5 text-xs font-medium text-gray-500">
+                  <span class="mr-1">
+                    {{ photo.name }}
+                  </span>
+                  <span v-if="photo.team">#{{ photo.team }}</span>
+                </div>
+              </a-tooltip>
+
+              <a-icon
+                v-show="!isItemSelect(photo) && photo.hover"
+                :style="{ fontSize: '20px', color: 'rgb(37 99 235)' }"
+                class="absolute top-1 right-1 cursor-pointer font-bold transition-all"
+                theme="twoTone"
+                type="plus-circle"
+                @click.stop="handleSelect(photo)"
+              />
+              <a-icon
+                v-show="isItemSelect(photo)"
+                :style="{ fontSize: '20px', color: 'rgb(37 99 235)' }"
+                class="absolute top-1 right-1 cursor-pointer font-bold transition-all"
+                theme="twoTone"
+                type="check-circle"
+              />
+            </div>
+          </div>
+        </a-spin>
       </a-col>
     </a-row>
 
@@ -119,8 +114,9 @@
       <a-pagination
         :current="pagination.page"
         :defaultPageSize="pagination.size"
-        :pageSizeOptions="['18', '36', '54', '72', '90', '108']"
+        :pageSizeOptions="['50', '100', '150', '200']"
         :total="pagination.total"
+        class="pagination"
         showLessItems
         showSizeChanger
         @change="handlePageChange"
@@ -203,7 +199,7 @@ export default {
         loading: false,
         params: {
           page: 0,
-          size: 18,
+          size: 50,
           sort: ['createTime,desc', 'id,asc'],
           keyword: null,
           team: undefined
