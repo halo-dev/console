@@ -9,6 +9,7 @@ import {
   VInput,
   VPageHeader,
   VSpace,
+  VSwitch,
   VTag,
 } from "@halo-dev/components";
 import { onMounted, ref } from "vue";
@@ -48,7 +49,7 @@ interface Metadata {
 }
 
 interface Status {
-  status: boolean;
+  status: string;
   entry?: string;
   stylesheet?: string;
 }
@@ -69,6 +70,10 @@ const handleRouteToDetail = (plugin: any) => {
   });
 };
 
+function isStarted(plugin: Plugin) {
+  return plugin.status.status === "STARTED";
+}
+
 const handleFetchPlugins = async () => {
   try {
     const response = await axios.get(
@@ -76,7 +81,7 @@ const handleFetchPlugins = async () => {
       {
         headers: {
           Authorization:
-            "Bearer eyJhbGciOiJSUzUxMiJ9.eyJpc3MiOiJIYWxvIE93bmVyIiwic3ViIjoiYWRtaW4iLCJleHAiOjE2NTU4NzAzMzIsImlhdCI6MTY1NTc4MzkzMiwic2NvcGUiOlsiUk9MRV9zdXBlci1yb2xlIl19.wsHVzIu3OKhZIep5aoxLUW8o93MjmrlE9fydC-Z7gGlils6MTiSKYxl7eQSc91JIiJTuhmI2qreZQ88kV_ec85jmkQAefZXE3scGXm-G3Gtg7rTBnIS_jbk3IImIkOJIu8twa5tZN6wyX4UoUbU2DiNZBZWqraM1vfsjnLBf7VYpQjBYEIyRu7f4cJ1k9XLFcZ2Fi-hAgVYQguGx3OOdoOpHLPIJOWxgaoSZ45WROvVjPxSrpnoHVxR8CGaAHgrwMwuklRRGjYW9Fd_Q3v_InfGi1TSomkkzTzsfN4igwIAGLEBYHzlcfrvFYL6meINQb_-D8KHePN3IiJDf84MRgw",
+            "Bearer eyJhbGciOiJSUzUxMiJ9.eyJpc3MiOiJIYWxvIE93bmVyIiwic3ViIjoiYWRtaW4iLCJleHAiOjE2NTU4OTQxNTQsImlhdCI6MTY1NTgwNzc1NCwic2NvcGUiOlsiUk9MRV9zdXBlci1yb2xlIl19.Gnj0rM8DU2bP1KcgKBUVaKf6zs1pDqGxYvii9zxG4lFv4rVZ_uNGXyfhi9V10vRK0GM4v4NEuMtX9-DYnqAV0wR2JcoFevPrJnHHWsvnFrOQm32qeMpew3PsZ5-YAwi9n8Y9GpAcQz_6aWsEuRwm9w5CC3A67CrYPfCK5qwuR5FFLfiMRqPAqNNuZ4r2IfoSZUvXy4HxhUS-01J2BCqP3-hbdN_-tFHCDxtIO637a51EsCmRItY5wSVNmwYPaPOYV7lbHxzBIKXw5RNXg6SrQCSLTVaaJCXsZjwIirk02RQACr6oqTHPbriBVuu-SIgPXS5PJ9i4VaMCn-z8t-oZlQ",
         },
         withCredentials: false,
       }
@@ -84,6 +89,28 @@ const handleFetchPlugins = async () => {
     plugins.value = response.data;
   } catch (e) {
     console.error("Fail to fetch plugins", e);
+  }
+};
+
+const handleChangePluginStatus = async (plugin: Plugin) => {
+  try {
+    await axios.put(
+      `http://localhost:8090/apis/plugin.halo.run/v1alpha1/plugins/${
+        plugin.metadata.name
+      }/${plugin.status.status === "STARTED" ? "stop" : "startup"}`,
+      {},
+      {
+        headers: {
+          Authorization:
+            "Bearer eyJhbGciOiJSUzUxMiJ9.eyJpc3MiOiJIYWxvIE93bmVyIiwic3ViIjoiYWRtaW4iLCJleHAiOjE2NTU4OTQxNTQsImlhdCI6MTY1NTgwNzc1NCwic2NvcGUiOlsiUk9MRV9zdXBlci1yb2xlIl19.Gnj0rM8DU2bP1KcgKBUVaKf6zs1pDqGxYvii9zxG4lFv4rVZ_uNGXyfhi9V10vRK0GM4v4NEuMtX9-DYnqAV0wR2JcoFevPrJnHHWsvnFrOQm32qeMpew3PsZ5-YAwi9n8Y9GpAcQz_6aWsEuRwm9w5CC3A67CrYPfCK5qwuR5FFLfiMRqPAqNNuZ4r2IfoSZUvXy4HxhUS-01J2BCqP3-hbdN_-tFHCDxtIO637a51EsCmRItY5wSVNmwYPaPOYV7lbHxzBIKXw5RNXg6SrQCSLTVaaJCXsZjwIirk02RQACr6oqTHPbriBVuu-SIgPXS5PJ9i4VaMCn-z8t-oZlQ",
+        },
+        withCredentials: false,
+      }
+    );
+  } catch (e) {
+    console.log(e);
+  } finally {
+    window.location.reload();
   }
 };
 
@@ -289,7 +316,7 @@ onMounted(handleFetchPlugins);
                   </span>
                   <VSpace>
                     <VTag>
-                      {{ plugin.status.status ? "已启用" : "未启用" }}
+                      {{ isStarted(plugin) ? "已启用" : "未启用" }}
                     </VTag>
                   </VSpace>
                 </div>
@@ -322,50 +349,10 @@ onMounted(handleFetchPlugins);
                     {{ plugin.metadata.creationTimestamp }}
                   </time>
                   <div class="flex items-center">
-                    <button
-                      aria-checked="false"
-                      class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out"
-                      role="switch"
-                      type="button"
-                    >
-                      <span class="sr-only">Use setting</span>
-                      <span
-                        class="pointer-events-none relative inline-block h-5 w-5 translate-x-0 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                      >
-                        <span
-                          aria-hidden="true"
-                          class="absolute inset-0 flex h-full w-full items-center justify-center opacity-100 transition-opacity duration-200 ease-in"
-                        >
-                          <svg
-                            class="h-3 w-3 text-gray-400"
-                            fill="none"
-                            viewBox="0 0 12 12"
-                          >
-                            <path
-                              d="M4 8l2-2m0 0l2-2M6 6L4 4m2 2l2 2"
-                              stroke="currentColor"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                            />
-                          </svg>
-                        </span>
-                        <span
-                          aria-hidden="true"
-                          class="absolute inset-0 flex h-full w-full items-center justify-center opacity-0 transition-opacity duration-100 ease-out"
-                        >
-                          <svg
-                            class="h-3 w-3 text-indigo-600"
-                            fill="currentColor"
-                            viewBox="0 0 12 12"
-                          >
-                            <path
-                              d="M3.707 5.293a1 1 0 00-1.414 1.414l1.414-1.414zM5 8l-.707.707a1 1 0 001.414 0L5 8zm4.707-3.293a1 1 0 00-1.414-1.414l1.414 1.414zm-7.414 2l2 2 1.414-1.414-2-2-1.414 1.414zm3.414 2l4-4-1.414-1.414-4 4 1.414 1.414z"
-                            />
-                          </svg>
-                        </span>
-                      </span>
-                    </button>
+                    <VSwitch
+                      :model-value="isStarted(plugin)"
+                      @click="handleChangePluginStatus(plugin)"
+                    />
                   </div>
                   <span class="cursor-pointer">
                     <IconSettings @click.stop="handleRouteToDetail(plugin)" />

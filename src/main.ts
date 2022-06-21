@@ -79,13 +79,15 @@ async function loadPluginModules() {
     // TODO supported by backend
 
     plugin.spec.assets = {
-      entry: `http://localhost:8090/assets/${plugin.metadata.name}/admin/main.js`,
+      entry: `http://localhost:8090${plugin.status.entry}`,
     };
 
-    const { assets } = plugin.spec;
+    const { entry, status } = plugin.status;
 
-    if (assets) {
-      const { load } = useScriptTag(assets.entry);
+    if (status === "STARTED" && entry) {
+      const { load } = useScriptTag(
+        `http://localhost:8090${plugin.status.entry}`
+      );
       await load();
       const pluginModule = window[plugin.metadata.name];
 
