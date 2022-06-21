@@ -1,90 +1,86 @@
 <template>
   <page-view>
-    <template slot="extra">
+    <template #extra>
       <a-space>
         <a-button type="primary" @click="form.visible = true">添加</a-button>
       </a-space>
     </template>
-    <a-modal :visible="modal.visible" title="确定移出分组吗" @ok="removeTeam" @cancel="recoverTeam">
-      <p>移出最后一个链接后，该分组将消失。确定要移出分组吗？</p>
-    </a-modal>
     <LinkCreateModal
       :form_.sync="form"
       :teams="computedTeams"
-      @close="form.visible = false"
-      @saved="handleSavedCallback"
+      @close="
+        form.visible = false
+        form.model = {}
+      "
       @createOrUpdateLink="handleCreateOrUpdateLink"
+      @saved="handleSavedCallback"
     />
     <a-row :gutter="12">
       <a-col :span="24" class="pb-3">
-        <a-card :bodyStyle="{ padding: '16px' }" title="所有友情链接">
-          <draggable
-            class="list-group"
-            :list="linkTeam"
-            v-bind="dragOptions"
-            handle=".mover"
-            group="pull: 'false', put: false"
-            @update="handleUpdateInBatch"
-          >
-            <transition-group type="transition">
-              <a-card
-                v-for="team in linkTeam"
-                :key="team.team"
-                :title="team.team ? team.team : '默认分组'"
-                style="margin-bottom: 10px"
-                class="shadow"
+        <draggable
+          :list="linkTeam"
+          class="list-group"
+          group="pull: 'false', put: false"
+          handle=".mover"
+          v-bind="dragOptions"
+          @update="handleUpdateInBatch"
+        >
+          <transition-group type="transition">
+            <a-card
+              v-for="team in linkTeam"
+              :key="team.team"
+              :bodyStyle="{ padding: '16px' }"
+              style="margin-bottom: 10px"
+            >
+              <template #title>
+                {{ team.team ? team.team : '默认分组' }}
+                <a-icon class="cursor-move mover ml-1 list-group-item" type="bars" />
+              </template>
+              <draggable
+                :list="team.links"
+                group="link"
+                v-bind="dragOptions"
+                @add="modal.lastAdd = team"
+                @remove="handleRemove($event, team)"
+                @update="handleUpdateInBatch"
               >
-                <template #extra><a-icon class="cursor-move mover mr-1 list-group-item" type="bars" /></template>
-                <draggable
-                  :list="team.links"
-                  v-bind="dragOptions"
-                  group="link"
-                  @update="handleUpdateInBatch"
-                  @remove="handleRemove($event, team)"
-                  @add="modal.lastAdd = team"
+                <transition-group
+                  class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                  type="transition"
                 >
-                  <transition-group
-                    type="transition"
-                    class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-8"
+                  <div
+                    v-for="link in team.links"
+                    :key="link.name"
+                    class="cursor-move relative flex items-center space-x-3 rounded border border-solid border-gray-300 bg-white px-2 py-2 shadow-sm hover:border-gray-400 hover:shadow"
                   >
-                    <div
-                      v-for="link in team.links"
-                      :key="link.name"
-                      class="relative flex items-center space-x-3 rounded border border-gray-300 bg-white px-2 py-2 shadow-sm hover:border-gray-400 hover:shadow"
-                    >
-                      <div class="flex-shrink-0">
-                        <a-avatar class="h-12 w-12 rounded-full" :src="link.logo" size="large" />
-                      </div>
-                      <div class="min-w-0 flex-1">
-                        <div>
-                          <p class="truncate text-sm font-medium text-gray-900" style="text-overflow: ellipsis">
-                            {{ link.name }}
-                          </p>
-                          <p class="truncate text-sm text-gray-500 w-24">{{ link.description }}</p>
-                        </div>
-                      </div>
-                      <div class="flex-col absolute top-0 right-0" style="justify-content: center">
-                        <div>
-                          <a-button @click="handleEdit(link)" class="!p-0" type="link">编辑</a-button>
-                        </div>
-                        <div>
-                          <a-popconfirm
-                            :title="'你确定要删除【' + link.name + '】链接？'"
-                            cancelText="取消"
-                            okText="确定"
-                            @confirm="handleDeleteLink(link.id)"
-                          >
-                            <a-button class="!p-0" type="link danger">删除</a-button>
-                          </a-popconfirm>
-                        </div>
+                    <div v-if="link.logo" class="flex-shrink-0">
+                      <a-avatar :src="link.logo" class="h-12 w-12 rounded-full" size="large" />
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <div>
+                        <p class="truncate text-sm font-medium text-gray-900 truncate">
+                          {{ link.name }}
+                        </p>
+                        <p class="truncate text-sm text-gray-500">{{ link.description }}</p>
                       </div>
                     </div>
-                  </transition-group>
-                </draggable>
-              </a-card>
-            </transition-group>
-          </draggable>
-        </a-card>
+                    <div class="absolute top-2 right-2 cursor-pointer hover:text-blue-600">
+                      <a-dropdown>
+                        <a-icon type="more" />
+                        <template #overlay>
+                          <a-menu>
+                            <a-menu-item @click="handleEdit(link)"> 编辑</a-menu-item>
+                            <a-menu-item @click="handleDeleteLink(link.id)"> 删除</a-menu-item>
+                          </a-menu>
+                        </template>
+                      </a-dropdown>
+                    </div>
+                  </div>
+                </transition-group>
+              </draggable>
+            </a-card>
+          </transition-group>
+        </draggable>
       </a-col>
     </a-row>
     <div style="position: fixed; bottom: 30px; right: 30px">
@@ -116,7 +112,7 @@ import draggable from 'vuedraggable'
 import { mixin, mixinDevice } from '@/mixins/mixin.js'
 import apiClient from '@/utils/api-client'
 import LinkCreateModal from '@/views/sheet/components/LinkCreateModal'
-
+import { Modal } from 'ant-design-vue'
 const columns = [
   {
     title: '名称',
@@ -152,7 +148,6 @@ export default {
     PageView,
     draggable
   },
-  display: 'Transitions',
   data() {
     return {
       modal: {
@@ -209,7 +204,6 @@ export default {
     this.handleListLinkTeams()
     this.handleListOptions()
   },
-
   methods: {
     ...mapActions(['refreshOptionsCache']),
     getPriority() {
@@ -232,22 +226,32 @@ export default {
         this.table.loading = false
       })
     },
+    removeConfirm() {
+      Modal.confirm({
+        title: '确定移出分组吗',
+        content: '移出最后一个链接后，该分组将消失。确定要移出分组吗？',
+        onCancel: () => {
+          this.recoverTeam()
+        },
+        onOk: () => {
+          this.removeTeam()
+        }
+      })
+    },
     removeTeam() {
       this.linkTeam.splice(this.linkTeam.indexOf(this.modal.lastRemove), 1)
       this.modal.newIndex = null
-      this.modal.visible = false
     },
     recoverTeam() {
       const recover = this.modal.lastAdd.links.splice(this.modal.newIndex, 1)
       this.modal.lastRemove.links.push(recover[0])
       this.modal.newIndex = null
-      this.modal.visible = false
     },
     handleRemove(evt, team) {
       this.modal.lastRemove = team
       if (team.links.length === 0) {
         this.modal.newIndex = evt.newIndex
-        this.modal.visible = true
+        this.removeConfirm()
       }
       this.handleUpdateInBatch()
     },
@@ -404,22 +408,18 @@ export default {
   height: 25px;
   min-width: 25px;
 }
-
 .list-group {
   min-height: 20px;
 }
-
 .list-group-item {
   cursor: move;
 }
-
 .list-group-item-body {
   cursor: pointer;
   padding-right: 8px;
   padding-left: 3px;
   font-size: 16px;
 }
-
 .link {
   margin-top: 4px;
   margin-bottom: 4px;
