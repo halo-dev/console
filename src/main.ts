@@ -10,6 +10,9 @@ import { registerMenu } from "@/router/menus.config";
 
 // core modules
 import { coreModules } from "./modules";
+import { useScriptTag } from "@vueuse/core";
+import { usePluginStore } from "@/stores/plugin";
+import axios from "axios";
 
 const app = createApp(App);
 
@@ -58,8 +61,43 @@ function loadCoreModules() {
   coreModules.forEach(registerModule);
 }
 
+const pluginStore = usePluginStore();
+
 async function loadPluginModules() {
-  // TODO: load plugin modules
+  const response = await axios.get(
+    "http://localhost:8090/apis/plugin.halo.run/v1alpha1/plugins",
+    {
+      headers: {
+        Authorization:
+          "Bearer eyJhbGciOiJSUzUxMiJ9.eyJpc3MiOiJIYWxvIE93bmVyIiwic3ViIjoiYWRtaW4iLCJleHAiOjE2NTU4NzAzMzIsImlhdCI6MTY1NTc4MzkzMiwic2NvcGUiOlsiUk9MRV9zdXBlci1yb2xlIl19.wsHVzIu3OKhZIep5aoxLUW8o93MjmrlE9fydC-Z7gGlils6MTiSKYxl7eQSc91JIiJTuhmI2qreZQ88kV_ec85jmkQAefZXE3scGXm-G3Gtg7rTBnIS_jbk3IImIkOJIu8twa5tZN6wyX4UoUbU2DiNZBZWqraM1vfsjnLBf7VYpQjBYEIyRu7f4cJ1k9XLFcZ2Fi-hAgVYQguGx3OOdoOpHLPIJOWxgaoSZ45WROvVjPxSrpnoHVxR8CGaAHgrwMwuklRRGjYW9Fd_Q3v_InfGi1TSomkkzTzsfN4igwIAGLEBYHzlcfrvFYL6meINQb_-D8KHePN3IiJDf84MRgw",
+      },
+      withCredentials: false,
+    }
+  );
+
+  for (const plugin of response.data) {
+    // TODO supported by backend
+
+    plugin.spec.assets = {
+      entry: `http://localhost:8090/assets/${plugin.metadata.name}/admin/main.js`,
+    };
+
+    const { assets } = plugin.spec;
+
+    if (assets) {
+      const { load } = useScriptTag(assets.entry);
+      await load();
+      const pluginModule = window[plugin.metadata.name];
+
+      if (pluginModule) {
+        // @ts-ignore
+        plugin.spec.module = pluginModule;
+        registerModule(pluginModule);
+      }
+    }
+
+    pluginStore.registerPlugin(plugin);
+  }
 }
 
 (async function () {
@@ -72,7 +110,8 @@ async function initApp() {
     await loadPluginModules();
   } catch (e) {
     console.error(e);
+  } finally {
+    app.use(router);
+    app.mount("#app");
   }
-  app.use(router);
-  app.mount("#app");
 }

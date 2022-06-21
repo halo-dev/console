@@ -9,16 +9,13 @@ import {
   VTag,
 } from "@halo-dev/components";
 import { useRoute } from "vue-router";
-import { plugins } from "./plugins-mock";
 import { ref } from "vue";
 
 const pluginActiveId = ref("detail");
 
 const { params } = useRoute();
 
-const plugin = plugins.find((item) => {
-  return item.spec.pluginClass === params.id;
-});
+const plugin = ref();
 
 console.log(plugin);
 </script>

@@ -11,13 +11,55 @@ import {
   VSpace,
   VTag,
 } from "@halo-dev/components";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import { plugins } from "./plugins-mock";
+import axios from "axios";
 
 const checkAll = ref(false);
+const plugins = ref<Plugin[]>([]);
 
 const router = useRouter();
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface PluginDependencies {}
+
+interface License {
+  name: string;
+  url: string;
+}
+
+interface Spec {
+  displayName: string;
+  version: string;
+  author: string;
+  logo: string;
+  pluginDependencies: PluginDependencies;
+  homepage: string;
+  description: string;
+  license: License[];
+  requires: string;
+  pluginClass: string;
+}
+
+interface Metadata {
+  name: string;
+  version: number;
+  creationTimestamp: Date;
+}
+
+interface Status {
+  status: boolean;
+  entry?: string;
+  stylesheet?: string;
+}
+
+interface Plugin {
+  spec: Spec;
+  apiVersion: string;
+  kind: string;
+  metadata: Metadata;
+  status: Status;
+}
 
 // eslint-disable-next-line
 const handleRouteToDetail = (plugin: any) => {
@@ -26,6 +68,26 @@ const handleRouteToDetail = (plugin: any) => {
     params: { id: plugin.spec.pluginClass },
   });
 };
+
+const handleFetchPlugins = async () => {
+  try {
+    const response = await axios.get(
+      "http://localhost:8090/apis/plugin.halo.run/v1alpha1/plugins",
+      {
+        headers: {
+          Authorization:
+            "Bearer eyJhbGciOiJSUzUxMiJ9.eyJpc3MiOiJIYWxvIE93bmVyIiwic3ViIjoiYWRtaW4iLCJleHAiOjE2NTU4NzAzMzIsImlhdCI6MTY1NTc4MzkzMiwic2NvcGUiOlsiUk9MRV9zdXBlci1yb2xlIl19.wsHVzIu3OKhZIep5aoxLUW8o93MjmrlE9fydC-Z7gGlils6MTiSKYxl7eQSc91JIiJTuhmI2qreZQ88kV_ec85jmkQAefZXE3scGXm-G3Gtg7rTBnIS_jbk3IImIkOJIu8twa5tZN6wyX4UoUbU2DiNZBZWqraM1vfsjnLBf7VYpQjBYEIyRu7f4cJ1k9XLFcZ2Fi-hAgVYQguGx3OOdoOpHLPIJOWxgaoSZ45WROvVjPxSrpnoHVxR8CGaAHgrwMwuklRRGjYW9Fd_Q3v_InfGi1TSomkkzTzsfN4igwIAGLEBYHzlcfrvFYL6meINQb_-D8KHePN3IiJDf84MRgw",
+        },
+        withCredentials: false,
+      }
+    );
+    plugins.value = response.data;
+  } catch (e) {
+    console.error("Fail to fetch plugins", e);
+  }
+};
+
+onMounted(handleFetchPlugins);
 </script>
 <template>
   <VPageHeader title="插件">
@@ -187,11 +249,7 @@ const handleRouteToDetail = (plugin: any) => {
         </div>
       </template>
       <ul class="box-border h-full w-full divide-y divide-gray-100" role="list">
-        <li
-          v-for="(plugin, index) in plugins"
-          :key="index"
-          @click.stop="handleRouteToDetail(plugin)"
-        >
+        <li v-for="(plugin, index) in plugins" :key="index">
           <div
             :class="{
               'bg-gray-100': checkAll,
@@ -223,12 +281,15 @@ const handleRouteToDetail = (plugin: any) => {
               </div>
               <div class="flex-1">
                 <div class="flex flex-row items-center">
-                  <span class="mr-2 truncate text-sm font-medium text-gray-900">
-                    {{ plugin.metadata.name }}
+                  <span
+                    class="mr-2 truncate text-sm font-medium text-gray-900"
+                    @click.stop="handleRouteToDetail(plugin)"
+                  >
+                    {{ plugin.spec.displayName }}
                   </span>
                   <VSpace>
                     <VTag>
-                      {{ plugin.metadata.enabled ? "已启用" : "未启用" }}
+                      {{ plugin.status.status ? "已启用" : "未启用" }}
                     </VTag>
                   </VSpace>
                 </div>
@@ -258,10 +319,56 @@ const handleRouteToDetail = (plugin: any) => {
                     {{ plugin.spec.version }}
                   </span>
                   <time class="text-sm text-gray-500" datetime="2020-01-07">
-                    2020-01-07
+                    {{ plugin.metadata.creationTimestamp }}
                   </time>
+                  <div class="flex items-center">
+                    <button
+                      aria-checked="false"
+                      class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-gray-200 transition-colors duration-200 ease-in-out"
+                      role="switch"
+                      type="button"
+                    >
+                      <span class="sr-only">Use setting</span>
+                      <span
+                        class="pointer-events-none relative inline-block h-5 w-5 translate-x-0 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                      >
+                        <span
+                          aria-hidden="true"
+                          class="absolute inset-0 flex h-full w-full items-center justify-center opacity-100 transition-opacity duration-200 ease-in"
+                        >
+                          <svg
+                            class="h-3 w-3 text-gray-400"
+                            fill="none"
+                            viewBox="0 0 12 12"
+                          >
+                            <path
+                              d="M4 8l2-2m0 0l2-2M6 6L4 4m2 2l2 2"
+                              stroke="currentColor"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                            />
+                          </svg>
+                        </span>
+                        <span
+                          aria-hidden="true"
+                          class="absolute inset-0 flex h-full w-full items-center justify-center opacity-0 transition-opacity duration-100 ease-out"
+                        >
+                          <svg
+                            class="h-3 w-3 text-indigo-600"
+                            fill="currentColor"
+                            viewBox="0 0 12 12"
+                          >
+                            <path
+                              d="M3.707 5.293a1 1 0 00-1.414 1.414l1.414-1.414zM5 8l-.707.707a1 1 0 001.414 0L5 8zm4.707-3.293a1 1 0 00-1.414-1.414l1.414 1.414zm-7.414 2l2 2 1.414-1.414-2-2-1.414 1.414zm3.414 2l4-4-1.414-1.414-4 4 1.414 1.414z"
+                            />
+                          </svg>
+                        </span>
+                      </span>
+                    </button>
+                  </div>
                   <span class="cursor-pointer">
-                    <IconSettings />
+                    <IconSettings @click.stop="handleRouteToDetail(plugin)" />
                   </span>
                 </div>
               </div>
