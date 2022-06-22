@@ -12,7 +12,7 @@ import { registerMenu } from "@/router/menus.config";
 import { coreModules } from "./modules";
 import { useScriptTag } from "@vueuse/core";
 import { usePluginStore } from "@/stores/plugin";
-import axios from "axios";
+import axiosInstance from "@/utils/api-client";
 
 const app = createApp(App);
 
@@ -64,27 +64,19 @@ function loadCoreModules() {
 const pluginStore = usePluginStore();
 
 async function loadPluginModules() {
-  const response = await axios.get(
-    "http://localhost:8090/apis/plugin.halo.run/v1alpha1/plugins",
-    {
-      headers: {
-        Authorization:
-          "Bearer eyJhbGciOiJSUzUxMiJ9.eyJpc3MiOiJIYWxvIE93bmVyIiwic3ViIjoiYWRtaW4iLCJleHAiOjE2NTU4NzAzMzIsImlhdCI6MTY1NTc4MzkzMiwic2NvcGUiOlsiUk9MRV9zdXBlci1yb2xlIl19.wsHVzIu3OKhZIep5aoxLUW8o93MjmrlE9fydC-Z7gGlils6MTiSKYxl7eQSc91JIiJTuhmI2qreZQ88kV_ec85jmkQAefZXE3scGXm-G3Gtg7rTBnIS_jbk3IImIkOJIu8twa5tZN6wyX4UoUbU2DiNZBZWqraM1vfsjnLBf7VYpQjBYEIyRu7f4cJ1k9XLFcZ2Fi-hAgVYQguGx3OOdoOpHLPIJOWxgaoSZ45WROvVjPxSrpnoHVxR8CGaAHgrwMwuklRRGjYW9Fd_Q3v_InfGi1TSomkkzTzsfN4igwIAGLEBYHzlcfrvFYL6meINQb_-D8KHePN3IiJDf84MRgw",
-      },
-      withCredentials: false,
-    }
+  const response = await axiosInstance.get(
+    `/apis/plugin.halo.run/v1alpha1/plugins`
   );
 
-  for (const plugin of response.data) {
-    // TODO supported by backend
+  // Get all started plugins
+  const plugins = response.data.filter(
+    (plugin) => plugin.status.status === "STARTED" && plugin.spec.enabled
+  );
 
-    plugin.spec.assets = {
-      entry: `http://localhost:8090${plugin.status.entry}`,
-    };
+  for (const plugin of plugins) {
+    const { entry } = plugin.status;
 
-    const { entry, status } = plugin.status;
-
-    if (status === "STARTED" && entry) {
+    if (entry) {
       const { load } = useScriptTag(
         `http://localhost:8090${plugin.status.entry}`
       );

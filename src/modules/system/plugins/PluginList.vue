@@ -14,77 +14,29 @@ import {
 } from "@halo-dev/components";
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import axios from "axios";
+import type { Plugin } from "./types";
+import axiosInstance from "@/utils/api-client";
 
 const checkAll = ref(false);
 const plugins = ref<Plugin[]>([]);
 
 const router = useRouter();
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface PluginDependencies {}
-
-interface License {
-  name: string;
-  url: string;
-}
-
-interface Spec {
-  displayName: string;
-  version: string;
-  author: string;
-  logo: string;
-  pluginDependencies: PluginDependencies;
-  homepage: string;
-  description: string;
-  license: License[];
-  requires: string;
-  pluginClass: string;
-}
-
-interface Metadata {
-  name: string;
-  version: number;
-  creationTimestamp: Date;
-}
-
-interface Status {
-  status: string;
-  entry?: string;
-  stylesheet?: string;
-}
-
-interface Plugin {
-  spec: Spec;
-  apiVersion: string;
-  kind: string;
-  metadata: Metadata;
-  status: Status;
-}
-
-// eslint-disable-next-line
-const handleRouteToDetail = (plugin: any) => {
+const handleRouteToDetail = (plugin: Plugin) => {
   router.push({
     name: "PluginDetail",
-    params: { id: plugin.spec.pluginClass },
+    params: { pluginName: plugin.metadata.name },
   });
 };
 
 function isStarted(plugin: Plugin) {
-  return plugin.status.status === "STARTED";
+  return plugin.status.phase === "STARTED" && plugin.spec.enabled;
 }
 
 const handleFetchPlugins = async () => {
   try {
-    const response = await axios.get(
-      "http://localhost:8090/apis/plugin.halo.run/v1alpha1/plugins",
-      {
-        headers: {
-          Authorization:
-            "Bearer eyJhbGciOiJSUzUxMiJ9.eyJpc3MiOiJIYWxvIE93bmVyIiwic3ViIjoiYWRtaW4iLCJleHAiOjE2NTU4OTQxNTQsImlhdCI6MTY1NTgwNzc1NCwic2NvcGUiOlsiUk9MRV9zdXBlci1yb2xlIl19.Gnj0rM8DU2bP1KcgKBUVaKf6zs1pDqGxYvii9zxG4lFv4rVZ_uNGXyfhi9V10vRK0GM4v4NEuMtX9-DYnqAV0wR2JcoFevPrJnHHWsvnFrOQm32qeMpew3PsZ5-YAwi9n8Y9GpAcQz_6aWsEuRwm9w5CC3A67CrYPfCK5qwuR5FFLfiMRqPAqNNuZ4r2IfoSZUvXy4HxhUS-01J2BCqP3-hbdN_-tFHCDxtIO637a51EsCmRItY5wSVNmwYPaPOYV7lbHxzBIKXw5RNXg6SrQCSLTVaaJCXsZjwIirk02RQACr6oqTHPbriBVuu-SIgPXS5PJ9i4VaMCn-z8t-oZlQ",
-        },
-        withCredentials: false,
-      }
+    const response = await axiosInstance.get(
+      `/apis/plugin.halo.run/v1alpha1/plugins`
     );
     plugins.value = response.data;
   } catch (e) {
@@ -94,18 +46,10 @@ const handleFetchPlugins = async () => {
 
 const handleChangePluginStatus = async (plugin: Plugin) => {
   try {
-    await axios.put(
-      `http://localhost:8090/apis/plugin.halo.run/v1alpha1/plugins/${
-        plugin.metadata.name
-      }/${plugin.status.status === "STARTED" ? "stop" : "startup"}`,
-      {},
-      {
-        headers: {
-          Authorization:
-            "Bearer eyJhbGciOiJSUzUxMiJ9.eyJpc3MiOiJIYWxvIE93bmVyIiwic3ViIjoiYWRtaW4iLCJleHAiOjE2NTU4OTQxNTQsImlhdCI6MTY1NTgwNzc1NCwic2NvcGUiOlsiUk9MRV9zdXBlci1yb2xlIl19.Gnj0rM8DU2bP1KcgKBUVaKf6zs1pDqGxYvii9zxG4lFv4rVZ_uNGXyfhi9V10vRK0GM4v4NEuMtX9-DYnqAV0wR2JcoFevPrJnHHWsvnFrOQm32qeMpew3PsZ5-YAwi9n8Y9GpAcQz_6aWsEuRwm9w5CC3A67CrYPfCK5qwuR5FFLfiMRqPAqNNuZ4r2IfoSZUvXy4HxhUS-01J2BCqP3-hbdN_-tFHCDxtIO637a51EsCmRItY5wSVNmwYPaPOYV7lbHxzBIKXw5RNXg6SrQCSLTVaaJCXsZjwIirk02RQACr6oqTHPbriBVuu-SIgPXS5PJ9i4VaMCn-z8t-oZlQ",
-        },
-        withCredentials: false,
-      }
+    await axiosInstance.put(
+      `/apis/plugin.halo.run/v1alpha1/plugins/${plugin.metadata.name}/${
+        isStarted(plugin) ? "stop" : "startup"
+      }`
     );
   } catch (e) {
     console.log(e);

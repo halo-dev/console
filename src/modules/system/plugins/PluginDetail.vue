@@ -5,28 +5,47 @@ import {
   VInput,
   VPageHeader,
   VSpace,
+  VSwitch,
   VTabbar,
   VTag,
 } from "@halo-dev/components";
 import { useRoute } from "vue-router";
 import { ref } from "vue";
+import type { Plugin } from "./types";
+import axios from "axios";
 
 const pluginActiveId = ref("detail");
+const plugin = ref<Plugin>();
 
 const { params } = useRoute();
 
-const plugin = ref();
-
-console.log(plugin);
+const handleFetchPlugin = async () => {
+  try {
+    const response = await axios.get(
+      `http://localhost:8090/apis/plugin.halo.run/v1alpha1/plugins/${params.pluginName}`,
+      {
+        headers: {
+          Authorization:
+            "Bearer eyJhbGciOiJSUzUxMiJ9.eyJpc3MiOiJIYWxvIE93bmVyIiwic3ViIjoiYWRtaW4iLCJleHAiOjE2NTU4OTQxNTQsImlhdCI6MTY1NTgwNzc1NCwic2NvcGUiOlsiUk9MRV9zdXBlci1yb2xlIl19.Gnj0rM8DU2bP1KcgKBUVaKf6zs1pDqGxYvii9zxG4lFv4rVZ_uNGXyfhi9V10vRK0GM4v4NEuMtX9-DYnqAV0wR2JcoFevPrJnHHWsvnFrOQm32qeMpew3PsZ5-YAwi9n8Y9GpAcQz_6aWsEuRwm9w5CC3A67CrYPfCK5qwuR5FFLfiMRqPAqNNuZ4r2IfoSZUvXy4HxhUS-01J2BCqP3-hbdN_-tFHCDxtIO637a51EsCmRItY5wSVNmwYPaPOYV7lbHxzBIKXw5RNXg6SrQCSLTVaaJCXsZjwIirk02RQACr6oqTHPbriBVuu-SIgPXS5PJ9i4VaMCn-z8t-oZlQ",
+        },
+        withCredentials: false,
+      }
+    );
+    plugin.value = response.data || {};
+  } catch (e) {
+    console.error(e);
+  }
+};
+handleFetchPlugin();
 </script>
 
 <template>
-  <VPageHeader :title="plugin.metadata.name">
+  <VPageHeader :title="plugin?.spec?.displayName">
     <template #icon>
-      <img :src="plugin.spec.logo" class="mr-2 h-8 w-8" />
+      <img :src="plugin?.spec?.logo" class="mr-2 h-8 w-8" />
     </template>
     <template #actions>
-      <VButton class="opacity-0" type="secondary"> 安装</VButton>
+      <VButton class="opacity-0" type="secondary">安装</VButton>
     </template>
   </VPageHeader>
 
@@ -45,16 +64,27 @@ console.log(plugin);
       </template>
 
       <div v-if="pluginActiveId === 'detail'">
-        <div class="px-4 py-4 sm:px-6">
-          <h3 class="text-lg font-medium leading-6 text-gray-900">插件信息</h3>
-          <p
-            class="mt-1 flex max-w-2xl items-center gap-2 text-sm text-gray-500"
-          >
-            <span>{{ plugin.spec.version }}</span>
-            <VTag>
-              {{ plugin.metadata.enabled ? "已启用" : "未启用" }}
-            </VTag>
-          </p>
+        <div class="flex items-center justify-between px-4 py-4 sm:px-6">
+          <div>
+            <h3 class="text-lg font-medium leading-6 text-gray-900">
+              插件信息
+            </h3>
+            <p
+              class="mt-1 flex max-w-2xl items-center gap-2 text-sm text-gray-500"
+            >
+              <span>{{ plugin?.spec?.version }}</span>
+              <VTag>
+                {{
+                  plugin?.status?.phase === "STARTED" && plugin?.spec?.enabled
+                    ? "已启用"
+                    : "未启用"
+                }}
+              </VTag>
+            </p>
+          </div>
+          <div>
+            <VSwitch />
+          </div>
         </div>
         <div class="border-t border-gray-200">
           <dl class="divide-y divide-gray-100">
@@ -63,19 +93,7 @@ console.log(plugin);
             >
               <dt class="text-sm font-medium text-gray-900">名称</dt>
               <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                {{ plugin.metadata.name }}
-              </dd>
-            </div>
-            <div
-              class="bg-white px-4 py-5 hover:bg-gray-50 sm:grid sm:grid-cols-6 sm:gap-4 sm:px-6"
-            >
-              <dt class="text-sm font-medium text-gray-900">插件类别</dt>
-              <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                <VTag>
-                  extensions.halo.run/category/{{
-                    plugin.metadata.labels["extensions.halo.run/category"]
-                  }}
-                </VTag>
+                {{ plugin?.spec?.displayName }}
               </dd>
             </div>
             <div
@@ -83,7 +101,7 @@ console.log(plugin);
             >
               <dt class="text-sm font-medium text-gray-900">版本</dt>
               <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                {{ plugin.spec.version }}
+                {{ plugin?.spec?.version }}
               </dd>
             </div>
             <div
@@ -91,7 +109,7 @@ console.log(plugin);
             >
               <dt class="text-sm font-medium text-gray-900">Halo 版本要求</dt>
               <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                {{ plugin.spec.requires }}
+                {{ plugin?.spec?.requires }}
               </dd>
             </div>
             <div
@@ -99,8 +117,8 @@ console.log(plugin);
             >
               <dt class="text-sm font-medium text-gray-900">提供方</dt>
               <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                <a :href="plugin.spec.homepage" target="_blank">
-                  @{{ plugin.spec.author }}
+                <a :href="plugin?.spec?.homepage" target="_blank">
+                  {{ plugin?.spec?.author }}
                 </a>
               </dd>
             </div>
@@ -109,7 +127,22 @@ console.log(plugin);
             >
               <dt class="text-sm font-medium text-gray-900">协议</dt>
               <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                {{ plugin.spec.license }}
+                <ul
+                  v-if="plugin?.spec?.license && plugin?.spec?.license.length"
+                  class="list-inside list-disc"
+                >
+                  <li
+                    v-for="(license, index) in plugin.spec.license"
+                    :key="index"
+                  >
+                    <a v-if="license.url" :href="license.url" target="_blank">
+                      {{ license.name }}
+                    </a>
+                    <span>
+                      {{ license.name }}
+                    </span>
+                  </li>
+                </ul>
               </dd>
             </div>
             <div
@@ -117,9 +150,9 @@ console.log(plugin);
             >
               <dt class="text-sm font-medium text-gray-900">模型定义</dt>
               <dd class="mt-1 sm:col-span-2 sm:mt-0">
-                <ul v-if="plugin.extensions" class="space-y-2">
+                <ul v-if="plugin?.extensions" class="space-y-2">
                   <li
-                    v-for="(extension, index) in plugin.extensions"
+                    v-for="(extension, index) in plugin?.extensions"
                     :key="index"
                   >
                     <div
