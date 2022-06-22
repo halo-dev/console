@@ -10,9 +10,9 @@ import {
   VTag,
 } from "@halo-dev/components";
 import { useRoute } from "vue-router";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import type { Plugin } from "./types";
-import axios from "axios";
+import axiosInstance from "@/utils/api-client";
 
 const pluginActiveId = ref("detail");
 const plugin = ref<Plugin>();
@@ -21,21 +21,33 @@ const { params } = useRoute();
 
 const handleFetchPlugin = async () => {
   try {
-    const response = await axios.get(
-      `http://localhost:8090/apis/plugin.halo.run/v1alpha1/plugins/${params.pluginName}`,
-      {
-        headers: {
-          Authorization:
-            "Bearer eyJhbGciOiJSUzUxMiJ9.eyJpc3MiOiJIYWxvIE93bmVyIiwic3ViIjoiYWRtaW4iLCJleHAiOjE2NTU4OTQxNTQsImlhdCI6MTY1NTgwNzc1NCwic2NvcGUiOlsiUk9MRV9zdXBlci1yb2xlIl19.Gnj0rM8DU2bP1KcgKBUVaKf6zs1pDqGxYvii9zxG4lFv4rVZ_uNGXyfhi9V10vRK0GM4v4NEuMtX9-DYnqAV0wR2JcoFevPrJnHHWsvnFrOQm32qeMpew3PsZ5-YAwi9n8Y9GpAcQz_6aWsEuRwm9w5CC3A67CrYPfCK5qwuR5FFLfiMRqPAqNNuZ4r2IfoSZUvXy4HxhUS-01J2BCqP3-hbdN_-tFHCDxtIO637a51EsCmRItY5wSVNmwYPaPOYV7lbHxzBIKXw5RNXg6SrQCSLTVaaJCXsZjwIirk02RQACr6oqTHPbriBVuu-SIgPXS5PJ9i4VaMCn-z8t-oZlQ",
-        },
-        withCredentials: false,
-      }
+    const response = await axiosInstance.get(
+      `/apis/plugin.halo.run/v1alpha1/plugins/${params.pluginName}`
     );
-    plugin.value = response.data || {};
+    plugin.value = response.data;
   } catch (e) {
     console.error(e);
   }
 };
+
+const isStarted = computed(() => {
+  return plugin.value?.status.phase === "STARTED" && plugin.value?.spec.enabled;
+});
+
+const handleChangePluginStatus = async () => {
+  try {
+    await axiosInstance.put(
+      `/apis/plugin.halo.run/v1alpha1/plugins/${plugin.value?.metadata.name}/${
+        isStarted.value ? "stop" : "startup"
+      }`
+    );
+  } catch (e) {
+    console.error(e);
+  } finally {
+    window.location.reload();
+  }
+};
+
 handleFetchPlugin();
 </script>
 
@@ -74,16 +86,15 @@ handleFetchPlugin();
             >
               <span>{{ plugin?.spec?.version }}</span>
               <VTag>
-                {{
-                  plugin?.status?.phase === "STARTED" && plugin?.spec?.enabled
-                    ? "已启用"
-                    : "未启用"
-                }}
+                {{ isStarted ? "已启用" : "未启用" }}
               </VTag>
             </p>
           </div>
           <div>
-            <VSwitch />
+            <VSwitch
+              :model-value="isStarted"
+              @change="handleChangePluginStatus"
+            />
           </div>
         </div>
         <div class="border-t border-gray-200">
