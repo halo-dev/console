@@ -52,7 +52,7 @@ const handleChangePluginStatus = async (plugin: Plugin) => {
       }`
     );
   } catch (e) {
-    console.log(e);
+    console.error(e);
   } finally {
     window.location.reload();
   }
