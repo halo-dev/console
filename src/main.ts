@@ -70,7 +70,7 @@ async function loadPluginModules() {
 
   // Get all started plugins
   const plugins = response.data.filter(
-    (plugin) => plugin.status.status === "STARTED" && plugin.spec.enabled
+    (plugin) => plugin.status.phase === "STARTED" && plugin.spec.enabled
   );
 
   for (const plugin of plugins) {
