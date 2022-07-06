@@ -8,7 +8,7 @@ specifiers:
   '@codemirror/lang-html': ^0.19.4
   '@codemirror/lang-java': ^0.19.1
   '@halo-dev/admin-api': ^1.0.0
-  '@halo-dev/editor': ^3.0.4
+  '@halo-dev/editor': ^3.0.5
   '@tailwindcss/aspect-ratio': ^0.4.0
   '@vue/cli-plugin-babel': ~5.0.4
   '@vue/cli-plugin-eslint': ~5.0.4
@@ -56,8 +56,8 @@ dependencies:
   '@codemirror/basic-setup': 0.19.3
   '@codemirror/lang-html': 0.19.4
   '@codemirror/lang-java': 0.19.1
-  '@halo-dev/admin-api': 1.0.0
-  '@halo-dev/editor': 3.0.4
+  '@halo-dev/admin-api': 1.1.0
+  '@halo-dev/editor': 3.0.5
   ant-design-vue: 1.7.8_9065e7474e033a8e4b95615fc8e6c36c
   dayjs: 1.11.0
   enquire.js: 2.1.6
@@ -1598,22 +1598,22 @@ packages:
       - supports-color
     dev: true
 
-  /@halo-dev/admin-api/1.0.0:
-    resolution: {integrity: sha512-DkuNK91Let+jPLx9YclhaU0XWKMA96LJNzGtYUq3e5VGuvPYqPY8AJKfQ8DNLA/3gmkF2b20nUCSDsZRz/ZObQ==}
+  /@halo-dev/admin-api/1.1.0:
+    resolution: {integrity: sha512-2K8ulSucPudWfBo8SWz92hLtlu8C7hVVfYNejlns0BZfMxFyivvGyTgeYiMYHgNR5n4K6tF903Zn1DkS7jnv0g==}
     engines: {node: '>=12'}
     dependencies:
-      '@halo-dev/rest-api-client': 1.0.0
-      tslib: 2.3.1
+      '@halo-dev/rest-api-client': 1.1.0
+      tslib: 2.4.0
     transitivePeerDependencies:
       - debug
     dev: false
 
-  /@halo-dev/editor/3.0.4:
-    resolution: {integrity: sha512-o4NzQkePa+JRPuQKs+2VsXMg2oE/zbi+LYiaHk+tQhVqlw+HBH6ohdndty3XjMnItpZYCvusXmgWyeol9JTqUg==}
+  /@halo-dev/editor/3.0.5:
+    resolution: {integrity: sha512-eIFNyCH85RgY1AvlJJMtXLN/OqXVoW464MTCQC3QR+liyK6c1pxWHKs8dvnjTjEAle9zEn6Niubfl7Stz9v9Ow==}
     dependencies:
-      '@halo-dev/markdown-renderer': 1.0.0
+      '@halo-dev/markdown-renderer': 1.1.0
       '@susisu/mte-kernel': 2.1.1
-      codemirror: 5.65.3
+      codemirror: 5.65.6
       github-markdown-css: 5.1.0
       highlight.js: 11.5.1
       katex: 0.12.0
@@ -1626,24 +1626,24 @@ packages:
       - '@types/markdown-it'
     dev: false
 
-  /@halo-dev/logger/1.0.0:
-    resolution: {integrity: sha512-i/bD4GlumEtaJ2Z8o1XutgnLCV8Xa02kQvgjCn8cVxphG4BBDES1JN3TNlmzuGHBowzFwbaC9Qu4O95qGLvkOw==}
+  /@halo-dev/logger/1.1.0:
+    resolution: {integrity: sha512-y0jVivYwF8MCVi/OdW2D0LN+GTM5rzMsR/ZmQVfgmKQw7Q7Q+EXPijxON6iCMZnWANGa4NaAcOO9k3ggG8oRwg==}
     engines: {node: '>=12.0.0'}
     dependencies:
-      tslib: 2.3.1
+      tslib: 2.4.0
     dev: false
 
-  /@halo-dev/markdown-renderer/1.0.0:
-    resolution: {integrity: sha512-EycEmxmL6fQF0HVMCH9pJvdDhfZFLWC+EB7eq5qEEbGNqqOi267Il//DxanI/CbbGAk43cMPARqfaLE7EMXMNw==}
+  /@halo-dev/markdown-renderer/1.1.0:
+    resolution: {integrity: sha512-oPbdIhO+c7ImY9cgqpHwNpZ0ybSGHLEmOz71HASb2vpBxwfb9XNHj8Ofr/hr+sc1aSfHFU0A9xZ5Hz1vtJDHrw==}
     engines: {node: '>=12'}
     dependencies:
       '@iktakahiro/markdown-it-katex': 4.0.1
       lodash.escape: 4.0.1
       markdown-it: 12.3.2
       markdown-it-abbr: 1.0.4
-      markdown-it-anchor: 8.4.1_markdown-it@12.3.2
-      markdown-it-attrs: 4.1.3_markdown-it@12.3.2
-      markdown-it-emoji: 2.0.0
+      markdown-it-anchor: 8.6.4_markdown-it@12.3.2
+      markdown-it-attrs: 4.1.4_markdown-it@12.3.2
+      markdown-it-emoji: 2.0.2
       markdown-it-footnote: 3.0.3
       markdown-it-images-preview: 1.0.1
       markdown-it-ins: 3.0.1
@@ -1657,16 +1657,16 @@ packages:
       - '@types/markdown-it'
     dev: false
 
-  /@halo-dev/rest-api-client/1.0.0:
-    resolution: {integrity: sha512-6zD57CiKWtSthpfAUgkyQfDG8Zck/23Z1r6UjrJf8h2M7/Up/KWNsaYNmsaK/7BvR4TLY9vRQst+0JNAWzMwaA==}
+  /@halo-dev/rest-api-client/1.1.0:
+    resolution: {integrity: sha512-zoAzaswdgBpkAw8A6zs4N+n03sSwF/YKnLnj9p7PNQoiix1Z1GK+Tc/WV59A+wRB9Xw5W3JZhzvuaOPOe7RpEw==}
     engines: {node: '>=12'}
     dependencies:
-      '@halo-dev/logger': 1.0.0
+      '@halo-dev/logger': 1.1.0
       axios: 0.24.0
       form-data: 4.0.0
       js-base64: 3.7.2
       qs: 6.10.3
-      tslib: 2.3.1
+      tslib: 2.4.0
     transitivePeerDependencies:
       - debug
     dev: false
@@ -2733,7 +2733,7 @@ packages:
     dev: true
 
   /asynckit/0.4.0:
-    resolution: {integrity: sha1-x57Zf380y48robyXkLzDZkdLS3k=}
+    resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
     dev: false
 
   /at-least-node/1.0.0:
@@ -3148,8 +3148,8 @@ packages:
     engines: {node: '>=0.8'}
     dev: true
 
-  /codemirror/5.65.3:
-    resolution: {integrity: sha512-kCC0iwGZOVZXHEKW3NDTObvM7pTIyowjty4BUqeREROc/3I6bWbgZDA3fGDwlA+rbgRjvnRnfqs9SfXynel1AQ==}
+  /codemirror/5.65.6:
+    resolution: {integrity: sha512-zNihMSMoDxK9Gqv9oEyDT8oM51rcRrQ+IEo2zyS48gJByBq5Fj8XuNEguMra+MuIOuh6lkpnLUJeL70DoTt6yw==}
     dev: false
 
   /color-convert/1.9.3:
@@ -4126,7 +4126,7 @@ packages:
     dev: false
 
   /delayed-stream/1.0.0:
-    resolution: {integrity: sha1-3zrhmayt+31ECqrgsp4icrJOxhk=}
+    resolution: {integrity: sha512-ZySD7Nf91aLB0RxL4KGrKHBXl7Eds1DAmEdcoVawXnLD7SDhpNgtuII2aAkg7a7QS41jxPSZ17p4VdGnMHk3MQ==}
     engines: {node: '>=0.4.0'}
     dev: false
 
@@ -5025,7 +5025,7 @@ packages:
     dev: false
 
   /hash-sum/1.0.2:
-    resolution: {integrity: sha1-M7QHd3VMZDJXPBIMw4CLvRDUfwQ=}
+    resolution: {integrity: sha512-fUs4B4L+mlt8/XAtSOGMUO1TXmAelItBPtJG7CyHJfYTdDjwisntGO2JQz7oUsatOY9o68+57eziUVNw/mRHmA==}
     dev: true
 
   /hash-sum/2.0.0:
@@ -5717,11 +5717,11 @@ packages:
     dev: true
 
   /lodash.escape/4.0.1:
-    resolution: {integrity: sha1-yQRGkMIeBClL6qUXcS/e0fqI3pg=}
+    resolution: {integrity: sha512-nXEOnb/jK9g0DYMr1/Xvq6l5xMD7GDG55+GSYIYmS0G4tBk/hURD4JR9WCavs04t33WmJx9kCyp9vJ+mr4BOUw==}
     dev: false
 
   /lodash.flatten/4.4.0:
-    resolution: {integrity: sha1-8xwiIlqWMtK7+OSt2+8kCqdlph8=}
+    resolution: {integrity: sha512-C5N2Z3DgnnKr0LOpv/hKCgKdb7ZZwafIrsesve6lmzvZIRZRGaZ/l6Q8+2W7NaT+ZwO3fFlSCzCzrDCFdJfZ4g==}
     dev: false
 
   /lodash.kebabcase/4.1.1:
@@ -5729,7 +5729,7 @@ packages:
     dev: true
 
   /lodash.last/3.0.0:
-    resolution: {integrity: sha1-JC9mMRLdTG5jcoxgo8kJ0b2tvUw=}
+    resolution: {integrity: sha512-14mq7rSkCxG4XMy9lF2FbIOqqgF0aH0NfPuQ3LPR3vIh0kHnUvIYP70dqa1Hf47zyXfQ8FzAg0MYOQeSuE1R7A==}
     dev: false
 
   /lodash.mapvalues/4.6.0:
@@ -5749,7 +5749,7 @@ packages:
     dev: false
 
   /lodash.times/4.3.2:
-    resolution: {integrity: sha1-Ph8lZcQxdU1Uq1fy7RdBk5KFyh0=}
+    resolution: {integrity: sha512-FfaJzl0SA35CRPDh5SWe2BTght6y5KSK7yJv166qIp/8q7qOwBDCvuDZE2RUSMRpBkLF6rZKbLEUoTmaP3qg6A==}
     dev: false
 
   /lodash.truncate/4.4.2:
@@ -5835,11 +5835,11 @@ packages:
     dev: true
 
   /markdown-it-abbr/1.0.4:
-    resolution: {integrity: sha1-1mtTZFIcuz3Yqlna37ovtoZcj9g=}
+    resolution: {integrity: sha512-ZeA4Z4SaBbYysZap5iZcxKmlPL6bYA8grqhzJIHB1ikn7njnzaP8uwbtuXc4YXD5LicI4/2Xmc0VwmSiFV04gg==}
     dev: false
 
-  /markdown-it-anchor/8.4.1_markdown-it@12.3.2:
-    resolution: {integrity: sha512-sLODeRetZ/61KkKLJElaU3NuU2z7MhXf12Ml1WJMSdwpngeofneCRF+JBbat8HiSqhniOMuTemXMrsI7hA6XyA==}
+  /markdown-it-anchor/8.6.4_markdown-it@12.3.2:
+    resolution: {integrity: sha512-Ul4YVYZNxMJYALpKtu+ZRdrryYt/GlQ5CK+4l1bp/gWXOG2QWElt6AqF3Mih/wfUKdZbNAZVXGR73/n6U/8img==}
     peerDependencies:
       '@types/markdown-it': '*'
       markdown-it: '*'
@@ -5847,17 +5847,17 @@ packages:
       markdown-it: 12.3.2
     dev: false
 
-  /markdown-it-attrs/4.1.3_markdown-it@12.3.2:
-    resolution: {integrity: sha512-d5yg/lzQV2KFI/4LPsZQB3uxQrf0/l2/RnMPCPm4lYLOZUSmFlpPccyojnzaHkfQpAD8wBHfnfUW0aMhpKOS2g==}
+  /markdown-it-attrs/4.1.4_markdown-it@12.3.2:
+    resolution: {integrity: sha512-53Zfv8PTb6rlVFDlD106xcZHKBSsRZKJ2IW/rTxEJBEVbVaoxaNsmRkG0HXfbHl2SK8kaxZ2QKqdthWy/QBwmA==}
     engines: {node: '>=6'}
     peerDependencies:
-      markdown-it: '>= 9.0.0 < 13.0.0'
+      markdown-it: '>= 9.0.0'
     dependencies:
       markdown-it: 12.3.2
     dev: false
 
-  /markdown-it-emoji/2.0.0:
-    resolution: {integrity: sha512-39j7/9vP/CPCKbEI44oV8yoPJTpvfeReTn/COgRhSpNrjWF3PfP/JUxxB0hxV6ynOY8KH8Y8aX9NMDdo6z+6YQ==}
+  /markdown-it-emoji/2.0.2:
+    resolution: {integrity: sha512-zLftSaNrKuYl0kR5zm4gxXjHaOI3FAOEaloKmRA5hijmJZvSjmxcokOLlzycb/HXlUFWzXqpIEoyEMCE4i9MvQ==}
     dev: false
 
   /markdown-it-footnote/3.0.3:
@@ -5865,7 +5865,7 @@ packages:
     dev: false
 
   /markdown-it-images-preview/1.0.1:
-    resolution: {integrity: sha1-F9brhJHMzSND1ORBmhq+nKQ8C7s=}
+    resolution: {integrity: sha512-wbu+ex/izUTHSxDXmlLIUL7ktNCdS4OoY82fGu7dNtGhBVthwBcDBcHO8ixL+zkGjE3kRk1lHrvs2co0JvAjlQ==}
     dev: false
 
   /markdown-it-ins/3.0.1:
@@ -5877,11 +5877,11 @@ packages:
     dev: false
 
   /markdown-it-sub/1.0.0:
-    resolution: {integrity: sha1-N1/WAm6ufdywEkl/ZBEZXqHjr+g=}
+    resolution: {integrity: sha512-z2Rm/LzEE1wzwTSDrI+FlPEveAAbgdAdPhdWarq/ZGJrGW/uCQbKAnhoCsE4hAbc3SEym26+W2z/VQB0cQiA9Q==}
     dev: false
 
   /markdown-it-sup/1.0.0:
-    resolution: {integrity: sha1-y5yf+RpSVawI8/09YyhuFd8KH8M=}
+    resolution: {integrity: sha512-E32m0nV9iyhRR7CrhnzL5msqic7rL1juWre6TQNxsnApg7Uf+F97JOKxUijg5YwXz86lZ0mqfOnutoryyNdntQ==}
     dev: false
 
   /markdown-it-table-of-contents/0.6.0:
@@ -5923,7 +5923,7 @@ packages:
     dev: true
 
   /mdurl/1.0.1:
-    resolution: {integrity: sha1-/oWy7HWlkDfyrf7BAP1sYBdhFS4=}
+    resolution: {integrity: sha512-/sKlQJCBYVY9Ers9hqzKou4H6V5UWc/M59TH2dvkt+84itfnq7uFOMLpOiOS4ujvHP4etln18fmIxA5R5fll0g==}
     dev: false
 
   /meaw/5.0.0:
@@ -7242,7 +7242,7 @@ packages:
     dev: true
 
   /rw/1.3.3:
-    resolution: {integrity: sha1-P4Yt+pGrdmsUiF700BEkv9oHT7Q=}
+    resolution: {integrity: sha512-PdhdWy89SiZogBLaw42zdeqtRJ//zFd2PgQavcICDUgJT5oW10QCRKbJ6bg4r0/UY2M6BWd5tkxuGFRvCkgfHQ==}
     dev: false
 
   /rxjs/7.5.2:
@@ -7911,6 +7911,11 @@ packages:
 
   /tslib/2.3.1:
     resolution: {integrity: sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==}
+    dev: true
+
+  /tslib/2.4.0:
+    resolution: {integrity: sha512-d6xOpEDfsi2CZVlPQzGeux8XMwLT9hssAsaPYExaQMuYskwb+x1x7J371tWlbBdWHroy99KnVB6qIkUbs5X3UQ==}
+    dev: false
 
   /type-check/0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
