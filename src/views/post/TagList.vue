@@ -60,14 +60,18 @@
       </a-col>
       <a-col :lg="14" :md="14" :sm="24" :xl="14" :xs="24" class="pb-3">
         <a-card :bodyStyle="{ padding: '16px' }" title="所有标签">
+          <template #extra>
+            <a class="p-0 m-0" href="javascript:void(0)" @click="handleCleanup">清理未使用标签</a>
+          </template>
           <a-spin :spinning="list.loading">
             <a-empty v-if="list.data.length === 0" />
-            <a-tooltip v-for="tag in list.data" v-else :key="tag.id" placement="topLeft">
-              <template slot="title">
-                <span>{{ tag.postCount }} 篇文章</span>
-              </template>
-              <post-tag :tag="tag" style="margin-bottom: 8px; cursor: pointer" @click.native="handleEdit(tag)" />
-            </a-tooltip>
+            <post-tag
+              v-for="tag in list.data"
+              :key="tag.id"
+              :tag="tag"
+              style="margin-bottom: 8px; cursor: pointer"
+              @click.native="handleEdit(tag)"
+            />
           </a-spin>
         </a-card>
       </a-col>
@@ -187,6 +191,30 @@ export default {
         }
         _this.handleListTags()
       }
+    },
+
+    handleCleanup() {
+      const tags = this.list.data.filter(tag => {
+        return tag.postCount === 0
+      })
+      this.$confirm({
+        title: '提示',
+        content: '是否确认清理没有使用的标签？',
+        okText: '确认',
+        cancelText: '取消',
+        onOk: async () => {
+          try {
+            const promises = tags.map(tag => {
+              return apiClient.tag.delete(tag.id)
+            })
+            await Promise.all(promises)
+          } catch (e) {
+            this.$log.error('Failed to cleanup tags:', e)
+          } finally {
+            this.handleListTags()
+          }
+        }
+      })
     }
   }
 }
