@@ -13,12 +13,13 @@ importers:
       '@formkit/vue': 1.0.0-beta.9
       '@halo-dev/admin-api': ^1.1.0
       '@halo-dev/admin-shared': workspace:*
-      '@halo-dev/api-client': ^0.0.2
+      '@halo-dev/api-client': ^0.0.3
       '@halo-dev/components': workspace:*
       '@rushstack/eslint-patch': ^1.1.4
       '@tailwindcss/aspect-ratio': ^0.4.0
       '@types/jsdom': ^16.2.14
       '@types/lodash.clonedeep': 4.5.7
+      '@types/lodash.isequal': ^4.5.6
       '@types/node': ^17.0.45
       '@types/qs': ^6.9.7
       '@types/uuid': ^8.3.4
@@ -79,7 +80,7 @@ importers:
       '@formkit/vue': 1.0.0-beta.9_jly5jqkcc2zgnt3crhnp3znzv4
       '@halo-dev/admin-api': 1.1.0
       '@halo-dev/admin-shared': link:packages/shared
-      '@halo-dev/api-client': link:../api-client
+      '@halo-dev/api-client': 0.0.3
       '@halo-dev/components': link:packages/components
       '@vueuse/components': 8.9.4_vue@3.2.37
       '@vueuse/core': 8.9.4_vue@3.2.37
@@ -102,6 +103,7 @@ importers:
       '@tailwindcss/aspect-ratio': 0.4.0_tailwindcss@3.1.6
       '@types/jsdom': 16.2.14
       '@types/lodash.clonedeep': 4.5.7
+      '@types/lodash.isequal': 4.5.6
       '@types/node': 17.0.45
       '@types/qs': 6.9.7
       '@types/uuid': 8.3.4
@@ -155,12 +157,12 @@ importers:
 
   packages/shared:
     specifiers:
-      '@halo-dev/api-client': ^0.0.2
+      '@halo-dev/api-client': ^0.0.3
       '@halo-dev/components': workspace:*
       axios: ^0.27.2
       vite-plugin-dts: ^1.3.1
     dependencies:
-      '@halo-dev/api-client': link:../../../api-client
+      '@halo-dev/api-client': 0.0.3
       '@halo-dev/components': link:../components
       axios: 0.27.2
     devDependencies:
@@ -1789,6 +1791,10 @@ packages:
       - debug
     dev: false
 
+  /@halo-dev/api-client/0.0.3:
+    resolution: {integrity: sha512-ybtVcjeeFqOldPIKRrm3socfGtbSR5GL+MXVmkSJwD2fCwT9OiXEvs3cgceWceIZI0Ug7AEKwxbcO+ZfOmDlYA==}
+    dev: false
+
   /@halo-dev/logger/1.1.0:
     resolution: {integrity: sha512-y0jVivYwF8MCVi/OdW2D0LN+GTM5rzMsR/ZmQVfgmKQw7Q7Q+EXPijxON6iCMZnWANGa4NaAcOO9k3ggG8oRwg==}
     engines: {node: '>=12.0.0'}
@@ -2438,6 +2444,12 @@ packages:
 
   /@types/lodash.clonedeep/4.5.7:
     resolution: {integrity: sha512-ccNqkPptFIXrpVqUECi60/DFxjNKsfoQxSQsgcBJCX/fuX1wgyQieojkcWH/KpE3xzLoWN/2k+ZeGqIN3paSvw==}
+    dependencies:
+      '@types/lodash': 4.14.182
+    dev: true
+
+  /@types/lodash.isequal/4.5.6:
+    resolution: {integrity: sha512-Ww4UGSe3DmtvLLJm2F16hDwEQSv7U0Rr8SujLUA2wHI2D2dm8kPu6Et+/y303LfjTIwSBKXB/YTUcAKpem/XEg==}
     dependencies:
       '@types/lodash': 4.14.182
     dev: true
