@@ -186,7 +186,7 @@ onMounted(() => {
                       {{
                         role.metadata.annotations?.[
                           rbacAnnotations.DISPLAY_NAME
-                          ] || role.metadata.name
+                        ] || role.metadata.name
                       }}
                     </span>
                   </RouterLink>
@@ -198,7 +198,7 @@ onMounted(() => {
                       JSON.parse(
                         role.metadata.annotations?.[
                           rbacAnnotations.DEPENDENCIES
-                          ] || "[]"
+                        ] || "[]"
                       ).length
                     }}
                     个权限

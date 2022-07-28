@@ -165,7 +165,7 @@ watchEffect(() => {
                           {{
                             role.metadata.annotations?.[
                               rbacAnnotations.DISPLAY_NAME
-                              ]
+                            ]
                           }}
                         </span>
                         <span
@@ -181,7 +181,7 @@ watchEffect(() => {
                             JSON.parse(
                               role.metadata.annotations?.[
                                 rbacAnnotations.DEPENDENCIES
-                                ]
+                              ]
                             ).join(", ")
                           }}
                         </span>
