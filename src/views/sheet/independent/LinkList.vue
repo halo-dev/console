@@ -17,7 +17,9 @@
     />
     <a-row :gutter="12">
       <a-col :span="24" class="pb-3">
+        <a-empty v-if="linkTeam.length === 0" />
         <draggable
+          v-else
           :list="linkTeam"
           class="list-group"
           group="pull: 'false', put: false"
@@ -56,13 +58,11 @@
                     <div v-if="link.logo" class="flex-shrink-0">
                       <a-avatar :src="link.logo" class="h-12 w-12 rounded-full" size="large" />
                     </div>
-                    <div class="min-w-0 flex-1">
-                      <div>
-                        <p class="truncate text-sm font-medium text-gray-900 truncate">
-                          {{ link.name }}
-                        </p>
-                        <p class="truncate text-sm text-gray-500">{{ link.description }}</p>
-                      </div>
+                    <div class="flex flex-col gap-y-1.5">
+                      <p class="mb-0 truncate text-sm font-medium text-gray-900 truncate">
+                        {{ link.name }}
+                      </p>
+                      <p class="mb-0 truncate text-sm text-gray-500">{{ link.description }}</p>
                     </div>
                     <div class="absolute top-2 right-2 cursor-pointer hover:text-blue-600">
                       <a-dropdown>
@@ -113,34 +113,6 @@ import { mixin, mixinDevice } from '@/mixins/mixin.js'
 import apiClient from '@/utils/api-client'
 import LinkCreateModal from '@/views/sheet/components/LinkCreateModal'
 import { Modal } from 'ant-design-vue'
-const columns = [
-  {
-    title: '名称',
-    dataIndex: 'name',
-    ellipsis: true,
-    scopedSlots: { customRender: 'name' }
-  },
-  {
-    title: '网址',
-    dataIndex: 'url',
-    ellipsis: true,
-    scopedSlots: { customRender: 'url' }
-  },
-  {
-    title: '分组',
-    ellipsis: true,
-    dataIndex: 'team'
-  },
-  {
-    title: '排序',
-    dataIndex: 'priority'
-  },
-  {
-    title: '操作',
-    key: 'action',
-    scopedSlots: { customRender: 'action' }
-  }
-]
 export default {
   mixins: [mixin, mixinDevice],
   components: {
@@ -158,7 +130,6 @@ export default {
         lastRemove: null
       },
       table: {
-        columns,
         data: [],
         loading: false
       },
@@ -182,9 +153,6 @@ export default {
         return '修改友情链接'
       }
       return '添加友情链接'
-    },
-    isUpdateMode() {
-      return !!this.form.model.id
     },
     computedTeams() {
       return this.teams.filter(item => {
@@ -254,16 +222,6 @@ export default {
         this.removeConfirm()
       }
       this.handleUpdateInBatch()
-    },
-    handleClose() {
-      this.form.model = {}
-      this.form.visible = false
-      const timer = setTimeout(() => {
-        this.$refs.linkForm.clearValidate()
-      }, 1)
-      this.$once('hook:beforeDestroy', () => {
-        clearInterval(timer)
-      })
     },
     splitIntoTeam(data) {
       const teamMap = new Map()
@@ -386,7 +344,6 @@ export default {
         this.handleListLinkTeams()
         this.form.visible = false
       }
-      console.log(this.form)
     },
     handleSaveOptions() {
       apiClient.option
@@ -404,24 +361,10 @@ export default {
 }
 </script>
 <style>
-.link {
-  height: 25px;
-  min-width: 25px;
-}
 .list-group {
   min-height: 20px;
 }
 .list-group-item {
   cursor: move;
-}
-.list-group-item-body {
-  cursor: pointer;
-  padding-right: 8px;
-  padding-left: 3px;
-  font-size: 16px;
-}
-.link {
-  margin-top: 4px;
-  margin-bottom: 4px;
 }
 </style>
