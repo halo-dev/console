@@ -7,6 +7,7 @@
     placeholder="请选择上级目录，默认为顶级目录"
     treeDefaultExpandAll
     @change="handleChange"
+    :dropdown-style="{ overflow: 'auto' }"
   >
   </a-tree-select>
 </template>

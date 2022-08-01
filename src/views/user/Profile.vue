@@ -301,7 +301,7 @@ export default {
           email: [
             { required: true, message: '* 电子邮箱地址不能为空', trigger: ['change'] },
             { type: 'email', message: '* 电子邮箱地址格式不正确', trigger: ['change'] },
-            { max: 127, message: '* 电子邮箱的字符长度不能超过 255', trigger: ['change'] }
+            { max: 127, message: '* 电子邮箱的字符长度不能超过 127', trigger: ['change'] }
           ],
           description: [{ max: 1023, message: '* 个人说明的字符长度不能超过 1023', trigger: ['change'] }]
         }

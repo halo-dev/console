@@ -648,44 +648,6 @@ body {
   }
 }
 
-.attach-item {
-  width: 50%;
-  padding-bottom: 28%;
-  float: left;
-}
-
-.attach-thumb,
-.photo-thumb {
-  width: 100%;
-  padding-bottom: 56%;
-}
-
-.attach-item,
-.attach-thumb,
-.photo-thumb {
-  margin: 0 auto;
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
-
-  img,
-  span {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
-
-  span {
-    display: flex;
-    font-size: 12px;
-    align-items: center;
-    justify-content: center;
-    color: #9b9ea0;
-  }
-}
-
 .analysis-card-container {
   position: relative;
   overflow: hidden;
@@ -741,21 +703,6 @@ body {
   }
 }
 
-.select-attachment-checkbox {
-  display: block;
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 10;
-
-  .ant-checkbox {
-    margin-left: 4px;
-  }
-}
-
 .ant-list-item {
   .ant-list-item-main,
   .ant-list-item-meta-content,
@@ -796,28 +743,6 @@ body {
   background: white;
   z-index: 999;
   top: 0;
-}
-
-// 附件图片样式
-.attachments-group,
-.photos-group {
-  &-item {
-    padding: 0;
-    height: 130px;
-
-    &-img {
-      display: block;
-      height: 100%;
-      background-repeat: no-repeat;
-      background-size: cover;
-      background-position: center;
-    }
-
-    .attachments-group &-type {
-      font-size: 38px;
-      text-transform: capitalize;
-    }
-  }
 }
 
 .ant-affix {
