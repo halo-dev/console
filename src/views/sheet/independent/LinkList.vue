@@ -58,7 +58,7 @@
                     <div v-if="link.logo" class="flex-shrink-0">
                       <a-avatar :src="link.logo" class="h-12 w-12 rounded-full" size="large" />
                     </div>
-                    <div class="flex flex-col gap-y-1.5">
+                    <div class="flex flex-col gap-y-1.5 overflow-hidden">
                       <p class="mb-0 truncate text-sm font-medium text-gray-900 truncate">
                         {{ link.name }}
                       </p>
@@ -285,29 +285,50 @@ export default {
     handleCreateOrUpdateLink() {
       this.form.saving = true
       if (this.isUpdateMode) {
-        let add, remove, removeId
+        let toTeam, fromTeam, removeId
         for (const team of this.linkTeam) {
+          if (toTeam && fromTeam) {
+            break
+          }
           if (team.team === this.form.model.team) {
             for (let link of team.links) {
               if (link.id === this.form.model.id) {
-                Object.assign(link, this.form.model)
+                // 分组没有改变， 直接update即可
+                apiClient.link
+                  .update(this.form.model.id, this.form.model)
+                  .catch(() => {
+                    this.form.errored = true
+                  })
+                  .finally(() => {
+                    setTimeout(() => {
+                      this.form.saving = false
+                    }, 400)
+                  })
+                return
               }
             }
-            add = team
+            toTeam = team
           } else {
             for (let i = 0; i < team.links.length; i++) {
               if (team.links[i].id === this.form.model.id) {
-                remove = team
+                fromTeam = team
                 removeId = i
                 break
               }
             }
           }
         }
-        if (add && remove && add.team !== remove.team) {
-          add.links.push(this.form.model)
-          remove.links.splice(removeId, 1)
+        if (!toTeam) {
+          toTeam = {
+            links: [],
+            priority: -1,
+            team: this.form.model.team
+          }
+          this.linkTeam.push(toTeam)
         }
+
+        toTeam.links.push(this.form.model)
+        fromTeam.links.splice(removeId, 1)
         const params = this.getPriority()
         apiClient.link
           .updateInBatch(params)
