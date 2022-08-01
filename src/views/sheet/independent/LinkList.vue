@@ -148,11 +148,8 @@ export default {
     }
   },
   computed: {
-    title() {
-      if (this.isUpdateMode) {
-        return '修改友情链接'
-      }
-      return '添加友情链接'
+    isUpdateMode() {
+      return !!this.form.model.id
     },
     computedTeams() {
       return this.teams.filter(item => {
