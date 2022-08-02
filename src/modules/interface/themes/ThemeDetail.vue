@@ -3,7 +3,6 @@ import {
   IconExchange,
   IconEye,
   IconPalette,
-  useDialog,
   VAlert,
   VButton,
   VCard,
@@ -13,83 +12,18 @@ import {
   VTag,
 } from "@halo-dev/components";
 import ThemeListModal from "./components/ThemeListModal.vue";
-import { computed, onMounted, ref } from "vue";
+import { ref } from "vue";
 import { RouterLink } from "vue-router";
-import { apiClient } from "@halo-dev/admin-shared";
 import type { Theme } from "@halo-dev/api-client";
+import { useThemeLifeCycle } from "./composables/use-theme";
 
 const selectedTheme = ref<Theme>({} as Theme);
-const activatedTheme = ref<Theme>({} as Theme);
 const themesModal = ref(false);
 const tabActiveId = ref("detail");
 const themeListRef = ref();
 
-const isActivated = computed(() => {
-  return (
-    activatedTheme.value?.metadata?.name === selectedTheme.value?.metadata?.name
-  );
-});
-
-const dialog = useDialog();
-
-const handleFetchActivatedTheme = async () => {
-  try {
-    const { data } = await apiClient.extension.configMap.getv1alpha1ConfigMap(
-      "system"
-    );
-
-    if (!data.data?.theme) {
-      // Todo: show error
-      return;
-    }
-    const themeConfig = JSON.parse(data.data.theme);
-
-    const { data: themeData } =
-      await apiClient.extension.theme.getthemeHaloRunV1alpha1Theme(
-        themeConfig.active
-      );
-
-    selectedTheme.value = themeData;
-    activatedTheme.value = themeData;
-  } catch (e) {
-    console.error("Failed to fetch active theme", e);
-  }
-};
-
-const handleActiveTheme = async () => {
-  dialog.info({
-    title: "是否确认启用当前主题",
-    description: selectedTheme.value.spec.displayName,
-    onConfirm: async () => {
-      try {
-        const { data: systemConfigMap } =
-          await apiClient.extension.configMap.getv1alpha1ConfigMap("system");
-
-        if (systemConfigMap.data) {
-          const themeConfigToUpdate = JSON.parse(
-            systemConfigMap.data?.theme || "{}"
-          );
-          themeConfigToUpdate.active = selectedTheme.value?.metadata?.name;
-          systemConfigMap.data["theme"] = JSON.stringify(themeConfigToUpdate);
-
-          await apiClient.extension.configMap.updatev1alpha1ConfigMap(
-            "system",
-            systemConfigMap
-          );
-        }
-      } catch (e) {
-        console.error("Failed to active theme", e);
-      } finally {
-        await handleFetchActivatedTheme();
-        await themeListRef.value.handleFetchThemes();
-      }
-    },
-  });
-};
-
-onMounted(() => {
-  handleFetchActivatedTheme();
-});
+const { isActivated, activatedTheme, handleActiveTheme } =
+  useThemeLifeCycle(selectedTheme);
 </script>
 
 <template>
