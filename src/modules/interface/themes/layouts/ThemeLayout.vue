@@ -96,18 +96,21 @@ const handleFetchSettings = async () => {
     const { spec } = settings.value;
 
     if (spec) {
-      spec.forEach((item: FormKitSettingSpec) => {
-        tabs.value.push({
-          id: item.group,
-          label: item.label || "",
-          route: {
-            name: "ThemeSetting",
-            params: {
-              group: item.group,
+      tabs.value = [
+        ...tabs.value,
+        ...spec.map((item: FormKitSettingSpec) => {
+          return {
+            id: item.group,
+            label: item.label || "",
+            route: {
+              name: "ThemeSetting",
+              params: {
+                group: item.group,
+              },
             },
-          },
-        });
-      });
+          };
+        }),
+      ] as ThemeTab[];
 
       onTabChange(route.name as string);
     }
