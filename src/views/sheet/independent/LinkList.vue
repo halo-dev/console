@@ -66,7 +66,9 @@
                     </div>
                     <div class="absolute top-2 right-2 cursor-pointer hover:text-blue-600">
                       <a-dropdown>
-                        <a-icon type="more" />
+                        <div style="width: 30px; display: flex; justify-content: flex-end">
+                          <a-icon type="more" />
+                        </div>
                         <template #overlay>
                           <a-menu>
                             <a-menu-item @click="handleEdit(link)"> 编辑</a-menu-item>
