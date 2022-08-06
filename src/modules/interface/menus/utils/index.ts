@@ -143,6 +143,11 @@ export function buildMenuItemsTree(menuItems: MenuItem[]): MenuTreeItem[] {
   return sortMenuItemsTree(menuTreeItems);
 }
 
+/**
+ * Sort a menu tree by priority.
+ *
+ * @param menuTreeItems
+ */
 export function sortMenuItemsTree(
   menuTreeItems: MenuTreeItem[] | MenuItem[]
 ): MenuTreeItem[] {
@@ -170,6 +175,11 @@ export function sortMenuItemsTree(
     });
 }
 
+/**
+ * Reset the menu tree item's priority.
+ *
+ * @param menuItems
+ */
 export function resetMenuItemsTreePriority(
   menuItems: MenuTreeItem[]
 ): MenuTreeItem[] {
@@ -182,6 +192,11 @@ export function resetMenuItemsTreePriority(
   return menuItems;
 }
 
+/**
+ * Convert a menu tree items into a flat array of menu.
+ *
+ * @param menuTreeItems
+ */
 export function convertTreeToMenuItems(menuTreeItems: MenuTreeItem[]) {
   const menuItems: MenuItem[] = [];
   const menuItemsMap = new Map<string, MenuItem>();
@@ -211,24 +226,12 @@ export function convertTreeToMenuItems(menuTreeItems: MenuTreeItem[]) {
   return menuItems;
 }
 
-export function getMenuTreeItemNames(menuTreeItems: MenuTreeItem[]) {
-  const names: string[] = [];
-  const convertMenuItem = (node: MenuTreeItem | undefined) => {
-    if (!node) {
-      return;
-    }
-    names.push(node.metadata.name);
-    const children = node.spec.children || [];
-    children.forEach((child) => {
-      convertMenuItem(child);
-    });
-  };
-  menuTreeItems.forEach((node) => {
-    convertMenuItem(node);
-  });
-  return names;
-}
-
+/**
+ * Convert {@link MenuItem} to {@link MenuTreeItem} with tree structure children.
+ *
+ * @param menuItems All menu items
+ * @param menuItem Current node item
+ */
 export function convertMenuItemToMenuTreeItem(
   menuItems: MenuItem[],
   menuItem: MenuItem
@@ -245,6 +248,11 @@ export function convertMenuItemToMenuTreeItem(
   };
 }
 
+/**
+ * Convert {@link MenuTreeItem} to {@link MenuItem} with flat children name array.
+ *
+ * @param menuTreeItem
+ */
 export function convertMenuTreeItemToMenuItem(
   menuTreeItem: MenuTreeItem
 ): MenuItem {
