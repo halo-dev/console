@@ -56,11 +56,17 @@ const handleSelect = (menu: Menu) => {
 const handleDeleteMenu = async (menu: Menu) => {
   dialog.warning({
     title: "确定要删除该菜单吗？",
-    // @ts-ignore
+    description: "将同时删除该菜单下的所有菜单项，该操作不可恢复。",
     confirmType: "danger",
     onConfirm: async () => {
       try {
         await apiClient.extension.menu.deletev1alpha1Menu(menu.metadata.name);
+
+        const deleteItemsPromises = Array.from(menu.spec.menuItems || []).map(
+          (item) => apiClient.extension.menuItem.deletev1alpha1MenuItem(item)
+        );
+
+        await Promise.all(deleteItemsPromises);
       } catch (e) {
         console.error("Failed to delete menu", e);
       } finally {
