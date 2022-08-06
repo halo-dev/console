@@ -228,3 +228,34 @@ export function getMenuTreeItemNames(menuTreeItems: MenuTreeItem[]) {
   });
   return names;
 }
+
+export function convertMenuItemToMenuTreeItem(
+  menuItems: MenuItem[],
+  menuItem: MenuItem
+): MenuTreeItem {
+  const children = menuItems.filter((item) => {
+    return menuItem.spec.children?.has(item.metadata.name);
+  });
+  return {
+    ...menuItem,
+    spec: {
+      ...menuItem.spec,
+      children: buildMenuItemsTree(children),
+    },
+  };
+}
+
+export function convertMenuTreeItemToMenuItem(
+  menuTreeItem: MenuTreeItem
+): MenuItem {
+  const childNames = menuTreeItem.spec.children.map(
+    (child) => child.metadata.name
+  );
+  return {
+    ...menuTreeItem,
+    spec: {
+      ...menuTreeItem.spec,
+      children: new Set(childNames),
+    },
+  };
+}

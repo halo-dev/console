@@ -12,12 +12,16 @@ defineProps({
   },
 });
 
-const emit = defineEmits(["change"]);
+const emit = defineEmits(["change", "open-editing"]);
 
 const isDragging = ref(false);
 
 function onChange() {
   emit("change");
+}
+
+function onOpenEditingModal(menuItem: MenuTreeItem) {
+  emit("open-editing", menuItem);
 }
 </script>
 <template>
@@ -65,6 +69,7 @@ function onChange() {
               >
                 <IconSettings
                   class="cursor-pointer transition-all hover:text-blue-600"
+                  @click="onOpenEditingModal(menuItem)"
                 />
               </div>
             </div>
@@ -73,8 +78,9 @@ function onChange() {
 
         <MenuItemListItem
           :menu-tree-items="menuItem.spec.children"
-          class="ml-10 transition-all duration-300"
+          class="pl-10 transition-all duration-300"
           @change="onChange"
+          @open-editing="onOpenEditingModal"
         />
       </li>
     </template>

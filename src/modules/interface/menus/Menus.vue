@@ -16,6 +16,7 @@ import cloneDeep from "lodash.clonedeep";
 import type { MenuTreeItem } from "./utils";
 import {
   buildMenuItemsTree,
+  convertMenuTreeItemToMenuItem,
   convertTreeToMenuItems,
   resetMenuItemsTreePriority,
 } from "./utils";
@@ -50,8 +51,8 @@ const handleFetchMenuItems = async () => {
   }
 };
 
-const handleOpenEditingModal = (menuItem: MenuItem | null) => {
-  selectedMenuItem.value = menuItem;
+const handleOpenEditingModal = (menuItem: MenuTreeItem) => {
+  selectedMenuItem.value = convertMenuTreeItemToMenuItem(menuItem);
   menuItemEditingModal.value = true;
 };
 
@@ -152,6 +153,7 @@ const handleUpdateInBatch = useDebounceFn(async () => {
           <MenuItemListItem
             :menu-tree-items="menuTreeItems"
             @change="handleUpdateInBatch"
+            @open-editing="handleOpenEditingModal"
           />
         </VCard>
       </div>
