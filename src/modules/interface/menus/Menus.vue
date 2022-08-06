@@ -127,7 +127,7 @@ const handleUpdateInBatch = useDebounceFn(async () => {
               >
                 <div class="flex w-full flex-1 sm:w-auto">
                   <span class="text-base font-medium">
-                    {{ menuListRef?.selectedMenu?.spec.displayName }}
+                    {{ selectedMenu?.spec.displayName }}
                   </span>
                 </div>
                 <div class="mt-4 flex sm:mt-0">
