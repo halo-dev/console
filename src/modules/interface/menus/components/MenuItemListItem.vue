@@ -72,7 +72,6 @@ function onChange() {
         </div>
 
         <MenuItemListItem
-          :class="{ 'my-2 min-h-[40px] rounded-base bg-gray-100': isDragging }"
           :menu-tree-items="menuItem.spec.children"
           class="ml-10 transition-all duration-300"
           @change="onChange"

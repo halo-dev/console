@@ -27,6 +27,7 @@ const initialFormState: MenuItem = {
     displayName: "",
     href: "",
     children: new Set([]),
+    priority: 0,
     categoryRef: {
       name: "",
     },

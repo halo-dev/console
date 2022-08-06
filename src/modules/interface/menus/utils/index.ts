@@ -116,46 +116,70 @@ export interface MenuTreeItem extends Omit<MenuItem, "spec"> {
  * @param menuItems
  */
 export function buildMenuItemsTree(menuItems: MenuItem[]): MenuTreeItem[] {
-  const menuTreeItems: MenuTreeItem[] = [];
+  const menuItemsMap = {};
+  const parentMap = {};
 
-  const menuItemsMap = new Map(
-    menuItems.map((menuItem) => [menuItem.metadata.name, menuItem])
-  );
+  menuItems.forEach((menuItem) => {
+    menuItemsMap[menuItem.metadata.name] = menuItem;
+    // @ts-ignore
+    menuItem.spec.children.forEach((child) => {
+      parentMap[child] = menuItem.metadata.name;
+    });
+    // @ts-ignore
+    menuItem.spec.children = [];
+  });
 
-  const convertMenuItem = (
-    node: MenuItem | undefined
-  ): MenuTreeItem | undefined => {
-    if (!node) {
-      return;
-    }
-
-    menuItemsMap.delete(node.metadata.name);
-    const children = Array.from(node.spec.children || "[]");
-    return (
-      children.length
-        ? {
-            ...node,
-            spec: {
-              ...node.spec,
-              children: children
-                .map((child) => convertMenuItem(menuItemsMap.get(child)))
-                .filter((child) => child),
-            },
-          }
-        : node
-    ) as MenuTreeItem;
-  };
-
-  menuItems.forEach((node) => {
-    if (menuItemsMap.has(node.metadata.name)) {
-      const menuTreeItem = convertMenuItem(node);
-      if (menuTreeItem) {
-        menuTreeItems.push(menuTreeItem);
-      }
+  menuItems.forEach((menuItem) => {
+    const parentName = parentMap[menuItem.metadata.name];
+    if (parentName && menuItemsMap[parentName]) {
+      menuItemsMap[parentName].spec.children.push(menuItem);
     }
   });
 
-  return menuTreeItems;
+  const menuTreeItems = menuItems.filter(
+    (node) => parentMap[node.metadata.name] === undefined
+  );
+
+  return sortMenuItemsTree(menuTreeItems);
+}
+
+export function sortMenuItemsTree(
+  menuTreeItems: MenuTreeItem[] | MenuItem[]
+): MenuTreeItem[] {
+  return menuTreeItems
+    .sort((a, b) => {
+      if (a.spec.priority < b.spec.priority) {
+        return -1;
+      }
+      if (a.spec.priority > b.spec.priority) {
+        return 1;
+      }
+      return 0;
+    })
+    .map((menuTreeItem) => {
+      if (menuTreeItem.spec.children.length) {
+        return {
+          ...menuTreeItem,
+          spec: {
+            ...menuTreeItem.spec,
+            children: sortMenuItemsTree(menuTreeItem.spec.children),
+          },
+        };
+      }
+      return menuTreeItem;
+    });
+}
+
+export function resetMenuItemsTreePriority(
+  menuItems: MenuTreeItem[]
+): MenuTreeItem[] {
+  for (let i = 0; i < menuItems.length; i++) {
+    menuItems[i].spec.priority = i;
+    if (menuItems[i].spec.children) {
+      resetMenuItemsTreePriority(menuItems[i].spec.children);
+    }
+  }
+  return menuItems;
 }
 
 export function convertTreeToMenuItems(menuTreeItems: MenuTreeItem[]) {
@@ -185,4 +209,22 @@ export function convertTreeToMenuItems(menuTreeItems: MenuTreeItem[]) {
     menuItems.push(node);
   });
   return menuItems;
+}
+
+export function getMenuTreeItemNames(menuTreeItems: MenuTreeItem[]) {
+  const names: string[] = [];
+  const convertMenuItem = (node: MenuTreeItem | undefined) => {
+    if (!node) {
+      return;
+    }
+    names.push(node.metadata.name);
+    const children = node.spec.children || [];
+    children.forEach((child) => {
+      convertMenuItem(child);
+    });
+  };
+  menuTreeItems.forEach((node) => {
+    convertMenuItem(node);
+  });
+  return names;
 }

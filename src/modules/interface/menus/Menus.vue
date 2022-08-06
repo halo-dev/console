@@ -14,7 +14,11 @@ import { apiClient } from "@halo-dev/admin-shared";
 import type { Menu, MenuItem } from "@halo-dev/api-client";
 import cloneDeep from "lodash.clonedeep";
 import type { MenuTreeItem } from "./utils";
-import { buildMenuItemsTree, convertTreeToMenuItems } from "./utils";
+import {
+  buildMenuItemsTree,
+  convertTreeToMenuItems,
+  resetMenuItemsTreePriority,
+} from "./utils";
 import { useDebounceFn } from "@vueuse/core";
 
 const menuItems = ref<MenuItem[]>([] as MenuItem[]);
@@ -39,7 +43,6 @@ const handleFetchMenuItems = async () => {
       [`name=(${menuItemNames.join(",")})`]
     );
     menuItems.value = data.items;
-
     // Build the menu tree
     menuTreeItems.value = buildMenuItemsTree(data.items);
   } catch (e) {
@@ -78,7 +81,8 @@ const onMenuItemSaved = async (menuItem: MenuItem) => {
 };
 
 const handleUpdateInBatch = useDebounceFn(async () => {
-  const menuItemsToUpdate = convertTreeToMenuItems(menuTreeItems.value);
+  const menuTreeItemsToUpdate = resetMenuItemsTreePriority(menuTreeItems.value);
+  const menuItemsToUpdate = convertTreeToMenuItems(menuTreeItemsToUpdate);
   console.log(menuItemsToUpdate);
   try {
     const promises = menuItemsToUpdate.map((menuItem) =>
@@ -91,6 +95,7 @@ const handleUpdateInBatch = useDebounceFn(async () => {
   } catch (e) {
     console.log("Failed to update menu items", e);
   } finally {
+    await menuListRef.value.handleFetchMenus();
     await handleFetchMenuItems();
   }
 }, 500);
