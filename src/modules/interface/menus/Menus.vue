@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import {
   IconListSettings,
+  useDialog,
   VButton,
   VCard,
   VPageHeader,
@@ -18,6 +19,7 @@ import {
   buildMenuItemsTree,
   convertMenuTreeItemToMenuItem,
   convertTreeToMenuItems,
+  getChildrenNames,
   resetMenuItemsTreePriority,
 } from "./utils";
 import { useDebounceFn } from "@vueuse/core";
@@ -28,6 +30,8 @@ const selectedMenu = ref<Menu | undefined>();
 const selectedMenuItem = ref<MenuItem | null>(null);
 const menuListRef = ref();
 const menuItemEditingModal = ref();
+
+const dialog = useDialog();
 
 const handleFetchMenuItems = async () => {
   try {
@@ -40,7 +44,7 @@ const handleFetchMenuItems = async () => {
     const { data } = await apiClient.extension.menuItem.listv1alpha1MenuItem(
       0,
       0,
-      undefined,
+      [],
       [`name=(${menuItemNames.join(",")})`]
     );
     menuItems.value = data.items;
@@ -100,6 +104,40 @@ const handleUpdateInBatch = useDebounceFn(async () => {
     await handleFetchMenuItems();
   }
 }, 500);
+
+const handleDelete = async (menuItem: MenuTreeItem) => {
+  dialog.info({
+    title: "是否确定删除该菜单？",
+    description: "删除后将无法恢复",
+    confirmType: "danger",
+    onConfirm: async () => {
+      await apiClient.extension.menuItem.deletev1alpha1MenuItem(
+        menuItem.metadata.name
+      );
+
+      const childrenNames = getChildrenNames(menuItem);
+
+      if (childrenNames.length) {
+        setTimeout(() => {
+          dialog.info({
+            title: "检查到当前菜单下包含子菜单，是否删除？",
+            description: "如果选择否，那么所有子菜单将转移到一级菜单",
+            confirmType: "danger",
+            onConfirm: async () => {
+              const promises = childrenNames.map((name) =>
+                apiClient.extension.menuItem.deletev1alpha1MenuItem(name)
+              );
+              await Promise.all(promises);
+            },
+          });
+        }, 200);
+      }
+
+      await menuListRef.value.handleFetchMenus();
+      await handleFetchMenuItems();
+    },
+  });
+};
 </script>
 <template>
   <MenuItemEditingModal
@@ -153,6 +191,7 @@ const handleUpdateInBatch = useDebounceFn(async () => {
           <MenuItemListItem
             :menu-tree-items="menuTreeItems"
             @change="handleUpdateInBatch"
+            @delete="handleDelete"
             @open-editing="handleOpenEditingModal"
           />
         </VCard>

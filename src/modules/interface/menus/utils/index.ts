@@ -226,6 +226,17 @@ export function convertTreeToMenuItems(menuTreeItems: MenuTreeItem[]) {
   return menuItems;
 }
 
+export function getChildrenNames(menuTreeItem: MenuTreeItem): string[] {
+  const childrenNames: string[] = [];
+  if (menuTreeItem.spec.children) {
+    menuTreeItem.spec.children.forEach((child) => {
+      childrenNames.push(child.metadata.name);
+      childrenNames.push(...getChildrenNames(child));
+    });
+  }
+  return childrenNames;
+}
+
 /**
  * Convert {@link MenuItem} to {@link MenuTreeItem} with tree structure children.
  *
