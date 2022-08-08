@@ -60,10 +60,6 @@ const handleOpenEditingModal = (menuItem: MenuTreeItem) => {
   menuItemEditingModal.value = true;
 };
 
-const onMenuSelected = () => {
-  handleFetchMenuItems();
-};
-
 const onMenuItemSaved = async (menuItem: MenuItem) => {
   const menuToUpdate = cloneDeep(selectedMenu.value);
 
@@ -149,9 +145,6 @@ const handleDelete = async (menuItem: MenuTreeItem) => {
     <template #icon>
       <IconListSettings class="mr-2 self-center" />
     </template>
-    <template #actions>
-      <VButton type="secondary">重建索引</VButton>
-    </template>
   </VPageHeader>
   <div class="m-0 md:m-4">
     <div class="flex flex-col gap-4 sm:flex-row">
@@ -159,7 +152,7 @@ const handleDelete = async (menuItem: MenuTreeItem) => {
         <MenuList
           ref="menuListRef"
           v-model:selected-menu="selectedMenu"
-          @select="onMenuSelected"
+          @select="handleFetchMenuItems"
         />
       </div>
       <div class="flex-1">

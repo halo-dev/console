@@ -1,4 +1,5 @@
 import type { MenuItem, MenuItemSpec } from "@halo-dev/api-client";
+import cloneDeep from "lodash.clonedeep";
 
 export interface MenuTreeItemSpec extends Omit<MenuItemSpec, "children"> {
   children: MenuTreeItem[];
@@ -116,10 +117,12 @@ export interface MenuTreeItem extends Omit<MenuItem, "spec"> {
  * @param menuItems
  */
 export function buildMenuItemsTree(menuItems: MenuItem[]): MenuTreeItem[] {
+  const menuItemsToUpdate = cloneDeep(menuItems);
+
   const menuItemsMap = {};
   const parentMap = {};
 
-  menuItems.forEach((menuItem) => {
+  menuItemsToUpdate.forEach((menuItem) => {
     menuItemsMap[menuItem.metadata.name] = menuItem;
     // @ts-ignore
     menuItem.spec.children.forEach((child) => {
@@ -129,14 +132,14 @@ export function buildMenuItemsTree(menuItems: MenuItem[]): MenuTreeItem[] {
     menuItem.spec.children = [];
   });
 
-  menuItems.forEach((menuItem) => {
+  menuItemsToUpdate.forEach((menuItem) => {
     const parentName = parentMap[menuItem.metadata.name];
     if (parentName && menuItemsMap[parentName]) {
       menuItemsMap[parentName].spec.children.push(menuItem);
     }
   });
 
-  const menuTreeItems = menuItems.filter(
+  const menuTreeItems = menuItemsToUpdate.filter(
     (node) => parentMap[node.metadata.name] === undefined
   );
 
@@ -228,35 +231,19 @@ export function convertTreeToMenuItems(menuTreeItems: MenuTreeItem[]) {
 
 export function getChildrenNames(menuTreeItem: MenuTreeItem): string[] {
   const childrenNames: string[] = [];
-  if (menuTreeItem.spec.children) {
-    menuTreeItem.spec.children.forEach((child) => {
-      childrenNames.push(child.metadata.name);
-      childrenNames.push(...getChildrenNames(child));
-    });
-  }
-  return childrenNames;
-}
 
-/**
- * Convert {@link MenuItem} to {@link MenuTreeItem} with tree structure children.
- *
- * @param menuItems All menu items
- * @param menuItem Current node item
- */
-export function convertMenuItemToMenuTreeItem(
-  menuItems: MenuItem[],
-  menuItem: MenuItem
-): MenuTreeItem {
-  const children = menuItems.filter((item) => {
-    return menuItem.spec.children?.has(item.metadata.name);
-  });
-  return {
-    ...menuItem,
-    spec: {
-      ...menuItem.spec,
-      children: buildMenuItemsTree(children),
-    },
-  };
+  function getChildrenNamesRecursive(menuTreeItem: MenuTreeItem) {
+    if (menuTreeItem.spec.children) {
+      menuTreeItem.spec.children.forEach((child) => {
+        childrenNames.push(child.metadata.name);
+        getChildrenNamesRecursive(child);
+      });
+    }
+  }
+
+  getChildrenNamesRecursive(menuTreeItem);
+
+  return childrenNames;
 }
 
 /**
