@@ -33,6 +33,7 @@ function onDelete(menuItem: MenuTreeItem) {
     :list="menuTreeItems"
     class="box-border h-full w-full divide-y divide-gray-100"
     group="menu-item"
+    handle=".drag-element"
     item-key="metadata.name"
     tag="ul"
     @change="onChange"
@@ -42,14 +43,16 @@ function onDelete(menuItem: MenuTreeItem) {
     <template #item="{ element: menuItem }">
       <li>
         <div
-          class="relative block cursor-pointer px-4 py-3 transition-all hover:bg-gray-50"
+          class="group relative block cursor-pointer px-4 py-3 transition-all hover:bg-gray-50"
         >
+          <div
+            class="drag-element absolute inset-y-0 left-0 flex hidden w-3.5 cursor-move items-center bg-gray-100 transition-all hover:bg-gray-200 group-hover:flex"
+          >
+            <IconList class="h-3.5 w-3.5" />
+          </div>
           <div class="relative flex flex-row items-center">
             <div class="flex-1">
               <div class="flex flex-row items-center">
-                <div class="drag-element mr-2 cursor-move">
-                  <IconList class="h-4 w-4" />
-                </div>
                 <span class="truncate text-sm font-medium text-gray-900">
                   {{ menuItem.spec.displayName }}
                 </span>
