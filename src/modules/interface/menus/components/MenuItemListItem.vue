@@ -87,13 +87,19 @@ function onDelete(menuItem: MenuTreeItem) {
                   <div class="w-48 p-2">
                     <VSpace class="w-full" direction="column">
                       <VButton
+                        v-close-popper
                         block
                         type="secondary"
                         @click="onOpenEditingModal(menuItem)"
                       >
                         修改
                       </VButton>
-                      <VButton block type="danger" @click="onDelete(menuItem)">
+                      <VButton
+                        v-close-popper
+                        block
+                        type="danger"
+                        @click="onDelete(menuItem)"
+                      >
                         删除
                       </VButton>
                     </VSpace>

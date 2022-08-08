@@ -119,6 +119,10 @@ defineExpose({
         class="relative flex items-center p-4"
         @click="handleSelect(menu)"
       >
+        <div
+          v-if="selectedMenu?.metadata.name === menu.metadata.name"
+          class="absolute inset-y-0 left-0 w-0.5 bg-primary"
+        ></div>
         <span class="flex flex-1 cursor-pointer flex-col gap-y-1">
           <span class="block text-sm font-medium">
             {{ menu.spec?.displayName }}
@@ -148,13 +152,19 @@ defineExpose({
               <div class="w-48 p-2">
                 <VSpace class="w-full" direction="column">
                   <VButton
+                    v-close-popper
                     block
                     type="secondary"
                     @click="handleOpenEditingModal(menu)"
                   >
                     修改
                   </VButton>
-                  <VButton block type="danger" @click="handleDeleteMenu(menu)">
+                  <VButton
+                    v-close-popper
+                    block
+                    type="danger"
+                    @click="handleDeleteMenu(menu)"
+                  >
                     删除
                   </VButton>
                 </VSpace>
