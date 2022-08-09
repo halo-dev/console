@@ -32,6 +32,7 @@ function onDelete(menuItem: MenuTreeItem) {
   <draggable
     :list="menuTreeItems"
     class="box-border h-full w-full divide-y divide-gray-100"
+    ghost-class="opacity-50"
     group="menu-item"
     handle=".drag-element"
     item-key="metadata.name"

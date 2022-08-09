@@ -84,7 +84,6 @@ const onMenuItemSaved = async (menuItem: MenuItem) => {
 const handleUpdateInBatch = useDebounceFn(async () => {
   const menuTreeItemsToUpdate = resetMenuItemsTreePriority(menuTreeItems.value);
   const menuItemsToUpdate = convertTreeToMenuItems(menuTreeItemsToUpdate);
-  console.log(menuItemsToUpdate);
   try {
     const promises = menuItemsToUpdate.map((menuItem) =>
       apiClient.extension.menuItem.updatev1alpha1MenuItem(
