@@ -39,7 +39,7 @@ export default defineConfig({
           "vue-router": "VueRouter",
         },
         exports: "named",
-        generatedCode: "es5"
+        generatedCode: "es5",
       },
     },
     sourcemap: true,
