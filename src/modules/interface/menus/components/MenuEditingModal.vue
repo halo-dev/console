@@ -35,7 +35,7 @@ const initialFormState: Menu = {
   },
 };
 
-const formState = ref<Menu>(initialFormState);
+const formState = ref<Menu>(cloneDeep(initialFormState));
 const saving = ref(false);
 
 const isUpdateMode = computed(() => {
@@ -86,6 +86,7 @@ watch(props, (newVal) => {
     return;
   }
   formState.value = cloneDeep(initialFormState);
+  formState.value.metadata.name = uuid();
 });
 </script>
 <template>

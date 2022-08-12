@@ -23,11 +23,13 @@ const props = defineProps({
 const emit = defineEmits(["select", "update:selectedMenu"]);
 
 const menus = ref<Menu[]>([] as Menu[]);
+const selectedMenuToUpdate = ref<Menu | null>(null);
 const menuEditingModal = ref<boolean>(false);
 
 const dialog = useDialog();
 
 const handleFetchMenus = async () => {
+  selectedMenuToUpdate.value = null;
   try {
     const { data } = await apiClient.extension.menu.listv1alpha1Menu();
     menus.value = data.items;
@@ -77,8 +79,7 @@ const handleDeleteMenu = async (menu: Menu) => {
 };
 
 const handleOpenEditingModal = (menu: Menu | null) => {
-  emit("update:selectedMenu", menu);
-  emit("select", menu);
+  selectedMenuToUpdate.value = menu;
   menuEditingModal.value = true;
 };
 
@@ -105,7 +106,7 @@ defineExpose({
 <template>
   <MenuEditingModal
     v-model:visible="menuEditingModal"
-    :menu="selectedMenu"
+    :menu="selectedMenuToUpdate"
     @close="handleFetchMenus"
   />
   <VCard :bodyClass="['!p-0']" title="菜单">

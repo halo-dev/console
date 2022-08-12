@@ -138,6 +138,7 @@ const handleDelete = async (menuItem: MenuTreeItem) => {
   <MenuItemEditingModal
     v-model:visible="menuItemEditingModal"
     :menu-item="selectedMenuItem"
+    @close="selectedMenuItem = null"
     @saved="onMenuItemSaved"
   />
   <VPageHeader title="菜单">
