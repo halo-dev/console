@@ -28,18 +28,6 @@ const initialFormState: MenuItem = {
     href: "",
     children: new Set([]),
     priority: 0,
-    categoryRef: {
-      name: "",
-    },
-    tagRef: {
-      name: "",
-    },
-    postRef: {
-      name: "",
-    },
-    pageRef: {
-      name: "",
-    },
   },
   apiVersion: "v1alpha1",
   kind: "MenuItem",
@@ -59,7 +47,7 @@ const handleSaveMenuItem = async () => {
   try {
     saving.value = true;
 
-    // TODO
+    // TODO 需要后端设置为 Array
     // @ts-ignore
     formState.value.spec.children = Array.from(formState.value.spec.children);
 
