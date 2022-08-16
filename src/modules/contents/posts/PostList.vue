@@ -107,6 +107,7 @@ onMounted(() => {
     <template #actions>
       <VSpace>
         <VButton :route="{ name: 'Categories' }" size="sm">分类</VButton>
+        <VButton :route="{ name: 'Tags' }" size="sm">标签</VButton>
         <VButton :route="{ name: 'PostEditor' }" type="secondary">
           <template #icon>
             <IconAddCircle class="h-full w-full" />

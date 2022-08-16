@@ -1,11 +1,16 @@
 <script lang="ts" setup>
-import { ref } from "vue";
+// core libs
+import { onMounted, ref } from "vue";
+import { apiClient } from "@halo-dev/admin-shared";
+
+// components
 import {
   IconAddCircle,
   IconBookRead,
   IconGrid,
   IconList,
   IconSettings,
+  useDialog,
   VButton,
   VCard,
   VPageHeader,
@@ -14,7 +19,9 @@ import {
 } from "@halo-dev/components";
 import TagEditingModal from "./components/TagEditingModal.vue";
 
-const editingModal = ref(false);
+// types
+import type { Tag } from "@halo-dev/api-client";
+
 const viewTypes = [
   {
     name: "list",
@@ -27,22 +34,99 @@ const viewTypes = [
 ];
 
 const viewType = ref("list");
+
+const dialog = useDialog();
+
+const editingModal = ref(false);
+const tags = ref<Tag[]>([] as Tag[]);
+const selectedTag = ref<Tag | null>(null);
+
+const handleFetchTags = async () => {
+  selectedTag.value = null;
+  try {
+    const { data } =
+      await apiClient.extension.tag.listcontentHaloRunV1alpha1Tag(0, 0);
+
+    tags.value = data.items;
+  } catch (e) {
+    console.error("Failed to fetch tags", e);
+  }
+};
+
+const handleDelete = async (tag: Tag) => {
+  dialog.warning({
+    title: "确定要删除该标签吗？",
+    description: "删除此标签之后，对应文章的关联将被解除。该操作不可恢复。",
+    confirmType: "danger",
+    onConfirm: async () => {
+      try {
+        await apiClient.extension.tag.deletecontentHaloRunV1alpha1Tag(
+          tag.metadata.name
+        );
+      } catch (e) {
+        console.error("Failed to delete tag", e);
+      } finally {
+        await handleFetchTags();
+      }
+    },
+  });
+};
+
+const handleOpenEditingModal = (tag: Tag | null) => {
+  selectedTag.value = tag;
+  editingModal.value = true;
+};
+
+const handleSelectPrevious = () => {
+  if (!selectedTag.value) {
+    selectedTag.value = tags.value[0];
+    return;
+  }
+  const currentIndex = tags.value.findIndex(
+    (tag) => tag.metadata.name === selectedTag.value?.metadata.name
+  );
+
+  if (currentIndex > 0) {
+    selectedTag.value = tags.value[currentIndex - 1];
+  }
+};
+
+const handleSelectNext = () => {
+  if (!selectedTag.value) {
+    selectedTag.value = tags.value[0];
+    return;
+  }
+  const currentIndex = tags.value.findIndex(
+    (tag) => tag.metadata.name === selectedTag.value?.metadata.name
+  );
+  if (currentIndex !== tags.value.length - 1) {
+    selectedTag.value = tags.value[currentIndex + 1];
+  }
+};
+
+onMounted(() => {
+  handleFetchTags();
+});
 </script>
 <template>
-  <TagEditingModal v-model:visible="editingModal" />
+  <TagEditingModal
+    v-model:visible="editingModal"
+    :tag="selectedTag"
+    @close="handleFetchTags"
+    @next="handleSelectNext"
+    @previous="handleSelectPrevious"
+  />
   <VPageHeader title="文章标签">
     <template #icon>
       <IconBookRead class="mr-2 self-center" />
     </template>
     <template #actions>
-      <VSpace>
-        <VButton type="secondary" @click="editingModal = true">
-          <template #icon>
-            <IconAddCircle class="h-full w-full" />
-          </template>
-          新建
-        </VButton>
-      </VSpace>
+      <VButton type="secondary" @click="editingModal = true">
+        <template #icon>
+          <IconAddCircle class="h-full w-full" />
+        </template>
+        新建
+      </VButton>
     </template>
   </VPageHeader>
   <div class="m-0 md:m-4">
@@ -53,7 +137,9 @@ const viewType = ref("list");
             class="relative flex flex-col items-start sm:flex-row sm:items-center"
           >
             <div class="flex w-full flex-1 sm:w-auto">
-              <span class="text-base font-medium"> {{ 10 }} 个标签 </span>
+              <span class="text-base font-medium">
+                {{ tags.length }} 个标签
+              </span>
             </div>
             <div class="flex flex-row gap-2">
               <div
@@ -76,18 +162,25 @@ const viewType = ref("list");
         class="box-border h-full w-full divide-y divide-gray-100"
         role="list"
       >
-        <li v-for="i in 10" :key="i">
+        <li v-for="(tag, index) in tags" :key="index">
           <div
+            :class="{
+              'bg-gray-100': selectedTag?.metadata.name === tag.metadata.name,
+            }"
             class="relative block cursor-pointer px-4 py-3 transition-all hover:bg-gray-50"
           >
+            <div
+              v-show="selectedTag?.metadata.name === tag.metadata.name"
+              class="absolute inset-y-0 left-0 w-0.5 bg-primary"
+            ></div>
             <div class="relative flex flex-row items-center">
               <div class="flex-1">
                 <div class="flex flex-col sm:flex-row">
-                  <VTag>主题</VTag>
+                  <VTag>{{ tag.spec.displayName }}</VTag>
                 </div>
                 <div class="mt-1 flex">
                   <span class="text-xs text-gray-500">
-                    https://halo.run/tags/themes
+                    /tags/{{ tag.metadata.name }}
                   </span>
                 </div>
               </div>
@@ -95,15 +188,28 @@ const viewType = ref("list");
                 <div
                   class="inline-flex flex-col flex-col-reverse items-end gap-4 sm:flex-row sm:items-center sm:gap-6"
                 >
+                  <FloatingTooltip
+                    v-if="tag.metadata.deletionTimestamp"
+                    class="mr-4 hidden items-center sm:flex"
+                  >
+                    <div
+                      class="inline-flex h-1.5 w-1.5 rounded-full bg-red-600"
+                    >
+                      <span
+                        class="inline-block h-1.5 w-1.5 animate-ping rounded-full bg-red-600"
+                      ></span>
+                    </div>
+                    <template #popper> 删除中</template>
+                  </FloatingTooltip>
                   <div
                     class="cursor-pointer text-sm text-gray-500 hover:text-gray-900"
                   >
                     20 篇文章
                   </div>
-                  <time class="text-sm text-gray-500" datetime="2020-01-07">
-                    2020-01-07
+                  <time class="text-sm text-gray-500">
+                    {{ tag.metadata.creationTimestamp }}
                   </time>
-                  <span class="cursor-pointer">
+                  <span class="self-center">
                     <FloatingDropdown>
                       <IconSettings
                         class="cursor-pointer transition-all hover:text-blue-600"
@@ -115,11 +221,16 @@ const viewType = ref("list");
                               v-close-popper
                               block
                               type="secondary"
-                              @click="editingModal = true"
+                              @click="handleOpenEditingModal(tag)"
                             >
                               修改
                             </VButton>
-                            <VButton v-close-popper block type="danger">
+                            <VButton
+                              v-close-popper
+                              block
+                              type="danger"
+                              @click="handleDelete(tag)"
+                            >
                               删除
                             </VButton>
                           </VSpace>
@@ -135,7 +246,13 @@ const viewType = ref("list");
       </ul>
 
       <div v-else class="flex flex-wrap gap-3 p-4" role="list">
-        <VTag v-for="i in 100" :key="i">主题(10)</VTag>
+        <VTag
+          v-for="(tag, index) in tags"
+          :key="index"
+          @click="handleOpenEditingModal(tag)"
+        >
+          {{ tag.spec.displayName }}(10)
+        </VTag>
       </div>
     </VCard>
   </div>
