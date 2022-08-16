@@ -12,33 +12,29 @@ import {
   VTag,
 } from "@halo-dev/components";
 import PostSettingModal from "./components/PostSettingModal.vue";
-import { posts } from "./posts-mock";
-import { computed, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import type { Post } from "@halo-dev/admin-api";
+import type { Post, User } from "@halo-dev/api-client";
 import { apiClient } from "@halo-dev/admin-shared";
-import type { User } from "@halo-dev/api-client";
-
-const postsRef = ref(
-  // eslint-disable-next-line
-  posts.map((item: any) => {
-    return {
-      ...item,
-      checked: false,
-    };
-  })
-);
 
 const router = useRouter();
+
+const posts = ref<Post[]>([] as Post[]);
 const checkAll = ref(false);
 const postSettings = ref(false);
-// eslint-disable-next-line
-const selected = ref<Post | Record<string, unknown> | null>({});
+const selected = ref<Post | null>(null);
 const users = ref<User[]>([]);
 
-const checkedCount = computed(() => {
-  return postsRef.value.filter((post) => post.checked).length;
-});
+const handleFetchPosts = async () => {
+  try {
+    const { data } =
+      await apiClient.extension.post.listcontentHaloRunV1alpha1Post();
+
+    posts.value = data.items;
+  } catch (e) {
+    console.error("Failed to fetch posts", e);
+  }
+};
 
 const handleFetchUsers = async () => {
   try {
@@ -49,21 +45,14 @@ const handleFetchUsers = async () => {
   }
 };
 
-const handleCheckAll = () => {
-  postsRef.value.forEach((item) => {
-    item.checked = checkAll.value;
-  });
-};
-
-// eslint-disable-next-line
-const handleSelect = (post: any) => {
+const handleSelect = (post: Post) => {
   selected.value = post;
   postSettings.value = true;
 };
 
 const handleSelectPrevious = () => {
-  const currentIndex = posts.findIndex(
-    (post) => post.id === selected.value?.id
+  const currentIndex = posts.value.findIndex(
+    (post) => post.metadata.name === selected.value?.metadata.name
   );
   if (currentIndex > 0) {
     selected.value = posts[currentIndex - 1];
@@ -71,25 +60,25 @@ const handleSelectPrevious = () => {
 };
 
 const handleSelectNext = () => {
-  const currentIndex = posts.findIndex(
-    (post) => post.id === selected.value?.id
+  const currentIndex = posts.value.findIndex(
+    (post) => post.metadata.name === selected.value?.metadata.name
   );
-  if (currentIndex < posts.length - 1) {
+  if (currentIndex < posts.value.length - 1) {
     selected.value = posts[currentIndex + 1];
   }
 };
 
-// eslint-disable-next-line
-const handleRouteToEditor = (post: any) => {
+const handleRouteToEditor = (post: Post) => {
   router.push({
     name: "PostEditor",
     params: {
-      id: post.id,
+      id: post.metadata.name,
     },
   });
 };
 
 onMounted(() => {
+  handleFetchPosts();
   handleFetchUsers();
 });
 </script>
@@ -130,12 +119,11 @@ onMounted(() => {
                 v-model="checkAll"
                 class="h-4 w-4 rounded border-gray-300 text-indigo-600"
                 type="checkbox"
-                @change="handleCheckAll()"
               />
             </div>
             <div class="flex w-full flex-1 sm:w-auto">
               <FormKit
-                v-if="checkedCount <= 0"
+                v-if="!checkAll"
                 placeholder="输入关键词搜索"
                 type="text"
               ></FormKit>
@@ -329,21 +317,20 @@ onMounted(() => {
         </div>
       </template>
       <ul class="box-border h-full w-full divide-y divide-gray-100" role="list">
-        <li v-for="(post, index) in postsRef" :key="index">
+        <li v-for="(post, index) in posts" :key="index">
           <div
             :class="{
-              'bg-gray-100': selected?.id === post.id || post.checked,
+              'bg-gray-100': selected?.metadata.name === post.metadata.name,
             }"
             class="relative block cursor-pointer px-4 py-3 transition-all hover:bg-gray-50"
           >
             <div
-              v-show="selected?.id === post.id || post.checked"
+              v-show="selected?.metadata.name === post.metadata.name"
               class="absolute inset-y-0 left-0 w-0.5 bg-primary"
             ></div>
             <div class="relative flex flex-row items-center">
               <div class="mr-4 hidden items-center sm:flex">
                 <input
-                  v-model="post.checked"
                   class="h-4 w-4 rounded border-gray-300 text-indigo-600"
                   type="checkbox"
                 />
@@ -354,22 +341,21 @@ onMounted(() => {
                     class="mr-0 truncate text-sm font-medium text-gray-900 sm:mr-2"
                     @click="handleRouteToEditor(post)"
                   >
-                    {{ post.title }}
+                    {{ post.spec.title }}
                   </span>
                   <VSpace class="mt-1 sm:mt-0">
-                    <VTag v-for="(tag, tagIndex) in post.tags" :key="tagIndex">
-                      {{ tag.name }}
+                    <VTag
+                      v-for="(tag, tagIndex) in post.spec.tags"
+                      :key="tagIndex"
+                    >
+                      {{ tag }}
                     </VTag>
                   </VSpace>
                 </div>
                 <div class="mt-1 flex">
                   <VSpace>
-                    <span class="text-xs text-gray-500"
-                      >访问量 {{ post.visits }}</span
-                    >
-                    <span class="text-xs text-gray-500"
-                      >评论 {{ post.commentCount }}</span
-                    >
+                    <span class="text-xs text-gray-500">访问量 0</span>
+                    <span class="text-xs text-gray-500"> 评论 0 </span>
                   </VSpace>
                 </div>
               </div>
@@ -381,8 +367,8 @@ onMounted(() => {
                     class="hidden h-6 w-6 rounded-full ring-2 ring-white sm:inline-block"
                     src="https://ryanc.cc/avatar"
                   />
-                  <time class="text-sm text-gray-500" datetime="2020-01-07">
-                    2020-01-07
+                  <time class="text-sm text-gray-500">
+                    {{ post.metadata.creationTimestamp }}
                   </time>
                   <span class="cursor-pointer">
                     <IconSettings @click.stop="handleSelect(post)" />
