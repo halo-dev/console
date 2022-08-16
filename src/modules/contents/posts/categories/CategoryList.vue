@@ -18,7 +18,13 @@ import CategoryListItem from "./components/CategoryListItem.vue";
 // types
 import type { Category } from "@halo-dev/api-client";
 import type { CategoryTree } from "./utils";
-import { buildCategoriesTree, convertCategoryTreeToCategory } from "./utils";
+import {
+  buildCategoriesTree,
+  convertCategoryTreeToCategory,
+  convertTreeToCategories,
+  resetCategoriesTreePriority,
+} from "./utils";
+import { useDebounceFn } from "@vueuse/core";
 
 const dialog = useDialog();
 
@@ -43,9 +49,25 @@ const handleFetchCategories = async () => {
   }
 };
 
-const handleUpdateInBatch = async () => {
-  // TODO
-};
+const handleUpdateInBatch = useDebounceFn(async () => {
+  const categoriesTreeToUpdate = resetCategoriesTreePriority(
+    categoriesTree.value
+  );
+  const categoriesToUpdate = convertTreeToCategories(categoriesTreeToUpdate);
+  try {
+    const promises = categoriesToUpdate.map((category) =>
+      apiClient.extension.category.updatecontentHaloRunV1alpha1Category(
+        category.metadata.name,
+        category
+      )
+    );
+    await Promise.all(promises);
+  } catch (e) {
+    console.log("Failed to update categories", e);
+  } finally {
+    await handleFetchCategories();
+  }
+}, 500);
 
 const handleDelete = async (category: CategoryTree) => {
   dialog.warning({
