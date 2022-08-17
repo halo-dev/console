@@ -14,12 +14,21 @@ import {
 import PostSettingModal from "./components/PostSettingModal.vue";
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import type { Post, User } from "@halo-dev/api-client";
+import type { Post, PostList, User } from "@halo-dev/api-client";
 import { apiClient } from "@halo-dev/admin-shared";
 
 const router = useRouter();
 
-const posts = ref<Post[]>([] as Post[]);
+const posts = ref<PostList>({
+  page: 1,
+  size: 20,
+  total: 0,
+  items: [],
+  first: true,
+  last: false,
+  hasNext: false,
+  hasPrevious: false,
+});
 const checkAll = ref(false);
 const postSettings = ref(false);
 const selected = ref<Post | null>(null);
@@ -28,12 +37,27 @@ const users = ref<User[]>([]);
 const handleFetchPosts = async () => {
   try {
     const { data } =
-      await apiClient.extension.post.listcontentHaloRunV1alpha1Post(0, 0);
+      await apiClient.extension.post.listcontentHaloRunV1alpha1Post(
+        posts.value.page,
+        posts.value.size
+      );
 
-    posts.value = data.items;
+    posts.value = data;
   } catch (e) {
     console.error("Failed to fetch posts", e);
   }
+};
+
+const handlePaginationChange = async ({
+  page,
+  size,
+}: {
+  page: number;
+  size: number;
+}) => {
+  posts.value.page = page;
+  posts.value.size = size;
+  await handleFetchPosts();
 };
 
 const handleFetchUsers = async () => {
@@ -51,7 +75,7 @@ const handleSelect = (post: Post) => {
 };
 
 const handleSelectPrevious = () => {
-  const currentIndex = posts.value.findIndex(
+  const currentIndex = posts.value.items.findIndex(
     (post) => post.metadata.name === selected.value?.metadata.name
   );
   if (currentIndex > 0) {
@@ -60,10 +84,10 @@ const handleSelectPrevious = () => {
 };
 
 const handleSelectNext = () => {
-  const currentIndex = posts.value.findIndex(
+  const currentIndex = posts.value.items.findIndex(
     (post) => post.metadata.name === selected.value?.metadata.name
   );
-  if (currentIndex < posts.value.length - 1) {
+  if (currentIndex < posts.value.items.length - 1) {
     selected.value = posts[currentIndex + 1];
   }
 };
@@ -317,7 +341,7 @@ onMounted(() => {
         </div>
       </template>
       <ul class="box-border h-full w-full divide-y divide-gray-100" role="list">
-        <li v-for="(post, index) in posts" :key="index">
+        <li v-for="(post, index) in posts.items" :key="index">
           <div
             :class="{
               'bg-gray-100': selected?.metadata.name === post.metadata.name,
@@ -382,7 +406,12 @@ onMounted(() => {
 
       <template #footer>
         <div class="bg-white sm:flex sm:items-center sm:justify-end">
-          <VPagination :page="1" :size="10" :total="20" />
+          <VPagination
+            :page="posts.page"
+            :size="posts.size"
+            :total="posts.total"
+            @change="handlePaginationChange"
+          />
         </div>
       </template>
     </VCard>

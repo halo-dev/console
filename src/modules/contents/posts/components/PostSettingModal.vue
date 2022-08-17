@@ -211,12 +211,13 @@ onMounted(() => {
             type="radio"
           ></FormKit>
           <FormKit
+            v-model="formState.spec.pinned"
             :options="[
               { label: '是', value: true },
               { label: '否', value: false },
             ]"
             label="是否置顶"
-            name="topPriority"
+            name="pinned"
             type="radio"
           ></FormKit>
           <FormKit
