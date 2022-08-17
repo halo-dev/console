@@ -17,7 +17,7 @@ import {
   VSpace,
 } from "@halo-dev/components";
 import TagEditingModal from "./components/TagEditingModal.vue";
-import PostTag from "../../posts/components/PostTag.vue";
+import PostTag from "./components/PostTag.vue";
 
 // types
 import type { Tag } from "@halo-dev/api-client";
