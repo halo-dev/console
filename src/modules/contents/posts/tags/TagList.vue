@@ -176,7 +176,9 @@ onMounted(() => {
             <div class="relative flex flex-row items-center">
               <div class="flex-1">
                 <div class="flex flex-col sm:flex-row">
-                  <VTag>{{ tag.spec.displayName }}</VTag>
+                  <VTag :styles="{ background: tag.spec.color }">
+                    {{ tag.spec.displayName }}
+                  </VTag>
                 </div>
                 <div class="mt-1 flex">
                   <span class="text-xs text-gray-500">
@@ -249,6 +251,7 @@ onMounted(() => {
         <VTag
           v-for="(tag, index) in tags"
           :key="index"
+          :styles="{ background: tag.spec.color }"
           @click="handleOpenEditingModal(tag)"
         >
           {{ tag.spec.displayName }}(10)
