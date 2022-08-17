@@ -23,6 +23,7 @@ export function usePostCategory(): usePostCategoryReturn {
 
   const handleFetchCategories = async () => {
     try {
+      loading.value = true;
       const { data } =
         await apiClient.extension.category.listcontentHaloRunV1alpha1Category(
           0,
@@ -32,6 +33,8 @@ export function usePostCategory(): usePostCategoryReturn {
       categoriesTree.value = buildCategoriesTree(data.items);
     } catch (e) {
       console.error("Failed to fetch categories", e);
+    } finally {
+      loading.value = false;
     }
   };
 

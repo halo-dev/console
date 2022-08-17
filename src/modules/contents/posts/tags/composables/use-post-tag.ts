@@ -19,12 +19,15 @@ export function usePostTag(): usePostTagReturn {
 
   const handleFetchTags = async () => {
     try {
+      loading.value = true;
       const { data } =
         await apiClient.extension.tag.listcontentHaloRunV1alpha1Tag(0, 0);
 
       tags.value = data.items;
     } catch (e) {
       console.error("Failed to fetch tags", e);
+    } finally {
+      loading.value = false;
     }
   };
 
