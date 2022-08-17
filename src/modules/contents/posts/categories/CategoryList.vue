@@ -1,13 +1,12 @@
 <script lang="ts" setup>
 // core libs
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import { apiClient } from "@halo-dev/admin-shared";
 
 // components
 import {
   IconAddCircle,
   IconBookRead,
-  useDialog,
   VButton,
   VCard,
   VPageHeader,
@@ -18,36 +17,23 @@ import CategoryListItem from "./components/CategoryListItem.vue";
 // types
 import type { Category } from "@halo-dev/api-client";
 import type { CategoryTree } from "./utils";
+
+// libs
+import { useDebounceFn } from "@vueuse/core";
 import {
-  buildCategoriesTree,
   convertCategoryTreeToCategory,
   convertTreeToCategories,
   resetCategoriesTreePriority,
 } from "./utils";
-import { useDebounceFn } from "@vueuse/core";
 
-const dialog = useDialog();
+// hooks
+import { usePostCategory } from "./composables/use-post-category";
 
 const editingModal = ref(false);
-const categories = ref<Category[]>([] as Category[]);
-const categoriesTree = ref<CategoryTree[]>([] as CategoryTree[]);
 const selectedCategory = ref<Category | null>(null);
 
-const handleFetchCategories = async () => {
-  selectedCategory.value = null;
-
-  try {
-    const { data } =
-      await apiClient.extension.category.listcontentHaloRunV1alpha1Category(
-        0,
-        0
-      );
-    categories.value = data.items;
-    categoriesTree.value = buildCategoriesTree(data.items);
-  } catch (e) {
-    console.error("Failed to fetch categories", e);
-  }
-};
+const { categories, categoriesTree, handleFetchCategories, handleDelete } =
+  usePostCategory();
 
 const handleUpdateInBatch = useDebounceFn(async () => {
   const categoriesTreeToUpdate = resetCategoriesTreePriority(
@@ -69,39 +55,21 @@ const handleUpdateInBatch = useDebounceFn(async () => {
   }
 }, 500);
 
-const handleDelete = async (category: CategoryTree) => {
-  dialog.warning({
-    title: "确定要删除该分类吗？",
-    description: "删除此分类之后，对应文章的关联将被解除。该操作不可恢复。",
-    confirmType: "danger",
-    onConfirm: async () => {
-      try {
-        await apiClient.extension.category.deletecontentHaloRunV1alpha1Category(
-          category.metadata.name
-        );
-      } catch (e) {
-        console.error("Failed to delete tag", e);
-      } finally {
-        await handleFetchCategories();
-      }
-    },
-  });
-};
-
 const handleOpenEditingModal = (category: CategoryTree) => {
   selectedCategory.value = convertCategoryTreeToCategory(category);
   editingModal.value = true;
 };
 
-onMounted(() => {
+const onEditingModalClose = () => {
+  selectedCategory.value = null;
   handleFetchCategories();
-});
+};
 </script>
 <template>
   <CategoryEditingModal
     v-model:visible="editingModal"
     :category="selectedCategory"
-    @close="handleFetchCategories"
+    @close="onEditingModalClose"
   />
   <VPageHeader title="文章分类">
     <template #icon>

@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 // core libs
-import { onMounted, ref } from "vue";
-import { apiClient } from "@halo-dev/admin-shared";
+import { ref } from "vue";
 
 // components
 import {
@@ -10,7 +9,6 @@ import {
   IconGrid,
   IconList,
   IconSettings,
-  useDialog,
   VButton,
   VCard,
   VPageHeader,
@@ -21,6 +19,7 @@ import PostTag from "./components/PostTag.vue";
 
 // types
 import type { Tag } from "@halo-dev/api-client";
+import { usePostTag } from "./composables/use-post-tag";
 
 const viewTypes = [
   {
@@ -35,42 +34,10 @@ const viewTypes = [
 
 const viewType = ref("list");
 
-const dialog = useDialog();
+const { tags, handleFetchTags, handleDelete } = usePostTag();
 
 const editingModal = ref(false);
-const tags = ref<Tag[]>([] as Tag[]);
 const selectedTag = ref<Tag | null>(null);
-
-const handleFetchTags = async () => {
-  selectedTag.value = null;
-  try {
-    const { data } =
-      await apiClient.extension.tag.listcontentHaloRunV1alpha1Tag(0, 0);
-
-    tags.value = data.items;
-  } catch (e) {
-    console.error("Failed to fetch tags", e);
-  }
-};
-
-const handleDelete = async (tag: Tag) => {
-  dialog.warning({
-    title: "确定要删除该标签吗？",
-    description: "删除此标签之后，对应文章的关联将被解除。该操作不可恢复。",
-    confirmType: "danger",
-    onConfirm: async () => {
-      try {
-        await apiClient.extension.tag.deletecontentHaloRunV1alpha1Tag(
-          tag.metadata.name
-        );
-      } catch (e) {
-        console.error("Failed to delete tag", e);
-      } finally {
-        await handleFetchTags();
-      }
-    },
-  });
-};
 
 const handleOpenEditingModal = (tag: Tag | null) => {
   selectedTag.value = tag;
@@ -105,15 +72,16 @@ const handleSelectNext = () => {
   }
 };
 
-onMounted(() => {
+const onEditingModalClose = () => {
+  selectedTag.value = null;
   handleFetchTags();
-});
+};
 </script>
 <template>
   <TagEditingModal
     v-model:visible="editingModal"
     :tag="selectedTag"
-    @close="handleFetchTags"
+    @close="onEditingModalClose"
     @next="handleSelectNext"
     @previous="handleSelectPrevious"
   />

@@ -8,9 +8,11 @@ import {
   VTabItem,
   VTabs,
 } from "@halo-dev/components";
-import { computed, onMounted, ref, watch, watchEffect } from "vue";
-import type { Category, Post, Tag } from "@halo-dev/api-client";
+import { computed, ref, watch, watchEffect } from "vue";
+import type { Post } from "@halo-dev/api-client";
 import cloneDeep from "lodash.clonedeep";
+import { usePostTag } from "@/modules/contents/posts/tags/composables/use-post-tag";
+import { usePostCategory } from "@/modules/contents/posts/categories/composables/use-post-category";
 import { apiClient } from "@halo-dev/admin-shared";
 
 const initialFormState: Post = {
@@ -68,8 +70,8 @@ const emit = defineEmits<{
 const settingActiveId = ref("general");
 const formState = ref<Post>(cloneDeep(initialFormState));
 const saving = ref(false);
-const categories = ref<Category[]>([] as Category[]);
 
+const { categories } = usePostCategory();
 const categoriesMap = computed(() => {
   return categories.value.map((category) => {
     return {
@@ -79,7 +81,7 @@ const categoriesMap = computed(() => {
   });
 });
 
-const tags = ref<Tag[]>([] as Tag[]);
+const { tags } = usePostTag();
 const tagsMap = computed(() => {
   return tags.value.map((tag) => {
     return {
@@ -89,6 +91,10 @@ const tagsMap = computed(() => {
   });
 });
 
+const isUpdateMode = computed(() => {
+  return !!formState.value.metadata.creationTimestamp;
+});
+
 const handleVisibleChange = (visible: boolean) => {
   emit("update:visible", visible);
   if (!visible) {
@@ -96,31 +102,27 @@ const handleVisibleChange = (visible: boolean) => {
   }
 };
 
-const handleSave = () => {
-  emit("saved", formState.value);
-  handleVisibleChange(false);
-};
-
-const handleFetchCategories = async () => {
+const handleSave = async () => {
   try {
-    const { data } =
-      await apiClient.extension.category.listcontentHaloRunV1alpha1Category(
-        0,
-        0
-      );
-    categories.value = data.items;
+    saving.value = true;
+    if (isUpdateMode.value) {
+      const { data } =
+        await apiClient.extension.post.updatecontentHaloRunV1alpha1Post(
+          formState.value.metadata.name,
+          formState.value
+        );
+      emit("saved", data);
+    } else {
+      const { data } =
+        await apiClient.extension.post.createcontentHaloRunV1alpha1Post(
+          formState.value
+        );
+      emit("saved", data);
+    }
   } catch (e) {
-    console.error("Failed to fetch categories", e);
-  }
-};
-const handleFetchTags = async () => {
-  try {
-    const { data } =
-      await apiClient.extension.tag.listcontentHaloRunV1alpha1Tag(0, 0);
-
-    tags.value = data.items;
-  } catch (e) {
-    console.error("Failed to fetch tags", e);
+    console.error("Failed to save post", e);
+  } finally {
+    saving.value = false;
   }
 };
 
@@ -140,11 +142,6 @@ watchEffect(() => {
   if (props.post) {
     formState.value = cloneDeep(props.post);
   }
-});
-
-onMounted(() => {
-  handleFetchCategories();
-  handleFetchTags();
 });
 </script>
 <template>
