@@ -41,6 +41,7 @@ const emit = defineEmits<{
 const initialFormState: Tag = {
   spec: {
     displayName: "",
+    slug: "",
     color: "#b16cBe",
     cover: "",
   },
@@ -146,7 +147,7 @@ watch(
         validation="required"
       ></FormKit>
       <FormKit
-        v-model="formState.metadata.name"
+        v-model="formState.spec.slug"
         help="通常作为标签访问地址标识"
         label="别名"
         type="text"

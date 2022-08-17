@@ -20,6 +20,7 @@ const initialFormState: PostRequest = {
   post: {
     spec: {
       title: "",
+      slug: "",
       releaseSnapshot: undefined,
       headSnapshot: undefined,
       baseSnapshot: undefined,

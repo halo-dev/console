@@ -149,7 +149,7 @@ const onEditingModalClose = () => {
                 </div>
                 <div class="mt-1 flex">
                   <span class="text-xs text-gray-500">
-                    /tags/{{ tag.metadata.name }}
+                    /tags/{{ tag.spec.slug }}
                   </span>
                 </div>
               </div>

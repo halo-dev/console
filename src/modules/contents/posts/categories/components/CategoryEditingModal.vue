@@ -33,6 +33,7 @@ const emit = defineEmits<{
 const initialFormState: Category = {
   spec: {
     displayName: "",
+    slug: "",
     description: undefined,
     cover: undefined,
     template: undefined,
@@ -121,7 +122,7 @@ watch(
         validation="required"
       ></FormKit>
       <FormKit
-        v-model="formState.metadata.name"
+        v-model="formState.spec.slug"
         help="通常作为分类访问地址标识"
         label="别名"
         type="text"

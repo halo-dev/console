@@ -18,6 +18,7 @@ import { apiClient } from "@halo-dev/admin-shared";
 const initialFormState: Post = {
   spec: {
     title: "",
+    slug: "",
     releaseSnapshot: undefined,
     headSnapshot: undefined,
     baseSnapshot: undefined,
@@ -170,8 +171,9 @@ watchEffect(() => {
             validation="required"
           ></FormKit>
           <FormKit
-            v-model="formState.metadata.name"
+            v-model="formState.spec.slug"
             label="别名"
+            name="slug"
             type="text"
             validation="required"
           ></FormKit>

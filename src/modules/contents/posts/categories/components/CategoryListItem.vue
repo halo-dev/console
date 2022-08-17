@@ -68,7 +68,7 @@ function onDelete(category: CategoryTree) {
               </div>
               <div class="mt-1 flex">
                 <span class="text-xs text-gray-500">
-                  /categories/{{ category.metadata.name }}
+                  /categories/{{ category.spec.slug }}
                 </span>
               </div>
             </div>
