@@ -38,6 +38,7 @@ importers:
       autoprefixer: ^10.4.8
       axios: ^0.27.2
       c8: ^7.12.0
+      colorjs.io: ^0.4.0
       cypress: ^9.7.0
       eslint: ^8.21.0
       eslint-plugin-cypress: ^2.12.1
@@ -92,6 +93,7 @@ importers:
       '@vueuse/core': 8.9.4_vue@3.2.37
       '@vueuse/router': 9.1.0_45jhv7el6g2ztux7wgm2ofrf4e
       axios: 0.27.2
+      colorjs.io: 0.4.0
       filepond: 4.30.4
       filepond-plugin-image-preview: 4.6.11_filepond@4.30.4
       floating-vue: 2.0.0-beta.19_vue@3.2.37
@@ -4362,6 +4364,10 @@ packages:
   /colorette/2.0.16:
     resolution: {integrity: sha512-hUewv7oMjCp+wkBv5Rm0v87eJhq4woh5rSR+42YSQJKecCqgIqNkZ6lAlQms/BwHPJA5NKMRlpxPRv0n8HQW6g==}
     dev: true
+
+  /colorjs.io/0.4.0:
+    resolution: {integrity: sha512-AUKG9GCDSHsFRUnxGrEMCm6nq6lxddnDvD0avmsy/klCEk68htpqgl9IERGtGoxaGJlr7uP5wmD381gY2uG8hw==}
+    dev: false
 
   /colors/1.2.5:
     resolution: {integrity: sha512-erNRLao/Y3Fv54qUa0LBB+//Uf3YwMUmdJinN20yMXm9zdKKqH9wt7R9IIVZ+K7ShzfpLV/Zg8+VyrBJYB4lpg==}

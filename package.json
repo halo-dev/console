@@ -40,6 +40,7 @@
     "@vueuse/core": "^8.9.4",
     "@vueuse/router": "^9.1.0",
     "axios": "^0.27.2",
+    "colorjs.io": "^0.4.0",
     "filepond": "^4.30.4",
     "filepond-plugin-image-preview": "^4.6.11",
     "floating-vue": "2.0.0-beta.19",

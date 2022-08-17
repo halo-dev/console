@@ -15,9 +15,9 @@ import {
   VCard,
   VPageHeader,
   VSpace,
-  VTag,
 } from "@halo-dev/components";
 import TagEditingModal from "./components/TagEditingModal.vue";
+import PostTag from "../../posts/components/PostTag.vue";
 
 // types
 import type { Tag } from "@halo-dev/api-client";
@@ -177,9 +177,7 @@ onMounted(() => {
             <div class="relative flex flex-row items-center">
               <div class="flex-1">
                 <div class="flex flex-col sm:flex-row">
-                  <VTag :styles="{ background: tag.spec.color }">
-                    {{ tag.spec.displayName }}
-                  </VTag>
+                  <PostTag :tag="tag" />
                 </div>
                 <div class="mt-1 flex">
                   <span class="text-xs text-gray-500">
@@ -249,14 +247,12 @@ onMounted(() => {
       </ul>
 
       <div v-else class="flex flex-wrap gap-3 p-4" role="list">
-        <VTag
+        <PostTag
           v-for="(tag, index) in tags"
           :key="index"
-          :styles="{ background: tag.spec.color }"
+          :tag="tag"
           @click="handleOpenEditingModal(tag)"
-        >
-          {{ tag.spec.displayName }}(10)
-        </VTag>
+        />
       </div>
     </VCard>
   </div>
