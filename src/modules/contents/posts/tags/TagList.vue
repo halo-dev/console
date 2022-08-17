@@ -78,16 +78,17 @@ const handleOpenEditingModal = (tag: Tag | null) => {
 };
 
 const handleSelectPrevious = () => {
-  if (!selectedTag.value) {
-    selectedTag.value = tags.value[0];
-    return;
-  }
   const currentIndex = tags.value.findIndex(
     (tag) => tag.metadata.name === selectedTag.value?.metadata.name
   );
 
   if (currentIndex > 0) {
     selectedTag.value = tags.value[currentIndex - 1];
+    return;
+  }
+
+  if (currentIndex <= 0) {
+    selectedTag.value = null;
   }
 };
 

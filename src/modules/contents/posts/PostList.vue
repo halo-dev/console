@@ -28,7 +28,7 @@ const users = ref<User[]>([]);
 const handleFetchPosts = async () => {
   try {
     const { data } =
-      await apiClient.extension.post.listcontentHaloRunV1alpha1Post();
+      await apiClient.extension.post.listcontentHaloRunV1alpha1Post(0, 0);
 
     posts.value = data.items;
   } catch (e) {
@@ -71,8 +71,8 @@ const handleSelectNext = () => {
 const handleRouteToEditor = (post: Post) => {
   router.push({
     name: "PostEditor",
-    params: {
-      id: post.metadata.name,
+    query: {
+      name: post.metadata.name,
     },
   });
 };

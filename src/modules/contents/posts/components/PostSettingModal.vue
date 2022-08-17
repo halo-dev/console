@@ -8,17 +8,19 @@ import {
   VTabItem,
   VTabs,
 } from "@halo-dev/components";
-import { ref, watch, watchEffect } from "vue";
-import type { Post } from "@halo-dev/api-client";
+import { computed, onMounted, ref, watch, watchEffect } from "vue";
+import type { Category, Post, Tag } from "@halo-dev/api-client";
 import cloneDeep from "lodash.clonedeep";
+import { apiClient } from "@halo-dev/admin-shared";
 
 const initialFormState: Post = {
   spec: {
     title: "",
-    releaseSnapshot: "",
-    headSnapshot: "",
-    baseSnapshot: "",
-    owner: "",
+    releaseSnapshot: undefined,
+    headSnapshot: undefined,
+    baseSnapshot: undefined,
+    // @ts-ignore
+    owner: undefined,
     template: "",
     cover: "",
     deleted: false,
@@ -66,6 +68,26 @@ const emit = defineEmits<{
 const settingActiveId = ref("general");
 const formState = ref<Post>(cloneDeep(initialFormState));
 const saving = ref(false);
+const categories = ref<Category[]>([] as Category[]);
+
+const categoriesMap = computed(() => {
+  return categories.value.map((category) => {
+    return {
+      value: category.metadata.name,
+      label: category.spec.displayName,
+    };
+  });
+});
+
+const tags = ref<Tag[]>([] as Tag[]);
+const tagsMap = computed(() => {
+  return tags.value.map((tag) => {
+    return {
+      value: tag.metadata.name,
+      label: tag.spec.displayName,
+    };
+  });
+});
 
 const handleVisibleChange = (visible: boolean) => {
   emit("update:visible", visible);
@@ -77,6 +99,29 @@ const handleVisibleChange = (visible: boolean) => {
 const handleSave = () => {
   emit("saved", formState.value);
   handleVisibleChange(false);
+};
+
+const handleFetchCategories = async () => {
+  try {
+    const { data } =
+      await apiClient.extension.category.listcontentHaloRunV1alpha1Category(
+        0,
+        0
+      );
+    categories.value = data.items;
+  } catch (e) {
+    console.error("Failed to fetch categories", e);
+  }
+};
+const handleFetchTags = async () => {
+  try {
+    const { data } =
+      await apiClient.extension.tag.listcontentHaloRunV1alpha1Tag(0, 0);
+
+    tags.value = data.items;
+  } catch (e) {
+    console.error("Failed to fetch tags", e);
+  }
 };
 
 watch(
@@ -95,6 +140,11 @@ watchEffect(() => {
   if (props.post) {
     formState.value = cloneDeep(props.post);
   }
+});
+
+onMounted(() => {
+  handleFetchCategories();
+  handleFetchTags();
 });
 </script>
 <template>
@@ -128,8 +178,20 @@ watchEffect(() => {
             type="text"
             validation="required"
           ></FormKit>
-          <FormKit label="分类目录" type="select"></FormKit>
-          <FormKit label="标签" type="select"></FormKit>
+          <FormKit
+            v-model="formState.spec.categories"
+            :options="categoriesMap"
+            label="分类目录"
+            name="categories"
+            type="checkbox"
+          />
+          <FormKit
+            v-model="formState.spec.tags"
+            :options="tagsMap"
+            label="标签"
+            name="tags"
+            type="checkbox"
+          />
           <FormKit
             v-model="formState.spec.excerpt.raw"
             label="摘要"

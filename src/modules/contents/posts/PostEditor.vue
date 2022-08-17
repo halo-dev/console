@@ -9,18 +9,22 @@ import {
 } from "@halo-dev/components";
 import PostSettingModal from "./components/PostSettingModal.vue";
 import type { Post, PostRequest } from "@halo-dev/api-client";
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import cloneDeep from "lodash.clonedeep";
 import { apiClient } from "@halo-dev/admin-shared";
+import { useRouteQuery } from "@vueuse/router";
+
+const name = useRouteQuery("name");
 
 const initialFormState: PostRequest = {
   post: {
     spec: {
       title: "",
       releaseSnapshot: undefined,
-      headSnapshot: "",
-      baseSnapshot: "",
-      owner: "",
+      headSnapshot: undefined,
+      baseSnapshot: undefined,
+      // @ts-ignore
+      owner: undefined,
       template: "",
       cover: "",
       deleted: false,
@@ -54,6 +58,8 @@ const initialFormState: PostRequest = {
 
 const formState = ref<PostRequest>(cloneDeep(initialFormState));
 const settingModal = ref(false);
+const saving = ref(false);
+const publishing = ref(false);
 
 const isUpdateMode = computed(() => {
   return !!formState.value.post.metadata.creationTimestamp;
@@ -61,39 +67,64 @@ const isUpdateMode = computed(() => {
 
 const handleSavePost = async () => {
   try {
-    formState.value.post.spec.owner = "ryanwang";
-
+    saving.value = true;
+    formState.value.content.content = formState.value.content.raw;
     if (isUpdateMode.value) {
       const { data } = await apiClient.post.updateDraftPost(
         formState.value.post.metadata.name,
         formState.value
       );
-
       formState.value.post = data;
     } else {
       const { data } = await apiClient.post.draftPost(formState.value);
       formState.value.post = data;
+      name.value = data.metadata.name;
     }
   } catch (e) {
+    alert(`保存异常: ${e}`);
     console.error("Failed to save post", e);
+  } finally {
+    saving.value = false;
   }
 };
 
 const handlePublish = async () => {
   try {
-    if (!isUpdateMode.value) {
-      await handleSavePost();
-    }
-
-    await apiClient.post.publishPost(formState.value.post.metadata.name);
+    publishing.value = true;
+    await handleSavePost();
+    const { data } = await apiClient.post.publishPost(
+      formState.value.post.metadata.name
+    );
+    formState.value.post = data;
   } catch (e) {
+    alert(`发布异常: ${e}`);
     console.error("Failed to publish post", e);
+  } finally {
+    publishing.value = false;
   }
 };
 
 const onSettingSaved = async (post: Post) => {
   formState.value.post = post;
 };
+
+onMounted(async () => {
+  if (name.value) {
+    // fetch post
+    const { data: post } =
+      await apiClient.extension.post.getcontentHaloRunV1alpha1Post(
+        name.value as string
+      );
+    formState.value.post = post;
+
+    if (formState.value.post.spec.headSnapshot) {
+      const { data: content } = await apiClient.content.obtainSnapshotContent(
+        formState.value.post.spec.headSnapshot
+      );
+      formState.value.content = content;
+    }
+  }
+});
 </script>
 
 <template>
@@ -114,7 +145,15 @@ const onSettingSaved = async (post: Post) => {
           </template>
           设置
         </VButton>
-        <VButton type="secondary" @click="handlePublish">
+        <VButton
+          :loading="saving"
+          size="sm"
+          type="primary"
+          @click="handleSavePost"
+        >
+          保存
+        </VButton>
+        <VButton :loading="publishing" type="secondary" @click="handlePublish">
           <template #icon>
             <IconSave class="h-full w-full" />
           </template>

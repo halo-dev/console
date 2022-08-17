@@ -54,6 +54,10 @@ const isUpdateMode = computed(() => {
   return !!formState.value.metadata.creationTimestamp;
 });
 
+const modalTitle = computed(() => {
+  return isUpdateMode.value ? "编辑文章分类" : "新增文章分类";
+});
+
 const handleSaveCategory = async () => {
   try {
     saving.value = true;
@@ -104,9 +108,9 @@ watch(
 </script>
 <template>
   <VModal
+    :title="modalTitle"
     :visible="visible"
     :width="600"
-    title="编辑文章分类"
     @update:visible="onVisibleChange"
   >
     <FormKit id="category-form" type="form" @submit="handleSaveCategory">
@@ -140,7 +144,7 @@ watch(
     <template #footer>
       <VSpace>
         <VButton type="secondary" @click="$formkit.submit('category-form')">
-          提交 ⌘ + ↵
+          保存 ⌘ + ↵
         </VButton>
         <VButton @click="onVisibleChange(false)">取消 Esc</VButton>
       </VSpace>

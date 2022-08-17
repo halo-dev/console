@@ -58,6 +58,10 @@ const isUpdateMode = computed(() => {
   return !!formState.value.metadata.creationTimestamp;
 });
 
+const modalTitle = computed(() => {
+  return isUpdateMode.value ? "编辑文章标签" : "新增文章标签";
+});
+
 const handleSaveTag = async () => {
   try {
     saving.value = true;
@@ -86,6 +90,11 @@ const onVisibleChange = (visible: boolean) => {
   }
 };
 
+const handleResetForm = () => {
+  formState.value = cloneDeep(initialFormState);
+  reset("tag-form");
+};
+
 const { Command_Enter } = useMagicKeys();
 
 watchEffect(() => {
@@ -98,8 +107,7 @@ watch(
   () => props.visible,
   (visible) => {
     if (!visible) {
-      formState.value = cloneDeep(initialFormState);
-      reset("tag-form");
+      handleResetForm();
     }
   }
 );
@@ -109,15 +117,17 @@ watch(
   (tag) => {
     if (tag) {
       formState.value = cloneDeep(tag);
+    } else {
+      handleResetForm();
     }
   }
 );
 </script>
 <template>
   <VModal
+    :title="modalTitle"
     :visible="visible"
     :width="600"
-    title="编辑文章标签"
     @update:visible="onVisibleChange"
   >
     <template #actions>
@@ -162,7 +172,7 @@ watch(
           type="secondary"
           @click="$formkit.submit('tag-form')"
         >
-          提交 ⌘ + ↵
+          保存
         </VButton>
         <VButton @click="onVisibleChange(false)">取消 Esc</VButton>
       </VSpace>
