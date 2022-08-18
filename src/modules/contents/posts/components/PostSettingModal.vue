@@ -1,13 +1,5 @@
 <script lang="ts" setup>
-import {
-  IconArrowLeft,
-  IconArrowRight,
-  VButton,
-  VModal,
-  VSpace,
-  VTabItem,
-  VTabs,
-} from "@halo-dev/components";
+import { VButton, VModal, VSpace, VTabItem, VTabs } from "@halo-dev/components";
 import { computed, ref, watch, watchEffect } from "vue";
 import type { Post } from "@halo-dev/api-client";
 import cloneDeep from "lodash.clonedeep";
@@ -64,11 +56,9 @@ const emit = defineEmits<{
   (event: "update:visible", visible: boolean): void;
   (event: "close"): void;
   (event: "saved", post: Post): void;
-  (event: "previous"): void;
-  (event: "next"): void;
 }>();
 
-const settingActiveId = ref("general");
+const activeTab = ref("general");
 const formState = ref<Post>(cloneDeep(initialFormState));
 const saving = ref(false);
 
@@ -148,20 +138,15 @@ watchEffect(() => {
 <template>
   <VModal
     :visible="visible"
-    :width="680"
+    :width="700"
     title="文章设置"
     @update:visible="handleVisibleChange"
   >
     <template #actions>
-      <div class="modal-header-action" @click="emit('previous')">
-        <IconArrowLeft />
-      </div>
-      <div class="modal-header-action" @click="emit('next')">
-        <IconArrowRight />
-      </div>
+      <slot name="actions"></slot>
     </template>
 
-    <VTabs v-model:active-id="settingActiveId" type="outline">
+    <VTabs v-model:active-id="activeTab" type="outline">
       <VTabItem id="general" label="常规">
         <FormKit id="basic" :actions="false" :preserve="true" type="form">
           <FormKit
@@ -192,8 +177,19 @@ watchEffect(() => {
             type="checkbox"
           />
           <FormKit
+            v-model="formState.spec.excerpt.autoGenerate"
+            :options="[
+              { label: '是', value: true },
+              { label: '否', value: false },
+            ]"
+            label="自动生成摘要"
+            type="radio"
+          >
+          </FormKit>
+          <FormKit
+            v-if="!formState.spec.excerpt.autoGenerate"
             v-model="formState.spec.excerpt.raw"
-            label="摘要"
+            label="自定义摘要"
             type="textarea"
           ></FormKit>
         </FormKit>
@@ -227,7 +223,7 @@ watchEffect(() => {
           <FormKit
             v-model="formState.spec.template"
             label="自定义模板"
-            type="select"
+            type="text"
           ></FormKit>
           <FormKit
             v-model="formState.spec.cover"

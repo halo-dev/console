@@ -2,6 +2,8 @@
 import {
   IconAddCircle,
   IconArrowDown,
+  IconArrowLeft,
+  IconArrowRight,
   IconBookRead,
   IconSettings,
   VButton,
@@ -13,12 +15,9 @@ import {
 } from "@halo-dev/components";
 import PostSettingModal from "./components/PostSettingModal.vue";
 import { onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
 import type { Post, PostList, User } from "@halo-dev/api-client";
 import { apiClient } from "@halo-dev/admin-shared";
 import { formatDatetime } from "@/utils/date";
-
-const router = useRouter();
 
 const posts = ref<PostList>({
   page: 1,
@@ -31,7 +30,7 @@ const posts = ref<PostList>({
   hasPrevious: false,
 });
 const checkAll = ref(false);
-const postSettings = ref(false);
+const settingModal = ref(false);
 const selected = ref<Post | null>(null);
 const users = ref<User[]>([]);
 
@@ -49,7 +48,7 @@ const handleFetchPosts = async () => {
   }
 };
 
-const handlePaginationChange = async ({
+const handlePaginationChange = ({
   page,
   size,
 }: {
@@ -58,7 +57,7 @@ const handlePaginationChange = async ({
 }) => {
   posts.value.page = page;
   posts.value.size = size;
-  await handleFetchPosts();
+  handleFetchPosts();
 };
 
 const handleFetchUsers = async () => {
@@ -72,34 +71,44 @@ const handleFetchUsers = async () => {
 
 const handleSelect = (post: Post) => {
   selected.value = post;
-  postSettings.value = true;
+  settingModal.value = true;
 };
 
-const handleSelectPrevious = () => {
-  const currentIndex = posts.value.items.findIndex(
+const onSettingModalClose = () => {
+  selected.value = null;
+  handleFetchPosts();
+};
+
+const handleSelectPrevious = async () => {
+  const { items, hasPrevious } = posts.value;
+  const index = items.findIndex(
     (post) => post.metadata.name === selected.value?.metadata.name
   );
-  if (currentIndex > 0) {
-    selected.value = posts[currentIndex - 1];
+  if (index > 0) {
+    selected.value = items[index - 1];
+    return;
+  }
+  if (index === 0 && hasPrevious) {
+    posts.value.page--;
+    await handleFetchPosts();
+    selected.value = posts.value.items[posts.value.items.length - 1];
   }
 };
 
-const handleSelectNext = () => {
-  const currentIndex = posts.value.items.findIndex(
+const handleSelectNext = async () => {
+  const { items, hasNext } = posts.value;
+  const index = items.findIndex(
     (post) => post.metadata.name === selected.value?.metadata.name
   );
-  if (currentIndex < posts.value.items.length - 1) {
-    selected.value = posts[currentIndex + 1];
+  if (index < items.length - 1) {
+    selected.value = items[index + 1];
+    return;
   }
-};
-
-const handleRouteToEditor = (post: Post) => {
-  router.push({
-    name: "PostEditor",
-    query: {
-      name: post.metadata.name,
-    },
-  });
+  if (index === items.length - 1 && hasNext) {
+    posts.value.page++;
+    await handleFetchPosts();
+    selected.value = posts.value.items[0];
+  }
 };
 
 onMounted(() => {
@@ -109,11 +118,19 @@ onMounted(() => {
 </script>
 <template>
   <PostSettingModal
-    v-model:visible="postSettings"
+    v-model:visible="settingModal"
     :post="selected"
-    @next="handleSelectNext"
-    @previous="handleSelectPrevious"
-  />
+    @close="onSettingModalClose"
+  >
+    <template #actions>
+      <div class="modal-header-action" @click="handleSelectPrevious">
+        <IconArrowLeft />
+      </div>
+      <div class="modal-header-action" @click="handleSelectNext">
+        <IconArrowRight />
+      </div>
+    </template>
+  </PostSettingModal>
   <VPageHeader title="文章">
     <template #icon>
       <IconBookRead class="mr-2 self-center" />
@@ -362,12 +379,18 @@ onMounted(() => {
               </div>
               <div class="flex-1">
                 <div class="flex flex-col sm:flex-row">
-                  <span
-                    class="mr-0 truncate text-sm font-medium text-gray-900 sm:mr-2"
-                    @click="handleRouteToEditor(post)"
+                  <RouterLink
+                    :to="{
+                      name: 'PostEditor',
+                      query: { name: post?.metadata.name },
+                    }"
                   >
-                    {{ post.spec.title }}
-                  </span>
+                    <span
+                      class="mr-0 truncate text-sm font-medium text-gray-900 sm:mr-2"
+                    >
+                      {{ post.spec.title }}
+                    </span>
+                  </RouterLink>
                   <VSpace class="mt-1 sm:mt-0">
                     <VTag
                       v-for="(tag, tagIndex) in post.spec.tags"
