@@ -6,6 +6,7 @@ import cloneDeep from "lodash.clonedeep";
 import { usePostTag } from "@/modules/contents/posts/tags/composables/use-post-tag";
 import { usePostCategory } from "@/modules/contents/posts/categories/composables/use-post-category";
 import { apiClient } from "@halo-dev/admin-shared";
+import { v4 as uuid } from "uuid";
 
 const initialFormState: Post = {
   spec: {
@@ -20,7 +21,7 @@ const initialFormState: Post = {
     cover: "",
     deleted: false,
     published: false,
-    publishTime: "",
+    publishTime: undefined,
     pinned: false,
     allowComment: true,
     visible: "PUBLIC",
@@ -37,7 +38,7 @@ const initialFormState: Post = {
   apiVersion: "content.halo.run/v1alpha1",
   kind: "Post",
   metadata: {
-    name: "",
+    name: uuid(),
   },
 };
 
@@ -45,10 +46,12 @@ const props = withDefaults(
   defineProps<{
     visible: boolean;
     post: Post | null;
+    onlyEmit: boolean;
   }>(),
   {
     visible: false,
     post: null,
+    onlyEmit: false,
   }
 );
 
@@ -94,6 +97,10 @@ const handleVisibleChange = (visible: boolean) => {
 };
 
 const handleSave = async () => {
+  if (props.onlyEmit) {
+    emit("saved", formState.value);
+    return;
+  }
   try {
     saving.value = true;
     if (isUpdateMode.value) {

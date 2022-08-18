@@ -13,6 +13,7 @@ import { computed, onMounted, ref } from "vue";
 import cloneDeep from "lodash.clonedeep";
 import { apiClient } from "@halo-dev/admin-shared";
 import { useRouteQuery } from "@vueuse/router";
+import { v4 as uuid } from "uuid";
 
 const name = useRouteQuery("name");
 
@@ -30,7 +31,7 @@ const initialFormState: PostRequest = {
       cover: "",
       deleted: false,
       published: false,
-      publishTime: "",
+      publishTime: undefined,
       pinned: false,
       allowComment: true,
       visible: "PUBLIC",
@@ -44,10 +45,10 @@ const initialFormState: PostRequest = {
       tags: [],
       htmlMetas: [],
     },
-    apiVersion: "api.halo.run/v1alpha1",
+    apiVersion: "content.halo.run/v1alpha1",
     kind: "Post",
     metadata: {
-      name: "",
+      name: uuid(),
     },
   },
   content: {
@@ -105,8 +106,10 @@ const handlePublish = async () => {
   }
 };
 
-const onSettingSaved = async (post: Post) => {
+const onSettingSaved = (post: Post) => {
   formState.value.post = post;
+  settingModal.value = false;
+  handleSavePost();
 };
 
 onMounted(async () => {
@@ -131,6 +134,7 @@ onMounted(async () => {
 <template>
   <PostSettingModal
     v-model:visible="settingModal"
+    :only-emit="true"
     :post="formState.post"
     @saved="onSettingSaved"
   />

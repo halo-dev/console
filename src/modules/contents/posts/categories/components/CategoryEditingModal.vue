@@ -13,6 +13,7 @@ import type { Category } from "@halo-dev/api-client";
 import cloneDeep from "lodash.clonedeep";
 import { reset, submitForm } from "@formkit/core";
 import { useMagicKeys } from "@vueuse/core";
+import { v4 as uuid } from "uuid";
 
 const props = withDefaults(
   defineProps<{
@@ -44,7 +45,7 @@ const initialFormState: Category = {
   apiVersion: "content.halo.run/v1alpha1",
   kind: "Category",
   metadata: {
-    name: "",
+    name: uuid(),
   },
 };
 
@@ -104,6 +105,7 @@ watch(
     }
     formState.value = cloneDeep(initialFormState);
     reset("category-form");
+    formState.value.metadata.name = uuid();
   }
 );
 </script>

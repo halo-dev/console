@@ -14,11 +14,36 @@ import {
   VTag,
 } from "@halo-dev/components";
 import PostSettingModal from "./components/PostSettingModal.vue";
+import PostTag from "../posts/tags/components/PostTag.vue";
 import { onMounted, ref, watch } from "vue";
-import type { Post, PostList } from "@halo-dev/api-client";
+import type { Category, Post, Tag } from "@halo-dev/api-client";
 import { apiClient } from "@halo-dev/admin-shared";
 import { formatDatetime } from "@/utils/date";
 import { useUserFetch } from "@/modules/system/users/composables/use-user";
+
+interface Contributor {
+  displayName: string;
+  avatar?: string;
+  name: string;
+}
+
+interface PostResult {
+  post: Post;
+  categories: Category[];
+  tags: Tag[];
+  contributors: Contributor[];
+}
+
+interface PostList {
+  page: number;
+  size: number;
+  total: number;
+  items: Array<PostResult>;
+  first: boolean;
+  last: boolean;
+  hasNext: boolean;
+  hasPrevious: boolean;
+}
 
 const posts = ref<PostList>({
   page: 1,
@@ -39,12 +64,12 @@ const { users } = useUserFetch();
 
 const handleFetchPosts = async () => {
   try {
-    const { data } =
-      await apiClient.extension.post.listcontentHaloRunV1alpha1Post(
-        posts.value.page,
-        posts.value.size
-      );
+    const { data } = await apiClient.post.listPosts(
+      posts.value.page,
+      posts.value.size
+    );
 
+    // @ts-ignore
     posts.value = data;
   } catch (e) {
     console.error("Failed to fetch posts", e);
@@ -76,32 +101,32 @@ const onSettingModalClose = () => {
 const handleSelectPrevious = async () => {
   const { items, hasPrevious } = posts.value;
   const index = items.findIndex(
-    (post) => post.metadata.name === selectedPost.value?.metadata.name
+    (post) => post.post.metadata.name === selectedPost.value?.metadata.name
   );
   if (index > 0) {
-    selectedPost.value = items[index - 1];
+    selectedPost.value = items[index - 1].post;
     return;
   }
   if (index === 0 && hasPrevious) {
     posts.value.page--;
     await handleFetchPosts();
-    selectedPost.value = posts.value.items[posts.value.items.length - 1];
+    selectedPost.value = posts.value.items[posts.value.items.length - 1].post;
   }
 };
 
 const handleSelectNext = async () => {
   const { items, hasNext } = posts.value;
   const index = items.findIndex(
-    (post) => post.metadata.name === selectedPost.value?.metadata.name
+    (post) => post.post.metadata.name === selectedPost.value?.metadata.name
   );
   if (index < items.length - 1) {
-    selectedPost.value = items[index + 1];
+    selectedPost.value = items[index + 1].post;
     return;
   }
   if (index === items.length - 1 && hasNext) {
     posts.value.page++;
     await handleFetchPosts();
-    selectedPost.value = posts.value.items[0];
+    selectedPost.value = posts.value.items[0].post;
   }
 };
 
@@ -117,8 +142,8 @@ const handleCheckAllChange = (e: Event) => {
 
   if (checked) {
     selectedPostNames.value =
-      posts.value.items.map((link) => {
-        return link.metadata.name;
+      posts.value.items.map((post) => {
+        return post.post.metadata.name;
       }) || [];
   } else {
     selectedPostNames.value.length = 0;
@@ -378,19 +403,19 @@ onMounted(() => {
         <li v-for="(post, index) in posts.items" :key="index">
           <div
             :class="{
-              'bg-gray-100': checkSelection(post),
+              'bg-gray-100': checkSelection(post.post),
             }"
             class="relative block cursor-pointer px-4 py-3 transition-all hover:bg-gray-50"
           >
             <div
-              v-show="checkSelection(post)"
+              v-show="checkSelection(post.post)"
               class="absolute inset-y-0 left-0 w-0.5 bg-primary"
             ></div>
             <div class="relative flex flex-row items-center">
               <div class="mr-4 hidden items-center sm:flex">
                 <input
                   v-model="selectedPostNames"
-                  :value="post.metadata.name"
+                  :value="post.post.metadata.name"
                   class="h-4 w-4 rounded border-gray-300 text-indigo-600"
                   name="post-checkbox"
                   type="checkbox"
@@ -401,22 +426,21 @@ onMounted(() => {
                   <RouterLink
                     :to="{
                       name: 'PostEditor',
-                      query: { name: post?.metadata.name },
+                      query: { name: post.post.metadata.name },
                     }"
                   >
                     <span
                       class="mr-0 truncate text-sm font-medium text-gray-900 sm:mr-2"
                     >
-                      {{ post.spec.title }}
+                      {{ post.post.spec.title }}
                     </span>
                   </RouterLink>
                   <VSpace class="mt-1 sm:mt-0">
-                    <VTag
-                      v-for="(tag, tagIndex) in post.spec.tags"
+                    <PostTag
+                      v-for="(tag, tagIndex) in post.tags"
                       :key="tagIndex"
-                    >
-                      {{ tag }}
-                    </VTag>
+                      :tag="tag"
+                    ></PostTag>
                   </VSpace>
                 </div>
                 <div class="mt-1 flex">
@@ -430,15 +454,28 @@ onMounted(() => {
                 <div
                   class="inline-flex flex-col flex-col-reverse items-end gap-4 sm:flex-row sm:items-center sm:gap-6"
                 >
-                  <img
-                    class="hidden h-6 w-6 rounded-full ring-2 ring-white sm:inline-block"
-                    src="https://ryanc.cc/avatar"
-                  />
+                  <RouterLink
+                    v-for="(contributor, index) in post.contributors"
+                    :key="index"
+                    :to="{
+                      name: 'UserDetail',
+                      params: { name: contributor.name },
+                    }"
+                  >
+                    <img
+                      :alt="contributor.name"
+                      :src="contributor.avatar"
+                      :title="contributor.displayName"
+                      class="hidden h-6 w-6 rounded-full ring-2 ring-white sm:inline-block"
+                    />
+                  </RouterLink>
                   <time class="text-sm text-gray-500">
-                    {{ formatDatetime(post.metadata.creationTimestamp) }}
+                    {{ formatDatetime(post.post.metadata.creationTimestamp) }}
                   </time>
                   <span class="cursor-pointer">
-                    <IconSettings @click.stop="handleOpenSettingModal(post)" />
+                    <IconSettings
+                      @click.stop="handleOpenSettingModal(post.post)"
+                    />
                   </span>
                 </div>
               </div>
