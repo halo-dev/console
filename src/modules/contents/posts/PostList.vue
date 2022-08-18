@@ -14,10 +14,11 @@ import {
   VTag,
 } from "@halo-dev/components";
 import PostSettingModal from "./components/PostSettingModal.vue";
-import { onMounted, ref } from "vue";
-import type { Post, PostList, User } from "@halo-dev/api-client";
+import { onMounted, ref, watch } from "vue";
+import type { Post, PostList } from "@halo-dev/api-client";
 import { apiClient } from "@halo-dev/admin-shared";
 import { formatDatetime } from "@/utils/date";
+import { useUserFetch } from "@/modules/system/users/composables/use-user";
 
 const posts = ref<PostList>({
   page: 1,
@@ -29,10 +30,12 @@ const posts = ref<PostList>({
   hasNext: false,
   hasPrevious: false,
 });
-const checkAll = ref(false);
 const settingModal = ref(false);
-const selected = ref<Post | null>(null);
-const users = ref<User[]>([]);
+const selectedPost = ref<Post | null>(null);
+const checkedAll = ref(false);
+const selectedPostNames = ref<string[]>([]);
+
+const { users } = useUserFetch();
 
 const handleFetchPosts = async () => {
   try {
@@ -60,66 +63,80 @@ const handlePaginationChange = ({
   handleFetchPosts();
 };
 
-const handleFetchUsers = async () => {
-  try {
-    const { data } = await apiClient.extension.user.listv1alpha1User();
-    users.value = data.items;
-  } catch (e) {
-    console.error(e);
-  }
-};
-
-const handleSelect = (post: Post) => {
-  selected.value = post;
+const handleOpenSettingModal = (post: Post) => {
+  selectedPost.value = post;
   settingModal.value = true;
 };
 
 const onSettingModalClose = () => {
-  selected.value = null;
+  selectedPost.value = null;
   handleFetchPosts();
 };
 
 const handleSelectPrevious = async () => {
   const { items, hasPrevious } = posts.value;
   const index = items.findIndex(
-    (post) => post.metadata.name === selected.value?.metadata.name
+    (post) => post.metadata.name === selectedPost.value?.metadata.name
   );
   if (index > 0) {
-    selected.value = items[index - 1];
+    selectedPost.value = items[index - 1];
     return;
   }
   if (index === 0 && hasPrevious) {
     posts.value.page--;
     await handleFetchPosts();
-    selected.value = posts.value.items[posts.value.items.length - 1];
+    selectedPost.value = posts.value.items[posts.value.items.length - 1];
   }
 };
 
 const handleSelectNext = async () => {
   const { items, hasNext } = posts.value;
   const index = items.findIndex(
-    (post) => post.metadata.name === selected.value?.metadata.name
+    (post) => post.metadata.name === selectedPost.value?.metadata.name
   );
   if (index < items.length - 1) {
-    selected.value = items[index + 1];
+    selectedPost.value = items[index + 1];
     return;
   }
   if (index === items.length - 1 && hasNext) {
     posts.value.page++;
     await handleFetchPosts();
-    selected.value = posts.value.items[0];
+    selectedPost.value = posts.value.items[0];
   }
 };
 
+const checkSelection = (post: Post) => {
+  return (
+    post.metadata.name === selectedPost.value?.metadata.name ||
+    selectedPostNames.value.includes(post.metadata.name)
+  );
+};
+
+const handleCheckAllChange = (e: Event) => {
+  const { checked } = e.target as HTMLInputElement;
+
+  if (checked) {
+    selectedPostNames.value =
+      posts.value.items.map((link) => {
+        return link.metadata.name;
+      }) || [];
+  } else {
+    selectedPostNames.value.length = 0;
+  }
+};
+
+watch(selectedPostNames, (newValue) => {
+  checkedAll.value = newValue.length === posts.value.items?.length;
+});
+
 onMounted(() => {
   handleFetchPosts();
-  handleFetchUsers();
 });
 </script>
 <template>
   <PostSettingModal
     v-model:visible="settingModal"
-    :post="selected"
+    :post="selectedPost"
     @close="onSettingModalClose"
   >
     <template #actions>
@@ -158,17 +175,16 @@ onMounted(() => {
           >
             <div class="mr-4 hidden items-center sm:flex">
               <input
-                v-model="checkAll"
+                v-model="checkedAll"
                 class="h-4 w-4 rounded border-gray-300 text-indigo-600"
                 type="checkbox"
+                @change="handleCheckAllChange"
               />
             </div>
             <div class="flex w-full flex-1 sm:w-auto">
-              <FormKit
-                v-if="!checkAll"
-                placeholder="输入关键词搜索"
-                type="text"
-              ></FormKit>
+              <div v-if="!selectedPostNames.length">
+                <FormKit placeholder="输入关键词搜索" type="text"></FormKit>
+              </div>
               <VSpace v-else>
                 <VButton type="default">设置</VButton>
                 <VButton type="danger">删除</VButton>
@@ -362,18 +378,21 @@ onMounted(() => {
         <li v-for="(post, index) in posts.items" :key="index">
           <div
             :class="{
-              'bg-gray-100': selected?.metadata.name === post.metadata.name,
+              'bg-gray-100': checkSelection(post),
             }"
             class="relative block cursor-pointer px-4 py-3 transition-all hover:bg-gray-50"
           >
             <div
-              v-show="selected?.metadata.name === post.metadata.name"
+              v-show="checkSelection(post)"
               class="absolute inset-y-0 left-0 w-0.5 bg-primary"
             ></div>
             <div class="relative flex flex-row items-center">
               <div class="mr-4 hidden items-center sm:flex">
                 <input
+                  v-model="selectedPostNames"
+                  :value="post.metadata.name"
                   class="h-4 w-4 rounded border-gray-300 text-indigo-600"
+                  name="post-checkbox"
                   type="checkbox"
                 />
               </div>
@@ -419,7 +438,7 @@ onMounted(() => {
                     {{ formatDatetime(post.metadata.creationTimestamp) }}
                   </time>
                   <span class="cursor-pointer">
-                    <IconSettings @click.stop="handleSelect(post)" />
+                    <IconSettings @click.stop="handleOpenSettingModal(post)" />
                   </span>
                 </div>
               </div>
