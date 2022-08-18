@@ -3,6 +3,7 @@ import { IconList, IconSettings, VButton, VSpace } from "@halo-dev/components";
 import Draggable from "vuedraggable";
 import type { CategoryTree } from "../utils";
 import { ref } from "vue";
+import { formatDatetime } from "@/utils/date";
 
 withDefaults(
   defineProps<{
@@ -93,7 +94,7 @@ function onDelete(category: CategoryTree) {
                   20 篇文章
                 </div>
                 <time class="text-sm text-gray-500">
-                  {{ category.metadata.creationTimestamp }}
+                  {{ formatDatetime(category.metadata.creationTimestamp) }}
                 </time>
                 <span class="self-center">
                   <FloatingDropdown>

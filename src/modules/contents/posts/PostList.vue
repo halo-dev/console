@@ -16,6 +16,7 @@ import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import type { Post, PostList, User } from "@halo-dev/api-client";
 import { apiClient } from "@halo-dev/admin-shared";
+import { formatDatetime } from "@/utils/date";
 
 const router = useRouter();
 
@@ -392,7 +393,7 @@ onMounted(() => {
                     src="https://ryanc.cc/avatar"
                   />
                   <time class="text-sm text-gray-500">
-                    {{ post.metadata.creationTimestamp }}
+                    {{ formatDatetime(post.metadata.creationTimestamp) }}
                   </time>
                   <span class="cursor-pointer">
                     <IconSettings @click.stop="handleSelect(post)" />

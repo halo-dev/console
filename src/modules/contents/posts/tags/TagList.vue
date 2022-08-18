@@ -21,6 +21,8 @@ import PostTag from "./components/PostTag.vue";
 import type { Tag } from "@halo-dev/api-client";
 import { usePostTag } from "./composables/use-post-tag";
 
+import { formatDatetime } from "@/utils/date";
+
 const viewTypes = [
   {
     name: "list",
@@ -176,7 +178,7 @@ const onEditingModalClose = () => {
                     20 篇文章
                   </div>
                   <time class="text-sm text-gray-500">
-                    {{ tag.metadata.creationTimestamp }}
+                    {{ formatDatetime(tag.metadata.creationTimestamp) }}
                   </time>
                   <span class="self-center">
                     <FloatingDropdown>

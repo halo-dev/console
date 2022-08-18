@@ -40,6 +40,7 @@ importers:
       c8: ^7.12.0
       colorjs.io: ^0.4.0
       cypress: ^9.7.0
+      dayjs: ^1.11.5
       eslint: ^8.21.0
       eslint-plugin-cypress: ^2.12.1
       eslint-plugin-vue: ^9.3.0
@@ -94,6 +95,7 @@ importers:
       '@vueuse/router': 9.1.0_45jhv7el6g2ztux7wgm2ofrf4e
       axios: 0.27.2
       colorjs.io: 0.4.0
+      dayjs: 1.11.5
       filepond: 4.30.4
       filepond-plugin-image-preview: 4.6.11_filepond@4.30.4
       floating-vue: 2.0.0-beta.19_vue@3.2.37
@@ -4569,7 +4571,7 @@ packages:
       cli-table3: 0.6.1
       commander: 5.1.0
       common-tags: 1.8.2
-      dayjs: 1.11.3
+      dayjs: 1.11.5
       debug: 4.3.4_supports-color@8.1.1
       enquirer: 2.3.6
       eventemitter2: 6.4.5
@@ -4613,9 +4615,8 @@ packages:
       whatwg-url: 11.0.0
     dev: true
 
-  /dayjs/1.11.3:
-    resolution: {integrity: sha512-xxwlswWOlGhzgQ4TKzASQkUhqERI3egRNqgV4ScR8wlANA/A9tZ7miXa44vTTKEq5l7vWoL5G57bG3zA+Kow0A==}
-    dev: true
+  /dayjs/1.11.5:
+    resolution: {integrity: sha512-CAdX5Q3YW3Gclyo5Vpqkgpj8fSdLQcRuzfX6mC6Phy0nfJ0eGYOeS7m4mt2plDWLAtA4TqTakvbboHvUxfe4iA==}
 
   /debug/2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
