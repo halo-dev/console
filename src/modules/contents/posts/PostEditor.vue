@@ -2,13 +2,12 @@
 import {
   IconBookRead,
   IconSave,
-  IconSettings,
   VButton,
   VPageHeader,
   VSpace,
 } from "@halo-dev/components";
 import PostSettingModal from "./components/PostSettingModal.vue";
-import type { Post, PostRequest } from "@halo-dev/api-client";
+import type { PostRequest } from "@halo-dev/api-client";
 import { computed, onMounted, ref } from "vue";
 import cloneDeep from "lodash.clonedeep";
 import { apiClient } from "@halo-dev/admin-shared";
@@ -22,11 +21,6 @@ const initialFormState: PostRequest = {
     spec: {
       title: "",
       slug: "",
-      releaseSnapshot: undefined,
-      headSnapshot: undefined,
-      baseSnapshot: undefined,
-      // @ts-ignore
-      owner: undefined,
       template: "",
       cover: "",
       deleted: false,
@@ -61,7 +55,6 @@ const initialFormState: PostRequest = {
 const formState = ref<PostRequest>(cloneDeep(initialFormState));
 const settingModal = ref(false);
 const saving = ref(false);
-const publishing = ref(false);
 
 const isUpdateMode = computed(() => {
   return !!formState.value.post.metadata.creationTimestamp;
@@ -90,24 +83,8 @@ const handleSavePost = async () => {
   }
 };
 
-const handlePublish = async () => {
-  try {
-    publishing.value = true;
-    await handleSavePost();
-    const { data } = await apiClient.post.publishPost(
-      formState.value.post.metadata.name
-    );
-    formState.value.post = data;
-  } catch (e) {
-    alert(`发布异常: ${e}`);
-    console.error("Failed to publish post", e);
-  } finally {
-    publishing.value = false;
-  }
-};
-
-const onSettingSaved = (post: Post) => {
-  formState.value.post = post;
+const onSettingSaved = (post: PostRequest) => {
+  formState.value = post;
   settingModal.value = false;
   handleSavePost();
 };
@@ -135,7 +112,7 @@ onMounted(async () => {
   <PostSettingModal
     v-model:visible="settingModal"
     :only-emit="true"
-    :post="formState.post"
+    :post="formState"
     @saved="onSettingSaved"
   />
   <VPageHeader title="文章">
@@ -144,21 +121,15 @@ onMounted(async () => {
     </template>
     <template #actions>
       <VSpace>
-        <VButton size="sm" @click="settingModal = true">
-          <template #icon>
-            <IconSettings class="h-full w-full" />
-          </template>
-          设置
-        </VButton>
         <VButton
           :loading="saving"
           size="sm"
-          type="primary"
+          type="default"
           @click="handleSavePost"
         >
           保存
         </VButton>
-        <VButton :loading="publishing" type="secondary" @click="handlePublish">
+        <VButton type="secondary" @click="settingModal = true">
           <template #icon>
             <IconSave class="h-full w-full" />
           </template>

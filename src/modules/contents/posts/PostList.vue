@@ -16,8 +16,8 @@ import {
 } from "@halo-dev/components";
 import PostSettingModal from "./components/PostSettingModal.vue";
 import PostTag from "../posts/tags/components/PostTag.vue";
-import { onMounted, ref, watch } from "vue";
-import type { ListedPostList, Post } from "@halo-dev/api-client";
+import { onMounted, ref, watch, watchEffect } from "vue";
+import type { ListedPostList, Post, PostRequest } from "@halo-dev/api-client";
 import { apiClient } from "@halo-dev/admin-shared";
 import { formatDatetime } from "@/utils/date";
 import { useUserFetch } from "@/modules/system/users/composables/use-user";
@@ -41,6 +41,7 @@ const posts = ref<ListedPostList>({
 });
 const settingModal = ref(false);
 const selectedPost = ref<Post | null>(null);
+const selectedPostWithContent = ref<PostRequest | null>(null);
 const checkedAll = ref(false);
 const selectedPostNames = ref<string[]>([]);
 
@@ -160,6 +161,21 @@ watch(selectedPostNames, (newValue) => {
   checkedAll.value = newValue.length === posts.value.items?.length;
 });
 
+watchEffect(async () => {
+  if (!selectedPost.value || !selectedPost.value.spec.headSnapshot) {
+    return;
+  }
+
+  const { data: content } = await apiClient.content.obtainSnapshotContent(
+    selectedPost.value.spec.headSnapshot
+  );
+
+  selectedPostWithContent.value = {
+    post: selectedPost.value,
+    content: content,
+  };
+});
+
 onMounted(() => {
   handleFetchPosts();
 });
@@ -167,7 +183,7 @@ onMounted(() => {
 <template>
   <PostSettingModal
     v-model:visible="settingModal"
-    :post="selectedPost"
+    :post="selectedPostWithContent"
     @close="onSettingModalClose"
   >
     <template #actions>

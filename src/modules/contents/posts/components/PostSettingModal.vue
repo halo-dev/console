@@ -1,52 +1,54 @@
 <script lang="ts" setup>
 import { VButton, VModal, VSpace, VTabItem, VTabs } from "@halo-dev/components";
 import { computed, ref, watch, watchEffect } from "vue";
-import type { Post } from "@halo-dev/api-client";
+import type { PostRequest } from "@halo-dev/api-client";
 import cloneDeep from "lodash.clonedeep";
 import { usePostTag } from "@/modules/contents/posts/tags/composables/use-post-tag";
 import { usePostCategory } from "@/modules/contents/posts/categories/composables/use-post-category";
 import { apiClient } from "@halo-dev/admin-shared";
 import { v4 as uuid } from "uuid";
 
-const initialFormState: Post = {
-  spec: {
-    title: "",
-    slug: "",
-    releaseSnapshot: undefined,
-    headSnapshot: undefined,
-    baseSnapshot: undefined,
-    // @ts-ignore
-    owner: undefined,
-    template: "",
-    cover: "",
-    deleted: false,
-    published: false,
-    publishTime: undefined,
-    pinned: false,
-    allowComment: true,
-    visible: "PUBLIC",
-    version: 1,
-    priority: 0,
-    excerpt: {
-      autoGenerate: true,
-      raw: "",
+const initialFormState: PostRequest = {
+  post: {
+    spec: {
+      title: "",
+      slug: "",
+      template: "",
+      cover: "",
+      deleted: false,
+      published: false,
+      publishTime: undefined,
+      pinned: false,
+      allowComment: true,
+      visible: "PUBLIC",
+      version: 1,
+      priority: 0,
+      excerpt: {
+        autoGenerate: true,
+        raw: "",
+      },
+      categories: [],
+      tags: [],
+      htmlMetas: [],
     },
-    categories: [],
-    tags: [],
-    htmlMetas: [],
+    apiVersion: "content.halo.run/v1alpha1",
+    kind: "Post",
+    metadata: {
+      name: uuid(),
+    },
   },
-  apiVersion: "content.halo.run/v1alpha1",
-  kind: "Post",
-  metadata: {
-    name: uuid(),
+  content: {
+    raw: "",
+    content: "",
+    rawType: "HTML",
   },
 };
 
 const props = withDefaults(
   defineProps<{
     visible: boolean;
-    post: Post | null;
-    onlyEmit: boolean;
+    post?: PostRequest | null;
+    onlyEmit?: boolean;
   }>(),
   {
     visible: false,
@@ -58,12 +60,14 @@ const props = withDefaults(
 const emit = defineEmits<{
   (event: "update:visible", visible: boolean): void;
   (event: "close"): void;
-  (event: "saved", post: Post): void;
+  (event: "saved", post: PostRequest): void;
 }>();
 
 const activeTab = ref("general");
-const formState = ref<Post>(cloneDeep(initialFormState));
+const formState = ref<PostRequest>(cloneDeep(initialFormState));
 const saving = ref(false);
+const publishing = ref(false);
+const publishCanceling = ref(false);
 
 const { categories } = usePostCategory();
 const categoriesMap = computed(() => {
@@ -86,7 +90,7 @@ const tagsMap = computed(() => {
 });
 
 const isUpdateMode = computed(() => {
-  return !!formState.value.metadata.creationTimestamp;
+  return !!formState.value.post.metadata.creationTimestamp;
 });
 
 const handleVisibleChange = (visible: boolean) => {
@@ -96,7 +100,7 @@ const handleVisibleChange = (visible: boolean) => {
   }
 };
 
-const handleSave = async () => {
+const handleSaveOnly = async () => {
   if (props.onlyEmit) {
     emit("saved", formState.value);
     return;
@@ -104,23 +108,57 @@ const handleSave = async () => {
   try {
     saving.value = true;
     if (isUpdateMode.value) {
-      const { data } =
-        await apiClient.extension.post.updatecontentHaloRunV1alpha1Post(
-          formState.value.metadata.name,
-          formState.value
-        );
-      emit("saved", data);
+      const { data } = await apiClient.post.updateDraftPost(
+        formState.value.post.metadata.name,
+        formState.value
+      );
+      formState.value.post = data;
+      emit("saved", formState.value);
     } else {
-      const { data } =
-        await apiClient.extension.post.createcontentHaloRunV1alpha1Post(
-          formState.value
-        );
-      emit("saved", data);
+      const { data } = await apiClient.post.draftPost(formState.value);
+      formState.value.post = data;
+      emit("saved", formState.value);
     }
   } catch (e) {
     console.error("Failed to save post", e);
   } finally {
     saving.value = false;
+  }
+};
+
+const handlePublish = async () => {
+  try {
+    publishing.value = true;
+    const { data } = await apiClient.post.publishPost(
+      formState.value.post.metadata.name
+    );
+    formState.value.post = data;
+    emit("saved", formState.value);
+  } catch (e) {
+    alert(`发布异常: ${e}`);
+    console.error("Failed to publish post", e);
+  } finally {
+    publishing.value = false;
+  }
+};
+
+const handlePublishCanceling = async () => {
+  try {
+    publishCanceling.value = true;
+    const postToUpdate = cloneDeep(formState.value);
+    postToUpdate.post.spec.published = false;
+
+    const { data } = await apiClient.post.updateDraftPost(
+      postToUpdate.post.metadata.name,
+      postToUpdate
+    );
+
+    formState.value.post = data;
+    emit("saved", formState.value);
+  } catch (e) {
+    console.log("Failed to cancel publish", e);
+  } finally {
+    publishCanceling.value = false;
   }
 };
 
@@ -157,43 +195,34 @@ watchEffect(() => {
       <VTabItem id="general" label="常规">
         <FormKit id="basic" :actions="false" :preserve="true" type="form">
           <FormKit
-            v-model="formState.spec.title"
+            v-model="formState.post.spec.title"
             label="标题"
             type="text"
             validation="required"
           ></FormKit>
           <FormKit
-            v-model="formState.spec.slug"
+            v-model="formState.post.spec.slug"
             label="别名"
             name="slug"
             type="text"
             validation="required"
           ></FormKit>
           <FormKit
-            v-model="formState.spec.published"
-            :options="[
-              { label: '已发布', value: true },
-              { label: '未发布', value: false },
-            ]"
-            label="发布状态"
-            type="radio"
-          ></FormKit>
-          <FormKit
-            v-model="formState.spec.categories"
+            v-model="formState.post.spec.categories"
             :options="categoriesMap"
             label="分类目录"
             name="categories"
             type="checkbox"
           />
           <FormKit
-            v-model="formState.spec.tags"
+            v-model="formState.post.spec.tags"
             :options="tagsMap"
             label="标签"
             name="tags"
             type="checkbox"
           />
           <FormKit
-            v-model="formState.spec.excerpt.autoGenerate"
+            v-model="formState.post.spec.excerpt.autoGenerate"
             :options="[
               { label: '是', value: true },
               { label: '否', value: false },
@@ -203,8 +232,8 @@ watchEffect(() => {
           >
           </FormKit>
           <FormKit
-            v-if="!formState.spec.excerpt.autoGenerate"
-            v-model="formState.spec.excerpt.raw"
+            v-if="!formState.post.spec.excerpt.autoGenerate"
+            v-model="formState.post.spec.excerpt.raw"
             label="自定义摘要"
             type="textarea"
           ></FormKit>
@@ -213,7 +242,7 @@ watchEffect(() => {
       <VTabItem id="advanced" label="高级">
         <FormKit id="advanced" :actions="false" :preserve="true" type="form">
           <FormKit
-            v-model="formState.spec.allowComment"
+            v-model="formState.post.spec.allowComment"
             :options="[
               { label: '是', value: true },
               { label: '否', value: false },
@@ -222,7 +251,7 @@ watchEffect(() => {
             type="radio"
           ></FormKit>
           <FormKit
-            v-model="formState.spec.pinned"
+            v-model="formState.post.spec.pinned"
             :options="[
               { label: '是', value: true },
               { label: '否', value: false },
@@ -232,7 +261,7 @@ watchEffect(() => {
             type="radio"
           ></FormKit>
           <FormKit
-            v-model="formState.spec.visible"
+            v-model="formState.post.spec.visible"
             :options="[
               { label: '公开', value: 'PUBLIC' },
               { label: '内部成员可访问', value: 'INTERNAL' },
@@ -243,17 +272,17 @@ watchEffect(() => {
             type="select"
           ></FormKit>
           <FormKit
-            v-model="formState.spec.publishTime"
+            v-model="formState.post.spec.publishTime"
             label="发表时间"
             type="datetime-local"
           ></FormKit>
           <FormKit
-            v-model="formState.spec.template"
+            v-model="formState.post.spec.template"
             label="自定义模板"
             type="text"
           ></FormKit>
           <FormKit
-            v-model="formState.spec.cover"
+            v-model="formState.post.spec.cover"
             label="封面图"
             type="text"
           ></FormKit>
@@ -284,11 +313,32 @@ watchEffect(() => {
 
     <template #footer>
       <VSpace>
-        <VButton :loading="saving" type="secondary" @click="handleSave">
-          保存
+        <VButton
+          v-if="formState.post.status?.phase === 'PUBLISHED'"
+          :loading="publishCanceling"
+          type="danger"
+          @click="handlePublishCanceling"
+        >
+          取消发布
         </VButton>
-        <VButton type="default" @click="handleVisibleChange(false)">
-          取消
+        <VButton
+          v-else
+          :loading="publishing"
+          type="secondary"
+          @click="handlePublish"
+        >
+          发布
+        </VButton>
+        <VButton
+          :loading="saving"
+          size="sm"
+          type="secondary"
+          @click="handleSaveOnly"
+        >
+          仅保存
+        </VButton>
+        <VButton size="sm" type="default" @click="handleVisibleChange(false)">
+          关闭
         </VButton>
       </VSpace>
     </template>
