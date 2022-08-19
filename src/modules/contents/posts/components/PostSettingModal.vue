@@ -323,6 +323,7 @@ watchEffect(() => {
         </VButton>
         <VButton
           v-else
+          :disabled="!isUpdateMode"
           :loading="publishing"
           type="secondary"
           @click="handlePublish"
