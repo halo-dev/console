@@ -16,36 +16,12 @@ import {
 import PostSettingModal from "./components/PostSettingModal.vue";
 import PostTag from "../posts/tags/components/PostTag.vue";
 import { onMounted, ref, watch } from "vue";
-import type { Category, Post, Tag } from "@halo-dev/api-client";
+import type { ListedPostList, Post } from "@halo-dev/api-client";
 import { apiClient } from "@halo-dev/admin-shared";
 import { formatDatetime } from "@/utils/date";
 import { useUserFetch } from "@/modules/system/users/composables/use-user";
 
-interface Contributor {
-  displayName: string;
-  avatar?: string;
-  name: string;
-}
-
-interface PostResult {
-  post: Post;
-  categories: Category[];
-  tags: Tag[];
-  contributors: Contributor[];
-}
-
-interface PostList {
-  page: number;
-  size: number;
-  total: number;
-  items: Array<PostResult>;
-  first: boolean;
-  last: boolean;
-  hasNext: boolean;
-  hasPrevious: boolean;
-}
-
-const posts = ref<PostList>({
+const posts = ref<ListedPostList>({
   page: 1,
   size: 20,
   total: 0,
@@ -68,8 +44,6 @@ const handleFetchPosts = async () => {
       posts.value.page,
       posts.value.size
     );
-
-    // @ts-ignore
     posts.value = data;
   } catch (e) {
     console.error("Failed to fetch posts", e);
@@ -463,6 +437,7 @@ onMounted(() => {
                     }"
                   >
                     <img
+                      v-tooltip="contributor.displayName"
                       :alt="contributor.name"
                       :src="contributor.avatar"
                       :title="contributor.displayName"

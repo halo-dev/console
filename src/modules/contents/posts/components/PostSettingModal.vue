@@ -170,6 +170,15 @@ watchEffect(() => {
             validation="required"
           ></FormKit>
           <FormKit
+            v-model="formState.spec.published"
+            :options="[
+              { label: '已发布', value: true },
+              { label: '未发布', value: false },
+            ]"
+            label="发布状态"
+            type="radio"
+          ></FormKit>
+          <FormKit
             v-model="formState.spec.categories"
             :options="categoriesMap"
             label="分类目录"
@@ -221,6 +230,17 @@ watchEffect(() => {
             label="是否置顶"
             name="pinned"
             type="radio"
+          ></FormKit>
+          <FormKit
+            v-model="formState.spec.visible"
+            :options="[
+              { label: '公开', value: 'PUBLIC' },
+              { label: '内部成员可访问', value: 'INTERNAL' },
+              { label: '私有', value: 'PRIVATE' },
+            ]"
+            label="可见性"
+            name="visible"
+            type="select"
           ></FormKit>
           <FormKit
             v-model="formState.spec.publishTime"
