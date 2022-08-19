@@ -6,6 +6,7 @@ import {
   IconArrowRight,
   IconBookRead,
   IconSettings,
+  useDialog,
   VButton,
   VCard,
   VPageHeader,
@@ -20,6 +21,13 @@ import type { ListedPostList, Post } from "@halo-dev/api-client";
 import { apiClient } from "@halo-dev/admin-shared";
 import { formatDatetime } from "@/utils/date";
 import { useUserFetch } from "@/modules/system/users/composables/use-user";
+import cloneDeep from "lodash.clonedeep";
+
+enum PostPhase {
+  DRAFT = "未发布",
+  PENDING_APPROVAL = "待审核",
+  PUBLISHED = "已发布",
+}
 
 const posts = ref<ListedPostList>({
   page: 1,
@@ -37,6 +45,7 @@ const checkedAll = ref(false);
 const selectedPostNames = ref<string[]>([]);
 
 const { users } = useUserFetch();
+const dialog = useDialog();
 
 const handleFetchPosts = async () => {
   try {
@@ -111,6 +120,13 @@ const checkSelection = (post: Post) => {
   );
 };
 
+const finalStatus = (post: Post) => {
+  if (post.status?.phase) {
+    return PostPhase[post.status.phase];
+  }
+  return "";
+};
+
 const handleCheckAllChange = (e: Event) => {
   const { checked } = e.target as HTMLInputElement;
 
@@ -122,6 +138,22 @@ const handleCheckAllChange = (e: Event) => {
   } else {
     selectedPostNames.value.length = 0;
   }
+};
+
+const handleDelete = async (post: Post) => {
+  dialog.warning({
+    title: "是否确认删除该文章？",
+    confirmType: "danger",
+    onConfirm: async () => {
+      const postToUpdate = cloneDeep(post);
+      postToUpdate.spec.deleted = true;
+      await apiClient.extension.post.updatecontentHaloRunV1alpha1Post(
+        postToUpdate.metadata.name,
+        postToUpdate
+      );
+      await handleFetchPosts();
+    },
+  });
 };
 
 watch(selectedPostNames, (newValue) => {
@@ -419,6 +451,18 @@ onMounted(() => {
                 </div>
                 <div class="mt-1 flex">
                   <VSpace>
+                    <p
+                      v-if="post.categories.length"
+                      class="inline-flex flex-wrap gap-1 text-xs text-gray-500"
+                    >
+                      分类：<span
+                        v-for="(category, index) in post.categories"
+                        :key="index"
+                        class="cursor-pointer hover:text-gray-900"
+                      >
+                        {{ category.spec.displayName }}
+                      </span>
+                    </p>
                     <span class="text-xs text-gray-500">访问量 0</span>
                     <span class="text-xs text-gray-500"> 评论 0 </span>
                   </VSpace>
@@ -444,13 +488,40 @@ onMounted(() => {
                       class="hidden h-6 w-6 rounded-full ring-2 ring-white sm:inline-block"
                     />
                   </RouterLink>
+                  <span class="text-sm text-gray-500">
+                    {{ finalStatus(post.post) }}
+                  </span>
                   <time class="text-sm text-gray-500">
                     {{ formatDatetime(post.post.metadata.creationTimestamp) }}
                   </time>
-                  <span class="cursor-pointer">
-                    <IconSettings
-                      @click.stop="handleOpenSettingModal(post.post)"
-                    />
+                  <span class="self-center">
+                    <FloatingDropdown>
+                      <IconSettings
+                        class="cursor-pointer transition-all hover:text-blue-600"
+                      />
+                      <template #popper>
+                        <div class="w-48 p-2">
+                          <VSpace class="w-full" direction="column">
+                            <VButton
+                              v-close-popper
+                              block
+                              type="secondary"
+                              @click="handleOpenSettingModal(post.post)"
+                            >
+                              设置
+                            </VButton>
+                            <VButton
+                              v-close-popper
+                              block
+                              type="danger"
+                              @click="handleDelete(post.post)"
+                            >
+                              删除
+                            </VButton>
+                          </VSpace>
+                        </div>
+                      </template>
+                    </FloatingDropdown>
                   </span>
                 </div>
               </div>
