@@ -12,6 +12,7 @@ import {
   useDialog,
   VButton,
   VCard,
+  VEmpty,
   VPageHeader,
   VPagination,
   VSpace,
@@ -45,6 +46,7 @@ const posts = ref<ListedPostList>({
   hasNext: false,
   hasPrevious: false,
 });
+const loading = ref(false);
 const settingModal = ref(false);
 const selectedPost = ref<Post | null>(null);
 const selectedPostWithContent = ref<PostRequest | null>(null);
@@ -58,6 +60,8 @@ const dialog = useDialog();
 
 const handleFetchPosts = async () => {
   try {
+    loading.value = true;
+
     const labelSelector: string[] = [];
 
     if (selectedVisibleFilterItem.value.value) {
@@ -80,6 +84,8 @@ const handleFetchPosts = async () => {
     posts.value = data;
   } catch (e) {
     console.error("Failed to fetch posts", e);
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -610,7 +616,29 @@ function handlePhaseFilterItemChange(filterItem: FilterItem) {
           </div>
         </div>
       </template>
-      <ul class="box-border h-full w-full divide-y divide-gray-100" role="list">
+
+      <VEmpty
+        v-if="!posts.items.length && !loading"
+        message="你可以尝试刷新或者新建文章"
+        title="当前没有文章"
+      >
+        <template #actions>
+          <VSpace>
+            <VButton @click="handleFetchPosts">刷新</VButton>
+            <VButton type="primary" :route="{ name: 'PostEditor' }">
+              <template #icon>
+                <IconAddCircle class="h-full w-full" />
+              </template>
+              新建文章
+            </VButton>
+          </VSpace>
+        </template>
+      </VEmpty>
+      <ul
+        v-else
+        class="box-border h-full w-full divide-y divide-gray-100"
+        role="list"
+      >
         <li v-for="(post, index) in posts.items" :key="index">
           <div
             :class="{

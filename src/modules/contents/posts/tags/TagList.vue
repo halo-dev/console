@@ -11,6 +11,7 @@ import {
   IconSettings,
   VButton,
   VCard,
+  VEmpty,
   VPageHeader,
   VSpace,
 } from "@halo-dev/components";
@@ -39,7 +40,7 @@ const viewTypes = [
 
 const viewType = ref("list");
 
-const { tags, handleFetchTags, handleDelete } = usePostTag();
+const { tags, loading, handleFetchTags, handleDelete } = usePostTag();
 
 const editingModal = ref(false);
 const selectedTag = ref<Tag | null>(null);
@@ -144,101 +145,120 @@ onMounted(async () => {
           </div>
         </div>
       </template>
-      <ul
-        v-if="viewType === 'list'"
-        class="box-border h-full w-full divide-y divide-gray-100"
-        role="list"
+      <VEmpty
+        v-if="!tags.length && !loading"
+        message="你可以尝试刷新或者新建标签"
+        title="当前没有标签"
       >
-        <li v-for="(tag, index) in tags" :key="index">
-          <div
-            :class="{
-              'bg-gray-100': selectedTag?.metadata.name === tag.metadata.name,
-            }"
-            class="relative block cursor-pointer px-4 py-3 transition-all hover:bg-gray-50"
-          >
+        <template #actions>
+          <VSpace>
+            <VButton @click="handleFetchTags">刷新</VButton>
+            <VButton type="primary" @click="editingModal = true">
+              <template #icon>
+                <IconAddCircle class="h-full w-full" />
+              </template>
+              新建标签
+            </VButton>
+          </VSpace>
+        </template>
+      </VEmpty>
+      <div v-else>
+        <ul
+          v-if="viewType === 'list'"
+          class="box-border h-full w-full divide-y divide-gray-100"
+          role="list"
+        >
+          <li v-for="(tag, index) in tags" :key="index">
             <div
-              v-show="selectedTag?.metadata.name === tag.metadata.name"
-              class="absolute inset-y-0 left-0 w-0.5 bg-primary"
-            ></div>
-            <div class="relative flex flex-row items-center">
-              <div class="flex-1">
-                <div class="flex flex-col sm:flex-row">
-                  <PostTag :tag="tag" />
-                </div>
-                <div class="mt-1 flex">
-                  <span class="text-xs text-gray-500">
-                    /tags/{{ tag.spec.slug }}
-                  </span>
-                </div>
-              </div>
-              <div class="flex">
-                <div
-                  class="inline-flex flex-col flex-col-reverse items-end gap-4 sm:flex-row sm:items-center sm:gap-6"
-                >
-                  <FloatingTooltip
-                    v-if="tag.metadata.deletionTimestamp"
-                    class="mr-4 hidden items-center sm:flex"
-                  >
-                    <div
-                      class="inline-flex h-1.5 w-1.5 rounded-full bg-red-600"
-                    >
-                      <span
-                        class="inline-block h-1.5 w-1.5 animate-ping rounded-full bg-red-600"
-                      ></span>
-                    </div>
-                    <template #popper> 删除中</template>
-                  </FloatingTooltip>
-                  <div
-                    class="cursor-pointer text-sm text-gray-500 hover:text-gray-900"
-                  >
-                    20 篇文章
+              :class="{
+                'bg-gray-100': selectedTag?.metadata.name === tag.metadata.name,
+              }"
+              class="relative block cursor-pointer px-4 py-3 transition-all hover:bg-gray-50"
+            >
+              <div
+                v-show="selectedTag?.metadata.name === tag.metadata.name"
+                class="absolute inset-y-0 left-0 w-0.5 bg-primary"
+              ></div>
+              <div class="relative flex flex-row items-center">
+                <div class="flex-1">
+                  <div class="flex flex-col sm:flex-row">
+                    <PostTag :tag="tag" />
                   </div>
-                  <time class="text-sm text-gray-500">
-                    {{ formatDatetime(tag.metadata.creationTimestamp) }}
-                  </time>
-                  <span class="self-center">
-                    <FloatingDropdown>
-                      <IconSettings
-                        class="cursor-pointer transition-all hover:text-blue-600"
-                      />
-                      <template #popper>
-                        <div class="w-48 p-2">
-                          <VSpace class="w-full" direction="column">
-                            <VButton
-                              v-close-popper
-                              block
-                              type="secondary"
-                              @click="handleOpenEditingModal(tag)"
-                            >
-                              修改
-                            </VButton>
-                            <VButton
-                              v-close-popper
-                              block
-                              type="danger"
-                              @click="handleDelete(tag)"
-                            >
-                              删除
-                            </VButton>
-                          </VSpace>
-                        </div>
-                      </template>
-                    </FloatingDropdown>
-                  </span>
+                  <div class="mt-1 flex">
+                    <span class="text-xs text-gray-500">
+                      /tags/{{ tag.spec.slug }}
+                    </span>
+                  </div>
+                </div>
+                <div class="flex">
+                  <div
+                    class="inline-flex flex-col flex-col-reverse items-end gap-4 sm:flex-row sm:items-center sm:gap-6"
+                  >
+                    <FloatingTooltip
+                      v-if="tag.metadata.deletionTimestamp"
+                      class="mr-4 hidden items-center sm:flex"
+                    >
+                      <div
+                        class="inline-flex h-1.5 w-1.5 rounded-full bg-red-600"
+                      >
+                        <span
+                          class="inline-block h-1.5 w-1.5 animate-ping rounded-full bg-red-600"
+                        ></span>
+                      </div>
+                      <template #popper> 删除中</template>
+                    </FloatingTooltip>
+                    <div
+                      class="cursor-pointer text-sm text-gray-500 hover:text-gray-900"
+                    >
+                      20 篇文章
+                    </div>
+                    <time class="text-sm text-gray-500">
+                      {{ formatDatetime(tag.metadata.creationTimestamp) }}
+                    </time>
+                    <span class="self-center">
+                      <FloatingDropdown>
+                        <IconSettings
+                          class="cursor-pointer transition-all hover:text-blue-600"
+                        />
+                        <template #popper>
+                          <div class="w-48 p-2">
+                            <VSpace class="w-full" direction="column">
+                              <VButton
+                                v-close-popper
+                                block
+                                type="secondary"
+                                @click="handleOpenEditingModal(tag)"
+                              >
+                                修改
+                              </VButton>
+                              <VButton
+                                v-close-popper
+                                block
+                                type="danger"
+                                @click="handleDelete(tag)"
+                              >
+                                删除
+                              </VButton>
+                            </VSpace>
+                          </div>
+                        </template>
+                      </FloatingDropdown>
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </li>
-      </ul>
+          </li>
+        </ul>
 
-      <div v-else class="flex flex-wrap gap-3 p-4" role="list">
-        <PostTag
-          v-for="(tag, index) in tags"
-          :key="index"
-          :tag="tag"
-          @click="handleOpenEditingModal(tag)"
-        />
+        <div v-else class="flex flex-wrap gap-3 p-4" role="list">
+          <PostTag
+            v-for="(tag, index) in tags"
+            :key="index"
+            :tag="tag"
+            @click="handleOpenEditingModal(tag)"
+          />
+        </div>
       </div>
     </VCard>
   </div>

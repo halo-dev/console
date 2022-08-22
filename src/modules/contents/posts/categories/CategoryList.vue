@@ -9,7 +9,9 @@ import {
   IconBookRead,
   VButton,
   VCard,
+  VEmpty,
   VPageHeader,
+  VSpace,
 } from "@halo-dev/components";
 import CategoryEditingModal from "./components/CategoryEditingModal.vue";
 import CategoryListItem from "./components/CategoryListItem.vue";
@@ -17,14 +19,14 @@ import CategoryListItem from "./components/CategoryListItem.vue";
 // types
 import type { Category } from "@halo-dev/api-client";
 import type { CategoryTree } from "./utils";
-
-// libs
-import { useDebounceFn } from "@vueuse/core";
 import {
   convertCategoryTreeToCategory,
   convertTreeToCategories,
   resetCategoriesTreePriority,
 } from "./utils";
+
+// libs
+import { useDebounceFn } from "@vueuse/core";
 
 // hooks
 import { usePostCategory } from "./composables/use-post-category";
@@ -32,8 +34,13 @@ import { usePostCategory } from "./composables/use-post-category";
 const editingModal = ref(false);
 const selectedCategory = ref<Category | null>(null);
 
-const { categories, categoriesTree, handleFetchCategories, handleDelete } =
-  usePostCategory();
+const {
+  categories,
+  categoriesTree,
+  loading,
+  handleFetchCategories,
+  handleDelete,
+} = usePostCategory();
 
 const handleUpdateInBatch = useDebounceFn(async () => {
   const categoriesTreeToUpdate = resetCategoriesTreePriority(
@@ -100,7 +107,25 @@ const onEditingModalClose = () => {
           </div>
         </div>
       </template>
+      <VEmpty
+        v-if="!categories.length && !loading"
+        message="你可以尝试刷新或者新建分类"
+        title="当前没有分类"
+      >
+        <template #actions>
+          <VSpace>
+            <VButton @click="handleFetchCategories">刷新</VButton>
+            <VButton type="primary" @click="editingModal = true">
+              <template #icon>
+                <IconAddCircle class="h-full w-full" />
+              </template>
+              新建分类
+            </VButton>
+          </VSpace>
+        </template>
+      </VEmpty>
       <CategoryListItem
+        v-else
         :categories="categoriesTree"
         @change="handleUpdateInBatch"
         @delete="handleDelete"
