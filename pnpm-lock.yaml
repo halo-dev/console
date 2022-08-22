@@ -13,7 +13,7 @@ importers:
       '@formkit/themes': 1.0.0-beta.10
       '@formkit/vue': 1.0.0-beta.10
       '@halo-dev/admin-shared': workspace:*
-      '@halo-dev/api-client': ^0.0.11
+      '@halo-dev/api-client': ^0.0.12
       '@halo-dev/components': workspace:*
       '@halo-dev/richtext-editor': 0.0.0-alpha.3
       '@rushstack/eslint-patch': ^1.1.4
@@ -87,7 +87,7 @@ importers:
       '@formkit/themes': 1.0.0-beta.10_tailwindcss@3.1.8
       '@formkit/vue': 1.0.0-beta.10_wwmyxdjqen5bmh3tr2meig5lki
       '@halo-dev/admin-shared': link:packages/shared
-      '@halo-dev/api-client': 0.0.11
+      '@halo-dev/api-client': 0.0.12
       '@halo-dev/components': link:packages/components
       '@halo-dev/richtext-editor': 0.0.0-alpha.3_vue@3.2.37
       '@vueuse/components': 8.9.4_vue@3.2.37
@@ -184,12 +184,12 @@ importers:
 
   packages/shared:
     specifiers:
-      '@halo-dev/api-client': ^0.0.11
+      '@halo-dev/api-client': ^0.0.12
       '@halo-dev/components': workspace:*
       axios: ^0.27.2
       vite-plugin-dts: ^1.4.1
     dependencies:
-      '@halo-dev/api-client': 0.0.11
+      '@halo-dev/api-client': 0.0.12
       '@halo-dev/components': link:../components
       axios: 0.27.2
     devDependencies:
@@ -2124,8 +2124,8 @@ packages:
       - windicss
     dev: false
 
-  /@halo-dev/api-client/0.0.11:
-    resolution: {integrity: sha512-67e7lrWPoHVKF4XItT6OWr7rX96CR9s/3SOVXYD3xCyAMIgLyFULfKVI7JGxisFMKvadTx7rm5RK4zzZ/CbXIw==}
+  /@halo-dev/api-client/0.0.12:
+    resolution: {integrity: sha512-fOI3DB9rOA1Z+h1aKiEQ+2kWkNSmdWIDvd+39dR5b3X0DmKH+zWrNmygA5Qe2gBPX28TNt/zr2qCKUjGjb99CA==}
     dev: false
 
   /@halo-dev/richtext-editor/0.0.0-alpha.3_vue@3.2.37:
