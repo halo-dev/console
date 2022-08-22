@@ -21,13 +21,40 @@ import type { ListedPostList, Post, PostRequest } from "@halo-dev/api-client";
 import { apiClient } from "@halo-dev/admin-shared";
 import { formatDatetime } from "@/utils/date";
 import { useUserFetch } from "@/modules/system/users/composables/use-user";
+import { usePostCategory } from "@/modules/contents/posts/categories/composables/use-post-category";
+import { usePostTag } from "@/modules/contents/posts/tags/composables/use-post-tag";
 import cloneDeep from "lodash.clonedeep";
+import { postLabels } from "@/constants/labels";
+
+interface FilterItem {
+  label: string;
+  value: string | undefined;
+}
 
 enum PostPhase {
   DRAFT = "未发布",
   PENDING_APPROVAL = "待审核",
   PUBLISHED = "已发布",
 }
+
+const VisibleFilterItems: FilterItem[] = [
+  {
+    label: "全部",
+    value: "",
+  },
+  {
+    label: "公开",
+    value: "PUBLIC",
+  },
+  {
+    label: "内部成员可访问",
+    value: "INTERNAL",
+  },
+  {
+    label: "私有",
+    value: "PRIVATE",
+  },
+];
 
 const posts = ref<ListedPostList>({
   page: 1,
@@ -44,15 +71,27 @@ const selectedPost = ref<Post | null>(null);
 const selectedPostWithContent = ref<PostRequest | null>(null);
 const checkedAll = ref(false);
 const selectedPostNames = ref<string[]>([]);
+const selectedVisibleFilterItem = ref<FilterItem>(VisibleFilterItems[0]);
 
 const { users } = useUserFetch();
+const { categories } = usePostCategory();
+const { tags } = usePostTag();
 const dialog = useDialog();
 
 const handleFetchPosts = async () => {
   try {
+    const labelSelector: string[] = [];
+
+    if (selectedVisibleFilterItem.value.value) {
+      labelSelector.push(
+        `${postLabels.VISIBLE}=${selectedVisibleFilterItem.value.value}`
+      );
+    }
+
     const { data } = await apiClient.post.listPosts(
       posts.value.page,
-      posts.value.size
+      posts.value.size,
+      labelSelector
     );
     posts.value = data;
   } catch (e) {
@@ -156,6 +195,11 @@ const handleDelete = async (post: Post) => {
     },
   });
 };
+
+function handleVisibleFilterItemChange(filterItem: FilterItem) {
+  selectedVisibleFilterItem.value = filterItem;
+  handleFetchPosts();
+}
 
 watch(selectedPostNames, (newValue) => {
   checkedAll.value = newValue.length === posts.value.items?.length;
@@ -264,12 +308,49 @@ onMounted(() => {
                         <li
                           class="flex cursor-pointer items-center rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                         >
-                          <span class="truncate">草稿</span>
+                          <span class="truncate">未发布</span>
                         </li>
                         <li
                           class="flex cursor-pointer items-center rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                         >
-                          <span class="truncate">未审核</span>
+                          <span class="truncate">待审核</span>
+                        </li>
+                        <li
+                          class="flex cursor-pointer items-center rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                        >
+                          <span class="truncate">回收站</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </template>
+                </FloatingDropdown>
+                <FloatingDropdown>
+                  <div
+                    class="flex cursor-pointer select-none items-center text-sm text-gray-700 hover:text-black"
+                  >
+                    <span class="mr-0.5">可见性</span>
+                    <span>
+                      <IconArrowDown />
+                    </span>
+                  </div>
+                  <template #popper>
+                    <div class="w-72 p-4">
+                      <ul class="space-y-1">
+                        <li
+                          v-for="(filterItem, index) in VisibleFilterItems"
+                          :key="index"
+                          v-close-popper
+                          :class="{
+                            'bg-gray-100':
+                              selectedVisibleFilterItem.value ===
+                              filterItem.value,
+                          }"
+                          class="flex cursor-pointer items-center rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                          @click="handleVisibleFilterItemChange(filterItem)"
+                        >
+                          <span class="truncate">
+                            {{ filterItem.label }}
+                          </span>
                         </li>
                       </ul>
                     </div>
@@ -286,10 +367,57 @@ onMounted(() => {
                   </div>
                   <template #popper>
                     <div class="h-96 w-80 p-4">
-                      <FormKit
-                        placeholder="输入关键词搜索"
-                        type="text"
-                      ></FormKit>
+                      <div class="bg-white">
+                        <FormKit
+                          placeholder="输入关键词搜索"
+                          type="text"
+                        ></FormKit>
+                      </div>
+
+                      <div class="mt-2">
+                        <ul
+                          class="box-border h-full w-full divide-y divide-gray-100"
+                        >
+                          <li
+                            v-for="(category, index) in categories"
+                            :key="index"
+                            v-close-popper
+                          >
+                            <div
+                              class="group relative block cursor-pointer px-4 py-3 transition-all hover:bg-gray-50"
+                            >
+                              <div class="relative flex flex-row items-center">
+                                <div class="flex-1">
+                                  <div class="flex flex-col sm:flex-row">
+                                    <span
+                                      class="mr-0 truncate text-sm font-medium text-gray-900 sm:mr-2"
+                                    >
+                                      {{ category.spec.displayName }}
+                                    </span>
+                                    <VSpace class="mt-1 sm:mt-0"></VSpace>
+                                  </div>
+                                  <div class="mt-1 flex">
+                                    <span class="text-xs text-gray-500">
+                                      /categories/{{ category.spec.slug }}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div class="flex">
+                                  <div
+                                    class="inline-flex flex-col flex-col-reverse items-end gap-4 sm:flex-row sm:items-center sm:gap-6"
+                                  >
+                                    <div
+                                      class="cursor-pointer text-sm text-gray-500 hover:text-gray-900"
+                                    >
+                                      20 篇文章
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
                     </div>
                   </template>
                 </FloatingDropdown>
@@ -304,10 +432,53 @@ onMounted(() => {
                   </div>
                   <template #popper>
                     <div class="h-96 w-80 p-4">
-                      <FormKit
-                        placeholder="输入关键词搜索"
-                        type="text"
-                      ></FormKit>
+                      <div class="bg-white">
+                        <FormKit
+                          placeholder="输入关键词搜索"
+                          type="text"
+                        ></FormKit>
+                      </div>
+
+                      <div class="mt-2">
+                        <ul
+                          class="box-border h-full w-full divide-y divide-gray-100"
+                          role="list"
+                        >
+                          <li
+                            v-for="(tag, index) in tags"
+                            :key="index"
+                            v-close-popper
+                          >
+                            <div
+                              class="relative block cursor-pointer px-4 py-3 transition-all hover:bg-gray-50"
+                            >
+                              <div class="relative flex flex-row items-center">
+                                <div class="flex-1">
+                                  <div class="flex flex-col sm:flex-row">
+                                    <PostTag :tag="tag" />
+                                  </div>
+                                  <div class="mt-1 flex">
+                                    <span class="text-xs text-gray-500">
+                                      /tags/{{ tag.spec.slug }}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div class="flex">
+                                  <div
+                                    class="inline-flex flex-col flex-col-reverse items-end gap-4 sm:flex-row sm:items-center sm:gap-6"
+                                  >
+                                    <div
+                                      class="cursor-pointer text-sm text-gray-500 hover:text-gray-900"
+                                    >
+                                      20 篇文章
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
                     </div>
                   </template>
                 </FloatingDropdown>
@@ -334,15 +505,10 @@ onMounted(() => {
                           <li
                             v-for="(user, index) in users"
                             :key="index"
+                            v-close-popper
                             class="cursor-pointer py-4 hover:bg-gray-50"
                           >
                             <div class="flex items-center space-x-4">
-                              <div class="flex items-center">
-                                <input
-                                  class="h-4 w-4 rounded border-gray-300 text-indigo-600"
-                                  type="checkbox"
-                                />
-                              </div>
                               <div class="flex-shrink-0">
                                 <img
                                   :alt="user.spec.displayName"
@@ -458,11 +624,16 @@ onMounted(() => {
                     </span>
                   </RouterLink>
                   <VSpace class="mt-1 sm:mt-0">
-                    <PostTag
+                    <RouterLink
                       v-for="(tag, tagIndex) in post.tags"
                       :key="tagIndex"
-                      :tag="tag"
-                    ></PostTag>
+                      :to="{
+                        name: 'Tags',
+                        query: { name: tag.metadata.name },
+                      }"
+                    >
+                      <PostTag :tag="tag"></PostTag>
+                    </RouterLink>
                   </VSpace>
                 </div>
                 <div class="mt-1 flex">

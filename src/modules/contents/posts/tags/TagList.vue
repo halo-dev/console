@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 // core libs
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 
 // components
 import {
@@ -22,6 +22,9 @@ import type { Tag } from "@halo-dev/api-client";
 import { usePostTag } from "./composables/use-post-tag";
 
 import { formatDatetime } from "@/utils/date";
+
+import { useRouteQuery } from "@vueuse/router";
+import { apiClient } from "@halo-dev/admin-shared";
 
 const viewTypes = [
   {
@@ -76,8 +79,21 @@ const handleSelectNext = () => {
 
 const onEditingModalClose = () => {
   selectedTag.value = null;
+  queryName.value = null;
   handleFetchTags();
 };
+
+const queryName = useRouteQuery("name");
+
+onMounted(async () => {
+  if (queryName.value) {
+    const { data } = await apiClient.extension.tag.getcontentHaloRunV1alpha1Tag(
+      queryName.value as string
+    );
+    selectedTag.value = data;
+    editingModal.value = true;
+  }
+});
 </script>
 <template>
   <TagEditingModal
