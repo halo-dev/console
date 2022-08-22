@@ -29,35 +29,11 @@ import { usePostTag } from "@/modules/contents/posts/tags/composables/use-post-t
 import cloneDeep from "lodash.clonedeep";
 import { postLabels } from "@/constants/labels";
 
-interface FilterItem {
-  label: string;
-  value: string | undefined;
-}
-
 enum PostPhase {
   DRAFT = "未发布",
   PENDING_APPROVAL = "待审核",
   PUBLISHED = "已发布",
 }
-
-const VisibleFilterItems: FilterItem[] = [
-  {
-    label: "全部",
-    value: "",
-  },
-  {
-    label: "公开",
-    value: "PUBLIC",
-  },
-  {
-    label: "内部成员可访问",
-    value: "INTERNAL",
-  },
-  {
-    label: "私有",
-    value: "PRIVATE",
-  },
-];
 
 const posts = ref<ListedPostList>({
   page: 1,
@@ -74,7 +50,6 @@ const selectedPost = ref<Post | null>(null);
 const selectedPostWithContent = ref<PostRequest | null>(null);
 const checkedAll = ref(false);
 const selectedPostNames = ref<string[]>([]);
-const selectedVisibleFilterItem = ref<FilterItem>(VisibleFilterItems[0]);
 
 const { users } = useUserFetch();
 const { categories } = usePostCategory();
@@ -88,6 +63,12 @@ const handleFetchPosts = async () => {
     if (selectedVisibleFilterItem.value.value) {
       labelSelector.push(
         `${postLabels.VISIBLE}=${selectedVisibleFilterItem.value.value}`
+      );
+    }
+
+    if (selectedPhaseFilterItem.value.value) {
+      labelSelector.push(
+        `${postLabels.PHASE}=${selectedPhaseFilterItem.value.value}`
       );
     }
 
@@ -199,11 +180,6 @@ const handleDelete = async (post: Post) => {
   });
 };
 
-function handleVisibleFilterItemChange(filterItem: FilterItem) {
-  selectedVisibleFilterItem.value = filterItem;
-  handleFetchPosts();
-}
-
 watch(selectedPostNames, (newValue) => {
   checkedAll.value = newValue.length === posts.value.items?.length;
 });
@@ -226,6 +202,62 @@ watchEffect(async () => {
 onMounted(() => {
   handleFetchPosts();
 });
+
+interface FilterItem {
+  label: string;
+  value: string | undefined;
+}
+
+const VisibleFilterItems: FilterItem[] = [
+  {
+    label: "全部",
+    value: "",
+  },
+  {
+    label: "公开",
+    value: "PUBLIC",
+  },
+  {
+    label: "内部成员可访问",
+    value: "INTERNAL",
+  },
+  {
+    label: "私有",
+    value: "PRIVATE",
+  },
+];
+
+const PhaseFilterItems: FilterItem[] = [
+  {
+    label: "全部",
+    value: "",
+  },
+  {
+    label: "已发布",
+    value: "PUBLISHED",
+  },
+  {
+    label: "未发布",
+    value: "DRAFT",
+  },
+  {
+    label: "待审核",
+    value: "PENDING_APPROVAL",
+  },
+];
+
+const selectedVisibleFilterItem = ref<FilterItem>(VisibleFilterItems[0]);
+const selectedPhaseFilterItem = ref<FilterItem>(PhaseFilterItems[0]);
+
+function handleVisibleFilterItemChange(filterItem: FilterItem) {
+  selectedVisibleFilterItem.value = filterItem;
+  handleFetchPosts();
+}
+
+function handlePhaseFilterItemChange(filterItem: FilterItem) {
+  selectedPhaseFilterItem.value = filterItem;
+  handleFetchPosts();
+}
 </script>
 <template>
   <PostSettingModal
@@ -299,29 +331,18 @@ onMounted(() => {
                     <div class="w-72 p-4">
                       <ul class="space-y-1">
                         <li
+                          v-for="(filterItem, index) in PhaseFilterItems"
+                          :key="index"
+                          v-close-popper
+                          :class="{
+                            'bg-gray-100':
+                              selectedPhaseFilterItem.value ===
+                              filterItem.value,
+                          }"
                           class="flex cursor-pointer items-center rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                          @click="handlePhaseFilterItemChange(filterItem)"
                         >
-                          <span class="truncate">全部</span>
-                        </li>
-                        <li
-                          class="flex cursor-pointer items-center rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                        >
-                          <span class="truncate">已发布</span>
-                        </li>
-                        <li
-                          class="flex cursor-pointer items-center rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                        >
-                          <span class="truncate">未发布</span>
-                        </li>
-                        <li
-                          class="flex cursor-pointer items-center rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                        >
-                          <span class="truncate">待审核</span>
-                        </li>
-                        <li
-                          class="flex cursor-pointer items-center rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                        >
-                          <span class="truncate">回收站</span>
+                          <span class="truncate">{{ filterItem.label }}</span>
                         </li>
                       </ul>
                     </div>
