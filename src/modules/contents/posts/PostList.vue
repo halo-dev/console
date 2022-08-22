@@ -5,7 +5,10 @@ import {
   IconArrowLeft,
   IconArrowRight,
   IconBookRead,
+  IconEye,
+  IconEyeOff,
   IconSettings,
+  IconTeam,
   useDialog,
   VButton,
   VCard,
@@ -328,7 +331,7 @@ onMounted(() => {
                   <div
                     class="flex cursor-pointer select-none items-center text-sm text-gray-700 hover:text-black"
                   >
-                    <span class="mr-0.5">可见性</span>
+                    <span class="mr-0.5"> 可见性 </span>
                     <span>
                       <IconArrowDown />
                     </span>
@@ -366,14 +369,13 @@ onMounted(() => {
                     </span>
                   </div>
                   <template #popper>
-                    <div class="h-96 w-80 p-4">
-                      <div class="bg-white">
+                    <div class="h-96 w-80">
+                      <div class="bg-white p-4">
                         <FormKit
                           placeholder="输入关键词搜索"
                           type="text"
                         ></FormKit>
                       </div>
-
                       <div class="mt-2">
                         <ul
                           class="box-border h-full w-full divide-y divide-gray-100"
@@ -431,8 +433,8 @@ onMounted(() => {
                     </span>
                   </div>
                   <template #popper>
-                    <div class="h-96 w-80 p-4">
-                      <div class="bg-white">
+                    <div class="h-96 w-80">
+                      <div class="bg-white p-4">
                         <FormKit
                           placeholder="输入关键词搜索"
                           type="text"
@@ -492,8 +494,8 @@ onMounted(() => {
                     </span>
                   </div>
                   <template #popper>
-                    <div class="h-96 w-80 p-4">
-                      <div class="bg-white">
+                    <div class="h-96 w-80">
+                      <div class="bg-white p-4">
                         <!--TODO: Auto Focus-->
                         <FormKit
                           placeholder="输入关键词搜索"
@@ -506,9 +508,9 @@ onMounted(() => {
                             v-for="(user, index) in users"
                             :key="index"
                             v-close-popper
-                            class="cursor-pointer py-4 hover:bg-gray-50"
+                            class="cursor-pointer hover:bg-gray-50"
                           >
-                            <div class="flex items-center space-x-4">
+                            <div class="flex items-center space-x-4 px-4 py-3">
                               <div class="flex-shrink-0">
                                 <img
                                   :alt="user.spec.displayName"
@@ -678,10 +680,27 @@ onMounted(() => {
                   <span class="text-sm text-gray-500">
                     {{ finalStatus(post.post) }}
                   </span>
+                  <span>
+                    <IconEye
+                      v-if="post.post.spec.visible === 'PUBLIC'"
+                      v-tooltip="`公开访问`"
+                      class="cursor-pointer text-sm transition-all hover:text-blue-600"
+                    />
+                    <IconEyeOff
+                      v-if="post.post.spec.visible === 'PRIVATE'"
+                      v-tooltip="`私有访问`"
+                      class="cursor-pointer text-sm transition-all hover:text-blue-600"
+                    />
+                    <IconTeam
+                      v-if="post.post.spec.visible === 'INTERNAL'"
+                      v-tooltip="`内部成员可访问`"
+                      class="cursor-pointer text-sm transition-all hover:text-blue-600"
+                    />
+                  </span>
                   <time class="text-sm text-gray-500">
                     {{ formatDatetime(post.post.metadata.creationTimestamp) }}
                   </time>
-                  <span class="self-center">
+                  <span>
                     <FloatingDropdown>
                       <IconSettings
                         class="cursor-pointer transition-all hover:text-blue-600"
