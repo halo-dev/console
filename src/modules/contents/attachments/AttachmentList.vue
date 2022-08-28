@@ -1,12 +1,10 @@
 <script lang="ts" setup>
 import {
-  IconAddCircle,
   IconArrowDown,
   IconCheckboxFill,
   IconDatabase2Line,
   IconGrid,
   IconList,
-  IconMore,
   IconPalette,
   IconSettings,
   IconUpload,
@@ -21,7 +19,7 @@ import AttachmentDetailModal from "./components/AttachmentDetailModal.vue";
 import AttachmentUploadModal from "./components/AttachmentUploadModal.vue";
 import AttachmentSelectModal from "./components/AttachmentSelectModal.vue";
 import AttachmentStrategiesModal from "./components/AttachmentStrategiesModal.vue";
-import AttachmentGroupEditingModal from "./components/AttachmentGroupEditingModal.vue";
+import AttachmentGroupList from "./components/AttachmentGroupList.vue";
 import { ref } from "vue";
 import { useUserFetch } from "@/modules/system/users/composables/use-user";
 
@@ -42,7 +40,6 @@ const strategyVisible = ref(false);
 const selectVisible = ref(false);
 const uploadVisible = ref(false);
 const detailVisible = ref(false);
-const groupEditingModal = ref(false);
 const checkAll = ref(false);
 
 const { users } = useUserFetch();
@@ -59,37 +56,12 @@ const attachments = Array.from(new Array(50), (_, index) => index).map(
     };
   }
 );
-
-const folders = [
-  {
-    name: "2022",
-  },
-  {
-    name: "2021",
-  },
-  {
-    name: "Photos",
-  },
-  {
-    name: "Documents",
-  },
-  {
-    name: "Videos",
-  },
-  {
-    name: "Pictures",
-  },
-  {
-    name: "Developer",
-  },
-];
 </script>
 <template>
   <AttachmentDetailModal v-model:visible="detailVisible" />
   <AttachmentUploadModal v-model:visible="uploadVisible" />
   <AttachmentSelectModal v-model:visible="selectVisible" />
   <AttachmentStrategiesModal v-model:visible="strategyVisible" />
-  <AttachmentGroupEditingModal v-model:visible="groupEditingModal" />
   <VPageHeader title="附件库">
     <template #icon>
       <IconPalette class="mr-2 self-center" />
@@ -338,62 +310,7 @@ const folders = [
           </template>
 
           <div v-if="viewType === 'grid'">
-            <div class="mb-5 grid grid-cols-2 gap-x-2 gap-y-3 sm:grid-cols-6">
-              <div
-                class="flex cursor-pointer items-center rounded-base bg-gray-200 p-2 text-gray-900 transition-all"
-              >
-                <div class="flex flex-1 items-center">
-                  <span class="text-sm">全部（212）</span>
-                </div>
-              </div>
-              <div
-                class="flex cursor-pointer items-center rounded-base bg-gray-100 p-2 text-gray-500 transition-all hover:bg-gray-200 hover:text-gray-900 hover:shadow-sm"
-              >
-                <div class="flex flex-1 items-center">
-                  <span class="text-sm">未分组（18）</span>
-                </div>
-              </div>
-              <div
-                v-for="(folder, index) in folders"
-                :key="index"
-                class="flex cursor-pointer items-center rounded-base bg-gray-100 p-2 text-gray-500 transition-all hover:bg-gray-200 hover:text-gray-900 hover:shadow-sm"
-              >
-                <div class="flex flex-1 items-center">
-                  <span class="text-sm">
-                    {{ folder.name }}（{{ index * 20 }}）
-                  </span>
-                </div>
-                <FloatingDropdown>
-                  <IconMore />
-                  <template #popper>
-                    <div class="w-48 p-2">
-                      <VSpace class="w-full" direction="column">
-                        <VButton
-                          v-close-popper
-                          block
-                          type="secondary"
-                          @click="groupEditingModal = true"
-                        >
-                          重命名
-                        </VButton>
-                        <VButton v-close-popper block type="danger">
-                          删除
-                        </VButton>
-                      </VSpace>
-                    </div>
-                  </template>
-                </FloatingDropdown>
-              </div>
-              <div
-                class="flex cursor-pointer items-center rounded-base bg-gray-100 p-2 text-gray-500 transition-all hover:bg-gray-200 hover:text-gray-900 hover:shadow-sm"
-                @click="groupEditingModal = true"
-              >
-                <div class="flex flex-1 items-center">
-                  <span class="text-sm">添加分组</span>
-                </div>
-                <IconAddCircle />
-              </div>
-            </div>
+            <AttachmentGroupList />
             <div
               class="mt-2 grid grid-cols-3 gap-x-2 gap-y-3 sm:grid-cols-3 md:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-12"
               role="list"

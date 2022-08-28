@@ -13,6 +13,9 @@ import {
   PluginHaloRunV1alpha1PluginApi,
   PluginHaloRunV1alpha1ReverseProxyApi,
   ThemeHaloRunV1alpha1ThemeApi,
+  StorageHaloRunV1alpha1AttachmentApi,
+  StorageHaloRunV1alpha1GroupApi,
+  StorageHaloRunV1alpha1PolicyApi,
   V1alpha1ConfigMapApi,
   V1alpha1MenuApi,
   V1alpha1MenuItemApi,
@@ -79,6 +82,15 @@ function setupApiClient(axios: AxiosInstance) {
       snapshot: new ContentHaloRunV1alpha1SnapshotApi(undefined, apiUrl, axios),
       comment: new ContentHaloRunV1alpha1CommentApi(undefined, apiUrl, axios),
       reply: new ContentHaloRunV1alpha1ReplyApi(undefined, apiUrl, axios),
+      storage: {
+        group: new StorageHaloRunV1alpha1GroupApi(undefined, apiUrl, axios),
+        attachment: new StorageHaloRunV1alpha1AttachmentApi(
+          undefined,
+          apiUrl,
+          axios
+        ),
+        policy: new StorageHaloRunV1alpha1PolicyApi(undefined, apiUrl, axios),
+      },
     },
     // custom endpoints
     user: new ApiHaloRunV1alpha1UserApi(undefined, apiUrl, axios),
