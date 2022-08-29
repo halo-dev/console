@@ -1,9 +1,14 @@
 <script lang="ts" setup>
+// core libs
 import { onMounted, ref } from "vue";
-import type { Group } from "@halo-dev/api-client";
 import { apiClient } from "@halo-dev/admin-shared";
+
+// components
 import { IconAddCircle, IconMore, VButton, VSpace } from "@halo-dev/components";
 import AttachmentGroupEditingModal from "./AttachmentGroupEditingModal.vue";
+
+// types
+import type { Group } from "@halo-dev/api-client";
 
 const groups = ref<Group[]>([] as Group[]);
 const selectedGroup = ref<Group | null>(null);

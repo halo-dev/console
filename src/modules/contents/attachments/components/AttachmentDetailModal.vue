@@ -7,13 +7,16 @@ import {
   VSpace,
   VTag,
 } from "@halo-dev/components";
+import type { Attachment } from "@halo-dev/api-client";
 
 withDefaults(
   defineProps<{
     visible: boolean;
+    attachment: Attachment | null;
   }>(),
   {
     visible: false,
+    attachment: null,
   }
 );
 
@@ -31,9 +34,9 @@ const onVisibleChange = (visible: boolean) => {
 </script>
 <template>
   <VModal
+    :title="attachment?.spec.displayName"
     :visible="visible"
     :width="1000"
-    title="attachment-0"
     @update:visible="onVisibleChange"
   >
     <template #actions>
@@ -50,9 +53,10 @@ const onVisibleChange = (visible: boolean) => {
           <div
             class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
           >
-            <dt class="text-sm font-medium text-gray-900">原始内容</dt>
+            <dt class="text-sm font-medium text-gray-900">预览</dt>
             <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
               <img
+                alt="Preview"
                 class="w-full rounded sm:w-1/2"
                 src="https://picsum.photos/1000/700?random=1"
               />
@@ -63,7 +67,7 @@ const onVisibleChange = (visible: boolean) => {
           >
             <dt class="text-sm font-medium text-gray-900">存储策略</dt>
             <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-              阿里云/bucket/blog-attachments
+              {{ attachment?.spec.policyRef?.name }}
             </dd>
           </div>
           <div
@@ -71,7 +75,7 @@ const onVisibleChange = (visible: boolean) => {
           >
             <dt class="text-sm font-medium text-gray-900">所在分组</dt>
             <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-              Photos
+              // TODO
             </dd>
           </div>
           <div
@@ -79,7 +83,7 @@ const onVisibleChange = (visible: boolean) => {
           >
             <dt class="text-sm font-medium text-gray-900">文件名称</dt>
             <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-              attachment-0
+              {{ attachment?.spec.displayName }}
             </dd>
           </div>
           <div
@@ -87,7 +91,7 @@ const onVisibleChange = (visible: boolean) => {
           >
             <dt class="text-sm font-medium text-gray-900">文件类型</dt>
             <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-              image/jpeg
+              {{ attachment?.spec.mediaType }}
             </dd>
           </div>
           <div
@@ -95,7 +99,7 @@ const onVisibleChange = (visible: boolean) => {
           >
             <dt class="text-sm font-medium text-gray-900">文件大小</dt>
             <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-              1.2 MB
+              {{ attachment?.spec.size }}
             </dd>
           </div>
           <div
@@ -103,7 +107,7 @@ const onVisibleChange = (visible: boolean) => {
           >
             <dt class="text-sm font-medium text-gray-900">上传者</dt>
             <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-              Ryan Wang
+              {{ attachment?.spec.uploadedBy?.name }}
             </dd>
           </div>
           <div
@@ -111,7 +115,7 @@ const onVisibleChange = (visible: boolean) => {
           >
             <dt class="text-sm font-medium text-gray-900">上传时间</dt>
             <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-              2020-01-01 12:00:00
+              {{ attachment?.metadata.creationTimestamp }}
             </dd>
           </div>
           <div
@@ -119,7 +123,7 @@ const onVisibleChange = (visible: boolean) => {
           >
             <dt class="text-sm font-medium text-gray-900">原始链接</dt>
             <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-              https://picsum.photos/1000/700?random=1
+              // TODO
             </dd>
           </div>
           <div
@@ -173,7 +177,7 @@ const onVisibleChange = (visible: boolean) => {
       </div>
     </div>
     <template #footer>
-      <VButton type="default" @click="onVisibleChange(false)">关闭</VButton>
+      <VButton type="default" @click="onVisibleChange(false)">关闭 Esc</VButton>
     </template>
   </VModal>
 </template>

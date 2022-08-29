@@ -18,10 +18,13 @@ import {
 import AttachmentDetailModal from "./components/AttachmentDetailModal.vue";
 import AttachmentUploadModal from "./components/AttachmentUploadModal.vue";
 import AttachmentSelectModal from "./components/AttachmentSelectModal.vue";
-import AttachmentStrategiesModal from "./components/AttachmentStrategiesModal.vue";
+import AttachmentPoliciesModal from "./components/AttachmentPoliciesModal.vue";
 import AttachmentGroupList from "./components/AttachmentGroupList.vue";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useUserFetch } from "@/modules/system/users/composables/use-user";
+import type { Attachment, AttachmentList } from "@halo-dev/api-client";
+import { apiClient } from "@halo-dev/admin-shared";
+import { formatDatetime } from "@/utils/date";
 
 const viewTypes = [
   {
@@ -44,24 +47,47 @@ const checkAll = ref(false);
 
 const { users } = useUserFetch();
 
-const attachments = Array.from(new Array(50), (_, index) => index).map(
-  (index) => {
-    return {
-      id: index,
-      name: `attachment-${index}`,
-      url: `https://picsum.photos/1000/700?random=${index}`,
-      size: "1.2MB",
-      type: "image/png",
-      strategy: "本地存储",
-    };
+const attachments = ref<AttachmentList>({
+  page: 1,
+  size: 10,
+  total: 0,
+  items: [],
+  first: true,
+  last: false,
+  hasNext: false,
+  hasPrevious: false,
+});
+const selectedAttachment = ref<Attachment>();
+const loading = ref<boolean>(false);
+
+const handleFetchAttachments = async () => {
+  try {
+    const { data } =
+      await apiClient.extension.storage.attachment.liststorageHaloRunV1alpha1Attachment();
+    attachments.value = data;
+  } catch (e) {
+    console.error("Failed to fetch attachments", e);
   }
-);
+};
+
+const handleOpenDetail = (attachment: Attachment) => {
+  selectedAttachment.value = attachment;
+  detailVisible.value = true;
+};
+
+onMounted(handleFetchAttachments);
 </script>
 <template>
-  <AttachmentDetailModal v-model:visible="detailVisible" />
-  <AttachmentUploadModal v-model:visible="uploadVisible" />
+  <AttachmentDetailModal
+    v-model:visible="detailVisible"
+    :attachment="selectedAttachment"
+  />
+  <AttachmentUploadModal
+    v-model:visible="uploadVisible"
+    @close="handleFetchAttachments"
+  />
   <AttachmentSelectModal v-model:visible="selectVisible" />
-  <AttachmentStrategiesModal v-model:visible="strategyVisible" />
+  <AttachmentPoliciesModal v-model:visible="strategyVisible" />
   <VPageHeader title="附件库">
     <template #icon>
       <IconPalette class="mr-2 self-center" />
@@ -316,26 +342,26 @@ const attachments = Array.from(new Array(50), (_, index) => index).map(
               role="list"
             >
               <VCard
-                v-for="(attachment, index) in attachments"
+                v-for="(attachment, index) in attachments.items"
                 :key="index"
                 :body-class="['!p-0']"
                 class="hover:shadow"
-                @click="detailVisible = true"
+                @click="handleOpenDetail(attachment)"
               >
                 <div class="relative bg-white">
                   <div
                     class="group aspect-w-10 aspect-h-8 block h-full w-full cursor-pointer overflow-hidden bg-gray-100"
                   >
                     <img
-                      :src="attachment.url"
                       alt=""
                       class="pointer-events-none object-cover group-hover:opacity-75"
+                      src=""
                     />
                   </div>
                   <p
                     class="pointer-events-none block truncate px-2 py-1 text-center text-xs font-medium text-gray-700"
                   >
-                    {{ attachment.name }}
+                    {{ attachment.spec.displayName }}
                   </p>
 
                   <IconCheckboxFill
@@ -352,7 +378,7 @@ const attachments = Array.from(new Array(50), (_, index) => index).map(
             class="box-border h-full w-full divide-y divide-gray-100"
             role="list"
           >
-            <li v-for="(attachment, index) in attachments" :key="index">
+            <li v-for="(attachment, index) in attachments.items" :key="index">
               <div
                 :class="{
                   'bg-gray-100': checkAll,
@@ -376,13 +402,17 @@ const attachments = Array.from(new Array(50), (_, index) => index).map(
                       <span
                         class="mr-0 truncate text-sm font-medium text-gray-900 sm:mr-2"
                       >
-                        {{ attachment.name }}
+                        {{ attachment.spec.displayName }}
                       </span>
                     </div>
                     <div class="mt-1 flex">
                       <VSpace>
-                        <span class="text-xs text-gray-500">image/png</span>
-                        <span class="text-xs text-gray-500">1.2 MB</span>
+                        <span class="text-xs text-gray-500">
+                          {{ attachment.spec.mediaType }}
+                        </span>
+                        <span class="text-xs text-gray-500">
+                          {{ attachment.spec.size }}
+                        </span>
                       </VSpace>
                     </div>
                   </div>
@@ -394,8 +424,10 @@ const attachments = Array.from(new Array(50), (_, index) => index).map(
                         class="hidden h-6 w-6 rounded-full ring-2 ring-white sm:inline-block"
                         src="https://ryanc.cc/avatar"
                       />
-                      <time class="text-sm text-gray-500" datetime="2020-01-07">
-                        2020-01-07
+                      <time class="text-sm text-gray-500">
+                        {{
+                          formatDatetime(attachment.metadata.creationTimestamp)
+                        }}
                       </time>
                       <span class="cursor-pointer">
                         <IconSettings @click.stop="detailVisible = true" />

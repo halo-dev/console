@@ -5,6 +5,7 @@ import "filepond/dist/filepond.min.css";
 import FilePondPluginImagePreview from "filepond-plugin-image-preview";
 import "filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css";
 import { ref } from "vue";
+import { apiClient } from "@halo-dev/admin-shared";
 
 const FilePond = vueFilePond(FilePondPluginImagePreview);
 
@@ -45,6 +46,18 @@ const onVisibleChange = (visible: boolean) => {
   if (!visible) {
     emit("close");
   }
+};
+
+const server = {
+  process: (fieldName, file, metadata, load) => {
+    apiClient.extension.storage.attachment
+      .uploadAttachment(file, "local")
+      .then((response) => {
+        load(response);
+        onVisibleChange(false);
+      });
+    return {};
+  },
 };
 </script>
 <template>
@@ -89,11 +102,10 @@ const onVisibleChange = (visible: boolean) => {
     <div class="w-full p-4">
       <file-pond
         ref="pond"
-        accepted-file-types="image/jpeg, image/png"
+        :allow-multiple="false"
+        :server="server"
         label-idle="Drop files here..."
-        name="test"
-        server="/api"
-        v-bind:allow-multiple="true"
+        name="file"
       />
     </div>
   </VModal>

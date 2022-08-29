@@ -8,7 +8,9 @@ import {
 } from "@halo-dev/components";
 import AttachmentLocalStrategyEditingModal from "./AttachmentLocalStrategyEditingModal.vue";
 import AttachmentAliOSSStrategyEditingModal from "./AttachmentAliOSSStrategyEditingModal.vue";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
+import type { Policy } from "@halo-dev/api-client";
+import { apiClient } from "@halo-dev/admin-shared";
 
 withDefaults(
   defineProps<{
@@ -24,26 +26,25 @@ const emit = defineEmits<{
   (event: "close"): void;
 }>();
 
-const strategies = ref([
-  {
-    id: "1",
-    name: "本地存储",
-    description: "~/.halo/uploads",
-  },
-  {
-    id: "2",
-    name: "阿里云 OSS",
-    description: "bucket/blog-attachments",
-  },
-  {
-    id: "3",
-    name: "阿里云 OSS",
-    description: "bucket/blog-photos",
-  },
-]);
+const policies = ref<Policy[]>([] as Policy[]);
+const selectedPolicy = ref<Policy | null>(null);
+const loading = ref<boolean>(false);
 
 const localStrategyVisible = ref(false);
 const aliOSSStrategyVisible = ref(false);
+
+const handleFetchPolicies = async () => {
+  try {
+    loading.value = true;
+    const { data } =
+      await apiClient.extension.storage.policy.liststorageHaloRunV1alpha1Policy();
+    policies.value = data.items;
+  } catch (e) {
+    console.error("Failed to fetch attachment policies", e);
+  } finally {
+    loading.value = false;
+  }
+};
 
 function onVisibleChange(visible: boolean) {
   emit("update:visible", visible);
@@ -51,6 +52,13 @@ function onVisibleChange(visible: boolean) {
     emit("close");
   }
 }
+
+const handleOpenEditingModal = (policy: Policy) => {
+  selectedPolicy.value = policy;
+  localStrategyVisible.value = true;
+};
+
+onMounted(handleFetchPolicies);
 </script>
 <template>
   <VModal
@@ -93,7 +101,7 @@ function onVisibleChange(visible: boolean) {
       </FloatingDropdown>
     </template>
     <ul class="box-border h-full w-full divide-y divide-gray-100" role="list">
-      <li v-for="(strategy, index) in strategies" :key="index">
+      <li v-for="(policy, index) in policies" :key="index">
         <div
           class="relative block cursor-pointer px-4 py-3 transition-all hover:bg-gray-50"
         >
@@ -103,12 +111,12 @@ function onVisibleChange(visible: boolean) {
                 <span
                   class="mr-0 truncate text-sm font-medium text-gray-900 sm:mr-2"
                 >
-                  {{ strategy.name }}
+                  {{ policy.spec.displayName }}
                 </span>
               </div>
               <div class="mt-1 flex">
                 <span class="text-xs text-gray-500">
-                  {{ strategy.description }}
+                  {{ policy.spec.settingRef }} / {{ policy.spec.configMapRef }}
                 </span>
               </div>
             </div>
@@ -116,8 +124,8 @@ function onVisibleChange(visible: boolean) {
               <div
                 class="inline-flex flex-col flex-col-reverse items-end gap-4 sm:flex-row sm:items-center sm:gap-6"
               >
-                <time class="text-sm text-gray-500" datetime="2020-01-07">
-                  2020-01-07
+                <time class="text-sm text-gray-500">
+                  {{ policy.metadata.creationTimestamp }}
                 </time>
                 <span class="cursor-pointer">
                   <FloatingDropdown>
@@ -125,7 +133,12 @@ function onVisibleChange(visible: boolean) {
                     <template #popper>
                       <div class="w-48 p-2">
                         <VSpace class="w-full" direction="column">
-                          <VButton v-close-popper block type="secondary">
+                          <VButton
+                            v-close-popper
+                            block
+                            type="secondary"
+                            @click="handleOpenEditingModal(policy)"
+                          >
                             编辑
                           </VButton>
                           <VButton v-close-popper block type="danger">
@@ -147,7 +160,11 @@ function onVisibleChange(visible: boolean) {
     </template>
   </VModal>
 
-  <AttachmentLocalStrategyEditingModal v-model:visible="localStrategyVisible" />
+  <AttachmentLocalStrategyEditingModal
+    v-model:visible="localStrategyVisible"
+    :policy="selectedPolicy"
+    @close="handleFetchPolicies"
+  />
   <AttachmentAliOSSStrategyEditingModal
     v-model:visible="aliOSSStrategyVisible"
   />
