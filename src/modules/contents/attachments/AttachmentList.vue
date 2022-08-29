@@ -522,6 +522,7 @@ const onDetailModalClose = () => {
                     <div class="flex flex-col sm:flex-row">
                       <span
                         class="mr-0 truncate text-sm font-medium text-gray-900 sm:mr-2"
+                        @click="handleOpenDetail(attachment)"
                       >
                         {{ attachment.spec.displayName }}
                       </span>

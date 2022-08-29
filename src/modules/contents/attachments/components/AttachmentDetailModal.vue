@@ -27,7 +27,7 @@ const onVisibleChange = (visible: boolean) => {
 </script>
 <template>
   <VModal
-    :title="attachment?.spec.displayName"
+    :title="`附件：${attachment?.spec.displayName || ''}`"
     :visible="visible"
     :width="1000"
     @update:visible="onVisibleChange"
