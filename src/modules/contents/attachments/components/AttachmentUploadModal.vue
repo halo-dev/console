@@ -56,7 +56,6 @@ const server = {
       .uploadAttachment(file, selectedPolicy.value?.metadata.name)
       .then((response) => {
         load(response);
-        onVisibleChange(false);
       });
     return {};
   },
@@ -107,7 +106,7 @@ onMounted(handleFetchPolicies);
     <div class="w-full p-4">
       <file-pond
         ref="pond"
-        :allow-multiple="false"
+        :allow-multiple="true"
         :server="server"
         label-idle="Drop files here..."
         name="file"
