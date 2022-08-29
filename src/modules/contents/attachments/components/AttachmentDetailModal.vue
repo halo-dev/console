@@ -1,12 +1,5 @@
 <script lang="ts" setup>
-import {
-  IconArrowLeft,
-  IconArrowRight,
-  VButton,
-  VModal,
-  VSpace,
-  VTag,
-} from "@halo-dev/components";
+import { VButton, VModal, VSpace, VTag } from "@halo-dev/components";
 import type { Attachment } from "@halo-dev/api-client";
 
 withDefaults(
@@ -40,12 +33,7 @@ const onVisibleChange = (visible: boolean) => {
     @update:visible="onVisibleChange"
   >
     <template #actions>
-      <div class="modal-header-action">
-        <IconArrowLeft />
-      </div>
-      <div class="modal-header-action">
-        <IconArrowRight />
-      </div>
+      <slot name="actions"></slot>
     </template>
     <div class="overflow-hidden bg-white">
       <div>

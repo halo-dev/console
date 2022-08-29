@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import {
   IconArrowDown,
+  IconArrowLeft,
+  IconArrowRight,
   IconCheckboxFill,
   IconDatabase2Line,
   IconGrid,
@@ -20,7 +22,7 @@ import AttachmentUploadModal from "./components/AttachmentUploadModal.vue";
 import AttachmentSelectModal from "./components/AttachmentSelectModal.vue";
 import AttachmentPoliciesModal from "./components/AttachmentPoliciesModal.vue";
 import AttachmentGroupList from "./components/AttachmentGroupList.vue";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useUserFetch } from "@/modules/system/users/composables/use-user";
 import type { Attachment, AttachmentList } from "@halo-dev/api-client";
 import { apiClient } from "@halo-dev/admin-shared";
@@ -43,7 +45,7 @@ const strategyVisible = ref(false);
 const selectVisible = ref(false);
 const uploadVisible = ref(false);
 const detailVisible = ref(false);
-const checkAll = ref(false);
+const checkedAll = ref(false);
 
 const { users } = useUserFetch();
 
@@ -58,21 +60,115 @@ const attachments = ref<AttachmentList>({
   hasPrevious: false,
 });
 const selectedAttachment = ref<Attachment>();
+const selectedAttachments = ref<Set<Attachment>>(new Set<Attachment>());
 const loading = ref<boolean>(false);
 
 const handleFetchAttachments = async () => {
   try {
+    loading.value = true;
     const { data } =
       await apiClient.extension.storage.attachment.liststorageHaloRunV1alpha1Attachment();
     attachments.value = data;
   } catch (e) {
     console.error("Failed to fetch attachments", e);
+  } finally {
+    loading.value = false;
   }
 };
 
 const handleOpenDetail = (attachment: Attachment) => {
+  if (selectedAttachments.value.size > 0) {
+    handleSelect(attachment);
+    return;
+  }
+
   selectedAttachment.value = attachment;
+  selectedAttachments.value.clear();
   detailVisible.value = true;
+};
+
+const handleSelectPrevious = async () => {
+  const { items, hasPrevious } = attachments.value;
+  const index = items.findIndex(
+    (attachment) =>
+      attachment.metadata.name === selectedAttachment.value?.metadata.name
+  );
+  if (index > 0) {
+    const { data } =
+      await apiClient.extension.storage.attachment.getstorageHaloRunV1alpha1Attachment(
+        items[index - 1].metadata.name
+      );
+    selectedAttachment.value = data;
+    return;
+  }
+  if (index === 0 && hasPrevious) {
+    attachments.value.page--;
+    await handleFetchAttachments();
+    selectedAttachment.value =
+      attachments.value.items[attachments.value.items.length - 1];
+  }
+};
+
+const handleSelectNext = async () => {
+  const { items, hasNext } = attachments.value;
+  const index = items.findIndex(
+    (attachment) =>
+      attachment.metadata.name === selectedAttachment.value?.metadata.name
+  );
+  if (index < items.length - 1) {
+    const { data } =
+      await apiClient.extension.storage.attachment.getstorageHaloRunV1alpha1Attachment(
+        items[index + 1].metadata.name
+      );
+    selectedAttachment.value = data;
+    return;
+  }
+  if (index === items.length - 1 && hasNext) {
+    attachments.value.page++;
+    await handleFetchAttachments();
+    selectedAttachment.value = attachments.value.items[0];
+  }
+};
+
+const handleCheckAllChange = (e: Event) => {
+  const { checked } = e.target as HTMLInputElement;
+
+  if (checked) {
+    attachments.value.items.forEach((attachment) => {
+      selectedAttachments.value.add(attachment);
+    });
+  } else {
+    selectedAttachments.value.clear();
+  }
+};
+
+watch(
+  () => selectedAttachments.value.size,
+  (newValue) => {
+    checkedAll.value = newValue === attachments.value.items?.length;
+  }
+);
+
+const checkSelection = (attachment: Attachment) => {
+  return (
+    attachment.metadata.name === selectedAttachment.value?.metadata.name ||
+    Array.from(selectedAttachments.value)
+      .map((item) => item.metadata.name)
+      .includes(attachment.metadata.name)
+  );
+};
+
+const handleSelect = async (attachment: Attachment) => {
+  if (selectedAttachments.value.has(attachment)) {
+    selectedAttachments.value.delete(attachment);
+    return;
+  }
+  selectedAttachments.value.add(attachment);
+};
+
+const onDetailModalClose = () => {
+  selectedAttachment.value = undefined;
+  handleFetchAttachments();
 };
 
 onMounted(handleFetchAttachments);
@@ -81,7 +177,17 @@ onMounted(handleFetchAttachments);
   <AttachmentDetailModal
     v-model:visible="detailVisible"
     :attachment="selectedAttachment"
-  />
+    @close="onDetailModalClose"
+  >
+    <template #actions>
+      <div class="modal-header-action" @click="handleSelectPrevious">
+        <IconArrowLeft />
+      </div>
+      <div class="modal-header-action" @click="handleSelectNext">
+        <IconArrowRight />
+      </div>
+    </template>
+  </AttachmentDetailModal>
   <AttachmentUploadModal
     v-model:visible="uploadVisible"
     @close="handleFetchAttachments"
@@ -127,14 +233,15 @@ onMounted(handleFetchAttachments);
               >
                 <div class="mr-4 hidden items-center sm:flex">
                   <input
-                    v-model="checkAll"
+                    v-model="checkedAll"
                     class="h-4 w-4 rounded border-gray-300 text-indigo-600"
                     type="checkbox"
+                    @change="handleCheckAllChange"
                   />
                 </div>
                 <div class="flex w-full flex-1 sm:w-auto">
                   <FormKit
-                    v-if="!checkAll"
+                    v-if="!checkedAll"
                     placeholder="输入关键词搜索"
                     type="text"
                   ></FormKit>
@@ -345,12 +452,15 @@ onMounted(handleFetchAttachments);
                 v-for="(attachment, index) in attachments.items"
                 :key="index"
                 :body-class="['!p-0']"
+                :class="{
+                  'ring-1 ring-primary': checkSelection(attachment),
+                }"
                 class="hover:shadow"
                 @click="handleOpenDetail(attachment)"
               >
-                <div class="relative bg-white">
+                <div class="group relative bg-white">
                   <div
-                    class="group aspect-w-10 aspect-h-8 block h-full w-full cursor-pointer overflow-hidden bg-gray-100"
+                    class="aspect-w-10 aspect-h-8 block h-full w-full cursor-pointer overflow-hidden bg-gray-100"
                   >
                     <img
                       alt=""
@@ -364,10 +474,18 @@ onMounted(handleFetchAttachments);
                     {{ attachment.spec.displayName }}
                   </p>
 
-                  <IconCheckboxFill
-                    v-if="checkAll"
-                    class="absolute top-0.5 right-0.5"
-                  />
+                  <div
+                    :class="{ '!flex': selectedAttachments.has(attachment) }"
+                    class="absolute top-0 left-0 hidden h-1/3 w-full justify-end bg-gradient-to-b from-gray-300 to-transparent ease-in-out group-hover:flex"
+                  >
+                    <IconCheckboxFill
+                      :class="{
+                        '!text-primary': selectedAttachments.has(attachment),
+                      }"
+                      class="mt-1 mr-1 h-6 w-6 cursor-pointer text-white transition-all hover:text-primary"
+                      @click.stop="handleSelect(attachment)"
+                    />
+                  </div>
                 </div>
               </VCard>
             </div>
@@ -381,20 +499,21 @@ onMounted(handleFetchAttachments);
             <li v-for="(attachment, index) in attachments.items" :key="index">
               <div
                 :class="{
-                  'bg-gray-100': checkAll,
+                  'bg-gray-100': checkSelection(attachment),
                 }"
                 class="relative block cursor-pointer px-4 py-3 transition-all hover:bg-gray-50"
               >
                 <div
-                  v-show="checkAll"
+                  v-show="checkSelection(attachment)"
                   class="absolute inset-y-0 left-0 w-0.5 bg-primary"
                 ></div>
                 <div class="relative flex flex-row items-center">
                   <div class="mr-4 hidden items-center sm:flex">
                     <input
-                      v-model="checkAll"
+                      :checked="selectedAttachments.has(attachment)"
                       class="h-4 w-4 rounded border-gray-300 text-indigo-600"
                       type="checkbox"
+                      @click="handleSelect(attachment)"
                     />
                   </div>
                   <div class="flex-1">
@@ -430,7 +549,9 @@ onMounted(handleFetchAttachments);
                         }}
                       </time>
                       <span class="cursor-pointer">
-                        <IconSettings @click.stop="detailVisible = true" />
+                        <IconSettings
+                          @click.stop="handleOpenDetail(attachment)"
+                        />
                       </span>
                     </div>
                   </div>
