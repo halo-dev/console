@@ -10,6 +10,7 @@ import {
   IconPalette,
   IconSettings,
   IconUpload,
+  useDialog,
   VButton,
   VCard,
   VPageHeader,
@@ -64,6 +65,8 @@ const selectedAttachment = ref<Attachment>();
 const selectedAttachments = ref<Set<Attachment>>(new Set<Attachment>());
 const selectedGroup = ref<Group>();
 const loading = ref<boolean>(false);
+
+const dialog = useDialog();
 
 const handleFetchAttachments = async () => {
   try {
@@ -183,6 +186,31 @@ const handleSelect = async (attachment: Attachment) => {
   selectedAttachments.value.add(attachment);
 };
 
+const handleDeleteInBatch = () => {
+  dialog.warning({
+    title: "确定要删除所选的附件吗？",
+    description: "删除之后将无法恢复",
+    confirmType: "danger",
+    onConfirm: async () => {
+      try {
+        const promises = Array.from(selectedAttachments.value).map(
+          (attachment) => {
+            return apiClient.extension.storage.attachment.deletestorageHaloRunV1alpha1Attachment(
+              attachment.metadata.name
+            );
+          }
+        );
+        await Promise.all(promises);
+        selectedAttachments.value.clear();
+      } catch (e) {
+        console.error("Failed to delete attachments", e);
+      } finally {
+        await handleFetchAttachments();
+      }
+    },
+  });
+};
+
 const onDetailModalClose = () => {
   selectedAttachment.value = undefined;
   handleFetchAttachments();
@@ -256,13 +284,14 @@ const onDetailModalClose = () => {
                 </div>
                 <div class="flex w-full flex-1 sm:w-auto">
                   <FormKit
-                    v-if="!checkedAll"
+                    v-if="!selectedAttachments.size"
                     placeholder="输入关键词搜索"
                     type="text"
                   ></FormKit>
                   <VSpace v-else>
-                    <VButton type="default">设置</VButton>
-                    <VButton type="danger">删除</VButton>
+                    <VButton type="danger" @click="handleDeleteInBatch">
+                      删除
+                    </VButton>
                   </VSpace>
                 </div>
                 <div class="mt-4 flex sm:mt-0">
