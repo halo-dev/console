@@ -22,9 +22,9 @@ import AttachmentUploadModal from "./components/AttachmentUploadModal.vue";
 import AttachmentSelectModal from "./components/AttachmentSelectModal.vue";
 import AttachmentPoliciesModal from "./components/AttachmentPoliciesModal.vue";
 import AttachmentGroupList from "./components/AttachmentGroupList.vue";
-import { onMounted, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import { useUserFetch } from "@/modules/system/users/composables/use-user";
-import type { Attachment, AttachmentList } from "@halo-dev/api-client";
+import type { Attachment, AttachmentList, Group } from "@halo-dev/api-client";
 import { apiClient } from "@halo-dev/admin-shared";
 import { formatDatetime } from "@/utils/date";
 
@@ -61,6 +61,7 @@ const attachments = ref<AttachmentList>({
 });
 const selectedAttachment = ref<Attachment>();
 const selectedAttachments = ref<Set<Attachment>>(new Set<Attachment>());
+const selectedGroup = ref<Group>();
 const loading = ref<boolean>(false);
 
 const handleFetchAttachments = async () => {
@@ -170,8 +171,6 @@ const onDetailModalClose = () => {
   selectedAttachment.value = undefined;
   handleFetchAttachments();
 };
-
-onMounted(handleFetchAttachments);
 </script>
 <template>
   <AttachmentDetailModal
@@ -443,7 +442,10 @@ onMounted(handleFetchAttachments);
           </template>
 
           <div v-if="viewType === 'grid'">
-            <AttachmentGroupList />
+            <AttachmentGroupList
+              v-model:selected-group="selectedGroup"
+              @select="handleFetchAttachments"
+            />
             <div
               class="mt-2 grid grid-cols-3 gap-x-2 gap-y-3 sm:grid-cols-3 md:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-12"
               role="list"

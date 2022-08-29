@@ -10,10 +10,51 @@ import AttachmentGroupEditingModal from "./AttachmentGroupEditingModal.vue";
 // types
 import type { Group } from "@halo-dev/api-client";
 
+import { useRouteQuery } from "@vueuse/router";
+
+withDefaults(
+  defineProps<{
+    selectedGroup: Group | undefined;
+  }>(),
+  {
+    selectedGroup: undefined,
+  }
+);
+
+const emit = defineEmits<{
+  (event: "update:selectedGroup", group: Group): void;
+  (event: "select", group: Group): void;
+}>();
+
+const defaultGroups: Group[] = [
+  {
+    spec: {
+      displayName: "全部",
+    },
+    apiVersion: "",
+    kind: "",
+    metadata: {
+      name: "",
+    },
+  },
+  {
+    spec: {
+      displayName: "未分组",
+    },
+    apiVersion: "",
+    kind: "",
+    metadata: {
+      name: "none",
+    },
+  },
+];
+
 const groups = ref<Group[]>([] as Group[]);
-const selectedGroup = ref<Group | null>(null);
+const groupToUpdate = ref<Group | null>(null);
 const loading = ref<boolean>(false);
-const groupEditingModal = ref(false);
+const editingModal = ref(false);
+
+const routeQuery = useRouteQuery("group");
 
 const handleFetchGroups = async () => {
   try {
@@ -28,38 +69,63 @@ const handleFetchGroups = async () => {
   }
 };
 
-const handleOpenEditingModal = (group: Group) => {
-  selectedGroup.value = group;
-  groupEditingModal.value = true;
+const handleSelectGroup = (group: Group) => {
+  emit("update:selectedGroup", group);
+  emit("select", group);
+  routeQuery.value = group.metadata.name;
 };
 
-onMounted(handleFetchGroups);
+const handleOpenEditingModal = (group: Group) => {
+  groupToUpdate.value = group;
+  editingModal.value = true;
+};
+
+onMounted(async () => {
+  await handleFetchGroups();
+
+  if (routeQuery.value) {
+    const allGroups = [...defaultGroups, ...groups.value];
+    const group = allGroups.find(
+      (group) => group.metadata.name === routeQuery.value
+    );
+    if (group) {
+      handleSelectGroup(group);
+    }
+    return;
+  }
+  handleSelectGroup(defaultGroups[0]);
+});
 </script>
 <template>
   <AttachmentGroupEditingModal
-    v-model:visible="groupEditingModal"
-    :group="selectedGroup"
+    v-model:visible="editingModal"
+    :group="groupToUpdate"
     @close="handleFetchGroups"
   />
   <div class="mb-5 grid grid-cols-2 gap-x-2 gap-y-3 sm:grid-cols-6">
     <div
-      class="flex cursor-pointer items-center rounded-base bg-gray-200 p-2 text-gray-900 transition-all"
-    >
-      <div class="flex flex-1 items-center">
-        <span class="text-sm">全部（212）</span>
-      </div>
-    </div>
-    <div
+      v-for="(defaultGroup, index) in defaultGroups"
+      :key="index"
+      :class="{
+        '!bg-gray-200 !text-gray-900':
+          defaultGroup.metadata.name === selectedGroup?.metadata.name,
+      }"
       class="flex cursor-pointer items-center rounded-base bg-gray-100 p-2 text-gray-500 transition-all hover:bg-gray-200 hover:text-gray-900 hover:shadow-sm"
+      @click="handleSelectGroup(defaultGroup)"
     >
       <div class="flex flex-1 items-center">
-        <span class="text-sm">未分组（18）</span>
+        <span class="text-sm">{{ defaultGroup.spec.displayName }}</span>
       </div>
     </div>
     <div
       v-for="(group, index) in groups"
       :key="index"
+      :class="{
+        '!bg-gray-200 !text-gray-900':
+          group.metadata.name === selectedGroup?.metadata.name,
+      }"
       class="flex cursor-pointer items-center rounded-base bg-gray-100 p-2 text-gray-500 transition-all hover:bg-gray-200 hover:text-gray-900 hover:shadow-sm"
+      @click="handleSelectGroup(group)"
     >
       <div class="flex flex-1 items-center">
         <span class="text-sm">
@@ -88,7 +154,7 @@ onMounted(handleFetchGroups);
     <div
       v-if="!loading"
       class="flex cursor-pointer items-center rounded-base bg-gray-100 p-2 text-gray-500 transition-all hover:bg-gray-200 hover:text-gray-900 hover:shadow-sm"
-      @click="groupEditingModal = true"
+      @click="editingModal = true"
     >
       <div class="flex flex-1 items-center">
         <span class="text-sm">添加分组</span>
