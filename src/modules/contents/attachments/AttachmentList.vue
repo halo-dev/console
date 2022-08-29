@@ -20,7 +20,6 @@ import {
 } from "@halo-dev/components";
 import AttachmentDetailModal from "./components/AttachmentDetailModal.vue";
 import AttachmentUploadModal from "./components/AttachmentUploadModal.vue";
-import AttachmentSelectModal from "./components/AttachmentSelectModal.vue";
 import AttachmentPoliciesModal from "./components/AttachmentPoliciesModal.vue";
 import AttachmentGroupList from "./components/AttachmentGroupList.vue";
 import { ref, watch } from "vue";
@@ -29,6 +28,7 @@ import type { Attachment, AttachmentList, Group } from "@halo-dev/api-client";
 import { apiClient } from "@halo-dev/admin-shared";
 import { formatDatetime } from "@/utils/date";
 import prettyBytes from "pretty-bytes";
+import { useFetchAttachmentPolicy } from "./composables/use-attachment-policy";
 
 const viewTypes = [
   {
@@ -44,12 +44,12 @@ const viewTypes = [
 const viewType = ref("grid");
 
 const strategyVisible = ref(false);
-const selectVisible = ref(false);
 const uploadVisible = ref(false);
 const detailVisible = ref(false);
 const checkedAll = ref(false);
 
 const { users } = useUserFetch();
+const { policies } = useFetchAttachmentPolicy();
 
 const attachments = ref<AttachmentList>({
   page: 1,
@@ -235,7 +235,6 @@ const onDetailModalClose = () => {
     v-model:visible="uploadVisible"
     @close="handleFetchAttachments"
   />
-  <AttachmentSelectModal v-model:visible="selectVisible" />
   <AttachmentPoliciesModal v-model:visible="strategyVisible" />
   <VPageHeader title="附件库">
     <template #icon>
@@ -309,22 +308,14 @@ const onDetailModalClose = () => {
                         <div class="w-72 p-4">
                           <ul class="space-y-1">
                             <li
+                              v-for="(policy, index) in policies"
+                              :key="index"
                               v-close-popper
                               class="flex cursor-pointer items-center rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                             >
-                              <span class="truncate">本地</span>
-                            </li>
-                            <li
-                              v-close-popper
-                              class="flex cursor-pointer items-center rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                            >
-                              <span class="truncate">阿里云 OSS</span>
-                            </li>
-                            <li
-                              v-close-popper
-                              class="flex cursor-pointer items-center rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                            >
-                              <span class="truncate">Amazon S3</span>
+                              <span class="truncate">
+                                {{ policy.spec.displayName }}
+                              </span>
                             </li>
                           </ul>
                         </div>
@@ -340,8 +331,8 @@ const onDetailModalClose = () => {
                         </span>
                       </div>
                       <template #popper>
-                        <div class="h-96 w-80 p-4">
-                          <div class="bg-white">
+                        <div class="h-96 w-80">
+                          <div class="bg-white p-4">
                             <!--TODO: Auto Focus-->
                             <FormKit
                               placeholder="输入关键词搜索"
@@ -354,15 +345,11 @@ const onDetailModalClose = () => {
                                 v-for="(user, index) in users"
                                 :key="index"
                                 v-close-popper
-                                class="cursor-pointer py-4 hover:bg-gray-50"
+                                class="cursor-pointer hover:bg-gray-50"
                               >
-                                <div class="flex items-center space-x-4">
-                                  <div class="flex items-center">
-                                    <input
-                                      class="h-4 w-4 rounded border-gray-300 text-indigo-600"
-                                      type="checkbox"
-                                    />
-                                  </div>
+                                <div
+                                  class="flex items-center space-x-4 px-4 py-3"
+                                >
                                   <div class="flex-shrink-0">
                                     <img
                                       :alt="user.spec.displayName"
@@ -381,7 +368,7 @@ const onDetailModalClose = () => {
                                     </p>
                                   </div>
                                   <div>
-                                    <VTag>{{ index + 1 }} 篇</VTag>
+                                    <VTag>{{ index + 1 }} 个</VTag>
                                   </div>
                                 </div>
                               </li>
@@ -418,14 +405,6 @@ const onDetailModalClose = () => {
                         </div>
                       </template>
                     </FloatingDropdown>
-                    <div
-                      class="flex cursor-pointer items-center text-sm text-gray-700 hover:text-black"
-                    >
-                      <span class="mr-0.5">标签</span>
-                      <span>
-                        <IconArrowDown />
-                      </span>
-                    </div>
                     <FloatingDropdown>
                       <div
                         class="flex cursor-pointer select-none items-center text-sm text-gray-700 hover:text-black"

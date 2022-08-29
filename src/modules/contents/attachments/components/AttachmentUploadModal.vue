@@ -2,9 +2,10 @@
 import { VModal } from "@halo-dev/components";
 import VueFilePond from "vue-filepond";
 import "filepond/dist/filepond.min.css";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watchEffect } from "vue";
 import { apiClient } from "@halo-dev/admin-shared";
 import type { Policy } from "@halo-dev/api-client";
+import { useFetchAttachmentPolicy } from "../composables/use-attachment-policy";
 
 const FilePond = VueFilePond();
 
@@ -22,21 +23,14 @@ const emit = defineEmits<{
   (event: "close"): void;
 }>();
 
-const policies = ref<Policy[]>([] as Policy[]);
+const { policies } = useFetchAttachmentPolicy();
 const selectedPolicy = ref<Policy | null>(null);
 
-const handleFetchPolicies = async () => {
-  try {
-    const { data } =
-      await apiClient.extension.storage.policy.liststorageHaloRunV1alpha1Policy();
-    policies.value = data.items;
-    if (policies.value.length) {
-      selectedPolicy.value = policies.value[0];
-    }
-  } catch (e) {
-    console.error("Failed to fetch attachment policies", e);
+watchEffect(() => {
+  if (policies.value.length) {
+    selectedPolicy.value = policies.value[0];
   }
-};
+});
 
 const onVisibleChange = (visible: boolean) => {
   emit("update:visible", visible);
@@ -58,8 +52,6 @@ const server = {
     return {};
   },
 };
-
-onMounted(handleFetchPolicies);
 </script>
 <template>
   <VModal

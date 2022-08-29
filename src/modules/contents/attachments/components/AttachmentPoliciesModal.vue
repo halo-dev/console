@@ -12,6 +12,7 @@ import type { Policy, PolicyTemplate } from "@halo-dev/api-client";
 import { apiClient } from "@halo-dev/admin-shared";
 import { v4 as uuid } from "uuid";
 import { formatDatetime } from "@/utils/date";
+import { useFetchAttachmentPolicy } from "../composables/use-attachment-policy";
 
 withDefaults(
   defineProps<{
@@ -27,25 +28,12 @@ const emit = defineEmits<{
   (event: "close"): void;
 }>();
 
-const policies = ref<Policy[]>([] as Policy[]);
+const { policies, handleFetchPolicies } = useFetchAttachmentPolicy();
+
 const selectedPolicy = ref<Policy | null>(null);
-const loading = ref<boolean>(false);
 const policyTemplates = ref<PolicyTemplate[]>([] as PolicyTemplate[]);
 
 const policyEditingModal = ref(false);
-
-const handleFetchPolicies = async () => {
-  try {
-    loading.value = true;
-    const { data } =
-      await apiClient.extension.storage.policy.liststorageHaloRunV1alpha1Policy();
-    policies.value = data.items;
-  } catch (e) {
-    console.error("Failed to fetch attachment policies", e);
-  } finally {
-    loading.value = false;
-  }
-};
 
 const handleFetchPolicyTemplates = async () => {
   try {
@@ -95,7 +83,6 @@ const onEditingModalClose = () => {
 };
 
 onMounted(() => {
-  handleFetchPolicies();
   handleFetchPolicyTemplates();
 });
 </script>
@@ -105,6 +92,7 @@ onMounted(() => {
     :width="750"
     title="存储策略"
     @update:visible="onVisibleChange"
+    :body-class="['!p-0']"
   >
     <template #actions>
       <FloatingDropdown>
