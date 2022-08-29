@@ -4,8 +4,9 @@ import vueFilePond from "vue-filepond";
 import "filepond/dist/filepond.min.css";
 import FilePondPluginImagePreview from "filepond-plugin-image-preview";
 import "filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { apiClient } from "@halo-dev/admin-shared";
+import type { Policy } from "@halo-dev/api-client";
 
 const FilePond = vueFilePond(FilePondPluginImagePreview);
 
@@ -23,23 +24,21 @@ const emit = defineEmits<{
   (event: "close"): void;
 }>();
 
-const strategies = ref([
-  {
-    id: "1",
-    name: "本地存储",
-    description: "~/.halo/uploads",
-  },
-  {
-    id: "2",
-    name: "阿里云 OSS",
-    description: "bucket/blog-attachments",
-  },
-  {
-    id: "3",
-    name: "阿里云 OSS",
-    description: "bucket/blog-photos",
-  },
-]);
+const policies = ref<Policy[]>([] as Policy[]);
+const selectedPolicy = ref<Policy | null>(null);
+
+const handleFetchPolicies = async () => {
+  try {
+    const { data } =
+      await apiClient.extension.storage.policy.liststorageHaloRunV1alpha1Policy();
+    policies.value = data.items;
+    if (policies.value.length) {
+      selectedPolicy.value = policies.value[0];
+    }
+  } catch (e) {
+    console.error("Failed to fetch attachment policies", e);
+  }
+};
 
 const onVisibleChange = (visible: boolean) => {
   emit("update:visible", visible);
@@ -50,8 +49,11 @@ const onVisibleChange = (visible: boolean) => {
 
 const server = {
   process: (fieldName, file, metadata, load) => {
+    if (!selectedPolicy.value) {
+      return;
+    }
     apiClient.extension.storage.attachment
-      .uploadAttachment(file, "local")
+      .uploadAttachment(file, selectedPolicy.value?.metadata.name)
       .then((response) => {
         load(response);
         onVisibleChange(false);
@@ -59,6 +61,8 @@ const server = {
     return {};
   },
 };
+
+onMounted(handleFetchPolicies);
 </script>
 <template>
   <VModal
@@ -71,22 +75,23 @@ const server = {
     <template #actions>
       <FloatingDropdown>
         <div v-tooltip="`选择存储策略`" class="modal-header-action">
-          <span class="text-sm">本地存储</span>
+          <span class="text-sm">{{ selectedPolicy?.spec.displayName }}</span>
         </div>
         <template #popper>
           <div class="w-72 p-4">
             <ul class="space-y-1">
               <li
-                v-for="(strategy, index) in strategies"
+                v-for="(policy, index) in policies"
                 :key="index"
                 v-close-popper
                 class="flex cursor-pointer flex-col rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                @click="selectedPolicy = policy"
               >
                 <span class="truncate">
-                  {{ strategy.name }}
+                  {{ policy.spec.displayName }}
                 </span>
                 <span class="text-xs">
-                  {{ strategy.description }}
+                  {{ policy.spec.templateRef?.name }}
                 </span>
               </li>
               <li

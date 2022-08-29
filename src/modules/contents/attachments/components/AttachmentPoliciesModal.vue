@@ -6,11 +6,12 @@ import {
   VModal,
   VSpace,
 } from "@halo-dev/components";
-import AttachmentLocalStrategyEditingModal from "./AttachmentLocalStrategyEditingModal.vue";
-import AttachmentAliOSSStrategyEditingModal from "./AttachmentAliOSSStrategyEditingModal.vue";
+import AttachmentPolicyEditingModal from "./AttachmentPolicyEditingModal.vue";
 import { onMounted, ref } from "vue";
-import type { Policy } from "@halo-dev/api-client";
+import type { Policy, PolicyTemplate } from "@halo-dev/api-client";
 import { apiClient } from "@halo-dev/admin-shared";
+import { v4 as uuid } from "uuid";
+import { formatDatetime } from "@/utils/date";
 
 withDefaults(
   defineProps<{
@@ -29,9 +30,9 @@ const emit = defineEmits<{
 const policies = ref<Policy[]>([] as Policy[]);
 const selectedPolicy = ref<Policy | null>(null);
 const loading = ref<boolean>(false);
+const policyTemplates = ref<PolicyTemplate[]>([] as PolicyTemplate[]);
 
-const localStrategyVisible = ref(false);
-const aliOSSStrategyVisible = ref(false);
+const policyEditingModal = ref(false);
 
 const handleFetchPolicies = async () => {
   try {
@@ -46,6 +47,16 @@ const handleFetchPolicies = async () => {
   }
 };
 
+const handleFetchPolicyTemplates = async () => {
+  try {
+    const { data } =
+      await apiClient.extension.storage.policyTemplate.liststorageHaloRunV1alpha1PolicyTemplate();
+    policyTemplates.value = data.items;
+  } catch (e) {
+    console.error("Failed to fetch attachment policy templates", e);
+  }
+};
+
 function onVisibleChange(visible: boolean) {
   emit("update:visible", visible);
   if (!visible) {
@@ -55,10 +66,38 @@ function onVisibleChange(visible: boolean) {
 
 const handleOpenEditingModal = (policy: Policy) => {
   selectedPolicy.value = policy;
-  localStrategyVisible.value = true;
+  policyEditingModal.value = true;
 };
 
-onMounted(handleFetchPolicies);
+const handleOpenCreateNewPolicyModal = (policyTemplate: PolicyTemplate) => {
+  selectedPolicy.value = {
+    spec: {
+      displayName: "",
+      templateRef: {
+        name: policyTemplate.metadata.name,
+      },
+      configMapRef: {
+        name: uuid(),
+      },
+    },
+    apiVersion: "storage.halo.run/v1alpha1",
+    kind: "Policy",
+    metadata: {
+      name: uuid(),
+    },
+  };
+  policyEditingModal.value = true;
+};
+
+const onEditingModalClose = () => {
+  selectedPolicy.value = null;
+  handleFetchPolicies();
+};
+
+onMounted(() => {
+  handleFetchPolicies();
+  handleFetchPolicyTemplates();
+});
 </script>
 <template>
   <VModal
@@ -76,24 +115,15 @@ onMounted(handleFetchPolicies);
           <div class="w-72 p-4">
             <ul class="space-y-1">
               <li
+                v-for="(policyTemplate, index) in policyTemplates"
+                :key="index"
                 v-close-popper
                 class="flex cursor-pointer items-center rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                @click="localStrategyVisible = true"
+                @click="handleOpenCreateNewPolicyModal(policyTemplate)"
               >
-                <span class="truncate">本地</span>
-              </li>
-              <li
-                v-close-popper
-                class="flex cursor-pointer items-center rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                @click="aliOSSStrategyVisible = true"
-              >
-                <span class="truncate">阿里云 OSS</span>
-              </li>
-              <li
-                v-close-popper
-                class="flex cursor-pointer items-center rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-              >
-                <span class="truncate">Amazon S3</span>
+                <span class="truncate">
+                  {{ policyTemplate.spec?.displayName }}
+                </span>
               </li>
             </ul>
           </div>
@@ -116,7 +146,7 @@ onMounted(handleFetchPolicies);
               </div>
               <div class="mt-1 flex">
                 <span class="text-xs text-gray-500">
-                  {{ policy.spec.settingRef }} / {{ policy.spec.configMapRef }}
+                  {{ policy.spec.templateRef?.name }}
                 </span>
               </div>
             </div>
@@ -125,7 +155,7 @@ onMounted(handleFetchPolicies);
                 class="inline-flex flex-col flex-col-reverse items-end gap-4 sm:flex-row sm:items-center sm:gap-6"
               >
                 <time class="text-sm text-gray-500">
-                  {{ policy.metadata.creationTimestamp }}
+                  {{ formatDatetime(policy.metadata.creationTimestamp) }}
                 </time>
                 <span class="cursor-pointer">
                   <FloatingDropdown>
@@ -160,12 +190,9 @@ onMounted(handleFetchPolicies);
     </template>
   </VModal>
 
-  <AttachmentLocalStrategyEditingModal
-    v-model:visible="localStrategyVisible"
+  <AttachmentPolicyEditingModal
+    v-model:visible="policyEditingModal"
     :policy="selectedPolicy"
-    @close="handleFetchPolicies"
-  />
-  <AttachmentAliOSSStrategyEditingModal
-    v-model:visible="aliOSSStrategyVisible"
+    @close="onEditingModalClose"
   />
 </template>

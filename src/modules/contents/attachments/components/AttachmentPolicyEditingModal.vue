@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import { VButton, VModal, VSpace } from "@halo-dev/components";
-import type { Policy } from "@halo-dev/api-client";
+import type { Policy, PolicyTemplate } from "@halo-dev/api-client";
 import cloneDeep from "lodash.clonedeep";
 import { computed, ref, watch, watchEffect } from "vue";
-import { apiClient } from "@halo-dev/admin-shared";
+import { apiClient, useSettingForm } from "@halo-dev/admin-shared";
 import { v4 as uuid } from "uuid";
 import { reset, submitForm } from "@formkit/core";
 import { useMagicKeys } from "@vueuse/core";
@@ -27,18 +27,57 @@ const emit = defineEmits<{
 const initialFormState: Policy = {
   spec: {
     displayName: "",
-    settingRef: "",
-    configMapRef: "",
+    templateRef: {
+      name: "",
+    },
+    configMapRef: {
+      name: "",
+    },
   },
   apiVersion: "storage.halo.run/v1alpha1",
   kind: "Policy",
   metadata: {
-    name: "local",
+    name: uuid(),
   },
 };
 
 const formState = ref<Policy>(cloneDeep(initialFormState));
-const saving = ref(false);
+const policyTemplate = ref<PolicyTemplate | undefined>();
+
+const settingName = computed(
+  () => policyTemplate.value?.spec?.settingRef?.name
+);
+const configMapName = computed(() => formState.value.spec.configMapRef?.name);
+
+const {
+  settings,
+  configMapFormData,
+  saving,
+  handleFetchConfigMap,
+  handleFetchSettings,
+  handleSaveConfigMap,
+  handleReset: handleResetSettingForm,
+} = useSettingForm(settingName, configMapName);
+
+const formSchema = computed(() => {
+  if (!settings?.value?.spec) {
+    return undefined;
+  }
+  return settings.value.spec.find((item) => item.group === "default")
+    ?.formSchema;
+});
+
+watchEffect(() => {
+  if (settingName.value) {
+    handleFetchSettings();
+  }
+});
+
+watchEffect(() => {
+  if (configMapName.value && settings.value) {
+    handleFetchConfigMap();
+  }
+});
 
 const isUpdateMode = computed(() => {
   return !!formState.value.metadata.creationTimestamp;
@@ -51,6 +90,9 @@ const modalTitle = computed(() => {
 const handleSave = async () => {
   try {
     saving.value = true;
+
+    await handleSaveConfigMap();
+
     if (isUpdateMode.value) {
       await apiClient.extension.storage.policy.updatestorageHaloRunV1alpha1Policy(
         formState.value.metadata.name,
@@ -61,6 +103,7 @@ const handleSave = async () => {
         formState.value
       );
     }
+
     onVisibleChange(false);
   } catch (e) {
     console.error("Failed to save attachment policy", e);
@@ -87,18 +130,35 @@ watch(
   () => props.visible,
   (visible) => {
     if (!visible) {
-      handleResetForm();
+      setTimeout(() => {
+        policyTemplate.value = undefined;
+        handleResetForm();
+        handleResetSettingForm();
+      }, 100);
     }
   }
 );
 
 watch(
   () => props.policy,
-  (policy) => {
+  async (policy) => {
     if (policy) {
       formState.value = cloneDeep(policy);
+
+      // Get policy template
+      if (formState.value.spec.templateRef?.name) {
+        const { data } =
+          await apiClient.extension.storage.policyTemplate.getstorageHaloRunV1alpha1PolicyTemplate(
+            formState.value.spec.templateRef.name
+          );
+        policyTemplate.value = data;
+      }
     } else {
-      handleResetForm();
+      setTimeout(() => {
+        policyTemplate.value = undefined;
+        handleResetForm();
+        handleResetSettingForm();
+      }, 100);
     }
   }
 );
@@ -117,20 +177,22 @@ const onVisibleChange = (visible: boolean) => {
     :width="600"
     @update:visible="onVisibleChange"
   >
-    <FormKit id="local-policy-form" type="form" @submit="handleSave">
+    <FormKit
+      v-if="formSchema && configMapFormData"
+      id="local-policy-form"
+      v-model="configMapFormData['default']"
+      :actions="false"
+      :preserve="true"
+      type="form"
+      @submit="handleSave"
+    >
       <FormKit
         v-model="formState.spec.displayName"
         label="名称"
         type="text"
         validation="required"
       ></FormKit>
-      <!--<FormKit label="存储位置" type="text" validation="required"></FormKit>-->
-      <!--      <FormKit-->
-      <!--        help="使用半角逗号分隔"-->
-      <!--        label="允许上传的文件类型"-->
-      <!--        type="textarea"-->
-      <!--        value="jpg,png,gif"-->
-      <!--      ></FormKit>-->
+      <FormKitSchema :schema="formSchema" />
     </FormKit>
 
     <template #footer>
