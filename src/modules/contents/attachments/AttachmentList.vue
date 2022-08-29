@@ -51,7 +51,7 @@ const { users } = useUserFetch();
 
 const attachments = ref<AttachmentList>({
   page: 1,
-  size: 10,
+  size: 60,
   total: 0,
   items: [],
   first: true,
@@ -68,13 +68,28 @@ const handleFetchAttachments = async () => {
   try {
     loading.value = true;
     const { data } =
-      await apiClient.extension.storage.attachment.liststorageHaloRunV1alpha1Attachment();
+      await apiClient.extension.storage.attachment.liststorageHaloRunV1alpha1Attachment(
+        attachments.value.page,
+        attachments.value.size
+      );
     attachments.value = data;
   } catch (e) {
     console.error("Failed to fetch attachments", e);
   } finally {
     loading.value = false;
   }
+};
+
+const handlePaginationChange = ({
+  page,
+  size,
+}: {
+  page: number;
+  size: number;
+}) => {
+  attachments.value.page = page;
+  attachments.value.size = size;
+  handleFetchAttachments();
 };
 
 const handleOpenDetail = (attachment: Attachment) => {
@@ -565,7 +580,12 @@ const onDetailModalClose = () => {
 
           <template #footer>
             <div class="bg-white sm:flex sm:items-center sm:justify-end">
-              <VPagination :page="1" :size="10" :total="20" />
+              <VPagination
+                :page="attachments.page"
+                :size="attachments.size"
+                :total="attachments.total"
+                @change="handlePaginationChange"
+              />
             </div>
           </template>
         </VCard>

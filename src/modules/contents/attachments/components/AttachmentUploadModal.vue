@@ -1,14 +1,12 @@
 <script lang="ts" setup>
 import { VModal } from "@halo-dev/components";
-import vueFilePond from "vue-filepond";
+import VueFilePond from "vue-filepond";
 import "filepond/dist/filepond.min.css";
-import FilePondPluginImagePreview from "filepond-plugin-image-preview";
-import "filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css";
 import { onMounted, ref } from "vue";
 import { apiClient } from "@halo-dev/admin-shared";
 import type { Policy } from "@halo-dev/api-client";
 
-const FilePond = vueFilePond(FilePondPluginImagePreview);
+const FilePond = VueFilePond();
 
 withDefaults(
   defineProps<{

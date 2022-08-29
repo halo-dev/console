@@ -46,7 +46,6 @@ importers:
       eslint-plugin-cypress: ^2.12.1
       eslint-plugin-vue: ^9.3.0
       filepond: ^4.30.4
-      filepond-plugin-image-preview: ^4.6.11
       floating-vue: 2.0.0-beta.19
       husky: ^8.0.1
       jsdom: ^20.0.0
@@ -99,7 +98,6 @@ importers:
       colorjs.io: 0.4.0
       dayjs: 1.11.5
       filepond: 4.30.4
-      filepond-plugin-image-preview: 4.6.11_filepond@4.30.4
       floating-vue: 2.0.0-beta.19_vue@3.2.37
       lodash.clonedeep: 4.5.0
       lodash.isequal: 4.5.0
@@ -5526,14 +5524,6 @@ packages:
     dependencies:
       minimatch: 5.0.1
     dev: true
-
-  /filepond-plugin-image-preview/4.6.11_filepond@4.30.4:
-    resolution: {integrity: sha512-0EmQ9HnOb/X0xc5rLcNRhhmdUbp7oiicRwQrcr90ZfVmPJOOZoX3ZGUEsEPj7luMI55huguhcVozdESxtqnuRw==}
-    peerDependencies:
-      filepond: '>=4.x <5.x'
-    dependencies:
-      filepond: 4.30.4
-    dev: false
 
   /filepond/4.30.4:
     resolution: {integrity: sha512-FCwsMvG9iiEs6uobdDrTaKsCgsqys0NuLgPPD8n37AYVYBiiDkrPkk9MSIU5rT2FahYcL1bScYI9huIPtlzqyA==}
