@@ -27,6 +27,7 @@ import { useUserFetch } from "@/modules/system/users/composables/use-user";
 import type { Attachment, AttachmentList, Group } from "@halo-dev/api-client";
 import { apiClient } from "@halo-dev/admin-shared";
 import { formatDatetime } from "@/utils/date";
+import prettyBytes from "pretty-bytes";
 
 const viewTypes = [
   {
@@ -548,7 +549,7 @@ const onDetailModalClose = () => {
                           {{ attachment.spec.mediaType }}
                         </span>
                         <span class="text-xs text-gray-500">
-                          {{ attachment.spec.size }}
+                          {{ prettyBytes(attachment.spec.size || 0) }}
                         </span>
                       </VSpace>
                     </div>

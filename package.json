@@ -48,6 +48,7 @@
     "lodash.clonedeep": "^4.5.0",
     "lodash.isequal": "^4.5.0",
     "pinia": "^2.0.20",
+    "pretty-bytes": "^6.0.0",
     "qs": "^6.11.0",
     "uuid": "^8.3.2",
     "vue": "^3.2.37",

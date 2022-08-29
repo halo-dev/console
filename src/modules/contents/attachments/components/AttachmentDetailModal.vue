@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { VButton, VModal, VSpace, VTag } from "@halo-dev/components";
 import type { Attachment } from "@halo-dev/api-client";
+import prettyBytes from "pretty-bytes";
 
 withDefaults(
   defineProps<{
@@ -87,7 +88,7 @@ const onVisibleChange = (visible: boolean) => {
           >
             <dt class="text-sm font-medium text-gray-900">文件大小</dt>
             <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-              {{ attachment?.spec.size }}
+              {{ prettyBytes(attachment?.spec.size || 0) }}
             </dd>
           </div>
           <div

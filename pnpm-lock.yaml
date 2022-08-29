@@ -55,6 +55,7 @@ importers:
       postcss: ^8.4.16
       prettier: ^2.7.1
       prettier-plugin-tailwindcss: ^0.1.13
+      pretty-bytes: ^6.0.0
       qs: ^6.11.0
       sass: ^1.54.5
       start-server-and-test: ^1.14.0
@@ -102,6 +103,7 @@ importers:
       lodash.clonedeep: 4.5.0
       lodash.isequal: 4.5.0
       pinia: 2.0.20_j6bzmzd4ujpabbp5objtwxyjp4
+      pretty-bytes: 6.0.0
       qs: 6.11.0
       uuid: 8.3.2
       vue: 3.2.37
@@ -7452,7 +7454,6 @@ packages:
   /pretty-bytes/6.0.0:
     resolution: {integrity: sha512-6UqkYefdogmzqAZWzJ7laYeJnaXDy2/J+ZqiiMtS7t7OfpXWTlaeGMwX8U6EFvPV/YWWEKRkS8hKS4k60WHTOg==}
     engines: {node: ^14.13.1 || >=16.0.0}
-    dev: true
 
   /process-nextick-args/2.0.1:
     resolution: {integrity: sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==}
