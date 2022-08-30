@@ -1,13 +1,10 @@
 <script lang="ts" setup>
 import { VModal } from "@halo-dev/components";
-import VueFilePond from "vue-filepond";
-import "filepond/dist/filepond.min.css";
-import { ref, watchEffect } from "vue";
+import FilePondUpload from "@/components/upload/FilePondUpload.vue";
+import { computed, ref, watchEffect } from "vue";
 import { apiClient } from "@halo-dev/admin-shared";
 import type { Policy } from "@halo-dev/api-client";
 import { useFetchAttachmentPolicy } from "../composables/use-attachment-policy";
-
-const FilePond = VueFilePond();
 
 withDefaults(
   defineProps<{
@@ -25,6 +22,7 @@ const emit = defineEmits<{
 
 const { policies } = useFetchAttachmentPolicy();
 const selectedPolicy = ref<Policy | null>(null);
+const FilePondUploadRef = ref();
 
 watchEffect(() => {
   if (policies.value.length) {
@@ -36,22 +34,18 @@ const onVisibleChange = (visible: boolean) => {
   emit("update:visible", visible);
   if (!visible) {
     emit("close");
+    FilePondUploadRef.value.handleRemoveFiles();
   }
 };
 
-const server = {
-  process: (fieldName, file, metadata, load) => {
-    if (!selectedPolicy.value) {
-      return;
-    }
-    apiClient.extension.storage.attachment
-      .uploadAttachment(file, selectedPolicy.value?.metadata.name)
-      .then((response) => {
-        load(response);
-      });
-    return {};
-  },
-};
+const uploadHandler = computed(() => {
+  return (file, config) =>
+    apiClient.extension.storage.attachment.uploadAttachment(
+      file,
+      selectedPolicy.value?.metadata.name as string,
+      config
+    );
+});
 </script>
 <template>
   <VModal
@@ -93,12 +87,10 @@ const server = {
       </FloatingDropdown>
     </template>
     <div class="w-full p-4">
-      <file-pond
-        ref="pond"
+      <FilePondUpload
+        ref="FilePondUploadRef"
         :allow-multiple="true"
-        :server="server"
-        label-idle="Drop files here..."
-        name="file"
+        :handler="uploadHandler"
       />
     </div>
   </VModal>
