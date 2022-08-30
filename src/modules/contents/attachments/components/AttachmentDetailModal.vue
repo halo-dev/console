@@ -4,6 +4,7 @@ import type { Attachment, Policy } from "@halo-dev/api-client";
 import prettyBytes from "pretty-bytes";
 import { ref, watchEffect } from "vue";
 import { apiClient } from "@halo-dev/admin-shared";
+import { isImage } from "@/utils/image";
 
 const props = withDefaults(
   defineProps<{
@@ -63,10 +64,12 @@ const onVisibleChange = (visible: boolean) => {
             <dt class="text-sm font-medium text-gray-900">预览</dt>
             <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
               <img
-                alt="Preview"
+                v-if="isImage(attachment?.spec.mediaType)"
+                :alt="attachment?.spec.displayName"
+                :src="attachment?.status?.permalink"
                 class="w-full rounded sm:w-1/2"
-                src="https://picsum.photos/1000/700?random=1"
               />
+              <span> 此文件不支持预览 </span>
             </dd>
           </div>
           <div

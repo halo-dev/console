@@ -31,6 +31,7 @@ import { useAttachmentControl } from "./composables/use-attachment";
 import AttachmentSelectModal from "@/modules/contents/attachments/components/AttachmentSelectModal.vue";
 import { apiClient } from "@halo-dev/admin-shared";
 import cloneDeep from "lodash.clonedeep";
+import { isImage } from "@/utils/image";
 
 const viewTypes = [
   {
@@ -419,9 +420,10 @@ onMounted(handleFetchGroups);
                     class="aspect-w-10 aspect-h-8 block h-full w-full cursor-pointer overflow-hidden bg-gray-100"
                   >
                     <img
-                      alt=""
+                      v-if="isImage(attachment.spec.mediaType)"
+                      :alt="attachment.spec.displayName"
+                      :src="attachment.status?.permalink"
                       class="pointer-events-none object-cover group-hover:opacity-75"
-                      src=""
                     />
                   </div>
                   <p
