@@ -28,7 +28,7 @@ import { formatDatetime } from "@/utils/date";
 import prettyBytes from "pretty-bytes";
 import { useFetchAttachmentPolicy } from "./composables/use-attachment-policy";
 import { useAttachmentControl } from "./composables/use-attachment";
-import AttachmentSelectModal from "@/modules/contents/attachments/components/AttachmentSelectModal.vue";
+import AttachmentSelectorModal from "@/modules/contents/attachments/components/AttachmentSelectorModal.vue";
 import { apiClient } from "@halo-dev/admin-shared";
 import cloneDeep from "lodash.clonedeep";
 import { isImage } from "@/utils/image";
@@ -125,8 +125,8 @@ const onDetailModalClose = () => {
 onMounted(handleFetchGroups);
 </script>
 <template>
-  <AttachmentSelectModal v-model:visible="selectVisible">
-  </AttachmentSelectModal>
+  <AttachmentSelectorModal v-model:visible="selectVisible">
+  </AttachmentSelectorModal>
   <AttachmentDetailModal
     v-model:visible="detailVisible"
     :attachment="selectedAttachment"

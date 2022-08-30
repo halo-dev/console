@@ -1,11 +1,11 @@
 import { BasicLayout, definePlugin } from "@halo-dev/admin-shared";
 import AttachmentList from "./AttachmentList.vue";
-import AttachmentSelectModal from "./components/AttachmentSelectModal.vue";
+import AttachmentSelectorModal from "./components/AttachmentSelectorModal.vue";
 import { IconFolder } from "@halo-dev/components";
 
 export default definePlugin({
   name: "attachmentModule",
-  components: [AttachmentSelectModal],
+  components: [AttachmentSelectorModal],
   routes: [
     {
       path: "/attachments",

@@ -50,6 +50,7 @@
     "pinia": "^2.0.20",
     "pretty-bytes": "^6.0.0",
     "qs": "^6.11.0",
+    "unsplash-js": "^7.0.15",
     "uuid": "^8.3.2",
     "vue": "^3.2.37",
     "vue-filepond": "^7.0.3",

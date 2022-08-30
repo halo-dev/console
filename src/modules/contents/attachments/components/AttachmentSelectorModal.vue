@@ -1,0 +1,93 @@
+<script lang="ts" setup>
+import { VButton, VModal, VTabbar } from "@halo-dev/components";
+import { ref, type Component, markRaw } from "vue";
+import CoreSelectorProvider from "./selector-providers/CoreSelectorProvider.vue";
+import UnsplashSelectorProvider from "./selector-providers/UnsplashSelectorProvider.vue";
+import type { AttachmentLike } from "./selector-providers/types";
+
+withDefaults(
+  defineProps<{
+    visible: boolean;
+  }>(),
+  {
+    visible: false,
+  }
+);
+
+const emit = defineEmits<{
+  (event: "update:visible", visible: boolean): void;
+  (event: "close"): void;
+  (event: "select", attachments: AttachmentLike[]): void;
+}>();
+
+interface AttachmentProvider {
+  id: string;
+  label: string;
+  component: Component | string;
+  callback?: (attachments: AttachmentLike[]) => void;
+}
+
+const selected = ref<AttachmentLike[]>([] as AttachmentLike[]);
+
+const providers = ref<AttachmentProvider[]>([
+  {
+    id: "core",
+    label: "附件库",
+    component: markRaw(CoreSelectorProvider),
+  },
+  {
+    id: "unsplash",
+    label: "Unsplash",
+    component: markRaw(UnsplashSelectorProvider),
+  },
+]);
+
+const activeId = ref(providers.value[0].id);
+
+const onVisibleChange = (visible: boolean) => {
+  emit("update:visible", visible);
+  if (!visible) {
+    emit("close");
+  }
+};
+
+const handleConfirm = () => {
+  console.log(Array.from(selected.value));
+  emit("select", Array.from(selected.value));
+  onVisibleChange(false);
+};
+</script>
+<template>
+  <VModal
+    :visible="visible"
+    :width="1240"
+    title="选择附件"
+    height="calc(100vh - 20px)"
+    @update:visible="onVisibleChange"
+  >
+    <VTabbar
+      v-model:active-id="activeId"
+      :items="providers"
+      class="w-full !rounded-none"
+      type="outline"
+    ></VTabbar>
+
+    <div class="mt-2">
+      <template v-for="(provider, index) in providers" :key="index">
+        <component
+          :is="provider.component"
+          v-if="activeId === provider.id"
+          v-model:selected="selected"
+        ></component>
+      </template>
+    </div>
+    <template #footer>
+      <VButton type="secondary" @click="handleConfirm">
+        确定
+        <span v-if="selected.length">
+          （已选择 {{ selected.length }} 项）
+        </span>
+      </VButton>
+    </template>
+  </VModal>
+</template>
