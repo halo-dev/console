@@ -50,6 +50,7 @@ const onVisibleChange = (visible: boolean) => {
     :title="`附件：${attachment?.spec.displayName || ''}`"
     :visible="visible"
     :width="1000"
+    height="calc(100vh - 20px)"
     @update:visible="onVisibleChange"
   >
     <template #actions>
@@ -69,7 +70,7 @@ const onVisibleChange = (visible: boolean) => {
                 :src="attachment?.status?.permalink"
                 class="w-full rounded sm:w-1/2"
               />
-              <span> 此文件不支持预览 </span>
+              <span v-else> 此文件不支持预览 </span>
             </dd>
           </div>
           <div

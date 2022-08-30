@@ -7,6 +7,7 @@ const props = withDefaults(
     visible?: boolean;
     title?: string;
     width?: number;
+    height?: string;
     fullscreen?: boolean;
     bodyClass?: string[];
   }>(),
@@ -14,6 +15,7 @@ const props = withDefaults(
     visible: false,
     title: undefined,
     width: 500,
+    height: undefined,
     fullscreen: false,
     bodyClass: undefined,
   }
@@ -36,6 +38,7 @@ const wrapperClasses = computed(() => {
 const contentStyles = computed(() => {
   return {
     maxWidth: props.width + "px",
+    height: props.height,
   };
 });
 
