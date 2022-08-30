@@ -21,7 +21,7 @@ import AttachmentDetailModal from "./components/AttachmentDetailModal.vue";
 import AttachmentUploadModal from "./components/AttachmentUploadModal.vue";
 import AttachmentPoliciesModal from "./components/AttachmentPoliciesModal.vue";
 import AttachmentGroupList from "./components/AttachmentGroupList.vue";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useUserFetch } from "@/modules/system/users/composables/use-user";
 import type { Attachment, Group } from "@halo-dev/api-client";
 import { formatDatetime } from "@/utils/date";
@@ -29,6 +29,8 @@ import prettyBytes from "pretty-bytes";
 import { useFetchAttachmentPolicy } from "./composables/use-attachment-policy";
 import { useAttachmentControl } from "./composables/use-attachment";
 import AttachmentSelectModal from "@/modules/contents/attachments/components/AttachmentSelectModal.vue";
+import { apiClient } from "@halo-dev/admin-shared";
+import cloneDeep from "lodash.clonedeep";
 
 const viewTypes = [
   {
@@ -66,9 +68,39 @@ const {
   isChecked,
 } = useAttachmentControl();
 
+const groups = ref<Group[]>([] as Group[]);
 const selectedGroup = ref<Group>();
 
-const handleOpenDetail = (attachment: Attachment) => {
+const handleFetchGroups = async () => {
+  try {
+    const { data } =
+      await apiClient.extension.storage.group.liststorageHaloRunV1alpha1Group();
+    groups.value = data.items;
+  } catch (e) {
+    console.error("Failed to fetch attachment groups", e);
+  }
+};
+
+const handleMove = async (group: Group) => {
+  try {
+    const promises = Array.from(selectedAttachments.value).map((attachment) => {
+      const attachmentToUpdate = cloneDeep(attachment);
+      attachmentToUpdate.spec.groupRef = {
+        name: group.metadata.name,
+      };
+      return apiClient.extension.storage.attachment.updatestorageHaloRunV1alpha1Attachment(
+        attachment.metadata.name,
+        attachmentToUpdate
+      );
+    });
+
+    await Promise.all(promises);
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+const handleClickItem = (attachment: Attachment) => {
   if (selectedAttachments.value.size > 0) {
     handleSelect(attachment);
     return;
@@ -88,6 +120,8 @@ const onDetailModalClose = () => {
   selectedAttachment.value = undefined;
   handleFetchAttachments();
 };
+
+onMounted(handleFetchGroups);
 </script>
 <template>
   <AttachmentSelectModal v-model:visible="selectVisible">
@@ -167,6 +201,26 @@ const onDetailModalClose = () => {
                     <VButton type="danger" @click="handleDeleteInBatch">
                       删除
                     </VButton>
+                    <FloatingDropdown>
+                      <VButton>移动</VButton>
+                      <template #popper>
+                        <div class="w-72 p-4">
+                          <ul class="space-y-1">
+                            <li
+                              v-for="(group, index) in groups"
+                              :key="index"
+                              v-close-popper
+                              class="flex cursor-pointer items-center rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                              @click="handleMove(group)"
+                            >
+                              <span class="truncate">
+                                {{ group.spec.displayName }}
+                              </span>
+                            </li>
+                          </ul>
+                        </div>
+                      </template>
+                    </FloatingDropdown>
                   </VSpace>
                 </div>
                 <div class="mt-4 flex sm:mt-0">
@@ -358,7 +412,7 @@ const onDetailModalClose = () => {
                   'ring-1 ring-primary': isChecked(attachment),
                 }"
                 class="hover:shadow"
-                @click="handleOpenDetail(attachment)"
+                @click="handleClickItem(attachment)"
               >
                 <div class="group relative bg-white">
                   <div
@@ -422,7 +476,7 @@ const onDetailModalClose = () => {
                     <div class="flex flex-col sm:flex-row">
                       <span
                         class="mr-0 truncate text-sm font-medium text-gray-900 sm:mr-2"
-                        @click="handleOpenDetail(attachment)"
+                        @click="handleClickItem(attachment)"
                       >
                         {{ attachment.spec.displayName }}
                       </span>
@@ -453,7 +507,7 @@ const onDetailModalClose = () => {
                       </time>
                       <span class="cursor-pointer">
                         <IconSettings
-                          @click.stop="handleOpenDetail(attachment)"
+                          @click.stop="handleClickItem(attachment)"
                         />
                       </span>
                     </div>
