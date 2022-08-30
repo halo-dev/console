@@ -5,6 +5,7 @@ import prettyBytes from "pretty-bytes";
 import { ref, watchEffect } from "vue";
 import { apiClient } from "@halo-dev/admin-shared";
 import { isImage } from "@/utils/image";
+import { formatDatetime } from "@/utils/date";
 
 const props = withDefaults(
   defineProps<{
@@ -86,7 +87,7 @@ const onVisibleChange = (visible: boolean) => {
           >
             <dt class="text-sm font-medium text-gray-900">所在分组</dt>
             <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-              // TODO
+              {{ attachment?.spec.groupRef?.name || "未分组" }}
             </dd>
           </div>
           <div
@@ -126,15 +127,19 @@ const onVisibleChange = (visible: boolean) => {
           >
             <dt class="text-sm font-medium text-gray-900">上传时间</dt>
             <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-              {{ attachment?.metadata.creationTimestamp }}
+              {{ formatDatetime(attachment?.metadata.creationTimestamp) }}
             </dd>
           </div>
           <div
             class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
           >
             <dt class="text-sm font-medium text-gray-900">原始链接</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-              // TODO
+            <dd
+              class="mt-1 text-sm text-gray-900 hover:text-blue-600 sm:col-span-2 sm:mt-0"
+            >
+              <a target="_blank" :href="attachment?.status?.permalink">
+                {{ attachment?.status?.permalink }}
+              </a>
             </dd>
           </div>
           <div
