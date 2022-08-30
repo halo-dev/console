@@ -2,7 +2,7 @@
 import { VModal } from "@halo-dev/components";
 import VueFilePond from "vue-filepond";
 import "filepond/dist/filepond.min.css";
-import { onMounted, ref, watchEffect } from "vue";
+import { ref, watchEffect } from "vue";
 import { apiClient } from "@halo-dev/admin-shared";
 import type { Policy } from "@halo-dev/api-client";
 import { useFetchAttachmentPolicy } from "../composables/use-attachment-policy";
@@ -73,7 +73,11 @@ const server = {
                 v-for="(policy, index) in policies"
                 :key="index"
                 v-close-popper
-                class="flex cursor-pointer flex-col rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                :class="{
+                  '!bg-gray-100 !text-gray-900':
+                    selectedPolicy?.metadata.name === policy.metadata.name,
+                }"
+                class="flex cursor-pointer flex-col rounded px-2 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                 @click="selectedPolicy = policy"
               >
                 <span class="truncate">
@@ -82,11 +86,6 @@ const server = {
                 <span class="text-xs">
                   {{ policy.spec.templateRef?.name }}
                 </span>
-              </li>
-              <li
-                class="flex cursor-pointer items-center rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-              >
-                <span class="truncate">新增存储策略</span>
               </li>
             </ul>
           </div>

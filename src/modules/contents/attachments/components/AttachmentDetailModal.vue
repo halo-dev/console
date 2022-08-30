@@ -1,9 +1,11 @@
 <script lang="ts" setup>
 import { VButton, VModal, VSpace, VTag } from "@halo-dev/components";
-import type { Attachment } from "@halo-dev/api-client";
+import type { Attachment, Policy } from "@halo-dev/api-client";
 import prettyBytes from "pretty-bytes";
+import { ref, watchEffect } from "vue";
+import { apiClient } from "@halo-dev/admin-shared";
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     visible: boolean;
     attachment: Attachment | null;
@@ -18,6 +20,22 @@ const emit = defineEmits<{
   (event: "update:visible", visible: boolean): void;
   (event: "close"): void;
 }>();
+
+const policy = ref<Policy>();
+
+watchEffect(async () => {
+  if (props.attachment) {
+    const { policyRef } = props.attachment.spec;
+    if (!policyRef) {
+      return;
+    }
+    const { data } =
+      await apiClient.extension.storage.policy.getstorageHaloRunV1alpha1Policy(
+        policyRef.name
+      );
+    policy.value = data;
+  }
+});
 
 const onVisibleChange = (visible: boolean) => {
   emit("update:visible", visible);
@@ -56,7 +74,7 @@ const onVisibleChange = (visible: boolean) => {
           >
             <dt class="text-sm font-medium text-gray-900">存储策略</dt>
             <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-              {{ attachment?.spec.policyRef?.name }}
+              {{ policy?.spec.displayName }}
             </dd>
           </div>
           <div
