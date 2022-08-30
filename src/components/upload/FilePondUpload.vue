@@ -70,10 +70,10 @@ defineExpose({
   <FilePond
     ref="FilePondRef"
     :allow-multiple="allowMultiple"
-    :allowRevert="false"
+    :allow-revert="false"
     :label-idle="labelIdle"
-    :maxFiles="maxFiles"
-    :maxParallelUploads="maxParallelUploads"
+    :max-files="maxFiles"
+    :max-parallel-uploads="maxParallelUploads"
     :name="name"
     :server="server"
   ></FilePond>

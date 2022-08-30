@@ -91,8 +91,8 @@ onMounted(() => {
     :visible="visible"
     :width="750"
     title="存储策略"
-    @update:visible="onVisibleChange"
     :body-class="['!p-0']"
+    @update:visible="onVisibleChange"
   >
     <template #actions>
       <FloatingDropdown>
