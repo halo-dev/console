@@ -10,6 +10,7 @@ import {
 import type { Attachment } from "@halo-dev/api-client";
 import { useAttachmentControl } from "../composables/use-attachment";
 import { ref, watch } from "vue";
+import { isImage } from "@/utils/image";
 
 const props = withDefaults(
   defineProps<{
@@ -88,9 +89,10 @@ watch(
                 class="aspect-w-10 aspect-h-8 block h-full w-full cursor-pointer overflow-hidden bg-gray-100"
               >
                 <img
-                  alt=""
+                  v-if="isImage(attachment.spec.mediaType)"
+                  :alt="attachment.spec.displayName"
                   class="pointer-events-none object-cover group-hover:opacity-75"
-                  src=""
+                  :src="attachment.status?.permalink"
                 />
               </div>
               <p
