@@ -496,7 +496,7 @@ onMounted(handleFetchGroups);
                   </div>
                   <div class="flex">
                     <div
-                      class="inline-flex flex-col flex-col-reverse items-end gap-4 sm:flex-row sm:items-center sm:gap-6"
+                      class="inline-flex flex-col items-end gap-4 sm:flex-row sm:items-center sm:gap-6"
                     >
                       <img
                         class="hidden h-6 w-6 rounded-full ring-2 ring-white sm:inline-block"
