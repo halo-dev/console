@@ -202,6 +202,9 @@ onMounted(handleFetchGroups);
                     <VButton type="danger" @click="handleDeleteInBatch">
                       删除
                     </VButton>
+                    <VButton @click="selectedAttachments.clear()">
+                      取消选择
+                    </VButton>
                     <FloatingDropdown>
                       <VButton>移动</VButton>
                       <template #popper>
