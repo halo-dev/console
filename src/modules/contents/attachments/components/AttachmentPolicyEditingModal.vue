@@ -84,7 +84,9 @@ const isUpdateMode = computed(() => {
 });
 
 const modalTitle = computed(() => {
-  return isUpdateMode.value ? "编辑本地存储策略" : "新增本地存储策略";
+  return isUpdateMode.value
+    ? `编辑策略：${props.policy?.spec.displayName}`
+    : `新增策略：${policyTemplate.value?.spec?.displayName}`;
 });
 
 const handleSave = async () => {
