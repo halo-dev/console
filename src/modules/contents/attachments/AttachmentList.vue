@@ -16,6 +16,8 @@ import {
   VPagination,
   VSpace,
   VTag,
+  VEmpty,
+  IconAddCircle,
 } from "@halo-dev/components";
 import AttachmentDetailModal from "./components/AttachmentDetailModal.vue";
 import AttachmentUploadModal from "./components/AttachmentUploadModal.vue";
@@ -59,6 +61,7 @@ const {
   selectedAttachment,
   selectedAttachments,
   checkedAll,
+  loading,
   handleFetchAttachments,
   handleSelectNext,
   handleSelectPrevious,
@@ -393,128 +396,153 @@ onMounted(handleFetchGroups);
             </div>
           </template>
 
-          <div v-if="viewType === 'grid'">
+          <div :style="`${viewType === 'list' ? 'padding:12px 16px 0' : ''}`">
             <AttachmentGroupList
               v-model:selected-group="selectedGroup"
               @select="handleFetchAttachments"
             />
-            <div
-              class="mt-2 grid grid-cols-3 gap-x-2 gap-y-3 sm:grid-cols-3 md:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-12"
-              role="list"
-            >
-              <VCard
-                v-for="(attachment, index) in attachments.items"
-                :key="index"
-                :body-class="['!p-0']"
-                :class="{
-                  'ring-1 ring-primary': isChecked(attachment),
-                }"
-                class="hover:shadow"
-                @click="handleClickItem(attachment)"
-              >
-                <div class="group relative bg-white">
-                  <div
-                    class="aspect-w-10 aspect-h-8 block h-full w-full cursor-pointer overflow-hidden bg-gray-100"
-                  >
-                    <img
-                      v-if="isImage(attachment.spec.mediaType)"
-                      :alt="attachment.spec.displayName"
-                      :src="attachment.status?.permalink"
-                      class="pointer-events-none object-cover group-hover:opacity-75"
-                    />
-                  </div>
-                  <p
-                    class="pointer-events-none block truncate px-2 py-1 text-center text-xs font-medium text-gray-700"
-                  >
-                    {{ attachment.spec.displayName }}
-                  </p>
-
-                  <div
-                    :class="{ '!flex': selectedAttachments.has(attachment) }"
-                    class="absolute top-0 left-0 hidden h-1/3 w-full justify-end bg-gradient-to-b from-gray-300 to-transparent ease-in-out group-hover:flex"
-                  >
-                    <IconCheckboxFill
-                      :class="{
-                        '!text-primary': selectedAttachments.has(attachment),
-                      }"
-                      class="mt-1 mr-1 h-6 w-6 cursor-pointer text-white transition-all hover:text-primary"
-                      @click.stop="handleSelect(attachment)"
-                    />
-                  </div>
-                </div>
-              </VCard>
-            </div>
           </div>
 
-          <ul
-            v-if="viewType === 'list'"
-            class="box-border h-full w-full divide-y divide-gray-100"
-            role="list"
+          <VEmpty
+            v-if="!attachments.total && !loading"
+            message="当前没有已安装的插件，你可以尝试刷新或者安装新插件"
+            title="当前没有已安装的插件"
           >
-            <li v-for="(attachment, index) in attachments.items" :key="index">
+            <template #actions>
+              <VSpace>
+                <VButton @click="handleFetchAttachments">刷新</VButton>
+                <VButton type="secondary" @click="uploadVisible = true">
+                  <template #icon>
+                    <IconAddCircle class="h-full w-full" />
+                  </template>
+                  上传附件
+                </VButton>
+              </VSpace>
+            </template>
+          </VEmpty>
+
+          <div v-else>
+            <div v-if="viewType === 'grid'">
               <div
-                :class="{
-                  'bg-gray-100': isChecked(attachment),
-                }"
-                class="relative block cursor-pointer px-4 py-3 transition-all hover:bg-gray-50"
+                class="mt-2 grid grid-cols-3 gap-x-2 gap-y-3 sm:grid-cols-3 md:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-12"
+                role="list"
               >
-                <div
-                  v-show="isChecked(attachment)"
-                  class="absolute inset-y-0 left-0 w-0.5 bg-primary"
-                ></div>
-                <div class="relative flex flex-row items-center">
-                  <div class="mr-4 hidden items-center sm:flex">
-                    <input
-                      :checked="selectedAttachments.has(attachment)"
-                      class="h-4 w-4 rounded border-gray-300 text-indigo-600"
-                      type="checkbox"
-                      @click="handleSelect(attachment)"
-                    />
-                  </div>
-                  <div class="flex-1">
-                    <div class="flex flex-col sm:flex-row">
-                      <span
-                        class="mr-0 truncate text-sm font-medium text-gray-900 sm:mr-2"
-                        @click="handleClickItem(attachment)"
-                      >
-                        {{ attachment.spec.displayName }}
-                      </span>
-                    </div>
-                    <div class="mt-1 flex">
-                      <VSpace>
-                        <span class="text-xs text-gray-500">
-                          {{ attachment.spec.mediaType }}
-                        </span>
-                        <span class="text-xs text-gray-500">
-                          {{ prettyBytes(attachment.spec.size || 0) }}
-                        </span>
-                      </VSpace>
-                    </div>
-                  </div>
-                  <div class="flex">
+                <VCard
+                  v-for="(attachment, index) in attachments.items"
+                  :key="index"
+                  :body-class="['!p-0']"
+                  :class="{
+                    'ring-1 ring-primary': isChecked(attachment),
+                  }"
+                  class="hover:shadow"
+                  @click="handleClickItem(attachment)"
+                >
+                  <div class="group relative bg-white">
                     <div
-                      class="inline-flex flex-col items-end gap-4 sm:flex-row sm:items-center sm:gap-6"
+                      class="aspect-w-10 aspect-h-8 block h-full w-full cursor-pointer overflow-hidden bg-gray-100"
                     >
                       <img
-                        class="hidden h-6 w-6 rounded-full ring-2 ring-white sm:inline-block"
-                        src="https://ryanc.cc/avatar"
+                        v-if="isImage(attachment.spec.mediaType)"
+                        :alt="attachment.spec.displayName"
+                        :src="attachment.status?.permalink"
+                        class="pointer-events-none object-cover group-hover:opacity-75"
                       />
-                      <time class="text-sm text-gray-500">
-                        {{
-                          formatDatetime(attachment.metadata.creationTimestamp)
-                        }}
-                      </time>
-                      <span class="cursor-pointer">
-                        <IconSettings
-                          @click.stop="handleClickItem(attachment)"
+                    </div>
+                    <p
+                      class="pointer-events-none block truncate px-2 py-1 text-center text-xs font-medium text-gray-700"
+                    >
+                      {{ attachment.spec.displayName }}
+                    </p>
+
+                    <div
+                      :class="{ '!flex': selectedAttachments.has(attachment) }"
+                      class="absolute top-0 left-0 hidden h-1/3 w-full justify-end bg-gradient-to-b from-gray-300 to-transparent ease-in-out group-hover:flex"
+                    >
+                      <IconCheckboxFill
+                        :class="{
+                          '!text-primary': selectedAttachments.has(attachment),
+                        }"
+                        class="mt-1 mr-1 h-6 w-6 cursor-pointer text-white transition-all hover:text-primary"
+                        @click.stop="handleSelect(attachment)"
+                      />
+                    </div>
+                  </div>
+                </VCard>
+              </div>
+            </div>
+
+            <ul
+              v-if="viewType === 'list'"
+              class="box-border h-full w-full divide-y divide-gray-100"
+              role="list"
+            >
+              <li v-for="(attachment, index) in attachments.items" :key="index">
+                <div
+                  :class="{
+                    'bg-gray-100': isChecked(attachment),
+                  }"
+                  class="relative block cursor-pointer px-4 py-3 transition-all hover:bg-gray-50"
+                >
+                  <div
+                    v-show="isChecked(attachment)"
+                    class="absolute inset-y-0 left-0 w-0.5 bg-primary"
+                  ></div>
+                  <div class="relative flex flex-row items-center">
+                    <div class="mr-4 hidden items-center sm:flex">
+                      <input
+                        :checked="selectedAttachments.has(attachment)"
+                        class="h-4 w-4 rounded border-gray-300 text-indigo-600"
+                        type="checkbox"
+                        @click="handleSelect(attachment)"
+                      />
+                    </div>
+                    <div class="flex-1">
+                      <div class="flex flex-col sm:flex-row">
+                        <span
+                          class="mr-0 truncate text-sm font-medium text-gray-900 sm:mr-2"
+                          @click="handleClickItem(attachment)"
+                        >
+                          {{ attachment.spec.displayName }}
+                        </span>
+                      </div>
+                      <div class="mt-1 flex">
+                        <VSpace>
+                          <span class="text-xs text-gray-500">
+                            {{ attachment.spec.mediaType }}
+                          </span>
+                          <span class="text-xs text-gray-500">
+                            {{ prettyBytes(attachment.spec.size || 0) }}
+                          </span>
+                        </VSpace>
+                      </div>
+                    </div>
+                    <div class="flex">
+                      <div
+                        class="inline-flex flex-col items-end gap-4 sm:flex-row sm:items-center sm:gap-6"
+                      >
+                        <img
+                          class="hidden h-6 w-6 rounded-full ring-2 ring-white sm:inline-block"
+                          src="https://ryanc.cc/avatar"
                         />
-                      </span>
+                        <time class="text-sm text-gray-500">
+                          {{
+                            formatDatetime(
+                              attachment.metadata.creationTimestamp
+                            )
+                          }}
+                        </time>
+                        <span class="cursor-pointer">
+                          <IconSettings
+                            @click.stop="handleClickItem(attachment)"
+                          />
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </li>
-          </ul>
+              </li>
+            </ul>
+          </div>
 
           <template #footer>
             <div class="bg-white sm:flex sm:items-center sm:justify-end">
