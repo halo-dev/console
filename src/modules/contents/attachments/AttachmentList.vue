@@ -159,12 +159,6 @@ onMounted(handleFetchGroups);
           </template>
           存储策略
         </VButton>
-        <VButton size="sm">
-          <template #icon>
-            <IconSettings class="h-full w-full" />
-          </template>
-          设置
-        </VButton>
         <VButton type="secondary" @click="uploadVisible = true">
           <template #icon>
             <IconUpload class="h-full w-full" />
