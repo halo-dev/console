@@ -1,9 +1,12 @@
 <script lang="ts" setup>
 import { VButton, VModal, VTabbar } from "@halo-dev/components";
-import { ref, type Component, markRaw } from "vue";
+import { ref, markRaw } from "vue";
 import CoreSelectorProvider from "./selector-providers/CoreSelectorProvider.vue";
-import UnsplashSelectorProvider from "./selector-providers/UnsplashSelectorProvider.vue";
-import type { AttachmentLike } from "./selector-providers/types";
+import type {
+  AttachmentLike,
+  AttachmentSelectorPublicState,
+} from "@halo-dev/admin-shared";
+import { useExtensionPointsState } from "@/composables/usePlugins";
 
 withDefaults(
   defineProps<{
@@ -20,29 +23,21 @@ const emit = defineEmits<{
   (event: "select", attachments: AttachmentLike[]): void;
 }>();
 
-interface AttachmentProvider {
-  id: string;
-  label: string;
-  component: Component | string;
-  callback?: (attachments: AttachmentLike[]) => void;
-}
-
 const selected = ref<AttachmentLike[]>([] as AttachmentLike[]);
 
-const providers = ref<AttachmentProvider[]>([
-  {
-    id: "core",
-    label: "附件库",
-    component: markRaw(CoreSelectorProvider),
-  },
-  {
-    id: "unsplash",
-    label: "Unsplash",
-    component: markRaw(UnsplashSelectorProvider),
-  },
-]);
+const attachmentSelectorPublicState = ref<AttachmentSelectorPublicState>({
+  providers: [
+    {
+      id: "core",
+      label: "附件库",
+      component: markRaw(CoreSelectorProvider),
+    },
+  ],
+});
 
-const activeId = ref(providers.value[0].id);
+useExtensionPointsState("ATTACHMENT_SELECTOR", attachmentSelectorPublicState);
+
+const activeId = ref(attachmentSelectorPublicState.value.providers[0].id);
 
 const onVisibleChange = (visible: boolean) => {
   emit("update:visible", visible);
@@ -67,13 +62,16 @@ const handleConfirm = () => {
   >
     <VTabbar
       v-model:active-id="activeId"
-      :items="providers"
+      :items="attachmentSelectorPublicState.providers"
       class="w-full !rounded-none"
       type="outline"
     ></VTabbar>
 
     <div class="mt-2">
-      <template v-for="(provider, index) in providers" :key="index">
+      <template
+        v-for="(provider, index) in attachmentSelectorPublicState.providers"
+        :key="index"
+      >
         <component
           :is="provider.component"
           v-if="activeId === provider.id"
