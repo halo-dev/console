@@ -1,9 +1,17 @@
 <script lang="ts" setup>
-import { IconCheckboxFill, VCard } from "@halo-dev/components";
-import { onMounted, watchEffect } from "vue";
+import {
+  IconCheckboxFill,
+  VCard,
+  VEmpty,
+  VSpace,
+  VButton,
+  IconUpload,
+} from "@halo-dev/components";
+import { onMounted, watchEffect, ref } from "vue";
 import { isImage } from "@/utils/image";
 import { useAttachmentControl } from "../../composables/use-attachment";
 import type { AttachmentLike } from "./types";
+import AttachmentUploadModal from "../AttachmentUploadModal.vue";
 
 withDefaults(
   defineProps<{
@@ -20,11 +28,14 @@ const emit = defineEmits<{
 
 const {
   attachments,
+  loading,
   selectedAttachments,
   handleFetchAttachments,
   handleSelect,
   isChecked,
 } = useAttachmentControl();
+
+const uploadVisible = ref(false);
 
 watchEffect(() => {
   emit("update:selected", Array.from(selectedAttachments.value));
@@ -33,7 +44,25 @@ watchEffect(() => {
 onMounted(handleFetchAttachments);
 </script>
 <template>
+  <VEmpty
+    v-if="!attachments.total && !loading"
+    message="当前没有附件，你可以尝试刷新或者上传附件"
+    title="当前没有附件"
+  >
+    <template #actions>
+      <VSpace>
+        <VButton @click="handleFetchAttachments">刷新</VButton>
+        <VButton type="secondary" @click="uploadVisible = true">
+          <template #icon>
+            <IconUpload class="h-full w-full" />
+          </template>
+          上传附件
+        </VButton>
+      </VSpace>
+    </template>
+  </VEmpty>
   <div
+    v-else
     class="mt-2 grid grid-cols-3 gap-x-2 gap-y-3 sm:grid-cols-3 md:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10"
     role="list"
   >
@@ -78,4 +107,8 @@ onMounted(handleFetchAttachments);
       </div>
     </VCard>
   </div>
+  <AttachmentUploadModal
+    v-model:visible="uploadVisible"
+    @close="handleFetchAttachments"
+  />
 </template>

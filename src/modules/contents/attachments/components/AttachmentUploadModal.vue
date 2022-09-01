@@ -5,6 +5,7 @@ import { computed, ref, watchEffect } from "vue";
 import { apiClient } from "@halo-dev/admin-shared";
 import type { Policy } from "@halo-dev/api-client";
 import { useFetchAttachmentPolicy } from "../composables/use-attachment-policy";
+import AttachmentPoliciesModal from "./AttachmentPoliciesModal.vue";
 
 withDefaults(
   defineProps<{
@@ -20,8 +21,9 @@ const emit = defineEmits<{
   (event: "close"): void;
 }>();
 
-const { policies } = useFetchAttachmentPolicy();
+const { policies, handleFetchPolicies } = useFetchAttachmentPolicy();
 const selectedPolicy = ref<Policy | null>(null);
+const policyVisible = ref(false);
 const FilePondUploadRef = ref();
 
 watchEffect(() => {
@@ -34,6 +36,7 @@ const onVisibleChange = (visible: boolean) => {
   emit("update:visible", visible);
   if (!visible) {
     emit("close");
+    policyVisible.value = false;
     FilePondUploadRef.value.handleRemoveFiles();
   }
 };
@@ -58,7 +61,9 @@ const uploadHandler = computed(() => {
     <template #actions>
       <FloatingDropdown>
         <div v-tooltip="`选择存储策略`" class="modal-header-action">
-          <span class="text-sm">{{ selectedPolicy?.spec.displayName }}</span>
+          <span class="text-sm">
+            {{ selectedPolicy?.spec.displayName || "无存储策略" }}
+          </span>
         </div>
         <template #popper>
           <div class="w-72 p-4">
@@ -81,6 +86,13 @@ const uploadHandler = computed(() => {
                   {{ policy.spec.templateRef?.name }}
                 </span>
               </li>
+              <li
+                v-close-popper
+                class="flex cursor-pointer flex-col rounded px-2 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                @click="policyVisible = true"
+              >
+                <span class="truncate"> 新增存储策略 </span>
+              </li>
             </ul>
           </div>
         </template>
@@ -91,7 +103,16 @@ const uploadHandler = computed(() => {
         ref="FilePondUploadRef"
         :allow-multiple="true"
         :handler="uploadHandler"
+        :disabled="!selectedPolicy"
+        :label-idle="
+          selectedPolicy ? '点击选择文件或者拖拽文件到此处' : '请先选择存储策略'
+        "
       />
     </div>
   </VModal>
+
+  <AttachmentPoliciesModal
+    v-model:visible="policyVisible"
+    @close="handleFetchPolicies"
+  />
 </template>

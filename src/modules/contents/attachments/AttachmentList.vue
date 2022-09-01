@@ -17,7 +17,6 @@ import {
   VSpace,
   VTag,
   VEmpty,
-  IconAddCircle,
 } from "@halo-dev/components";
 import AttachmentDetailModal from "./components/AttachmentDetailModal.vue";
 import AttachmentUploadModal from "./components/AttachmentUploadModal.vue";
@@ -48,7 +47,7 @@ const viewTypes = [
 
 const viewType = ref("grid");
 
-const strategyVisible = ref(false);
+const policyVisible = ref(false);
 const uploadVisible = ref(false);
 const detailVisible = ref(false);
 const selectVisible = ref(false);
@@ -148,7 +147,7 @@ onMounted(handleFetchGroups);
     v-model:visible="uploadVisible"
     @close="handleFetchAttachments"
   />
-  <AttachmentPoliciesModal v-model:visible="strategyVisible" />
+  <AttachmentPoliciesModal v-model:visible="policyVisible" />
   <VPageHeader title="附件库">
     <template #icon>
       <IconPalette class="mr-2 self-center" />
@@ -156,7 +155,7 @@ onMounted(handleFetchGroups);
     <template #actions>
       <VSpace>
         <VButton size="sm" @click="selectVisible = true"> 选择附件</VButton>
-        <VButton size="sm" @click="strategyVisible = true">
+        <VButton size="sm" @click="policyVisible = true">
           <template #icon>
             <IconDatabase2Line class="h-full w-full" />
           </template>
@@ -405,15 +404,15 @@ onMounted(handleFetchGroups);
 
           <VEmpty
             v-if="!attachments.total && !loading"
-            message="当前没有已安装的插件，你可以尝试刷新或者安装新插件"
-            title="当前没有已安装的插件"
+            message="当前分组没有附件，你可以尝试刷新或者上传附件"
+            title="当前分组没有附件"
           >
             <template #actions>
               <VSpace>
                 <VButton @click="handleFetchAttachments">刷新</VButton>
                 <VButton type="secondary" @click="uploadVisible = true">
                   <template #icon>
-                    <IconAddCircle class="h-full w-full" />
+                    <IconUpload class="h-full w-full" />
                   </template>
                   上传附件
                 </VButton>

@@ -11,6 +11,7 @@ const props = withDefaults(
     maxFiles?: number | null;
     maxParallelUploads?: number;
     name?: string;
+    disabled?: boolean;
     handler: (
       // eslint-disable-next-line
       file: any,
@@ -24,6 +25,7 @@ const props = withDefaults(
     maxFiles: null,
     maxParallelUploads: 3,
     name: "file",
+    disabled: false,
   }
 );
 
@@ -76,5 +78,6 @@ defineExpose({
     :max-parallel-uploads="maxParallelUploads"
     :name="name"
     :server="server"
+    :disabled="disabled"
   ></FilePond>
 </template>

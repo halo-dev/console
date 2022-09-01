@@ -127,8 +127,8 @@ onMounted(async () => {
       class="flex cursor-pointer items-center rounded-base bg-gray-100 p-2 text-gray-500 transition-all hover:bg-gray-200 hover:text-gray-900 hover:shadow-sm"
       @click="handleSelectGroup(group)"
     >
-      <div class="flex flex-1 items-center">
-        <span class="text-sm">
+      <div class="flex flex-1 items-center truncate">
+        <span class="truncate text-sm">
           {{ group.spec.displayName }}（{{ index * 20 }}）
         </span>
       </div>

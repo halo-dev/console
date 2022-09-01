@@ -5,6 +5,7 @@ import {
   VButton,
   VModal,
   VSpace,
+  VEmpty,
 } from "@halo-dev/components";
 import AttachmentPolicyEditingModal from "./AttachmentPolicyEditingModal.vue";
 import { onMounted, ref } from "vue";
@@ -28,7 +29,7 @@ const emit = defineEmits<{
   (event: "close"): void;
 }>();
 
-const { policies, handleFetchPolicies } = useFetchAttachmentPolicy();
+const { policies, loading, handleFetchPolicies } = useFetchAttachmentPolicy();
 
 const selectedPolicy = ref<Policy | null>(null);
 const policyTemplates = ref<PolicyTemplate[]>([] as PolicyTemplate[]);
@@ -118,7 +119,47 @@ onMounted(() => {
         </template>
       </FloatingDropdown>
     </template>
-    <ul class="box-border h-full w-full divide-y divide-gray-100" role="list">
+    <VEmpty
+      v-if="!policies.length && !loading"
+      message="当前没有可用的存储策略，你可以尝试刷新或者新建策略"
+      title="当前没有可用的存储策略"
+    >
+      <template #actions>
+        <VSpace>
+          <VButton @click="handleFetchPolicies">刷新</VButton>
+          <FloatingDropdown>
+            <VButton type="secondary">
+              <template #icon>
+                <IconAddCircle class="h-full w-full" />
+              </template>
+              新建策略
+            </VButton>
+            <template #popper>
+              <div class="w-72 p-4">
+                <ul class="space-y-1">
+                  <li
+                    v-for="(policyTemplate, index) in policyTemplates"
+                    :key="index"
+                    v-close-popper
+                    class="flex cursor-pointer items-center rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                    @click="handleOpenCreateNewPolicyModal(policyTemplate)"
+                  >
+                    <span class="truncate">
+                      {{ policyTemplate.spec?.displayName }}
+                    </span>
+                  </li>
+                </ul>
+              </div>
+            </template>
+          </FloatingDropdown>
+        </VSpace>
+      </template>
+    </VEmpty>
+    <ul
+      v-else
+      class="box-border h-full w-full divide-y divide-gray-100"
+      role="list"
+    >
       <li v-for="(policy, index) in policies" :key="index">
         <div
           class="relative block cursor-pointer px-4 py-3 transition-all hover:bg-gray-50"
