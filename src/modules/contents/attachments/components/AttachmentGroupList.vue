@@ -156,8 +156,8 @@ onMounted(async () => {
       class="flex cursor-pointer items-center rounded-base bg-gray-100 p-2 text-gray-500 transition-all hover:bg-gray-200 hover:text-gray-900 hover:shadow-sm"
       @click="editingModal = true"
     >
-      <div class="flex flex-1 items-center">
-        <span class="text-sm">添加分组</span>
+      <div class="flex flex-1 items-center truncate">
+        <span class="truncate text-sm">添加分组</span>
       </div>
       <IconAddCircle />
     </div>
