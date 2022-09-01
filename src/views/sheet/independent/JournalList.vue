@@ -229,7 +229,7 @@ export default {
       },
       optionModal: {
         visible: false,
-        options: []
+        options: {}
       }
     }
   },
@@ -282,7 +282,7 @@ export default {
       }
     },
     handleListOptions() {
-      apiClient.option.list().then(response => {
+      apiClient.option.listAsMapViewByKeys(['journals_page_size', 'journals_title']).then(response => {
         this.optionModal.options = response.data
       })
     },
@@ -391,7 +391,7 @@ export default {
 
     handleSaveOptions() {
       apiClient.option
-        .save(this.optionModal.options)
+        .saveMapView(this.optionModal.options)
         .then(() => {
           this.$message.success('保存成功！')
           this.optionModal.visible = false

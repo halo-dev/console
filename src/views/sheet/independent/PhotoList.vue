@@ -225,7 +225,7 @@ export default {
       formVisible: false,
 
       teams: [],
-      options: [],
+      options: {},
       optionFormVisible: false
     }
   },
@@ -438,14 +438,14 @@ export default {
     },
 
     handleListOptions() {
-      apiClient.option.list().then(response => {
+      apiClient.option.listAsMapViewByKeys(['photos_page_size', 'photos_title']).then(response => {
         this.options = response.data
       })
     },
 
     handleSaveOptions() {
       apiClient.option
-        .save(this.options)
+        .saveMapView(this.options)
         .then(() => {
           this.$message.success('保存成功！')
           this.optionFormVisible = false

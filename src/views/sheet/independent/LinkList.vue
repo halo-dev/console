@@ -143,7 +143,7 @@ export default {
       },
       optionsModal: {
         visible: false,
-        data: []
+        data: {}
       },
       teams: [],
       linkTeam: []
@@ -265,7 +265,7 @@ export default {
       })
     },
     handleListOptions() {
-      apiClient.option.list().then(response => {
+      apiClient.option.listAsMapViewByKeys(['links_title']).then(response => {
         this.optionsModal.data = response.data
       })
     },
@@ -367,7 +367,7 @@ export default {
     },
     handleSaveOptions() {
       apiClient.option
-        .save(this.optionsModal.data)
+        .saveMapView(this.optionsModal.data)
         .then(() => {
           this.$message.success('保存成功！')
           this.optionsModal.visible = false
