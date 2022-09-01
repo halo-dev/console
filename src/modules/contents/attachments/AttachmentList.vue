@@ -30,6 +30,7 @@ import prettyBytes from "pretty-bytes";
 import { useFetchAttachmentPolicy } from "./composables/use-attachment-policy";
 import { useAttachmentControl } from "./composables/use-attachment";
 import AttachmentSelectorModal from "@/modules/contents/attachments/components/AttachmentSelectorModal.vue";
+import AttachmentFileTypeIcon from "./components/AttachmentFileTypeIcon.vue";
 import { apiClient } from "@halo-dev/admin-shared";
 import cloneDeep from "lodash.clonedeep";
 import { isImage } from "@/utils/image";
@@ -445,6 +446,10 @@ onMounted(handleFetchGroups);
                         :alt="attachment.spec.displayName"
                         :src="attachment.status?.permalink"
                         class="pointer-events-none object-cover group-hover:opacity-75"
+                      />
+                      <AttachmentFileTypeIcon
+                        v-else
+                        :file-name="attachment.spec.displayName"
                       />
                     </div>
                     <p

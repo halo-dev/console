@@ -47,6 +47,7 @@
     "floating-vue": "2.0.0-beta.19",
     "lodash.clonedeep": "^4.5.0",
     "lodash.isequal": "^4.5.0",
+    "path-browserify": "^1.0.1",
     "pinia": "^2.0.20",
     "pretty-bytes": "^6.0.0",
     "qs": "^6.11.0",
@@ -61,6 +62,7 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.24.3",
+    "@iconify-json/vscode-icons": "^1.1.11",
     "@rushstack/eslint-patch": "^1.1.4",
     "@tailwindcss/aspect-ratio": "^0.4.0",
     "@types/jsdom": "^20.0.0",
@@ -94,6 +96,7 @@
     "tailwindcss-safe-area": "^0.2.2",
     "tailwindcss-themer": "^2.0.1",
     "typescript": "~4.7.4",
+    "unplugin-icons": "^0.14.8",
     "vite": "^3.0.9",
     "vite-compression-plugin": "^0.0.4",
     "vite-plugin-externals": "^0.5.1",

@@ -12,10 +12,11 @@ importers:
       '@formkit/inputs': 1.0.0-beta.10
       '@formkit/themes': 1.0.0-beta.10
       '@formkit/vue': 1.0.0-beta.10
-      '@halo-dev/admin-shared': workspace:*
+      '@halo-dev/admin-shared': ^0.0.0-alpha.4
       '@halo-dev/api-client': ^0.0.12
       '@halo-dev/components': workspace:*
       '@halo-dev/richtext-editor': ^0.0.0-alpha.5
+      '@iconify-json/vscode-icons': ^1.1.11
       '@rushstack/eslint-patch': ^1.1.4
       '@tailwindcss/aspect-ratio': ^0.4.0
       '@tiptap/extension-character-count': 2.0.0-beta.31
@@ -51,6 +52,7 @@ importers:
       jsdom: ^20.0.0
       lodash.clonedeep: ^4.5.0
       lodash.isequal: ^4.5.0
+      path-browserify: ^1.0.1
       pinia: ^2.0.20
       postcss: ^8.4.16
       prettier: ^2.7.1
@@ -63,6 +65,7 @@ importers:
       tailwindcss-safe-area: ^0.2.2
       tailwindcss-themer: ^2.0.1
       typescript: ~4.7.4
+      unplugin-icons: ^0.14.8
       unsplash-js: ^7.0.15
       uuid: ^8.3.2
       vite: ^3.0.9
@@ -103,6 +106,7 @@ importers:
       floating-vue: 2.0.0-beta.19_vue@3.2.37
       lodash.clonedeep: 4.5.0
       lodash.isequal: 4.5.0
+      path-browserify: 1.0.1
       pinia: 2.0.20_j6bzmzd4ujpabbp5objtwxyjp4
       pretty-bytes: 6.0.0
       qs: 6.11.0
@@ -116,6 +120,7 @@ importers:
       yaml: 2.1.1
     devDependencies:
       '@changesets/cli': 2.24.3
+      '@iconify-json/vscode-icons': 1.1.11
       '@rushstack/eslint-patch': 1.1.4
       '@tailwindcss/aspect-ratio': 0.4.0_tailwindcss@3.1.8
       '@types/jsdom': 20.0.0
@@ -149,6 +154,7 @@ importers:
       tailwindcss-safe-area: 0.2.2
       tailwindcss-themer: 2.0.1_tailwindcss@3.1.8
       typescript: 4.7.4
+      unplugin-icons: 0.14.8_jz6tpbhhn2upnbiwxxr6wx7age
       vite: 3.0.9_sass@1.54.5
       vite-compression-plugin: 0.0.4
       vite-plugin-externals: 0.5.1_vite@3.0.9
@@ -2241,6 +2247,12 @@ packages:
 
   /@iconify-json/ri/1.1.3:
     resolution: {integrity: sha512-YQ45kQNpuHc2bso4fDGhooWou43qy7njD/I5l7vpjcujb+P/K2BfLASbWYTTUKu6lMersuFmO8F7NdGzy6eGWw==}
+    dependencies:
+      '@iconify/types': 1.1.0
+    dev: true
+
+  /@iconify-json/vscode-icons/1.1.11:
+    resolution: {integrity: sha512-2HducOcHAGEY5fD9NRilS4BeLTu72/JEjKy9/HsUzst9VlXT0TGH6qaU1m7X2bSFZHV+CGsisG1lq6M5XxzytQ==}
     dependencies:
       '@iconify/types': 1.1.0
     dev: true
@@ -7246,7 +7258,6 @@ packages:
 
   /path-browserify/1.0.1:
     resolution: {integrity: sha512-b7uo2UCUOYZcnF/3ID0lulOJi/bafxa1xPe7ZPsammBSpjSWQkjNxlt635YGS2MiR9GjvuXCtz2emr3jbsz98g==}
-    dev: true
 
   /path-exists/4.0.0:
     resolution: {integrity: sha512-ak9Qy5Q7jYb2Wwcey5Fpvg2KoAc/ZIhLSLOSBmRmygPsGwkVVt0fZa0qrtMz+m6tJTAHfZQ8FnmB4MG4LWy7/w==}
@@ -8726,6 +8737,39 @@ packages:
       - webpack
     dev: true
 
+  /unplugin-icons/0.14.8_jz6tpbhhn2upnbiwxxr6wx7age:
+    resolution: {integrity: sha512-YxLC0Uxec+ayl8ju3CXmRX4Jg7IF8Tu2cRyq/okXwMK6fM140SPae332ByTlul1E/I7I0PXYSVVn8SlGunM/2g==}
+    peerDependencies:
+      '@svgr/core': '>=5.5.0'
+      '@vue/compiler-sfc': ^3.0.2
+      vue-template-compiler: ^2.6.12
+      vue-template-es2015-compiler: ^1.9.0
+    peerDependenciesMeta:
+      '@svgr/core':
+        optional: true
+      '@vue/compiler-sfc':
+        optional: true
+      vue-template-compiler:
+        optional: true
+      vue-template-es2015-compiler:
+        optional: true
+    dependencies:
+      '@antfu/install-pkg': 0.1.0
+      '@antfu/utils': 0.5.2
+      '@iconify/utils': 1.0.33
+      '@vue/compiler-sfc': 3.2.37
+      debug: 4.3.4
+      kolorist: 1.5.1
+      local-pkg: 0.4.2
+      unplugin: 0.8.0_vite@3.0.9
+    transitivePeerDependencies:
+      - esbuild
+      - rollup
+      - supports-color
+      - vite
+      - webpack
+    dev: true
+
   /unplugin/0.8.0:
     resolution: {integrity: sha512-OzOkJ9XOPlD1Cph6qy/p4i/KSUbs76GToXjH/STHpfo6D7y+EqpfAL6G6HaoOw5QLkt9+KWwcxYUmPFkDf1upQ==}
     peerDependencies:
@@ -8745,6 +8789,30 @@ packages:
     dependencies:
       acorn: 8.8.0
       chokidar: 3.5.3
+      webpack-sources: 3.2.3
+      webpack-virtual-modules: 0.4.4
+    dev: true
+
+  /unplugin/0.8.0_vite@3.0.9:
+    resolution: {integrity: sha512-OzOkJ9XOPlD1Cph6qy/p4i/KSUbs76GToXjH/STHpfo6D7y+EqpfAL6G6HaoOw5QLkt9+KWwcxYUmPFkDf1upQ==}
+    peerDependencies:
+      esbuild: '>=0.13'
+      rollup: ^2.50.0
+      vite: ^2.3.0 || ^3.0.0-0
+      webpack: 4 || 5
+    peerDependenciesMeta:
+      esbuild:
+        optional: true
+      rollup:
+        optional: true
+      vite:
+        optional: true
+      webpack:
+        optional: true
+    dependencies:
+      acorn: 8.8.0
+      chokidar: 3.5.3
+      vite: 3.0.9_sass@1.54.5
       webpack-sources: 3.2.3
       webpack-virtual-modules: 0.4.4
     dev: true

@@ -10,8 +10,9 @@ import {
 import { onMounted, watchEffect, ref } from "vue";
 import { isImage } from "@/utils/image";
 import { useAttachmentControl } from "../../composables/use-attachment";
-import type { AttachmentLike } from "./types";
+import type { AttachmentLike } from "@halo-dev/admin-shared";
 import AttachmentUploadModal from "../AttachmentUploadModal.vue";
+import AttachmentFileTypeIcon from "../AttachmentFileTypeIcon.vue";
 
 withDefaults(
   defineProps<{
@@ -85,6 +86,10 @@ onMounted(handleFetchAttachments);
             :alt="attachment.spec.displayName"
             class="pointer-events-none object-cover group-hover:opacity-75"
             :src="attachment.status?.permalink"
+          />
+          <AttachmentFileTypeIcon
+            v-else
+            :file-name="attachment.spec.displayName"
           />
         </div>
         <p
