@@ -168,8 +168,7 @@ const viewTypes = [
 const viewType = useRouteQuery<string>("view", "grid");
 </script>
 <template>
-  <AttachmentSelectorModal v-model:visible="selectVisible">
-  </AttachmentSelectorModal>
+  <AttachmentSelectorModal v-model:visible="selectVisible" />
   <AttachmentDetailModal
     v-model:visible="detailVisible"
     :attachment="selectedAttachment"
@@ -541,8 +540,10 @@ const viewType = useRouteQuery<string>("view", "grid");
                         :file-name="attachment.spec.displayName"
                       />
                     </div>
+                    
                     <p
-                      class="pointer-events-none block truncate px-2 py-1 text-center text-xs font-medium text-gray-700"
+                      v-tooltip="attachment.spec.displayName"
+                      class="block cursor-pointer truncate px-2 py-1 text-center text-xs font-medium text-gray-700"
                     >
                       {{ attachment.spec.displayName }}
                     </p>
@@ -557,7 +558,7 @@ const viewType = useRouteQuery<string>("view", "grid");
                     <div
                       v-if="!attachment.metadata.deletionTimestamp"
                       :class="{ '!flex': selectedAttachments.has(attachment) }"
-                      class="absolute top-0 left-0 hidden h-1/3 w-full justify-end bg-gradient-to-b from-gray-300 to-transparent ease-in-out group-hover:flex"
+                      class="absolute top-0 left-0 hidden h-1/3 w-full cursor-pointer justify-end bg-gradient-to-b from-gray-300 to-transparent ease-in-out group-hover:flex"
                     >
                       <IconCheckboxFill
                         :class="{

@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { VButton, VModal, VSpace, VTag } from "@halo-dev/components";
-import type { Attachment, Policy } from "@halo-dev/api-client";
+import type { Attachment, Group, Policy } from "@halo-dev/api-client";
 import prettyBytes from "pretty-bytes";
-import { ref, watchEffect } from "vue";
+import { ref, watch, watchEffect } from "vue";
 import { apiClient } from "@halo-dev/admin-shared";
 import { isImage } from "@/utils/image";
 import { formatDatetime } from "@/utils/date";
@@ -25,6 +25,7 @@ const emit = defineEmits<{
   (event: "close"): void;
 }>();
 
+const groups = ref<Group[]>([] as Group[]);
 const policy = ref<Policy>();
 const onlyPreview = ref(false);
 
@@ -41,6 +42,30 @@ watchEffect(async () => {
     policy.value = data;
   }
 });
+
+const handleFetchGroups = async () => {
+  try {
+    const { data } =
+      await apiClient.extension.storage.group.liststorageHaloRunV1alpha1Group();
+    groups.value = data.items;
+  } catch (e) {
+    console.error("Failed to fetch attachment groups", e);
+  }
+};
+
+watch(
+  () => props.visible,
+  (newValue) => {
+    if (newValue) {
+      handleFetchGroups();
+    }
+  }
+);
+
+const getGroupName = (name: string | undefined) => {
+  const group = groups.value.find((group) => group.metadata.name === name);
+  return group?.spec.displayName || name;
+};
 
 const onVisibleChange = (visible: boolean) => {
   emit("update:visible", visible);
@@ -100,7 +125,7 @@ const onVisibleChange = (visible: boolean) => {
         <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
           <dt class="text-sm font-medium text-gray-900">所在分组</dt>
           <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-            {{ attachment?.spec.groupRef?.name || "未分组" }}
+            {{ getGroupName(attachment?.spec.groupRef?.name) || "未分组" }}
           </dd>
         </div>
         <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
