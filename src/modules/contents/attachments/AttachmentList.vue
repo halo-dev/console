@@ -105,6 +105,10 @@ const handleMove = async (group: Group) => {
 };
 
 const handleClickItem = (attachment: Attachment) => {
+  if (attachment.metadata.deletionTimestamp) {
+    return;
+  }
+
   if (selectedAttachments.value.size > 0) {
     handleSelect(attachment);
     return;
@@ -434,6 +438,8 @@ onMounted(handleFetchGroups);
                   :body-class="['!p-0']"
                   :class="{
                     'ring-1 ring-primary': isChecked(attachment),
+                    'ring-1 ring-red-600':
+                      attachment.metadata.deletionTimestamp,
                   }"
                   class="hover:shadow"
                   @click="handleClickItem(attachment)"
@@ -460,6 +466,14 @@ onMounted(handleFetchGroups);
                     </p>
 
                     <div
+                      v-if="attachment.metadata.deletionTimestamp"
+                      class="absolute top-1 right-1 text-xs text-red-300"
+                    >
+                      删除中...
+                    </div>
+
+                    <div
+                      v-if="!attachment.metadata.deletionTimestamp"
                       :class="{ '!flex': selectedAttachments.has(attachment) }"
                       class="absolute top-0 left-0 hidden h-1/3 w-full justify-end bg-gradient-to-b from-gray-300 to-transparent ease-in-out group-hover:flex"
                     >
@@ -529,6 +543,19 @@ onMounted(handleFetchGroups);
                           class="hidden h-6 w-6 rounded-full ring-2 ring-white sm:inline-block"
                           src="https://ryanc.cc/avatar"
                         />
+                        <FloatingTooltip
+                          v-if="attachment.metadata.deletionTimestamp"
+                          class="hidden items-center sm:flex"
+                        >
+                          <div
+                            class="inline-flex h-1.5 w-1.5 rounded-full bg-red-600"
+                          >
+                            <span
+                              class="inline-block h-1.5 w-1.5 animate-ping rounded-full bg-red-600"
+                            ></span>
+                          </div>
+                          <template #popper> 删除中</template>
+                        </FloatingTooltip>
                         <time class="text-sm text-gray-500">
                           {{
                             formatDatetime(
