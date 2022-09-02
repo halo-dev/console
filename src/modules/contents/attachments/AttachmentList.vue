@@ -146,6 +146,7 @@ onMounted(handleFetchGroups);
   </AttachmentDetailModal>
   <AttachmentUploadModal
     v-model:visible="uploadVisible"
+    :group="selectedGroup"
     @close="handleFetchAttachments"
   />
   <AttachmentPoliciesModal v-model:visible="policyVisible" />

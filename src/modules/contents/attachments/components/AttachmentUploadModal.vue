@@ -3,16 +3,18 @@ import { VModal } from "@halo-dev/components";
 import FilePondUpload from "@/components/upload/FilePondUpload.vue";
 import { computed, ref, watch, watchEffect } from "vue";
 import { apiClient } from "@halo-dev/admin-shared";
-import type { Policy } from "@halo-dev/api-client";
+import type { Policy, Group } from "@halo-dev/api-client";
 import { useFetchAttachmentPolicy } from "../composables/use-attachment-policy";
 import AttachmentPoliciesModal from "./AttachmentPoliciesModal.vue";
 
 const props = withDefaults(
   defineProps<{
     visible: boolean;
+    group?: Group;
   }>(),
   {
     visible: false,
+    group: undefined,
   }
 );
 
@@ -22,9 +24,17 @@ const emit = defineEmits<{
 }>();
 
 const { policies, handleFetchPolicies } = useFetchAttachmentPolicy();
+
 const selectedPolicy = ref<Policy | null>(null);
 const policyVisible = ref(false);
 const FilePondUploadRef = ref();
+
+const modalTitle = computed(() => {
+  if (props.group && props.group.metadata.name) {
+    return `上传附件：${props.group.spec.displayName}`;
+  }
+  return "上传附件";
+});
 
 watchEffect(() => {
   if (policies.value.length) {
@@ -46,6 +56,7 @@ const uploadHandler = computed(() => {
     apiClient.extension.storage.attachment.uploadAttachment(
       file,
       selectedPolicy.value?.metadata.name as string,
+      props.group?.metadata.name as string,
       config
     );
 });
@@ -64,7 +75,7 @@ watch(
     :body-class="['!p-0']"
     :visible="visible"
     :width="600"
-    title="上传附件"
+    :title="modalTitle"
     @update:visible="onVisibleChange"
   >
     <template #actions>
