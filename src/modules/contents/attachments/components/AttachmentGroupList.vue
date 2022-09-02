@@ -24,6 +24,7 @@ withDefaults(
 const emit = defineEmits<{
   (event: "update:selectedGroup", group: Group): void;
   (event: "select", group: Group): void;
+  (event: "update"): void;
 }>();
 
 const defaultGroups: Group[] = [
@@ -80,6 +81,11 @@ const handleOpenEditingModal = (group: Group) => {
   editingModal.value = true;
 };
 
+const onEditingModalClose = () => {
+  emit("update");
+  handleFetchGroups();
+};
+
 onMounted(async () => {
   await handleFetchGroups();
 
@@ -100,7 +106,7 @@ onMounted(async () => {
   <AttachmentGroupEditingModal
     v-model:visible="editingModal"
     :group="groupToUpdate"
-    @close="handleFetchGroups"
+    @close="onEditingModalClose"
   />
   <div class="mb-5 grid grid-cols-2 gap-x-2 gap-y-3 sm:grid-cols-6">
     <div
@@ -129,7 +135,7 @@ onMounted(async () => {
     >
       <div class="flex flex-1 items-center truncate">
         <span class="truncate text-sm">
-          {{ group.spec.displayName }}（{{ index * 20 }}）
+          {{ group.spec.displayName }}
         </span>
       </div>
       <FloatingDropdown>

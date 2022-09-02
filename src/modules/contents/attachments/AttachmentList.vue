@@ -34,19 +34,7 @@ import AttachmentFileTypeIcon from "./components/AttachmentFileTypeIcon.vue";
 import { apiClient } from "@halo-dev/admin-shared";
 import cloneDeep from "lodash.clonedeep";
 import { isImage } from "@/utils/image";
-
-const viewTypes = [
-  {
-    name: "list",
-    icon: IconList,
-  },
-  {
-    name: "grid",
-    icon: IconGrid,
-  },
-];
-
-const viewType = ref("grid");
+import { useRouteQuery } from "@vueuse/router";
 
 const policyVisible = ref(false);
 const uploadVisible = ref(false);
@@ -55,6 +43,9 @@ const selectVisible = ref(false);
 
 const { users } = useUserFetch();
 const { policies } = useFetchAttachmentPolicy({ fetchOnMounted: true });
+
+const groups = ref<Group[]>([] as Group[]);
+const selectedGroup = ref<Group>();
 
 const {
   attachments,
@@ -70,10 +61,8 @@ const {
   handleCheckAll,
   handleSelect,
   isChecked,
-} = useAttachmentControl();
-
-const groups = ref<Group[]>([] as Group[]);
-const selectedGroup = ref<Group>();
+  handleReset,
+} = useAttachmentControl({ group: selectedGroup });
 
 const handleFetchGroups = async () => {
   try {
@@ -99,8 +88,11 @@ const handleMove = async (group: Group) => {
     });
 
     await Promise.all(promises);
+    selectedAttachments.value.clear();
   } catch (e) {
     console.error(e);
+  } finally {
+    handleFetchAttachments();
   }
 };
 
@@ -129,7 +121,26 @@ const onDetailModalClose = () => {
   handleFetchAttachments();
 };
 
+const onGroupChange = () => {
+  handleReset();
+  handleFetchAttachments();
+};
+
 onMounted(handleFetchGroups);
+
+// View type
+const viewTypes = [
+  {
+    name: "list",
+    icon: IconList,
+  },
+  {
+    name: "grid",
+    icon: IconGrid,
+  },
+];
+
+const viewType = useRouteQuery<string>("view", "grid");
 </script>
 <template>
   <AttachmentSelectorModal v-model:visible="selectVisible">
@@ -404,7 +415,8 @@ onMounted(handleFetchGroups);
           <div :style="`${viewType === 'list' ? 'padding:12px 16px 0' : ''}`">
             <AttachmentGroupList
               v-model:selected-group="selectedGroup"
-              @select="handleFetchAttachments"
+              @select="onGroupChange"
+              @update="handleFetchGroups"
             />
           </div>
 
@@ -539,10 +551,16 @@ onMounted(handleFetchGroups);
                       <div
                         class="inline-flex flex-col items-end gap-4 sm:flex-row sm:items-center sm:gap-6"
                       >
-                        <img
-                          class="hidden h-6 w-6 rounded-full ring-2 ring-white sm:inline-block"
-                          src="https://ryanc.cc/avatar"
-                        />
+                        <RouterLink
+                          :to="{
+                            name: 'UserDetail',
+                            params: { name: attachment.spec.uploadedBy?.name },
+                          }"
+                        >
+                          <time class="text-sm text-gray-500">
+                            {{ attachment.spec.uploadedBy?.name }}
+                          </time>
+                        </RouterLink>
                         <FloatingTooltip
                           v-if="attachment.metadata.deletionTimestamp"
                           class="hidden items-center sm:flex"

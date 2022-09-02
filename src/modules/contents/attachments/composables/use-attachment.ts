@@ -1,4 +1,9 @@
-import type { Attachment, AttachmentList } from "@halo-dev/api-client";
+import type {
+  Attachment,
+  AttachmentList,
+  Group,
+  Policy,
+} from "@halo-dev/api-client";
 import type { Ref } from "vue";
 import { ref, watch } from "vue";
 import { apiClient } from "@halo-dev/admin-shared";
@@ -27,7 +32,12 @@ interface useAttachmentControlReturn {
   handleReset: () => void;
 }
 
-export function useAttachmentControl(): useAttachmentControlReturn {
+export function useAttachmentControl(filterOptions?: {
+  policy?: Ref<Policy | undefined>;
+  group?: Ref<Group | undefined>;
+}): useAttachmentControlReturn {
+  const { policy, group } = filterOptions || {};
+
   const attachments = ref<AttachmentList>({
     page: 1,
     size: 60,
@@ -50,9 +60,15 @@ export function useAttachmentControl(): useAttachmentControlReturn {
     try {
       loading.value = true;
       const { data } =
-        await apiClient.extension.storage.attachment.liststorageHaloRunV1alpha1Attachment(
+        await apiClient.extension.storage.attachment.searchAttachments(
+          policy?.value?.metadata.name,
+          undefined,
+          group?.value?.metadata.name,
+          undefined,
+          attachments.value.size,
           attachments.value.page,
-          attachments.value.size
+          [],
+          []
         );
       attachments.value = data;
     } catch (e) {
