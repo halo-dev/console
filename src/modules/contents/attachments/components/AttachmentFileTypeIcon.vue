@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import VscodeIconsDefaultFile from "~icons/vscode-icons/default-file";
+import VscodeIconsFileTypeImage from "~icons/vscode-icons/file-type-image";
 import VscodeIconsFileTypePhotoshop from "~icons/vscode-icons/file-type-photoshop";
 import VscodeIconsFileTypeAi from "~icons/vscode-icons/file-type-ai";
 import VscodeIconsFileTypeWord from "~icons/vscode-icons/file-type-word";
@@ -32,6 +33,13 @@ import { extname } from "path-browserify";
 import { computed, markRaw } from "vue";
 
 const FileTypeIconsMap = {
+  // image
+  ".jpg": markRaw(VscodeIconsFileTypeImage),
+  ".png": markRaw(VscodeIconsFileTypeImage),
+  ".gif": markRaw(VscodeIconsFileTypeImage),
+  ".webp": markRaw(VscodeIconsFileTypeImage),
+  ".svg": markRaw(VscodeIconsFileTypeImage),
+
   // documnet
   ".docx": markRaw(VscodeIconsFileTypeWord),
   ".pptx": markRaw(VscodeIconsFileTypePowerpoint),
@@ -68,9 +76,15 @@ const FileTypeIconsMap = {
 const props = withDefaults(
   defineProps<{
     fileName: string | undefined;
+    displayExt?: boolean;
+    width?: number;
+    height?: number;
   }>(),
   {
     fileName: undefined,
+    displayExt: true,
+    width: 10,
+    height: 10,
   }
 );
 
@@ -85,11 +99,18 @@ const getIcon = computed(() => {
   if (icon) return icon;
   return markRaw(VscodeIconsDefaultFile);
 });
+
+const iconClass = computed(() => {
+  return [`w-${props.width}`, `h-${props.height}`];
+});
 </script>
 <template>
   <div class="flex h-full w-full flex-col items-center justify-center gap-1">
-    <component :is="getIcon" class="h-10 w-10" />
-    <span v-if="getExtname" class="font-sans text-xs text-gray-500">
+    <component :is="getIcon" :class="iconClass" />
+    <span
+      v-if="getExtname && displayExt"
+      class="font-sans text-xs text-gray-500"
+    >
       {{ getExtname }}
     </span>
   </div>

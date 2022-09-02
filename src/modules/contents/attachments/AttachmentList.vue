@@ -597,6 +597,18 @@ const viewType = useRouteQuery<string>("view", "grid");
                         @click="handleSelect(attachment)"
                       />
                     </div>
+                    <div class="mr-4">
+                      <div
+                        class="h-12 w-12 rounded border bg-white p-1 hover:shadow-sm"
+                      >
+                        <AttachmentFileTypeIcon
+                          :display-ext="false"
+                          :file-name="attachment.spec.displayName"
+                          :width="8"
+                          :height="8"
+                        />
+                      </div>
+                    </div>
                     <div class="flex-1">
                       <div class="flex flex-col sm:flex-row">
                         <span
