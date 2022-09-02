@@ -1,13 +1,13 @@
 <script lang="ts" setup>
 import { VModal } from "@halo-dev/components";
 import FilePondUpload from "@/components/upload/FilePondUpload.vue";
-import { computed, ref, watchEffect } from "vue";
+import { computed, ref, watch, watchEffect } from "vue";
 import { apiClient } from "@halo-dev/admin-shared";
 import type { Policy } from "@halo-dev/api-client";
 import { useFetchAttachmentPolicy } from "../composables/use-attachment-policy";
 import AttachmentPoliciesModal from "./AttachmentPoliciesModal.vue";
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     visible: boolean;
   }>(),
@@ -49,6 +49,15 @@ const uploadHandler = computed(() => {
       config
     );
 });
+
+watch(
+  () => props.visible,
+  (newValue) => {
+    if (newValue) {
+      handleFetchPolicies();
+    }
+  }
+);
 </script>
 <template>
   <VModal

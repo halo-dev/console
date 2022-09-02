@@ -8,14 +8,14 @@ import {
   VEmpty,
 } from "@halo-dev/components";
 import AttachmentPolicyEditingModal from "./AttachmentPolicyEditingModal.vue";
-import { onMounted, ref } from "vue";
+import { ref, watch } from "vue";
 import type { Policy, PolicyTemplate } from "@halo-dev/api-client";
 import { apiClient } from "@halo-dev/admin-shared";
 import { v4 as uuid } from "uuid";
 import { formatDatetime } from "@/utils/date";
 import { useFetchAttachmentPolicy } from "../composables/use-attachment-policy";
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     visible: boolean;
   }>(),
@@ -83,9 +83,15 @@ const onEditingModalClose = () => {
   handleFetchPolicies();
 };
 
-onMounted(() => {
-  handleFetchPolicyTemplates();
-});
+watch(
+  () => props.visible,
+  (newValue) => {
+    if (newValue) {
+      handleFetchPolicyTemplates();
+      handleFetchPolicies();
+    }
+  }
+);
 </script>
 <template>
   <VModal

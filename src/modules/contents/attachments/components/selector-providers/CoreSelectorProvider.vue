@@ -7,7 +7,7 @@ import {
   VButton,
   IconUpload,
 } from "@halo-dev/components";
-import { onMounted, watchEffect, ref } from "vue";
+import { watchEffect, ref } from "vue";
 import { isImage } from "@/utils/image";
 import { useAttachmentControl } from "../../composables/use-attachment";
 import type { AttachmentLike } from "@halo-dev/admin-shared";
@@ -42,7 +42,7 @@ watchEffect(() => {
   emit("update:selected", Array.from(selectedAttachments.value));
 });
 
-onMounted(handleFetchAttachments);
+await handleFetchAttachments();
 </script>
 <template>
   <VEmpty

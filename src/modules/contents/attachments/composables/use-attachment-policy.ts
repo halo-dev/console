@@ -9,7 +9,11 @@ interface useFetchAttachmentPolicyReturn {
   handleFetchPolicies: () => void;
 }
 
-export function useFetchAttachmentPolicy(): useFetchAttachmentPolicyReturn {
+export function useFetchAttachmentPolicy(options?: {
+  fetchOnMounted: boolean;
+}): useFetchAttachmentPolicyReturn {
+  const { fetchOnMounted } = options || {};
+
   const policies = ref<Policy[]>([] as Policy[]);
   const loading = ref<boolean>(false);
 
@@ -26,7 +30,9 @@ export function useFetchAttachmentPolicy(): useFetchAttachmentPolicyReturn {
     }
   };
 
-  onMounted(handleFetchPolicies);
+  onMounted(() => {
+    fetchOnMounted && handleFetchPolicies();
+  });
 
   return {
     policies,

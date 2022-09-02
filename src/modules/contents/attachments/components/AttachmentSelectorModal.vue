@@ -67,16 +67,19 @@ const handleConfirm = () => {
       type="outline"
     ></VTabbar>
 
-    <div class="mt-2">
+    <div v-if="visible" class="mt-2">
       <template
         v-for="(provider, index) in attachmentSelectorPublicState.providers"
         :key="index"
       >
-        <component
-          :is="provider.component"
-          v-if="activeId === provider.id"
-          v-model:selected="selected"
-        ></component>
+        <Suspense>
+          <component
+            :is="provider.component"
+            v-if="activeId === provider.id"
+            v-model:selected="selected"
+          ></component>
+          <template #fallback> 加载中 </template>
+        </Suspense>
       </template>
     </div>
     <template #footer>

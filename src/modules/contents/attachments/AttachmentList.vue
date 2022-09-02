@@ -54,7 +54,7 @@ const detailVisible = ref(false);
 const selectVisible = ref(false);
 
 const { users } = useUserFetch();
-const { policies } = useFetchAttachmentPolicy();
+const { policies } = useFetchAttachmentPolicy({ fetchOnMounted: true });
 
 const {
   attachments,
