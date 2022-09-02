@@ -3,6 +3,7 @@ import type {
   AttachmentList,
   Group,
   Policy,
+  User,
 } from "@halo-dev/api-client";
 import type { Ref } from "vue";
 import { ref, watch } from "vue";
@@ -35,8 +36,10 @@ interface useAttachmentControlReturn {
 export function useAttachmentControl(filterOptions?: {
   policy?: Ref<Policy | undefined>;
   group?: Ref<Group | undefined>;
+  user?: Ref<User | undefined>;
+  keyword?: Ref<string | undefined>;
 }): useAttachmentControlReturn {
-  const { policy, group } = filterOptions || {};
+  const { user, policy, group, keyword } = filterOptions || {};
 
   const attachments = ref<AttachmentList>({
     page: 1,
@@ -62,9 +65,9 @@ export function useAttachmentControl(filterOptions?: {
       const { data } =
         await apiClient.extension.storage.attachment.searchAttachments(
           policy?.value?.metadata.name,
-          undefined,
+          keyword?.value,
           group?.value?.metadata.name,
-          undefined,
+          user?.value?.metadata.name,
           attachments.value.size,
           attachments.value.page,
           [],

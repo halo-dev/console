@@ -15,8 +15,8 @@ import {
   VPageHeader,
   VPagination,
   VSpace,
-  VTag,
   VEmpty,
+  IconCloseCircle,
 } from "@halo-dev/components";
 import AttachmentDetailModal from "./components/AttachmentDetailModal.vue";
 import AttachmentUploadModal from "./components/AttachmentUploadModal.vue";
@@ -24,7 +24,7 @@ import AttachmentPoliciesModal from "./components/AttachmentPoliciesModal.vue";
 import AttachmentGroupList from "./components/AttachmentGroupList.vue";
 import { onMounted, ref } from "vue";
 import { useUserFetch } from "@/modules/system/users/composables/use-user";
-import type { Attachment, Group } from "@halo-dev/api-client";
+import type { Attachment, Group, Policy, User } from "@halo-dev/api-client";
 import { formatDatetime } from "@/utils/date";
 import prettyBytes from "pretty-bytes";
 import { useFetchAttachmentPolicy } from "./composables/use-attachment-policy";
@@ -47,6 +47,21 @@ const { policies } = useFetchAttachmentPolicy({ fetchOnMounted: true });
 const groups = ref<Group[]>([] as Group[]);
 const selectedGroup = ref<Group>();
 
+// Filter
+const selectedPolicy = ref<Policy>();
+const selectedUser = ref<User>();
+const keyword = ref<string>("");
+
+function handleSelectPolicy(policy: Policy | undefined) {
+  selectedPolicy.value = policy;
+  handleFetchAttachments();
+}
+
+function handleSelectUser(user: User | undefined) {
+  selectedUser.value = user;
+  handleFetchAttachments();
+}
+
 const {
   attachments,
   selectedAttachment,
@@ -62,7 +77,12 @@ const {
   handleSelect,
   isChecked,
   handleReset,
-} = useAttachmentControl({ group: selectedGroup });
+} = useAttachmentControl({
+  group: selectedGroup,
+  policy: selectedPolicy,
+  user: selectedUser,
+  keyword: keyword,
+});
 
 const handleFetchGroups = async () => {
   try {
@@ -124,6 +144,11 @@ const onDetailModalClose = () => {
 const onGroupChange = () => {
   handleReset();
   handleFetchAttachments();
+};
+
+const getPolicyName = (name: string | undefined) => {
+  const policy = policies.value.find((p) => p.metadata.name === name);
+  return policy?.spec.displayName;
 };
 
 onMounted(handleFetchGroups);
@@ -205,12 +230,48 @@ const viewType = useRouteQuery<string>("view", "grid");
                     @change="handleCheckAllChange"
                   />
                 </div>
-                <div class="flex w-full flex-1 sm:w-auto">
-                  <FormKit
+                <div class="flex w-full flex-1 items-center sm:w-auto">
+                  <div
                     v-if="!selectedAttachments.size"
-                    placeholder="输入关键词搜索"
-                    type="text"
-                  ></FormKit>
+                    class="flex items-center gap-2"
+                  >
+                    <FormKit
+                      v-model="keyword"
+                      placeholder="输入关键词搜索"
+                      type="text"
+                      @keyup.enter="handleFetchAttachments()"
+                    ></FormKit>
+
+                    <div
+                      v-if="selectedPolicy"
+                      class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                    >
+                      <span
+                        class="text-xs text-gray-600 group-hover:text-gray-900"
+                      >
+                        存储策略：{{ selectedPolicy?.spec.displayName }}
+                      </span>
+                      <IconCloseCircle
+                        class="h-4 w-4 text-gray-600"
+                        @click="handleSelectPolicy(undefined)"
+                      />
+                    </div>
+
+                    <div
+                      v-if="selectedUser"
+                      class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                    >
+                      <span
+                        class="text-xs text-gray-600 group-hover:text-gray-900"
+                      >
+                        上传者：{{ selectedUser?.spec.displayName }}
+                      </span>
+                      <IconCloseCircle
+                        class="h-4 w-4 text-gray-600"
+                        @click="handleSelectUser(undefined)"
+                      />
+                    </div>
+                  </div>
                   <VSpace v-else>
                     <VButton type="danger" @click="handleDeleteInBatch">
                       删除
@@ -258,7 +319,13 @@ const viewType = useRouteQuery<string>("view", "grid");
                               v-for="(policy, index) in policies"
                               :key="index"
                               v-close-popper
+                              :class="{
+                                'bg-gray-100':
+                                  selectedPolicy?.metadata.name ===
+                                  policy.metadata.name,
+                              }"
                               class="flex cursor-pointer items-center rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                              @click="handleSelectPolicy(policy)"
                             >
                               <span class="truncate">
                                 {{ policy.spec.displayName }}
@@ -293,6 +360,12 @@ const viewType = useRouteQuery<string>("view", "grid");
                                 :key="index"
                                 v-close-popper
                                 class="cursor-pointer hover:bg-gray-50"
+                                :class="{
+                                  'bg-gray-100':
+                                    selectedUser?.metadata.name ===
+                                    user.metadata.name,
+                                }"
+                                @click="handleSelectUser(user)"
                               >
                                 <div
                                   class="flex items-center space-x-4 px-4 py-3"
@@ -313,9 +386,6 @@ const viewType = useRouteQuery<string>("view", "grid");
                                     <p class="truncate text-sm text-gray-500">
                                       @{{ user.metadata.name }}
                                     </p>
-                                  </div>
-                                  <div>
-                                    <VTag>{{ index + 1 }} 个</VTag>
                                   </div>
                                 </div>
                               </li>
@@ -551,15 +621,18 @@ const viewType = useRouteQuery<string>("view", "grid");
                       <div
                         class="inline-flex flex-col items-end gap-4 sm:flex-row sm:items-center sm:gap-6"
                       >
+                        <span class="text-sm text-gray-500">
+                          {{ getPolicyName(attachment.spec.policyRef?.name) }}
+                        </span>
                         <RouterLink
                           :to="{
                             name: 'UserDetail',
                             params: { name: attachment.spec.uploadedBy?.name },
                           }"
                         >
-                          <time class="text-sm text-gray-500">
+                          <span class="text-sm text-gray-500">
                             {{ attachment.spec.uploadedBy?.name }}
-                          </time>
+                          </span>
                         </RouterLink>
                         <FloatingTooltip
                           v-if="attachment.metadata.deletionTimestamp"
