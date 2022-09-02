@@ -16,10 +16,11 @@ import { watchEffect, ref } from "vue";
 import { isImage } from "@/utils/image";
 import { useAttachmentControl } from "../../composables/use-attachment";
 import type { AttachmentLike } from "@halo-dev/admin-shared";
-import type { Attachment } from "@halo-dev/api-client";
+import type { Attachment, Group } from "@halo-dev/api-client";
 import AttachmentUploadModal from "../AttachmentUploadModal.vue";
 import AttachmentFileTypeIcon from "../AttachmentFileTypeIcon.vue";
 import AttachmentDetailModal from "../AttachmentDetailModal.vue";
+import AttachmentGroupList from "../AttachmentGroupList.vue";
 
 withDefaults(
   defineProps<{
@@ -34,6 +35,8 @@ const emit = defineEmits<{
   (event: "update:selected", attachments: AttachmentLike[]): void;
 }>();
 
+const selectedGroup = ref<Group>();
+
 const {
   attachments,
   loading,
@@ -44,8 +47,9 @@ const {
   handleSelect,
   handleSelectPrevious,
   handleSelectNext,
+  handleReset,
   isChecked,
-} = useAttachmentControl();
+} = useAttachmentControl({ group: selectedGroup });
 
 const uploadVisible = ref(false);
 const detailVisible = ref(false);
@@ -59,9 +63,19 @@ const handleOpenDetail = (attachment: Attachment) => {
   detailVisible.value = true;
 };
 
+const onGroupChange = () => {
+  handleReset();
+  handleFetchAttachments();
+};
+
 await handleFetchAttachments();
 </script>
 <template>
+  <AttachmentGroupList
+    v-model:selected-group="selectedGroup"
+    readonly
+    @select="onGroupChange"
+  />
   <VEmpty
     v-if="!attachments.total && !loading"
     message="当前没有附件，你可以尝试刷新或者上传附件"

@@ -12,12 +12,14 @@ import type { Group } from "@halo-dev/api-client";
 
 import { useRouteQuery } from "@vueuse/router";
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     selectedGroup: Group | undefined;
+    readonly?: boolean;
   }>(),
   {
     selectedGroup: undefined,
+    readonly: false,
   }
 );
 
@@ -73,7 +75,10 @@ const handleFetchGroups = async () => {
 const handleSelectGroup = (group: Group) => {
   emit("update:selectedGroup", group);
   emit("select", group);
-  routeQuery.value = group.metadata.name;
+
+  if (!props.readonly) {
+    routeQuery.value = group.metadata.name;
+  }
 };
 
 const handleOpenEditingModal = (group: Group) => {
@@ -89,7 +94,7 @@ const onEditingModalClose = () => {
 onMounted(async () => {
   await handleFetchGroups();
 
-  if (routeQuery.value) {
+  if (routeQuery.value && !props.readonly) {
     const allGroups = [...defaultGroups, ...groups.value];
     const group = allGroups.find(
       (group) => group.metadata.name === routeQuery.value
@@ -99,6 +104,7 @@ onMounted(async () => {
     }
     return;
   }
+
   handleSelectGroup(defaultGroups[0]);
 });
 </script>
@@ -138,7 +144,7 @@ onMounted(async () => {
           {{ group.spec.displayName }}
         </span>
       </div>
-      <FloatingDropdown>
+      <FloatingDropdown v-if="!readonly">
         <IconMore />
         <template #popper>
           <div class="w-48 p-2">
@@ -158,7 +164,7 @@ onMounted(async () => {
       </FloatingDropdown>
     </div>
     <div
-      v-if="!loading"
+      v-if="!loading && !readonly"
       class="flex cursor-pointer items-center rounded-base bg-gray-100 p-2 text-gray-500 transition-all hover:bg-gray-200 hover:text-gray-900 hover:shadow-sm"
       @click="editingModal = true"
     >
