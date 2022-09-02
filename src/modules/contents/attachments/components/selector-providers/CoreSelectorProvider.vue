@@ -1,18 +1,25 @@
 <script lang="ts" setup>
 import {
   IconCheckboxFill,
+  IconArrowLeft,
+  IconArrowRight,
   VCard,
   VEmpty,
   VSpace,
   VButton,
   IconUpload,
+  VPagination,
+  IconEye,
+  IconCheckboxCircle,
 } from "@halo-dev/components";
 import { watchEffect, ref } from "vue";
 import { isImage } from "@/utils/image";
 import { useAttachmentControl } from "../../composables/use-attachment";
 import type { AttachmentLike } from "@halo-dev/admin-shared";
+import type { Attachment } from "@halo-dev/api-client";
 import AttachmentUploadModal from "../AttachmentUploadModal.vue";
 import AttachmentFileTypeIcon from "../AttachmentFileTypeIcon.vue";
+import AttachmentDetailModal from "../AttachmentDetailModal.vue";
 
 withDefaults(
   defineProps<{
@@ -30,17 +37,27 @@ const emit = defineEmits<{
 const {
   attachments,
   loading,
+  selectedAttachment,
   selectedAttachments,
   handleFetchAttachments,
+  handlePaginationChange,
   handleSelect,
+  handleSelectPrevious,
+  handleSelectNext,
   isChecked,
 } = useAttachmentControl();
 
 const uploadVisible = ref(false);
+const detailVisible = ref(false);
 
 watchEffect(() => {
   emit("update:selected", Array.from(selectedAttachments.value));
 });
+
+const handleOpenDetail = (attachment: Attachment) => {
+  selectedAttachment.value = attachment;
+  detailVisible.value = true;
+};
 
 await handleFetchAttachments();
 </script>
@@ -102,6 +119,10 @@ await handleFetchAttachments();
           :class="{ '!flex': selectedAttachments.has(attachment) }"
           class="absolute top-0 left-0 hidden h-1/3 w-full justify-end bg-gradient-to-b from-gray-300 to-transparent ease-in-out group-hover:flex"
         >
+          <IconEye
+            class="mt-1 mr-1 hidden h-6 w-6 cursor-pointer text-white transition-all hover:text-primary group-hover:block"
+            @click.stop="handleOpenDetail(attachment)"
+          />
           <IconCheckboxFill
             :class="{
               '!text-primary': selectedAttachments.has(attachment),
@@ -112,8 +133,46 @@ await handleFetchAttachments();
       </div>
     </VCard>
   </div>
+  <div class="mt-4 bg-white sm:flex sm:items-center sm:justify-end">
+    <VPagination
+      :page="attachments.page"
+      :size="attachments.size"
+      :total="attachments.total"
+      @change="handlePaginationChange"
+    />
+  </div>
   <AttachmentUploadModal
     v-model:visible="uploadVisible"
     @close="handleFetchAttachments"
   />
+  <AttachmentDetailModal
+    v-model:visible="detailVisible"
+    :mount-to-body="true"
+    :attachment="selectedAttachment"
+    @close="selectedAttachment = undefined"
+  >
+    <template #actions>
+      <div
+        v-if="selectedAttachment && selectedAttachments.has(selectedAttachment)"
+        class="modal-header-action"
+        @click="handleSelect(selectedAttachment)"
+      >
+        <IconCheckboxFill />
+      </div>
+      <div
+        v-else
+        class="modal-header-action"
+        @click="handleSelect(selectedAttachment)"
+      >
+        <IconCheckboxCircle />
+      </div>
+
+      <div class="modal-header-action" @click="handleSelectPrevious">
+        <IconArrowLeft />
+      </div>
+      <div class="modal-header-action" @click="handleSelectNext">
+        <IconArrowRight />
+      </div>
+    </template>
+  </AttachmentDetailModal>
 </template>

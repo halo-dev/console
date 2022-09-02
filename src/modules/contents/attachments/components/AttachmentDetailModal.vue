@@ -11,10 +11,12 @@ const props = withDefaults(
   defineProps<{
     visible: boolean;
     attachment: Attachment | null;
+    mountToBody?: boolean;
   }>(),
   {
     visible: false,
     attachment: null,
+    mountToBody: false,
   }
 );
 
@@ -52,6 +54,7 @@ const onVisibleChange = (visible: boolean) => {
     :title="`附件：${attachment?.spec.displayName || ''}`"
     :visible="visible"
     :width="1000"
+    :mount-to-body="mountToBody"
     height="calc(100vh - 20px)"
     @update:visible="onVisibleChange"
   >
@@ -188,7 +191,12 @@ const onVisibleChange = (visible: boolean) => {
       </dl>
     </div>
     <template #footer>
-      <VButton type="default" @click="onVisibleChange(false)">关闭 Esc</VButton>
+      <VSpace>
+        <VButton type="default" @click="onVisibleChange(false)"
+          >关闭 Esc</VButton
+        >
+        <slot name="footer" />
+      </VSpace>
     </template>
   </VModal>
 </template>

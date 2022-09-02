@@ -22,7 +22,7 @@ interface useAttachmentControlReturn {
   handleSelectNext: () => void;
   handleDeleteInBatch: () => void;
   handleCheckAll: (checkAll: boolean) => void;
-  handleSelect: (attachment: Attachment) => void;
+  handleSelect: (attachment: Attachment | undefined) => void;
   isChecked: (attachment: Attachment) => boolean;
   handleReset: () => void;
 }
@@ -81,11 +81,7 @@ export function useAttachmentControl(): useAttachmentControlReturn {
         attachment.metadata.name === selectedAttachment.value?.metadata.name
     );
     if (index > 0) {
-      const { data } =
-        await apiClient.extension.storage.attachment.getstorageHaloRunV1alpha1Attachment(
-          items[index - 1].metadata.name
-        );
-      selectedAttachment.value = data;
+      selectedAttachment.value = items[index - 1];
       return;
     }
     if (index === 0 && hasPrevious) {
@@ -103,11 +99,7 @@ export function useAttachmentControl(): useAttachmentControlReturn {
         attachment.metadata.name === selectedAttachment.value?.metadata.name
     );
     if (index < items.length - 1) {
-      const { data } =
-        await apiClient.extension.storage.attachment.getstorageHaloRunV1alpha1Attachment(
-          items[index + 1].metadata.name
-        );
-      selectedAttachment.value = data;
+      selectedAttachment.value = items[index + 1];
       return;
     }
     if (index === items.length - 1 && hasNext) {
@@ -152,7 +144,8 @@ export function useAttachmentControl(): useAttachmentControlReturn {
     }
   };
 
-  const handleSelect = async (attachment: Attachment) => {
+  const handleSelect = async (attachment: Attachment | undefined) => {
+    if (!attachment) return;
     if (selectedAttachments.value.has(attachment)) {
       selectedAttachments.value.delete(attachment);
       return;

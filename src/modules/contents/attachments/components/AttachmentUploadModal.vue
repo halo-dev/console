@@ -124,6 +124,7 @@ watch(
         :allow-multiple="true"
         :handler="uploadHandler"
         :disabled="!selectedPolicy"
+        :max-parallel-uploads="5"
         :label-idle="
           selectedPolicy ? '点击选择文件或者拖拽文件到此处' : '请先选择存储策略'
         "
