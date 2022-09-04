@@ -7,7 +7,6 @@ import {
   IconDatabase2Line,
   IconGrid,
   IconList,
-  IconPalette,
   IconSettings,
   IconUpload,
   VButton,
@@ -17,6 +16,7 @@ import {
   VSpace,
   VEmpty,
   IconCloseCircle,
+  IconFolder,
 } from "@halo-dev/components";
 import AttachmentDetailModal from "./components/AttachmentDetailModal.vue";
 import AttachmentUploadModal from "./components/AttachmentUploadModal.vue";
@@ -141,6 +141,11 @@ const onDetailModalClose = () => {
   handleFetchAttachments();
 };
 
+const onUploadModalClose = () => {
+  routeQueryAction.value = undefined;
+  handleFetchAttachments();
+};
+
 const onGroupChange = () => {
   handleReset();
   handleFetchAttachments();
@@ -166,6 +171,18 @@ const viewTypes = [
 ];
 
 const viewType = useRouteQuery<string>("view", "grid");
+
+// Route query action
+const routeQueryAction = useRouteQuery<string | undefined>("action");
+
+onMounted(() => {
+  if (!routeQueryAction.value) {
+    return;
+  }
+  if (routeQueryAction.value === "upload") {
+    uploadVisible.value = true;
+  }
+});
 </script>
 <template>
   <AttachmentSelectorModal v-model:visible="selectVisible" />
@@ -186,12 +203,12 @@ const viewType = useRouteQuery<string>("view", "grid");
   <AttachmentUploadModal
     v-model:visible="uploadVisible"
     :group="selectedGroup"
-    @close="handleFetchAttachments"
+    @close="onUploadModalClose"
   />
   <AttachmentPoliciesModal v-model:visible="policyVisible" />
   <VPageHeader title="附件库">
     <template #icon>
-      <IconPalette class="mr-2 self-center" />
+      <IconFolder class="mr-2 self-center" />
     </template>
     <template #actions>
       <VSpace>
@@ -540,7 +557,7 @@ const viewType = useRouteQuery<string>("view", "grid");
                         :file-name="attachment.spec.displayName"
                       />
                     </div>
-                    
+
                     <p
                       v-tooltip="attachment.spec.displayName"
                       class="block cursor-pointer truncate px-2 py-1 text-center text-xs font-medium text-gray-700"
