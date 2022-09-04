@@ -189,6 +189,7 @@ export function useAttachmentControl(filterOptions?: {
   };
 
   const handleReset = () => {
+    attachments.value.page = 1;
     selectedAttachment.value = undefined;
     selectedAttachments.value.clear();
     checkedAll.value = false;
