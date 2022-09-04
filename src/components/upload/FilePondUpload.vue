@@ -29,6 +29,10 @@ const props = withDefaults(
   }
 );
 
+const emit = defineEmits<{
+  (event: "uploaded", response: AxiosResponse): void;
+}>();
+
 const FilePond = VueFilePond();
 
 const FilePondRef = ref();
@@ -48,6 +52,7 @@ const server = {
         },
       });
 
+      emit("uploaded", response);
       load(response);
     } catch (e) {
       error(e);

@@ -2,6 +2,7 @@
 import { VButton, VModal, VTabbar } from "@halo-dev/components";
 import { ref, markRaw } from "vue";
 import CoreSelectorProvider from "./selector-providers/CoreSelectorProvider.vue";
+import UploadSelectorProvider from "./selector-providers/UploadSelectorProvider.vue";
 import type {
   AttachmentLike,
   AttachmentSelectorPublicState,
@@ -31,6 +32,11 @@ const attachmentSelectorPublicState = ref<AttachmentSelectorPublicState>({
       id: "core",
       label: "附件库",
       component: markRaw(CoreSelectorProvider),
+    },
+    {
+      id: "upload",
+      label: "上传",
+      component: markRaw(UploadSelectorProvider),
     },
   ],
 });
