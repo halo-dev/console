@@ -15,6 +15,7 @@ import {
 import { watchEffect, ref } from "vue";
 import { isImage } from "@/utils/image";
 import { useAttachmentControl } from "../../composables/use-attachment";
+import LazyImage from "@/components/image/LazyImage.vue";
 import type { AttachmentLike } from "@halo-dev/admin-shared";
 import type { Attachment, Group } from "@halo-dev/api-client";
 import AttachmentUploadModal from "../AttachmentUploadModal.vue";
@@ -112,12 +113,24 @@ await handleFetchAttachments();
         <div
           class="aspect-w-10 aspect-h-8 block h-full w-full cursor-pointer overflow-hidden bg-gray-100"
         >
-          <img
+          <LazyImage
             v-if="isImage(attachment.spec.mediaType)"
+            :key="attachment.metadata.name"
             :alt="attachment.spec.displayName"
-            class="pointer-events-none object-cover group-hover:opacity-75"
             :src="attachment.status?.permalink"
-          />
+            class="pointer-events-none object-cover group-hover:opacity-75"
+          >
+            <template #loading>
+              <div class="flex h-full items-center justify-center object-cover">
+                <span class="text-xs text-gray-400">加载中...</span>
+              </div>
+            </template>
+            <template #error>
+              <div class="flex h-full items-center justify-center object-cover">
+                <span class="text-xs text-red-400">加载异常</span>
+              </div>
+            </template>
+          </LazyImage>
           <AttachmentFileTypeIcon
             v-else
             :file-name="attachment.spec.displayName"

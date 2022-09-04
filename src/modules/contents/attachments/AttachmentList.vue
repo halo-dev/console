@@ -18,6 +18,7 @@ import {
   IconCloseCircle,
   IconFolder,
 } from "@halo-dev/components";
+import LazyImage from "@/components/image/LazyImage.vue";
 import AttachmentDetailModal from "./components/AttachmentDetailModal.vue";
 import AttachmentUploadModal from "./components/AttachmentUploadModal.vue";
 import AttachmentPoliciesModal from "./components/AttachmentPoliciesModal.vue";
@@ -546,12 +547,28 @@ onMounted(() => {
                     <div
                       class="aspect-w-10 aspect-h-8 block h-full w-full cursor-pointer overflow-hidden bg-gray-100"
                     >
-                      <img
+                      <LazyImage
                         v-if="isImage(attachment.spec.mediaType)"
+                        :key="attachment.metadata.name"
                         :alt="attachment.spec.displayName"
                         :src="attachment.status?.permalink"
-                        class="pointer-events-none object-cover group-hover:opacity-75"
-                      />
+                        classes="pointer-events-none object-cover group-hover:opacity-75"
+                      >
+                        <template #loading>
+                          <div
+                            class="flex h-full items-center justify-center object-cover"
+                          >
+                            <span class="text-xs text-gray-400">加载中...</span>
+                          </div>
+                        </template>
+                        <template #error>
+                          <div
+                            class="flex h-full items-center justify-center object-cover"
+                          >
+                            <span class="text-xs text-red-400">加载异常</span>
+                          </div>
+                        </template>
+                      </LazyImage>
                       <AttachmentFileTypeIcon
                         v-else
                         :file-name="attachment.spec.displayName"
