@@ -1,12 +1,13 @@
 <script lang="ts" setup>
 import { VButton, VModal, VSpace, VTag } from "@halo-dev/components";
 import LazyImage from "@/components/image/LazyImage.vue";
-import type { Attachment, Group, Policy } from "@halo-dev/api-client";
+import type { Attachment, Policy } from "@halo-dev/api-client";
 import prettyBytes from "pretty-bytes";
 import { ref, watch, watchEffect } from "vue";
 import { apiClient } from "@halo-dev/admin-shared";
 import { isImage } from "@/utils/image";
 import { formatDatetime } from "@/utils/date";
+import { useFetchAttachmentGroup } from "../composables/use-attachment-group";
 
 const props = withDefaults(
   defineProps<{
@@ -26,7 +27,8 @@ const emit = defineEmits<{
   (event: "close"): void;
 }>();
 
-const groups = ref<Group[]>([] as Group[]);
+const { groups, handleFetchGroups } = useFetchAttachmentGroup();
+
 const policy = ref<Policy>();
 const onlyPreview = ref(false);
 
@@ -43,16 +45,6 @@ watchEffect(async () => {
     policy.value = data;
   }
 });
-
-const handleFetchGroups = async () => {
-  try {
-    const { data } =
-      await apiClient.extension.storage.group.liststorageHaloRunV1alpha1Group();
-    groups.value = data.items;
-  } catch (e) {
-    console.error("Failed to fetch attachment groups", e);
-  }
-};
 
 watch(
   () => props.visible,

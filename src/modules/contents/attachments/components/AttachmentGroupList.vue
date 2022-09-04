@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 // core libs
 import { onMounted, ref } from "vue";
-import { apiClient } from "@halo-dev/admin-shared";
 
 // components
 import { IconAddCircle, IconMore, VButton, VSpace } from "@halo-dev/components";
@@ -11,6 +10,7 @@ import AttachmentGroupEditingModal from "./AttachmentGroupEditingModal.vue";
 import type { Group } from "@halo-dev/api-client";
 
 import { useRouteQuery } from "@vueuse/router";
+import { useFetchAttachmentGroup } from "../composables/use-attachment-group";
 
 const props = withDefaults(
   defineProps<{
@@ -52,25 +52,13 @@ const defaultGroups: Group[] = [
   },
 ];
 
-const groups = ref<Group[]>([] as Group[]);
+const { groups, handleFetchGroups } = useFetchAttachmentGroup();
+
 const groupToUpdate = ref<Group | null>(null);
 const loading = ref<boolean>(false);
 const editingModal = ref(false);
 
 const routeQuery = useRouteQuery("group");
-
-const handleFetchGroups = async () => {
-  try {
-    loading.value = true;
-    const { data } =
-      await apiClient.extension.storage.group.liststorageHaloRunV1alpha1Group();
-    groups.value = data.items;
-  } catch (e) {
-    console.error("Failed to fetch attachment groups", e);
-  } finally {
-    loading.value = false;
-  }
-};
 
 const handleSelectGroup = (group: Group) => {
   emit("update:selectedGroup", group);

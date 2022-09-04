@@ -36,6 +36,7 @@ import { apiClient } from "@halo-dev/admin-shared";
 import cloneDeep from "lodash.clonedeep";
 import { isImage } from "@/utils/image";
 import { useRouteQuery } from "@vueuse/router";
+import { useFetchAttachmentGroup } from "./composables/use-attachment-group";
 
 const policyVisible = ref(false);
 const uploadVisible = ref(false);
@@ -44,8 +45,10 @@ const selectVisible = ref(false);
 
 const { users } = useUserFetch();
 const { policies } = useFetchAttachmentPolicy({ fetchOnMounted: true });
+const { groups, handleFetchGroups } = useFetchAttachmentGroup({
+  fetchOnMounted: true,
+});
 
-const groups = ref<Group[]>([] as Group[]);
 const selectedGroup = ref<Group>();
 
 // Filter
@@ -84,16 +87,6 @@ const {
   user: selectedUser,
   keyword: keyword,
 });
-
-const handleFetchGroups = async () => {
-  try {
-    const { data } =
-      await apiClient.extension.storage.group.liststorageHaloRunV1alpha1Group();
-    groups.value = data.items;
-  } catch (e) {
-    console.error("Failed to fetch attachment groups", e);
-  }
-};
 
 const handleMove = async (group: Group) => {
   try {
@@ -156,8 +149,6 @@ const getPolicyName = (name: string | undefined) => {
   const policy = policies.value.find((p) => p.metadata.name === name);
   return policy?.spec.displayName;
 };
-
-onMounted(handleFetchGroups);
 
 // View type
 const viewTypes = [

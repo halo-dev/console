@@ -15,6 +15,8 @@ import AttachmentFileTypeIcon from "../AttachmentFileTypeIcon.vue";
 import { computed, ref, watchEffect } from "vue";
 import type { AxiosResponse } from "axios";
 import { isImage } from "@/utils/image";
+import { useFetchAttachmentPolicy } from "../../composables/use-attachment-policy";
+import { useFetchAttachmentGroup } from "../../composables/use-attachment-group";
 
 withDefaults(
   defineProps<{
@@ -29,6 +31,40 @@ const emit = defineEmits<{
   (event: "update:selected", attachments: AttachmentLike[]): void;
 }>();
 
+const { policies } = useFetchAttachmentPolicy({ fetchOnMounted: true });
+const policyMap = computed(() => {
+  return [
+    {
+      label: "选择存储策略",
+      value: "",
+    },
+    ...policies.value.map((policy) => {
+      return {
+        label: policy.spec.displayName,
+        value: policy.metadata.name,
+      };
+    }),
+  ];
+});
+const selectedPolicy = ref("");
+
+const { groups } = useFetchAttachmentGroup({ fetchOnMounted: true });
+const groupMap = computed(() => {
+  return [
+    {
+      label: "选择分组",
+      value: "",
+    },
+    ...groups.value.map((group) => {
+      return {
+        label: group.spec.displayName,
+        value: group.metadata.name,
+      };
+    }),
+  ];
+});
+const selectedGroup = ref("");
+
 const attachments = ref<Set<Attachment>>(new Set<Attachment>());
 const selectedAttachments = ref<Set<Attachment>>(new Set<Attachment>());
 
@@ -36,8 +72,8 @@ const uploadHandler = computed(() => {
   return (file, config) =>
     apiClient.extension.storage.attachment.uploadAttachment(
       file,
-      "1c00ce7e-dc77-41b6-b5ac-9d825207d6e3",
-      undefined,
+      selectedPolicy.value,
+      selectedGroup.value,
       config
     );
 });
@@ -89,13 +125,30 @@ watchEffect(() => {
 
 <template>
   <div class="flex h-full flex-col gap-4 sm:flex-row">
-    <div class="h-full w-full overflow-auto sm:w-96">
+    <div class="h-full w-full space-y-4 overflow-auto sm:w-96">
+      <FormKit type="form">
+        <FormKit
+          v-model="selectedPolicy"
+          type="select"
+          :options="policyMap"
+          label="存储策略"
+        ></FormKit>
+        <FormKit
+          v-model="selectedGroup"
+          :options="groupMap"
+          type="select"
+          label="分组"
+        ></FormKit>
+      </FormKit>
       <FilePondUpload
         ref="FilePondUploadRef"
         :allow-multiple="true"
         :handler="uploadHandler"
         :max-parallel-uploads="5"
-        label-idle="点击选择文件或者拖拽文件到此处"
+        :disabled="!selectedPolicy"
+        :label-idle="
+          selectedPolicy ? '点击选择文件或者拖拽文件到此处' : '请先选择存储策略'
+        "
         @uploaded="onUploaded"
       />
     </div>
