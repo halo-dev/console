@@ -1,13 +1,12 @@
 // core libs
+// types
+import type { Ref } from "vue";
 import { ref } from "vue";
 import { apiClient } from "../utils/api-client";
 
 // libs
 import cloneDeep from "lodash.clonedeep";
 import merge from "lodash.merge";
-
-// types
-import type { Ref } from "vue";
 import type { FormKitSetting, FormKitSettingSpec } from "../types/formkit";
 import type { ConfigMap } from "@halo-dev/api-client";
 import type { FormKitSchemaNode } from "@formkit/core";
@@ -21,10 +20,21 @@ const initialConfigMap: ConfigMap = {
   data: {},
 };
 
+interface useSettingFormReturn {
+  settings: Ref<FormKitSetting | undefined>;
+  configMap: Ref<ConfigMap>;
+  configMapFormData: Ref<Record<string, Record<string, string>> | undefined>;
+  saving: Ref<boolean>;
+  handleFetchSettings: () => void;
+  handleFetchConfigMap: () => void;
+  handleSaveConfigMap: () => void;
+  handleReset: () => void;
+}
+
 export function useSettingForm(
   settingName: Ref<string | undefined>,
   configMapName: Ref<string | undefined>
-) {
+): useSettingFormReturn {
   const settings = ref<FormKitSetting | undefined>();
   const configMap = ref<ConfigMap>(cloneDeep(initialConfigMap));
   const configMapFormData = ref<
@@ -138,6 +148,12 @@ export function useSettingForm(
     }
   };
 
+  const handleReset = () => {
+    settings.value = undefined;
+    configMap.value = cloneDeep(initialConfigMap);
+    configMapFormData.value = undefined;
+  };
+
   return {
     settings,
     configMap,
@@ -146,5 +162,6 @@ export function useSettingForm(
     handleFetchSettings,
     handleFetchConfigMap,
     handleSaveConfigMap,
+    handleReset,
   };
 }
