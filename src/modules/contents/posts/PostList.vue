@@ -77,6 +77,8 @@ const handleFetchPosts = async () => {
     }
 
     const { data } = await apiClient.post.listPosts(
+      // TODO
+      // @ts-ignore
       posts.value.page,
       posts.value.size,
       labelSelector
