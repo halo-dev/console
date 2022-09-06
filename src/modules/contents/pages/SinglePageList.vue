@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import {
   IconArrowDown,
+  IconArrowLeft,
+  IconArrowRight,
   IconSettings,
   VButton,
   VCard,
@@ -8,36 +10,21 @@ import {
   VSpace,
   VTag,
 } from "@halo-dev/components";
-import { onMounted, ref } from "vue";
+import SinglePageSettingModal from "./components/SinglePageSettingModal.vue";
+import { onMounted, ref, watchEffect } from "vue";
 import { useUserFetch } from "@/modules/system/users/composables/use-user";
-import type { SinglePageList } from "@halo-dev/api-client";
+import type {
+  ListedSinglePageList,
+  SinglePage,
+  SinglePageRequest,
+} from "@halo-dev/api-client";
 import { apiClient } from "@halo-dev/admin-shared";
-
-const pagesRef = ref([
-  {
-    title: "关于我们",
-    url: "/about",
-    views: "31231",
-    commentCount: "32",
-  },
-  {
-    title: "案例中心",
-    url: "/case",
-    views: "11431",
-    commentCount: "35",
-  },
-  {
-    title: "我们的产品",
-    url: "/products",
-    views: "11431",
-    commentCount: "35",
-  },
-]);
-const checkAll = ref(false);
+import { formatDatetime } from "@/utils/date";
+import { RouterLink } from "vue-router";
 
 const { users } = useUserFetch();
 
-const singlePages = ref<SinglePageList>({
+const singlePages = ref<ListedSinglePageList>({
   page: 1,
   size: 20,
   total: 0,
@@ -48,12 +35,18 @@ const singlePages = ref<SinglePageList>({
   hasPrevious: false,
 });
 const loading = ref(false);
+const settingModal = ref(false);
+const selectedSinglePage = ref<SinglePage>();
+const selectedSinglePageWithContent = ref<SinglePageRequest>();
+const checkAll = ref(false);
 
 const handleFetchSinglePages = async () => {
   try {
     loading.value = true;
-    const { data } =
-      await apiClient.extension.singlePage.listcontentHaloRunV1alpha1SinglePage();
+    const { data } = await apiClient.post.listSinglePages({
+      page: singlePages.value.page,
+      size: singlePages.value.size,
+    });
     singlePages.value = data;
   } catch (error) {
     console.error("Failed to fetch single pages", error);
@@ -62,10 +55,112 @@ const handleFetchSinglePages = async () => {
   }
 };
 
+const handlePaginationChange = ({
+  page,
+  size,
+}: {
+  page: number;
+  size: number;
+}) => {
+  singlePages.value.page = page;
+  singlePages.value.size = size;
+  handleFetchSinglePages();
+};
+
+const handleOpenSettingModal = async (singlePage: SinglePage) => {
+  const { data } =
+    await apiClient.extension.singlePage.getcontentHaloRunV1alpha1SinglePage({
+      name: singlePage.metadata.name,
+    });
+  selectedSinglePage.value = data;
+  settingModal.value = true;
+};
+
+const onSettingModalClose = () => {
+  selectedSinglePage.value = undefined;
+  selectedSinglePageWithContent.value = undefined;
+  handleFetchSinglePages();
+};
+
+watchEffect(async () => {
+  if (
+    !selectedSinglePage.value ||
+    !selectedSinglePage.value.spec.headSnapshot
+  ) {
+    return;
+  }
+
+  const { data: content } = await apiClient.content.obtainSnapshotContent({
+    snapshotName: selectedSinglePage.value.spec.headSnapshot,
+  });
+
+  selectedSinglePageWithContent.value = {
+    page: selectedSinglePage.value,
+    content: content,
+  };
+});
+
+const handleSelectPrevious = async () => {
+  const { items, hasPrevious } = singlePages.value;
+  const index = items.findIndex(
+    (singlePage) =>
+      singlePage.page.metadata.name === selectedSinglePage.value?.metadata.name
+  );
+  if (index > 0) {
+    const { data } =
+      await apiClient.extension.singlePage.getcontentHaloRunV1alpha1SinglePage({
+        name: items[index - 1].page.metadata.name,
+      });
+    selectedSinglePage.value = data;
+    return;
+  }
+  if (index === 0 && hasPrevious) {
+    singlePages.value.page--;
+    await handleFetchSinglePages();
+    selectedSinglePage.value =
+      singlePages.value.items[singlePages.value.items.length - 1].page;
+  }
+};
+
+const handleSelectNext = async () => {
+  const { items, hasNext } = singlePages.value;
+  const index = items.findIndex(
+    (singlePage) =>
+      singlePage.page.metadata.name === selectedSinglePage.value?.metadata.name
+  );
+  if (index < items.length - 1) {
+    const { data } =
+      await apiClient.extension.singlePage.getcontentHaloRunV1alpha1SinglePage({
+        name: items[index + 1].page.metadata.name,
+      });
+    selectedSinglePage.value = data;
+    return;
+  }
+  if (index === items.length - 1 && hasNext) {
+    singlePages.value.page++;
+    await handleFetchSinglePages();
+    selectedSinglePage.value = singlePages.value.items[0].page;
+  }
+};
+
 onMounted(handleFetchSinglePages);
 </script>
 
 <template>
+  <SinglePageSettingModal
+    v-model:visible="settingModal"
+    :single-page="selectedSinglePageWithContent"
+    @close="onSettingModalClose"
+  >
+    <template #actions>
+      <div class="modal-header-action" @click="handleSelectPrevious">
+        <IconArrowLeft />
+      </div>
+      <div class="modal-header-action" @click="handleSelectNext">
+        <IconArrowRight />
+      </div>
+    </template>
+  </SinglePageSettingModal>
   <VCard :body-class="['!p-0']" class="rounded-none border-none shadow-none">
     <template #header>
       <div class="block w-full bg-gray-50 px-4 py-3">
@@ -204,7 +299,7 @@ onMounted(handleFetchSinglePages);
       </div>
     </template>
     <ul class="box-border h-full w-full divide-y divide-gray-100" role="list">
-      <li v-for="(page, index) in pagesRef" :key="index">
+      <li v-for="(singlePage, index) in singlePages.items" :key="index">
         <div
           :class="{
             'bg-gray-100': checkAll,
@@ -224,22 +319,25 @@ onMounted(handleFetchSinglePages);
               />
             </div>
             <div class="flex-1">
-              <div class="flex flex-row">
-                <span
-                  class="mr-0 truncate text-sm font-medium text-gray-900 sm:mr-2"
+              <div class="flex flex-row items-center">
+                <RouterLink
+                  :to="{
+                    name: 'SinglePageEditor',
+                    query: { name: singlePage.page.metadata.name },
+                  }"
                 >
-                  {{ page.title }}
-                </span>
-                <VTag>{{ page.url }}</VTag>
+                  <span
+                    class="mr-0 truncate text-sm font-medium text-gray-900 sm:mr-2"
+                  >
+                    {{ singlePage.page.spec.title }}
+                  </span>
+                </RouterLink>
+                <VTag>{{ singlePage.page.status?.permalink }}</VTag>
               </div>
               <div class="mt-1 flex">
                 <VSpace>
-                  <span class="text-xs text-gray-500">
-                    访问量 {{ page.views }}
-                  </span>
-                  <span class="text-xs text-gray-500">
-                    评论 {{ page.commentCount }}
-                  </span>
+                  <span class="text-xs text-gray-500"> 访问量 0 </span>
+                  <span class="text-xs text-gray-500"> 评论 0 </span>
                 </VSpace>
               </div>
             </div>
@@ -247,15 +345,52 @@ onMounted(handleFetchSinglePages);
               <div
                 class="inline-flex flex-col items-end gap-4 sm:flex-row sm:items-center sm:gap-6"
               >
-                <img
-                  class="hidden h-6 w-6 rounded-full ring-2 ring-white sm:inline-block"
-                  src="https://ryanc.cc/avatar"
-                />
-                <time class="text-sm text-gray-500" datetime="2020-01-07">
-                  2020-01-07
+                <RouterLink
+                  v-for="(
+                    contributor, contributorIndex
+                  ) in singlePage.contributors"
+                  :key="contributorIndex"
+                  :to="{
+                    name: 'UserDetail',
+                    params: { name: contributor.name },
+                  }"
+                >
+                  <img
+                    v-tooltip="contributor.displayName"
+                    :alt="contributor.name"
+                    :src="contributor.avatar"
+                    :title="contributor.displayName"
+                    class="hidden h-6 w-6 rounded-full ring-2 ring-white sm:inline-block"
+                  />
+                </RouterLink>
+                <time class="text-sm text-gray-500">
+                  {{
+                    formatDatetime(singlePage.page.metadata.creationTimestamp)
+                  }}
                 </time>
-                <span class="cursor-pointer">
-                  <IconSettings />
+                <span>
+                  <FloatingDropdown>
+                    <IconSettings
+                      class="cursor-pointer transition-all hover:text-blue-600"
+                    />
+                    <template #popper>
+                      <div class="w-48 p-2">
+                        <VSpace class="w-full" direction="column">
+                          <VButton
+                            v-close-popper
+                            block
+                            type="secondary"
+                            @click="handleOpenSettingModal(singlePage.page)"
+                          >
+                            设置
+                          </VButton>
+                          <VButton v-close-popper block type="danger">
+                            删除
+                          </VButton>
+                        </VSpace>
+                      </div>
+                    </template>
+                  </FloatingDropdown>
                 </span>
               </div>
             </div>
@@ -266,7 +401,12 @@ onMounted(handleFetchSinglePages);
 
     <template #footer>
       <div class="bg-white sm:flex sm:items-center sm:justify-end">
-        <VPagination :page="1" :size="10" :total="20" />
+        <VPagination
+          :page="singlePages.page"
+          :size="singlePages.size"
+          :total="singlePages.total"
+          @change="handlePaginationChange"
+        />
       </div>
     </template>
   </VCard>
