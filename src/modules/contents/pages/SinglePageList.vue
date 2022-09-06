@@ -11,12 +11,11 @@ import {
   VCard,
   VPagination,
   VSpace,
-  VTag,
   useDialog,
 } from "@halo-dev/components";
 import SinglePageSettingModal from "./components/SinglePageSettingModal.vue";
+import UserDropdownSelector from "@/components/dropdown-selector/UserDropdownSelector.vue";
 import { onMounted, ref, watchEffect } from "vue";
-import { useUserFetch } from "@/modules/system/users/composables/use-user";
 import type {
   ListedSinglePageList,
   SinglePage,
@@ -34,8 +33,6 @@ enum SinglePagePhase {
 }
 
 const dialog = useDialog();
-
-const { users } = useUserFetch();
 
 const singlePages = ref<ListedSinglePageList>({
   page: 1,
@@ -225,7 +222,7 @@ onMounted(handleFetchSinglePages);
           </div>
           <div class="mt-4 flex sm:mt-0">
             <VSpace spacing="lg">
-              <FloatingDropdown>
+              <UserDropdownSelector>
                 <div
                   class="flex cursor-pointer select-none items-center text-sm text-gray-700 hover:text-black"
                 >
@@ -234,51 +231,7 @@ onMounted(handleFetchSinglePages);
                     <IconArrowDown />
                   </span>
                 </div>
-                <template #popper>
-                  <div class="h-96 w-80 p-4">
-                    <div class="bg-white">
-                      <!--TODO: Auto Focus-->
-                      <FormKit
-                        placeholder="输入关键词搜索"
-                        type="text"
-                      ></FormKit>
-                    </div>
-                    <div class="mt-2">
-                      <ul class="divide-y divide-gray-200" role="list">
-                        <li
-                          v-for="(user, index) in users"
-                          :key="index"
-                          v-close-popper
-                          class="cursor-pointer hover:bg-gray-50"
-                        >
-                          <div class="flex items-center space-x-4 px-4 py-3">
-                            <div class="flex-shrink-0">
-                              <img
-                                :alt="user.spec.displayName"
-                                :src="user.spec.avatar"
-                                class="h-10 w-10 rounded"
-                              />
-                            </div>
-                            <div class="min-w-0 flex-1">
-                              <p
-                                class="truncate text-sm font-medium text-gray-900"
-                              >
-                                {{ user.spec.displayName }}
-                              </p>
-                              <p class="truncate text-sm text-gray-500">
-                                @{{ user.metadata.name }}
-                              </p>
-                            </div>
-                            <div>
-                              <VTag>{{ index + 1 }} 篇</VTag>
-                            </div>
-                          </div>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </template>
-              </FloatingDropdown>
+              </UserDropdownSelector>
               <FloatingDropdown>
                 <div
                   class="flex cursor-pointer select-none items-center text-sm text-gray-700 hover:text-black"
