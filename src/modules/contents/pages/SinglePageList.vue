@@ -4,11 +4,15 @@ import {
   IconArrowLeft,
   IconArrowRight,
   IconSettings,
+  IconEye,
+  IconEyeOff,
+  IconTeam,
   VButton,
   VCard,
   VPagination,
   VSpace,
   VTag,
+  useDialog,
 } from "@halo-dev/components";
 import SinglePageSettingModal from "./components/SinglePageSettingModal.vue";
 import { onMounted, ref, watchEffect } from "vue";
@@ -21,6 +25,15 @@ import type {
 import { apiClient } from "@halo-dev/admin-shared";
 import { formatDatetime } from "@/utils/date";
 import { RouterLink } from "vue-router";
+import cloneDeep from "lodash.clonedeep";
+
+enum SinglePagePhase {
+  DRAFT = "未发布",
+  PENDING_APPROVAL = "待审核",
+  PUBLISHED = "已发布",
+}
+
+const dialog = useDialog();
 
 const { users } = useUserFetch();
 
@@ -143,6 +156,31 @@ const handleSelectNext = async () => {
   }
 };
 
+const handleDelete = async (singlePage: SinglePage) => {
+  dialog.warning({
+    title: "是否确认删除该自定义页面？",
+    confirmType: "danger",
+    onConfirm: async () => {
+      const singlePageToUpdate = cloneDeep(singlePage);
+      singlePageToUpdate.spec.deleted = true;
+      await apiClient.extension.singlePage.updatecontentHaloRunV1alpha1SinglePage(
+        {
+          name: singlePage.metadata.name,
+          singlePage: singlePageToUpdate,
+        }
+      );
+      await handleFetchSinglePages();
+    },
+  });
+};
+
+const finalStatus = (singlePage: SinglePage) => {
+  if (singlePage.status?.phase) {
+    return SinglePagePhase[singlePage.status.phase];
+  }
+  return "";
+};
+
 onMounted(handleFetchSinglePages);
 </script>
 
@@ -211,15 +249,9 @@ onMounted(handleFetchSinglePages);
                           v-for="(user, index) in users"
                           :key="index"
                           v-close-popper
-                          class="cursor-pointer py-4 hover:bg-gray-50"
+                          class="cursor-pointer hover:bg-gray-50"
                         >
-                          <div class="flex items-center space-x-4">
-                            <div class="flex items-center">
-                              <input
-                                class="h-4 w-4 rounded border-gray-300 text-indigo-600"
-                                type="checkbox"
-                              />
-                            </div>
+                          <div class="flex items-center space-x-4 px-4 py-3">
                             <div class="flex-shrink-0">
                               <img
                                 :alt="user.spec.displayName"
@@ -332,13 +364,32 @@ onMounted(handleFetchSinglePages);
                     {{ singlePage.page.spec.title }}
                   </span>
                 </RouterLink>
-                <VTag>{{ singlePage.page.status?.permalink }}</VTag>
+                <FloatingTooltip
+                  v-if="singlePage.page.status?.inProgress"
+                  class="hidden items-center sm:flex"
+                >
+                  <RouterLink
+                    :to="{
+                      name: 'SinglePageEditor',
+                      query: { name: singlePage.page.metadata.name },
+                    }"
+                    class="flex items-center"
+                  >
+                    <div
+                      class="inline-flex h-1.5 w-1.5 rounded-full bg-orange-600"
+                    >
+                      <span
+                        class="inline-block h-1.5 w-1.5 animate-ping rounded-full bg-orange-600"
+                      ></span>
+                    </div>
+                  </RouterLink>
+                  <template #popper> 当前有内容已保存，但还未发布。 </template>
+                </FloatingTooltip>
               </div>
               <div class="mt-1 flex">
-                <VSpace>
-                  <span class="text-xs text-gray-500"> 访问量 0 </span>
-                  <span class="text-xs text-gray-500"> 评论 0 </span>
-                </VSpace>
+                <span class="text-xs text-gray-500">
+                  {{ singlePage.page.status?.permalink }}
+                </span>
               </div>
             </div>
             <div class="flex">
@@ -363,6 +414,26 @@ onMounted(handleFetchSinglePages);
                     class="hidden h-6 w-6 rounded-full ring-2 ring-white sm:inline-block"
                   />
                 </RouterLink>
+                <span class="text-sm text-gray-500">
+                  {{ finalStatus(singlePage.page) }}
+                </span>
+                <span>
+                  <IconEye
+                    v-if="singlePage.page.spec.visible === 'PUBLIC'"
+                    v-tooltip="`公开访问`"
+                    class="cursor-pointer text-sm transition-all hover:text-blue-600"
+                  />
+                  <IconEyeOff
+                    v-if="singlePage.page.spec.visible === 'PRIVATE'"
+                    v-tooltip="`私有访问`"
+                    class="cursor-pointer text-sm transition-all hover:text-blue-600"
+                  />
+                  <IconTeam
+                    v-if="singlePage.page.spec.visible === 'INTERNAL'"
+                    v-tooltip="`内部成员可访问`"
+                    class="cursor-pointer text-sm transition-all hover:text-blue-600"
+                  />
+                </span>
                 <time class="text-sm text-gray-500">
                   {{
                     formatDatetime(singlePage.page.metadata.creationTimestamp)
@@ -384,7 +455,12 @@ onMounted(handleFetchSinglePages);
                           >
                             设置
                           </VButton>
-                          <VButton v-close-popper block type="danger">
+                          <VButton
+                            v-close-popper
+                            block
+                            type="danger"
+                            @click="handleDelete(singlePage.page)"
+                          >
                             删除
                           </VButton>
                         </VSpace>

@@ -7,6 +7,7 @@ import {
   IconSave,
 } from "@halo-dev/components";
 import SinglePageSettingModal from "./components/SinglePageSettingModal.vue";
+import PostPreviewModal from "../posts/components/PostPreviewModal.vue";
 import {
   allExtensions,
   RichTextEditor,
@@ -56,6 +57,7 @@ const initialFormState: SinglePageRequest = {
 const formState = ref<SinglePageRequest>(cloneDeep(initialFormState));
 const saving = ref(false);
 const settingModal = ref(false);
+const previewModal = ref(false);
 
 const isUpdateMode = computed(() => {
   return !!formState.value.page.metadata.creationTimestamp;
@@ -163,13 +165,16 @@ onMounted(async () => {
     :single-page="formState"
     @saved="onSettingSaved"
   />
+  <PostPreviewModal v-model:visible="previewModal" />
   <VPageHeader title="自定义页面">
     <template #icon>
       <IconPages class="mr-2 self-center" />
     </template>
     <template #actions>
       <VSpace>
-        <VButton size="sm" type="default"> 预览 </VButton>
+        <VButton size="sm" type="default" @click="previewModal = true">
+          预览
+        </VButton>
         <VButton :loading="saving" size="sm" type="default" @click="handleSave">
           保存
         </VButton>

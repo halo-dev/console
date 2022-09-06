@@ -535,8 +535,8 @@ function handlePhaseFilterItemChange(filterItem: FilterItem) {
                     </span>
                   </div>
                   <template #popper>
-                    <div class="h-96 w-80">
-                      <div class="bg-white p-4">
+                    <div class="h-96 w-80 p-4">
+                      <div class="bg-white">
                         <!--TODO: Auto Focus-->
                         <FormKit
                           placeholder="输入关键词搜索"
