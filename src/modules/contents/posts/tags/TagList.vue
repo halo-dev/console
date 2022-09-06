@@ -89,7 +89,9 @@ const queryName = useRouteQuery("name");
 onMounted(async () => {
   if (queryName.value) {
     const { data } = await apiClient.extension.tag.getcontentHaloRunV1alpha1Tag(
-      queryName.value as string
+      {
+        name: queryName.value as string,
+      }
     );
     selectedTag.value = data;
     editingModal.value = true;
@@ -186,7 +188,7 @@ onMounted(async () => {
                   </div>
                   <div class="mt-1 flex">
                     <span class="text-xs text-gray-500">
-                      /tags/{{ tag.spec.slug }}
+                      {{ tag.status?.permalink }}
                     </span>
                   </div>
                 </div>

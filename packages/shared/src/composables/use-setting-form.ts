@@ -49,10 +49,9 @@ export function useSettingForm(
       return;
     }
     try {
-      const response = await apiClient.extension.setting.getv1alpha1Setting(
-        settingName.value
-      );
-
+      const response = await apiClient.extension.setting.getv1alpha1Setting({
+        name: settingName.value,
+      });
       settings.value = response.data as FormKitSetting;
 
       // init configMapFormData
@@ -88,7 +87,9 @@ export function useSettingForm(
     }
     try {
       const response = await apiClient.extension.configMap.getv1alpha1ConfigMap(
-        configMapName.value
+        {
+          name: configMapName.value,
+        }
       );
 
       configMap.value = response.data;
@@ -130,14 +131,14 @@ export function useSettingForm(
       });
 
       if (!configMap.value.metadata.creationTimestamp) {
-        await apiClient.extension.configMap.createv1alpha1ConfigMap(
-          configMap.value
-        );
+        await apiClient.extension.configMap.createv1alpha1ConfigMap({
+          configMap: configMap.value,
+        });
       } else {
-        await apiClient.extension.configMap.updatev1alpha1ConfigMap(
-          configMap.value.metadata.name,
-          configMap.value
-        );
+        await apiClient.extension.configMap.updatev1alpha1ConfigMap({
+          configMap: configMap.value,
+          name: configMap.value.metadata.name,
+        });
       }
     } catch (e) {
       console.error(e);
