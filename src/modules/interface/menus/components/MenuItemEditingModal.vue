@@ -234,7 +234,10 @@ const selectedRef = ref<string>("");
 
 const handleFetchPosts = async () => {
   const { data } =
-    await apiClient.extension.post.listcontentHaloRunV1alpha1Post(0, 0);
+    await apiClient.extension.post.listcontentHaloRunV1alpha1Post({
+      page: 0,
+      size: 0,
+    });
   posts.value = data.items;
 };
 
