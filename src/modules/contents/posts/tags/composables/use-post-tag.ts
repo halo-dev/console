@@ -25,7 +25,10 @@ export function usePostTag(options?: {
     try {
       loading.value = true;
       const { data } =
-        await apiClient.extension.tag.listcontentHaloRunV1alpha1Tag(0, 0);
+        await apiClient.extension.tag.listcontentHaloRunV1alpha1Tag({
+          page: 0,
+          size: 0,
+        });
 
       tags.value = data.items;
     } catch (e) {
@@ -42,9 +45,9 @@ export function usePostTag(options?: {
       confirmType: "danger",
       onConfirm: async () => {
         try {
-          await apiClient.extension.tag.deletecontentHaloRunV1alpha1Tag(
-            tag.metadata.name
-          );
+          await apiClient.extension.tag.deletecontentHaloRunV1alpha1Tag({
+            name: tag.metadata.name,
+          });
         } catch (e) {
           console.error("Failed to delete tag", e);
         } finally {
