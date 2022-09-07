@@ -8,11 +8,13 @@ import {
   IconEyeOff,
   IconTeam,
   IconCloseCircle,
+  IconAddCircle,
   VButton,
   VCard,
   VPagination,
   VSpace,
   useDialog,
+  VEmpty,
 } from "@halo-dev/components";
 import SinglePageSettingModal from "./components/SinglePageSettingModal.vue";
 import UserDropdownSelector from "@/components/dropdown-selector/UserDropdownSelector.vue";
@@ -306,7 +308,28 @@ const handleSelectUser = (user?: User) => {
         </div>
       </div>
     </template>
-    <ul class="box-border h-full w-full divide-y divide-gray-100" role="list">
+    <VEmpty
+      v-if="!singlePages.items.length && !loading"
+      message="你可以尝试刷新或者新建页面"
+      title="当前没有页面"
+    >
+      <template #actions>
+        <VSpace>
+          <VButton @click="handleFetchSinglePages">刷新</VButton>
+          <VButton :route="{ name: 'SinglePageEditor' }" type="primary">
+            <template #icon>
+              <IconAddCircle class="h-full w-full" />
+            </template>
+            新建页面
+          </VButton>
+        </VSpace>
+      </template>
+    </VEmpty>
+    <ul
+      v-else
+      class="box-border h-full w-full divide-y divide-gray-100"
+      role="list"
+    >
       <li v-for="(singlePage, index) in singlePages.items" :key="index">
         <div
           :class="{
