@@ -227,7 +227,7 @@ const handleSelectUser = (user?: User) => {
                 class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
               >
                 <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                  上传者：{{ selectedUser?.spec.displayName }}
+                  作者：{{ selectedUser?.spec.displayName }}
                 </span>
                 <IconCloseCircle
                   class="h-4 w-4 text-gray-600"
