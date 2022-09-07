@@ -7,6 +7,7 @@ import {
   IconEye,
   IconEyeOff,
   IconTeam,
+  IconCloseCircle,
   VButton,
   VCard,
   VPagination,
@@ -20,6 +21,7 @@ import type {
   ListedSinglePageList,
   SinglePage,
   SinglePageRequest,
+  User,
 } from "@halo-dev/api-client";
 import { apiClient } from "@halo-dev/admin-shared";
 import { formatDatetime } from "@/utils/date";
@@ -179,6 +181,14 @@ const finalStatus = (singlePage: SinglePage) => {
 };
 
 onMounted(handleFetchSinglePages);
+
+// Filters
+const selectedUser = ref<User>();
+
+const handleSelectUser = (user?: User) => {
+  selectedUser.value = user;
+  handleFetchSinglePages();
+};
 </script>
 
 <template>
@@ -210,11 +220,21 @@ onMounted(handleFetchSinglePages);
             />
           </div>
           <div class="flex w-full flex-1 sm:w-auto">
-            <FormKit
-              v-if="!checkAll"
-              placeholder="输入关键词搜索"
-              type="text"
-            ></FormKit>
+            <div v-if="!checkAll" class="flex items-center gap-2">
+              <FormKit placeholder="输入关键词搜索" type="text"></FormKit>
+              <div
+                v-if="selectedUser"
+                class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+              >
+                <span class="text-xs text-gray-600 group-hover:text-gray-900">
+                  上传者：{{ selectedUser?.spec.displayName }}
+                </span>
+                <IconCloseCircle
+                  class="h-4 w-4 text-gray-600"
+                  @click="handleSelectUser(undefined)"
+                />
+              </div>
+            </div>
             <VSpace v-else>
               <VButton type="default">设置</VButton>
               <VButton type="danger">删除</VButton>
@@ -222,7 +242,10 @@ onMounted(handleFetchSinglePages);
           </div>
           <div class="mt-4 flex sm:mt-0">
             <VSpace spacing="lg">
-              <UserDropdownSelector>
+              <UserDropdownSelector
+                v-model:selected="selectedUser"
+                @select="handleSelectUser"
+              >
                 <div
                   class="flex cursor-pointer select-none items-center text-sm text-gray-700 hover:text-black"
                 >
