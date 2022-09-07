@@ -8,6 +8,7 @@ import {
 } from "@halo-dev/components";
 import SinglePageSettingModal from "./components/SinglePageSettingModal.vue";
 import PostPreviewModal from "../posts/components/PostPreviewModal.vue";
+import AttachmentSelectorModal from "../attachments/components/AttachmentSelectorModal.vue";
 import {
   allExtensions,
   RichTextEditor,
@@ -19,6 +20,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { apiClient } from "@halo-dev/admin-shared";
 import { useRouteQuery } from "@vueuse/router";
 import cloneDeep from "lodash.clonedeep";
+import { useAttachmentSelect } from "../attachments/composables/use-attachment";
 
 const initialFormState: SinglePageRequest = {
   page: {
@@ -58,6 +60,7 @@ const formState = ref<SinglePageRequest>(cloneDeep(initialFormState));
 const saving = ref(false);
 const settingModal = ref(false);
 const previewModal = ref(false);
+const attachemntSelectorModal = ref(false);
 
 const isUpdateMode = computed(() => {
   return !!formState.value.page.metadata.creationTimestamp;
@@ -85,6 +88,8 @@ watch(
     editor.value?.commands.setContent(newValue as string, false);
   }
 );
+
+const { onAttachmentSelect } = useAttachmentSelect(editor);
 
 const routeQueryName = useRouteQuery<string>("name");
 
@@ -166,12 +171,23 @@ onMounted(async () => {
     @saved="onSettingSaved"
   />
   <PostPreviewModal v-model:visible="previewModal" />
+  <AttachmentSelectorModal
+    v-model:visible="attachemntSelectorModal"
+    @select="onAttachmentSelect"
+  />
   <VPageHeader title="自定义页面">
     <template #icon>
       <IconPages class="mr-2 self-center" />
     </template>
     <template #actions>
       <VSpace>
+        <VButton
+          size="sm"
+          type="default"
+          @click="attachemntSelectorModal = true"
+        >
+          附件库
+        </VButton>
         <VButton size="sm" type="default" @click="previewModal = true">
           预览
         </VButton>
