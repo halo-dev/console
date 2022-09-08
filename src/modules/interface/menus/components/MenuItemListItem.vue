@@ -43,7 +43,7 @@ function getMenuItemRefDisplayName(menuItem: MenuTreeItem) {
   if (menuItem.spec.postRef) {
     return "文章";
   }
-  if (menuItem.spec.pageRef) {
+  if (menuItem.spec.singlePageRef) {
     return "自定义页面";
   }
   if (menuItem.spec.categoryRef) {

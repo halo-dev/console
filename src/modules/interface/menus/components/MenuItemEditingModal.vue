@@ -127,7 +127,8 @@ watch(
       formState.value = cloneDeep(menuItem);
 
       // Set Ref related
-      const { postRef, categoryRef, tagRef, pageRef } = formState.value.spec;
+      const { postRef, categoryRef, tagRef, singlePageRef } =
+        formState.value.spec;
 
       if (postRef) {
         selectedMenuItemSource.value = "post";
@@ -144,9 +145,9 @@ watch(
         selectedRef.value = tagRef.name;
       }
 
-      if (pageRef) {
+      if (singlePageRef) {
         selectedMenuItemSource.value = "singlePage";
-        selectedRef.value = pageRef.name;
+        selectedRef.value = singlePageRef.name;
       }
     } else {
       handleResetForm();
@@ -158,7 +159,7 @@ watch(
 interface MenuItemSource {
   label: string;
   value: string;
-  ref?: "postRef" | "categoryRef" | "tagRef" | "pageRef";
+  ref?: "postRef" | "categoryRef" | "tagRef" | "singlePageRef";
   kind?: "Post" | "Category" | "Tag" | "SinglePage";
 }
 
@@ -176,7 +177,7 @@ const menuItemSources: MenuItemSource[] = [
   {
     label: "自定义页面",
     value: "singlePage",
-    ref: "pageRef",
+    ref: "singlePageRef",
     kind: "SinglePage",
   },
   {
