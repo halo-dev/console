@@ -183,12 +183,12 @@ onMounted(() => {
     @close="onDetailModalClose"
   >
     <template #actions>
-      <div class="modal-header-action" @click="handleSelectPrevious">
+      <span @click="handleSelectPrevious">
         <IconArrowLeft />
-      </div>
-      <div class="modal-header-action" @click="handleSelectNext">
+      </span>
+      <span @click="handleSelectNext">
         <IconArrowRight />
-      </div>
+      </span>
     </template>
   </AttachmentDetailModal>
   <AttachmentUploadModal
