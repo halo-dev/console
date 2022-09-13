@@ -45,7 +45,7 @@ const emit = defineEmits<{
       class="inline-flex items-center"
     >
       <slot name="description">
-        <span v-if="description" class="text-xs text-gray-500">
+        <span v-if="description" class="truncate text-xs text-gray-500">
           {{ description }}
         </span>
       </slot>

@@ -2,17 +2,60 @@
 import {
   IconArrowDown,
   IconMessage,
-  IconSettings,
   VButton,
   VCard,
   VPageHeader,
   VPagination,
   VSpace,
-  VAvatar,
 } from "@halo-dev/components";
-import { ref } from "vue";
+import CommentListItem from "./components/CommentListItem.vue";
+import type { Comment } from "@halo-dev/api-client";
+import { onMounted, ref } from "vue";
+import { faker } from "@faker-js/faker";
 
 const checkAll = ref(false);
+
+const comments = ref<Comment[]>();
+
+onMounted(() => {
+  const result: Comment[] = [];
+  for (let i = 0; i <= 50; i++) {
+    const content = faker.lorem.paragraph(5);
+    result.push({
+      metadata: {
+        name: faker.datatype.uuid(),
+        creationTimestamp: faker.date.recent().toISOString(),
+      },
+      spec: {
+        raw: content,
+        content: content,
+        subjectRef: {
+          kind: "Post",
+          name: faker.lorem.words(),
+        },
+        owner: {
+          kind: "Email",
+          name: faker.internet.email(),
+          displayName: faker.name.fullName(),
+          annotations: {
+            website: faker.internet.url(),
+            avatar: faker.internet.avatar(),
+          },
+        },
+        top: false,
+        priority: 0,
+        userAgent: faker.internet.userAgent(),
+        ipAddress: faker.internet.ip(),
+        allowNotification: false,
+        approved: true,
+        hidden: false,
+      },
+      kind: "Comment",
+      apiVersion: "content.halo.run/v1alpha1",
+    });
+  }
+  comments.value = result;
+});
 </script>
 <template>
   <VPageHeader title="评论">
@@ -83,58 +126,8 @@ const checkAll = ref(false);
         </div>
       </template>
       <ul class="box-border h-full w-full divide-y divide-gray-100" role="list">
-        <li v-for="index in 10" :key="index">
-          <div
-            :class="{
-              'bg-gray-100': checkAll,
-            }"
-            class="relative block cursor-pointer px-4 py-3 transition-all hover:bg-gray-50"
-          >
-            <div
-              v-show="checkAll"
-              class="absolute inset-y-0 left-0 w-0.5 bg-primary"
-            ></div>
-            <div class="relative flex flex-row items-center">
-              <div class="mr-4 hidden items-center sm:flex">
-                <input
-                  v-model="checkAll"
-                  class="h-4 w-4 rounded border-gray-300 text-indigo-600"
-                  type="checkbox"
-                />
-              </div>
-              <div class="flex-1">
-                <div class="flex flex-col sm:flex-row">
-                  <span
-                    class="mr-0 truncate text-sm font-medium text-gray-900 sm:mr-2"
-                  >
-                    Ryan Wang
-                  </span>
-                </div>
-                <div class="mt-1 flex">
-                  <VSpace>
-                    <p class="text-xs text-gray-500">评论测试</p>
-                  </VSpace>
-                </div>
-              </div>
-              <div class="flex">
-                <div
-                  class="inline-flex flex-col items-end gap-4 sm:flex-row sm:items-center sm:gap-6"
-                >
-                  <VAvatar
-                    size="xs"
-                    src="https://ryanc.cc/avatar"
-                    circle
-                  ></VAvatar>
-                  <time class="text-sm text-gray-500" datetime="2020-01-07">
-                    2020-01-07
-                  </time>
-                  <span class="cursor-pointer">
-                    <IconSettings />
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+        <li v-for="(comment, index) in comments" :key="index">
+          <CommentListItem :comment="comment" :is-selected="checkAll" />
         </li>
       </ul>
 

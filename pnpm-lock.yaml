@@ -5,6 +5,7 @@ importers:
   .:
     specifiers:
       '@changesets/cli': ^2.24.4
+      '@faker-js/faker': ^7.5.0
       '@formkit/addons': 1.0.0-beta.10
       '@formkit/auto-animate': 1.0.0-beta.3
       '@formkit/core': 1.0.0-beta.10
@@ -84,6 +85,7 @@ importers:
       vuedraggable: ^4.1.0
       yaml: ^2.1.1
     dependencies:
+      '@faker-js/faker': 7.5.0
       '@formkit/addons': 1.0.0-beta.10
       '@formkit/auto-animate': 1.0.0-beta.3
       '@formkit/core': 1.0.0-beta.10
@@ -1763,6 +1765,11 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /@faker-js/faker/7.5.0:
+    resolution: {integrity: sha512-8wNUCCUHvfvI0gQpDUho/3gPzABffnCn5um65F8dzQ86zz6dlt4+nmAA7PQUc8L+eH+9RgR/qzy5N/8kN0Ozdw==}
+    engines: {node: '>=14.0.0', npm: '>=6.0.0'}
+    dev: false
 
   /@floating-ui/core/0.3.1:
     resolution: {integrity: sha512-ensKY7Ub59u16qsVIFEo2hwTCqZ/r9oZZFh51ivcLGHfUwTn8l1Xzng8RJUe91H/UP8PeqeBronAGx0qmzwk2g==}

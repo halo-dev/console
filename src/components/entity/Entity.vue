@@ -51,5 +51,8 @@ withDefaults(
         </FloatingDropdown>
       </div>
     </div>
+    <div v-if="$slots.footer">
+      <slot name="footer" />
+    </div>
   </div>
 </template>
