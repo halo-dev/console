@@ -1,7 +1,11 @@
 <script lang="ts" setup>
-import { VAvatar, VButton, VTag } from "@halo-dev/components";
-import Entity from "@/components/entity/Entity.vue";
-import EntityField from "@/components/entity/EntityField.vue";
+import {
+  VAvatar,
+  VButton,
+  VTag,
+  VEntityField,
+  VEntity,
+} from "@halo-dev/components";
 import type { Reply } from "@halo-dev/api-client";
 import { formatDatetime } from "@/utils/date";
 
@@ -16,9 +20,9 @@ withDefaults(
 </script>
 
 <template>
-  <Entity class="!px-0 !py-2">
+  <VEntity class="!px-0 !py-2">
     <template #start>
-      <EntityField>
+      <VEntityField>
         <template #description>
           <VAvatar
             circle
@@ -26,13 +30,13 @@ withDefaults(
             size="md"
           ></VAvatar>
         </template>
-      </EntityField>
-      <EntityField
+      </VEntityField>
+      <VEntityField
         class="w-28 min-w-[7rem]"
         :title="reply?.spec.owner.displayName"
         :description="reply?.spec.owner.name"
-      ></EntityField>
-      <EntityField>
+      ></VEntityField>
+      <VEntityField>
         <template #description>
           <div class="flex flex-col gap-2">
             <div class="w-1/2 text-sm text-gray-900">
@@ -46,16 +50,16 @@ withDefaults(
             </div>
           </div>
         </template>
-      </EntityField>
+      </VEntityField>
     </template>
     <template #end>
-      <EntityField
+      <VEntityField
         :description="formatDatetime(reply?.metadata.creationTimestamp)"
       >
-      </EntityField>
+      </VEntityField>
     </template>
-    <template #menuItems>
+    <template #dropdownItems>
       <VButton v-close-popper block type="danger"> 删除 </VButton>
     </template>
-  </Entity>
+  </VEntity>
 </template>

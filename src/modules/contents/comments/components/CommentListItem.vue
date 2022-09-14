@@ -1,7 +1,11 @@
 <script lang="ts" setup>
-import { VAvatar, VButton } from "@halo-dev/components";
-import Entity from "@/components/entity/Entity.vue";
-import EntityField from "@/components/entity/EntityField.vue";
+import {
+  VAvatar,
+  VButton,
+  VEntity,
+  VEntityField,
+  VStatusDot,
+} from "@halo-dev/components";
 import type { Comment } from "@halo-dev/api-client";
 import { formatDatetime } from "@/utils/date";
 import { onMounted, ref } from "vue";
@@ -66,7 +70,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <Entity :is-selected="isSelected">
+  <VEntity :is-selected="isSelected">
     <template v-if="showReplies" #prepend>
       <div class="absolute inset-y-0 left-0 w-[1px] bg-black/50"></div>
       <div class="absolute inset-y-0 right-0 w-[1px] bg-black/50"></div>
@@ -81,7 +85,7 @@ onMounted(() => {
       />
     </template>
     <template #start>
-      <EntityField>
+      <VEntityField>
         <template #description>
           <VAvatar
             circle
@@ -89,13 +93,13 @@ onMounted(() => {
             size="md"
           ></VAvatar>
         </template>
-      </EntityField>
-      <EntityField
+      </VEntityField>
+      <VEntityField
         class="w-28 min-w-[7rem]"
         :title="comment?.spec.owner.displayName"
         :description="comment?.spec.owner.name"
-      ></EntityField>
-      <EntityField>
+      ></VEntityField>
+      <VEntityField>
         <template #description>
           <div class="flex flex-col gap-2">
             <div class="w-1/2 text-sm text-gray-900">
@@ -108,30 +112,23 @@ onMounted(() => {
               >
                 {{ (Math.random() * 10).toFixed(0) }} 条回复
               </span>
-              <div class="flex items-center gap-2">
-                <div class="inline-flex h-1.5 w-1.5 rounded-full bg-green-600">
-                  <span
-                    class="inline-block h-1.5 w-1.5 animate-ping rounded-full bg-green-600"
-                  ></span>
-                </div>
-                <span class="text-gray-500">新回复</span>
-              </div>
+              <VStatusDot state="success" animate text="新回复" />
             </div>
           </div>
         </template>
-      </EntityField>
+      </VEntityField>
     </template>
     <template #end>
-      <EntityField
+      <VEntityField
         :title="comment?.spec.subjectRef.name"
         description="文章"
-      ></EntityField>
-      <EntityField
+      ></VEntityField>
+      <VEntityField
         :description="formatDatetime(comment?.metadata.creationTimestamp)"
       >
-      </EntityField>
+      </VEntityField>
     </template>
-    <template #menuItems>
+    <template #dropdownItems>
       <VButton v-close-popper block type="danger"> 删除 </VButton>
     </template>
 
@@ -147,5 +144,5 @@ onMounted(() => {
         ></ReplyListItem>
       </div>
     </template>
-  </Entity>
+  </VEntity>
 </template>

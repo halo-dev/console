@@ -48,6 +48,9 @@ const classes = computed(() => {
         </FloatingDropdown>
       </div>
     </div>
+    <div v-if="$slots.footer">
+      <slot name="footer" />
+    </div>
   </div>
 </template>
 <style lang="scss">
