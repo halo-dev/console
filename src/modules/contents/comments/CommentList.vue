@@ -9,53 +9,26 @@ import {
   VSpace,
 } from "@halo-dev/components";
 import CommentListItem from "./components/CommentListItem.vue";
-import type { Comment } from "@halo-dev/api-client";
+import type { ListedComment } from "@halo-dev/api-client";
 import { onMounted, ref } from "vue";
-import { faker } from "@faker-js/faker";
+import { apiClient } from "@halo-dev/admin-shared";
 
 const checkAll = ref(false);
 
-const comments = ref<Comment[]>();
+const comments = ref<ListedComment[]>();
 
-onMounted(() => {
-  const result: Comment[] = [];
-  for (let i = 0; i <= 50; i++) {
-    const content = faker.lorem.paragraph(5);
-    result.push({
-      metadata: {
-        name: faker.datatype.uuid(),
-        creationTimestamp: faker.date.recent().toISOString(),
-      },
-      spec: {
-        raw: content,
-        content: content,
-        subjectRef: {
-          kind: "Post",
-          name: faker.lorem.words(),
-        },
-        owner: {
-          kind: "Email",
-          name: faker.internet.email(),
-          displayName: faker.name.fullName(),
-          annotations: {
-            website: faker.internet.url(),
-            avatar: faker.internet.avatar(),
-          },
-        },
-        top: false,
-        priority: 0,
-        userAgent: faker.internet.userAgent(),
-        ipAddress: faker.internet.ip(),
-        allowNotification: false,
-        approved: true,
-        hidden: false,
-      },
-      kind: "Comment",
-      apiVersion: "content.halo.run/v1alpha1",
+const handleFetchComments = async () => {
+  try {
+    const { data } = await apiClient.comment.listComments({
+      sort: "LAST_REPLY_TIME",
     });
+    comments.value = data.items;
+  } catch (error) {
+    console.log("Failed to fetch comments", error);
   }
-  comments.value = result;
-});
+};
+
+onMounted(handleFetchComments);
 </script>
 <template>
   <VPageHeader title="评论">

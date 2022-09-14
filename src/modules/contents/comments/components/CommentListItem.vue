@@ -6,7 +6,7 @@ import {
   VEntityField,
   VStatusDot,
 } from "@halo-dev/components";
-import type { Comment } from "@halo-dev/api-client";
+import type { ListedComment } from "@halo-dev/api-client";
 import { formatDatetime } from "@/utils/date";
 import { onMounted, ref } from "vue";
 import type { Reply } from "@halo-dev/api-client";
@@ -15,7 +15,7 @@ import ReplyListItem from "./ReplyListItem.vue";
 
 withDefaults(
   defineProps<{
-    comment?: Comment;
+    comment?: ListedComment;
     isSelected?: boolean;
   }>(),
   {
@@ -89,28 +89,34 @@ onMounted(() => {
         <template #description>
           <VAvatar
             circle
-            :src="comment?.spec.owner.annotations?.avatar"
+            :src="comment?.comment?.spec.owner.annotations?.avatar"
             size="md"
           ></VAvatar>
         </template>
       </VEntityField>
       <VEntityField
         class="w-28 min-w-[7rem]"
-        :title="comment?.spec.owner.displayName"
-        :description="comment?.spec.owner.name"
+        :title="comment?.owner?.displayName"
+        :description="comment?.owner?.email"
+        :route="{
+          name: 'UserDetail',
+          params: {
+            name: comment?.owner?.name,
+          },
+        }"
       ></VEntityField>
       <VEntityField>
         <template #description>
           <div class="flex flex-col gap-2">
             <div class="w-1/2 text-sm text-gray-900">
-              {{ comment?.spec.content }}
+              {{ comment?.comment?.spec.content }}
             </div>
             <div class="flex items-center gap-3 text-xs">
               <span
-                class="text-gray-700 hover:text-gray-900"
+                class="select-none text-gray-700 hover:text-gray-900"
                 @click="showReplies = !showReplies"
               >
-                {{ (Math.random() * 10).toFixed(0) }} 条回复
+                {{ comment?.comment?.status?.replyCount || 0 }} 条回复
               </span>
               <VStatusDot state="success" animate text="新回复" />
             </div>
@@ -119,12 +125,11 @@ onMounted(() => {
       </VEntityField>
     </template>
     <template #end>
+      <VEntityField title="unknow" description="文章"></VEntityField>
       <VEntityField
-        :title="comment?.spec.subjectRef.name"
-        description="文章"
-      ></VEntityField>
-      <VEntityField
-        :description="formatDatetime(comment?.metadata.creationTimestamp)"
+        :description="
+          formatDatetime(comment?.comment?.metadata.creationTimestamp)
+        "
       >
       </VEntityField>
     </template>
