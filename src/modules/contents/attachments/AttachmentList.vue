@@ -16,6 +16,9 @@ import {
   VEmpty,
   IconCloseCircle,
   IconFolder,
+  VStatusDot,
+  VEntity,
+  VEntityField,
 } from "@halo-dev/components";
 import LazyImage from "@/components/image/LazyImage.vue";
 import UserDropdownSelector from "@/components/dropdown-selector/UserDropdownSelector.vue";
@@ -35,8 +38,6 @@ import cloneDeep from "lodash.clonedeep";
 import { isImage } from "@/utils/image";
 import { useRouteQuery } from "@vueuse/router";
 import { useFetchAttachmentGroup } from "./composables/use-attachment-group";
-import Entity from "@/components/entity/Entity.vue";
-import EntityField from "@/components/entity/EntityField.vue";
 
 const policyVisible = ref(false);
 const uploadVisible = ref(false);
@@ -556,7 +557,7 @@ onMounted(() => {
               role="list"
             >
               <li v-for="(attachment, index) in attachments.items" :key="index">
-                <Entity :is-selected="isChecked(attachment)">
+                <VEntity :is-selected="isChecked(attachment)">
                   <template #checkbox>
                     <input
                       :checked="selectedAttachments.has(attachment)"
@@ -566,7 +567,7 @@ onMounted(() => {
                     />
                   </template>
                   <template #start>
-                    <EntityField>
+                    <VEntityField>
                       <template #description>
                         <div
                           class="h-10 w-10 rounded border bg-white p-1 hover:shadow-sm"
@@ -579,8 +580,8 @@ onMounted(() => {
                           />
                         </div>
                       </template>
-                    </EntityField>
-                    <EntityField
+                    </VEntityField>
+                    <VEntityField
                       :title="attachment.spec.displayName"
                       @click="handleClickItem(attachment)"
                     >
@@ -594,15 +595,15 @@ onMounted(() => {
                           </span>
                         </VSpace>
                       </template>
-                    </EntityField>
+                    </VEntityField>
                   </template>
                   <template #end>
-                    <EntityField
+                    <VEntityField
                       :description="
                         getPolicyName(attachment.spec.policyRef?.name)
                       "
                     />
-                    <EntityField>
+                    <VEntityField>
                       <template #description>
                         <RouterLink
                           :to="{
@@ -614,29 +615,26 @@ onMounted(() => {
                           {{ attachment.spec.uploadedBy?.name }}
                         </RouterLink>
                       </template>
-                    </EntityField>
-                    <EntityField v-if="attachment.metadata.deletionTimestamp">
+                    </VEntityField>
+                    <VEntityField v-if="attachment.metadata.deletionTimestamp">
                       <template #description>
-                        <div
+                        <VStatusDot
                           v-tooltip="`删除中`"
-                          class="inline-flex h-1.5 w-1.5 rounded-full bg-red-600"
-                        >
-                          <span
-                            class="inline-block h-1.5 w-1.5 animate-ping rounded-full bg-red-600"
-                          ></span>
-                        </div>
+                          state="warning"
+                          animate
+                        />
                       </template>
-                    </EntityField>
-                    <EntityField
+                    </VEntityField>
+                    <VEntityField
                       :description="
                         formatDatetime(attachment.metadata.creationTimestamp)
                       "
                     />
                   </template>
-                  <template #menuItems>
+                  <template #dropdownItems>
                     <VButton v-close-popper block type="danger"> 删除 </VButton>
                   </template>
-                </Entity>
+                </VEntity>
               </li>
             </ul>
           </div>

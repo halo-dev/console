@@ -15,10 +15,11 @@ import {
   VPagination,
   VSpace,
   VTag,
+  VStatusDot,
+  VEntity,
+  VEntityField,
 } from "@halo-dev/components";
 import RoleEditingModal from "./components/RoleEditingModal.vue";
-import Entity from "@/components/entity/Entity.vue";
-import EntityField from "@/components/entity/EntityField.vue";
 
 // constants
 import { rbacAnnotations } from "@/constants/annotations";
@@ -200,9 +201,9 @@ const handleDelete = async (role: Role) => {
       </template>
       <ul class="box-border h-full w-full divide-y divide-gray-100" role="list">
         <li v-for="(role, index) in roles" :key="index">
-          <Entity>
+          <VEntity>
             <template #start>
-              <EntityField
+              <VEntityField
                 :title="
                   role.metadata.annotations?.[rbacAnnotations.DISPLAY_NAME] ||
                   role.metadata.name
@@ -222,32 +223,25 @@ const handleDelete = async (role: Role) => {
                     name: role.metadata.name,
                   },
                 }"
-              ></EntityField>
+              ></VEntityField>
             </template>
             <template #end>
-              <EntityField v-if="role.metadata.deletionTimestamp">
+              <VEntityField v-if="role.metadata.deletionTimestamp">
                 <template #description>
-                  <div
-                    v-tooltip="`删除中`"
-                    class="inline-flex h-1.5 w-1.5 rounded-full bg-red-600"
-                  >
-                    <span
-                      class="inline-block h-1.5 w-1.5 animate-ping rounded-full bg-red-600"
-                    ></span>
-                  </div>
+                  <VStatusDot v-tooltip="`删除中`" state="warning" animate />
                 </template>
-              </EntityField>
-              <EntityField description="0 个用户" />
-              <EntityField>
+              </VEntityField>
+              <VEntityField description="0 个用户" />
+              <VEntityField>
                 <template #description>
                   <VTag> 系统保留</VTag>
                 </template>
-              </EntityField>
-              <EntityField
+              </VEntityField>
+              <VEntityField
                 :description="formatDatetime(role.metadata.creationTimestamp)"
               />
             </template>
-            <template #menuItems>
+            <template #dropdownItems>
               <VButton
                 v-close-popper
                 block
@@ -268,7 +262,7 @@ const handleDelete = async (role: Role) => {
                 基于此角色创建
               </VButton>
             </template>
-          </Entity>
+          </VEntity>
         </li>
       </ul>
 

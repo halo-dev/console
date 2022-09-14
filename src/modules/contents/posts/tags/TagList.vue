@@ -13,11 +13,12 @@ import {
   VEmpty,
   VPageHeader,
   VSpace,
+  VStatusDot,
+  VEntity,
+  VEntityField,
 } from "@halo-dev/components";
 import TagEditingModal from "./components/TagEditingModal.vue";
 import PostTag from "./components/PostTag.vue";
-import Entity from "@/components/entity/Entity.vue";
-import EntityField from "@/components/entity/EntityField.vue";
 
 // types
 import type { Tag } from "@halo-dev/api-client";
@@ -174,37 +175,30 @@ onMounted(async () => {
           role="list"
         >
           <li v-for="(tag, index) in tags" :key="index">
-            <Entity
+            <VEntity
               :is-selected="selectedTag?.metadata.name === tag.metadata.name"
             >
               <template #start>
-                <EntityField :description="tag.status?.permalink">
+                <VEntityField :description="tag.status?.permalink">
                   <template #title>
                     <PostTag :tag="tag" />
                   </template>
-                </EntityField>
+                </VEntityField>
               </template>
               <template #end>
-                <EntityField v-if="tag.metadata.deletionTimestamp">
+                <VEntityField v-if="tag.metadata.deletionTimestamp">
                   <template #description>
-                    <div
-                      v-tooltip="`删除中`"
-                      class="inline-flex h-1.5 w-1.5 rounded-full bg-red-600"
-                    >
-                      <span
-                        class="inline-block h-1.5 w-1.5 animate-ping rounded-full bg-red-600"
-                      ></span>
-                    </div>
+                    <VStatusDot v-tooltip="`删除中`" state="warning" animate />
                   </template>
-                </EntityField>
-                <EntityField
+                </VEntityField>
+                <VEntityField
                   :description="`${tag.status?.posts?.length || 0} 篇文章`"
                 />
-                <EntityField
+                <VEntityField
                   :description="formatDatetime(tag.metadata.creationTimestamp)"
                 />
               </template>
-              <template #menuItems>
+              <template #dropdownItems>
                 <VButton
                   v-close-popper
                   block
@@ -222,7 +216,7 @@ onMounted(async () => {
                   删除
                 </VButton>
               </template>
-            </Entity>
+            </VEntity>
           </li>
         </ul>
 
