@@ -5,11 +5,14 @@ import {
   VTag,
   VEntityField,
   VEntity,
+  useDialog,
+  VStatusDot,
 } from "@halo-dev/components";
 import type { Reply } from "@halo-dev/api-client";
 import { formatDatetime } from "@/utils/date";
+import { apiClient } from "@halo-dev/admin-shared";
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     reply?: Reply;
   }>(),
@@ -17,6 +20,31 @@ withDefaults(
     reply: undefined,
   }
 );
+
+const emit = defineEmits<{
+  (event: "reload"): void;
+}>();
+
+const dialog = useDialog();
+
+const handleDelete = async () => {
+  dialog.warning({
+    title: "是否确认删除该回复？",
+    description: "该操作不可恢复。",
+    confirmType: "danger",
+    onConfirm: async () => {
+      try {
+        await apiClient.extension.reply.deletecontentHaloRunV1alpha1Reply({
+          name: props.reply?.metadata.name as string,
+        });
+      } catch (error) {
+        console.log("Failed to delete comment reply", error);
+      } finally {
+        emit("reload");
+      }
+    },
+  });
+};
 </script>
 
 <template>
@@ -53,13 +81,20 @@ withDefaults(
       </VEntityField>
     </template>
     <template #end>
+      <VEntityField v-if="reply?.metadata.deletionTimestamp">
+        <template #description>
+          <VStatusDot v-tooltip="`删除中`" state="warning" animate />
+        </template>
+      </VEntityField>
       <VEntityField
         :description="formatDatetime(reply?.metadata.creationTimestamp)"
       >
       </VEntityField>
     </template>
     <template #dropdownItems>
-      <VButton v-close-popper block type="danger"> 删除 </VButton>
+      <VButton v-close-popper block type="danger" @click="handleDelete">
+        删除
+      </VButton>
     </template>
   </VEntity>
 </template>

@@ -35,8 +35,7 @@ const dialog = useDialog();
 const replies = ref<Reply[]>([] as Reply[]);
 const showReplies = ref(false);
 
-const handleDelete = async (comment: ListedComment | undefined) => {
-  if (!comment) return;
+const handleDelete = async () => {
   dialog.warning({
     title: "是否确认删除该评论？",
     description: "删除评论的同时会删除该评论下的所有回复，该操作不可恢复。",
@@ -44,7 +43,7 @@ const handleDelete = async (comment: ListedComment | undefined) => {
     onConfirm: async () => {
       try {
         await apiClient.extension.comment.deletecontentHaloRunV1alpha1Comment({
-          name: comment.comment?.metadata.name as string,
+          name: props.comment?.comment?.metadata.name as string,
         });
       } catch (error) {
         console.log("Failed to delete comment", error);
@@ -81,11 +80,7 @@ const handleTriggerReply = () => {
       <div class="absolute inset-x-0 bottom-0 h-[1px] bg-black/50"></div>
     </template>
     <template #checkbox>
-      <input
-        :checked="isSelected"
-        class="h-4 w-4 rounded border-gray-300 text-indigo-600"
-        type="checkbox"
-      />
+      <slot name="checkbox" />
     </template>
     <template #start>
       <VEntityField>
@@ -148,12 +143,7 @@ const handleTriggerReply = () => {
       </VEntityField>
     </template>
     <template #dropdownItems>
-      <VButton
-        v-close-popper
-        block
-        type="danger"
-        @click="handleDelete(comment)"
-      >
+      <VButton v-close-popper block type="danger" @click="handleDelete">
         删除
       </VButton>
     </template>
@@ -167,6 +157,7 @@ const handleTriggerReply = () => {
           v-for="reply in replies"
           :key="reply.metadata.name"
           :reply="reply"
+          @reload="handleFetchReplies"
         ></ReplyListItem>
       </div>
     </template>
