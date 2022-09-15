@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import {
+  useDialog,
   VAvatar,
   VButton,
   VEntity,
@@ -12,6 +13,7 @@ import { onMounted, ref } from "vue";
 import type { Reply } from "@halo-dev/api-client";
 import { faker } from "@faker-js/faker";
 import ReplyListItem from "./ReplyListItem.vue";
+import { apiClient } from "@halo-dev/admin-shared";
 
 withDefaults(
   defineProps<{
@@ -24,9 +26,35 @@ withDefaults(
   }
 );
 
+const emit = defineEmits<{
+  (event: "reload"): void;
+}>();
+
+const dialog = useDialog();
+
 const showReplies = ref(false);
 
 const replies = ref<Reply[]>([] as Reply[]);
+
+const handleDelete = async (comment: ListedComment | undefined) => {
+  if (!comment) return;
+  dialog.warning({
+    title: "是否确认删除该评论？",
+    description: "删除评论的同时会删除该评论下的所有回复，该操作不可恢复。",
+    confirmType: "danger",
+    onConfirm: async () => {
+      try {
+        await apiClient.extension.comment.deletecontentHaloRunV1alpha1Comment({
+          name: comment.comment?.metadata.name as string,
+        });
+      } catch (error) {
+        console.log("Failed to delete comment", error);
+      } finally {
+        emit("reload");
+      }
+    },
+  });
+};
 
 onMounted(() => {
   const result: Reply[] = [];
@@ -126,6 +154,11 @@ onMounted(() => {
     </template>
     <template #end>
       <VEntityField title="unknow" description="文章"></VEntityField>
+      <VEntityField v-if="comment?.comment?.metadata.deletionTimestamp">
+        <template #description>
+          <VStatusDot v-tooltip="`删除中`" state="warning" animate />
+        </template>
+      </VEntityField>
       <VEntityField
         :description="
           formatDatetime(comment?.comment?.metadata.creationTimestamp)
@@ -134,7 +167,14 @@ onMounted(() => {
       </VEntityField>
     </template>
     <template #dropdownItems>
-      <VButton v-close-popper block type="danger"> 删除 </VButton>
+      <VButton
+        v-close-popper
+        block
+        type="danger"
+        @click="handleDelete(comment)"
+      >
+        删除
+      </VButton>
     </template>
 
     <template v-if="showReplies" #footer>
