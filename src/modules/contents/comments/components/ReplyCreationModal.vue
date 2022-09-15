@@ -1,12 +1,11 @@
 <script lang="ts" setup>
 import { VModal, VSpace, VButton, IconMotionLine } from "@halo-dev/components";
-import type { ListedComment, Reply, User } from "@halo-dev/api-client";
+import type { ListedComment, Reply, ReplyRequest } from "@halo-dev/api-client";
 // @ts-ignore
 import { Picker } from "emoji-mart";
 import data from "@emoji-mart/data";
 import i18n from "@emoji-mart/data/i18n/zh.json";
-import { inject, ref, watch, watchEffect } from "vue";
-import { v4 as uuid } from "uuid";
+import { ref, watch, watchEffect } from "vue";
 import { reset, submitForm } from "@formkit/core";
 import cloneDeep from "lodash.clonedeep";
 import { useMagicKeys } from "@vueuse/core";
@@ -31,40 +30,21 @@ const emit = defineEmits<{
   (event: "close"): void;
 }>();
 
-const currentUser = inject<User>("currentUser");
-
-const initialFormState: Reply = {
-  spec: {
-    raw: "",
-    content: "",
-    owner: {
-      kind: "User",
-      name: currentUser?.metadata.name as string,
-      displayName: currentUser?.spec.displayName,
-    },
-    userAgent: navigator.userAgent,
-    ipAddress: "",
-    priority: 0,
-    top: false,
-    allowNotification: true,
-    approved: false,
-    hidden: false,
-    commentName: "",
-  },
-  apiVersion: "content.halo.run/v1alpha1",
-  kind: "Reply",
-  metadata: {
-    name: uuid(),
-  },
+const initialFormState: ReplyRequest = {
+  raw: "",
+  content: "",
+  allowNotification: true,
+  owner: undefined,
+  quoteReply: undefined,
 };
 
-const formState = ref<Reply>(cloneDeep(initialFormState));
+const formState = ref<ReplyRequest>(cloneDeep(initialFormState));
 const saving = ref(false);
 
 watch(
-  () => formState.value.spec.raw,
+  () => formState.value.raw,
   (newValue) => {
-    formState.value.spec.content = newValue;
+    formState.value.content = newValue;
   }
 );
 
@@ -77,7 +57,6 @@ const onVisibleChange = (visible: boolean) => {
 
 const handleResetForm = () => {
   formState.value = cloneDeep(initialFormState);
-  formState.value.metadata.name = uuid();
   reset("comment-reply-form");
 };
 
@@ -93,8 +72,6 @@ watch(
   () => props.visible,
   (visible) => {
     if (visible) {
-      formState.value.spec.commentName = props.comment?.comment?.metadata
-        .name as string;
       setFocus("contentInput");
     } else {
       handleResetForm();
@@ -105,8 +82,12 @@ watch(
 const handleCreateReply = async () => {
   try {
     saving.value = true;
-    await apiClient.extension.reply.createcontentHaloRunV1alpha1Reply({
-      reply: formState.value,
+    if (props.reply) {
+      formState.value.quoteReply = props.reply.metadata.name;
+    }
+    await apiClient.comment.createReply({
+      name: props.comment?.comment.metadata.name,
+      replyRequest: formState.value,
     });
     onVisibleChange(false);
   } catch (error) {
@@ -131,7 +112,7 @@ const handleCreateEmojiPicker = () => {
 };
 
 const onEmojiSelect = (emoji: { native: string }) => {
-  formState.value.spec.raw += emoji.native;
+  formState.value.raw += emoji.native;
   setFocus("contentInput");
 };
 
@@ -157,7 +138,7 @@ watchEffect(() => {
     >
       <FormKit
         id="contentInput"
-        v-model="formState.spec.raw"
+        v-model="formState.raw"
         type="textarea"
         validation="required"
         validation-label="内容"

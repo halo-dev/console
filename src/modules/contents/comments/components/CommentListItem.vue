@@ -7,9 +7,10 @@ import {
   VEntityField,
   VStatusDot,
 } from "@halo-dev/components";
+import ReplyCreationModal from "./ReplyCreationModal.vue";
 import type { ListedComment } from "@halo-dev/api-client";
 import { formatDatetime } from "@/utils/date";
-import { onMounted, ref } from "vue";
+import { ref, watch } from "vue";
 import type { Reply } from "@halo-dev/api-client";
 import ReplyListItem from "./ReplyListItem.vue";
 import { apiClient } from "@halo-dev/admin-shared";
@@ -27,13 +28,15 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (event: "reload"): void;
-  (event: "reply", comment: ListedComment): void;
 }>();
 
 const dialog = useDialog();
 
 const replies = ref<Reply[]>([] as Reply[]);
+const selectedReply = ref<Reply>();
+const loading = ref(false);
 const showReplies = ref(false);
+const replyModal = ref(false);
 
 const handleDelete = async () => {
   dialog.warning({
@@ -56,22 +59,58 @@ const handleDelete = async () => {
 
 const handleFetchReplies = async () => {
   try {
+    loading.value = true;
     const { data } =
-      await apiClient.extension.reply.listcontentHaloRunV1alpha1Reply();
+      await apiClient.extension.reply.listcontentHaloRunV1alpha1Reply({
+        labelSelector: [
+          `content.halo.run/comment-name=${props.comment.comment.metadata.name}`,
+        ],
+      });
     replies.value = data.items;
   } catch (error) {
     console.error("Failed to fetch comment replies", error);
+  } finally {
+    loading.value = false;
   }
 };
 
-onMounted(handleFetchReplies);
+watch(
+  () => showReplies.value,
+  (newValue) => {
+    if (newValue) {
+      handleFetchReplies();
+    } else {
+      replies.value = [];
+    }
+  }
+);
 
 const handleTriggerReply = () => {
-  emit("reply", props.comment);
+  replyModal.value = true;
+};
+
+const onTriggerReply = (reply: Reply) => {
+  selectedReply.value = reply;
+  replyModal.value = true;
+};
+
+const onReplyCreationModalClose = () => {
+  if (selectedReply.value) {
+    handleFetchReplies();
+    selectedReply.value = undefined;
+    return;
+  }
+  emit("reload");
 };
 </script>
 
 <template>
+  <ReplyCreationModal
+    v-model:visible="replyModal"
+    :comment="comment"
+    :reply="selectedReply"
+    @close="onReplyCreationModalClose"
+  />
   <VEntity :is-selected="isSelected">
     <template v-if="showReplies" #prepend>
       <div class="absolute inset-y-0 left-0 w-[1px] bg-black/50"></div>
@@ -116,7 +155,12 @@ const handleTriggerReply = () => {
               >
                 {{ comment?.comment?.status?.replyCount || 0 }} 条回复
               </span>
-              <VStatusDot state="success" animate text="新回复" />
+              <VStatusDot
+                v-if="comment?.comment?.status?.unreadReplyCount || 0 > 0"
+                state="success"
+                animate
+                text="新回复"
+              />
               <span
                 class="select-none text-gray-700 hover:text-gray-900"
                 @click="handleTriggerReply"
@@ -158,6 +202,7 @@ const handleTriggerReply = () => {
           :key="reply.metadata.name"
           :reply="reply"
           @reload="handleFetchReplies"
+          @reply="onTriggerReply"
         ></ReplyListItem>
       </div>
     </template>

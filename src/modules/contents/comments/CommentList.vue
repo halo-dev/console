@@ -10,7 +10,6 @@ import {
   IconCloseCircle,
 } from "@halo-dev/components";
 import CommentListItem from "./components/CommentListItem.vue";
-import ReplyCreationModal from "./components/ReplyCreationModal.vue";
 import type { ListedComment, ListedCommentList } from "@halo-dev/api-client";
 import { onMounted, ref, watch } from "vue";
 import { apiClient } from "@halo-dev/admin-shared";
@@ -29,8 +28,6 @@ const comments = ref<ListedCommentList>({
 });
 const selectedComment = ref<ListedComment>();
 const selectedCommentNames = ref<string[]>([]);
-
-const replyModal = ref(false);
 
 const handleFetchComments = async () => {
   try {
@@ -58,11 +55,6 @@ const handlePaginationChange = ({
   handleFetchComments();
 };
 
-const onTriggerReply = (comment: ListedComment) => {
-  selectedComment.value = comment;
-  replyModal.value = true;
-};
-
 // Selection
 const handleCheckAllChange = (e: Event) => {
   const { checked } = e.target as HTMLInputElement;
@@ -75,6 +67,14 @@ const handleCheckAllChange = (e: Event) => {
   } else {
     selectedCommentNames.value.length = 0;
   }
+};
+
+const checkSelection = (comment: ListedComment) => {
+  return (
+    comment.comment.metadata.name ===
+      selectedComment.value?.comment.metadata.name ||
+    selectedCommentNames.value.includes(comment.comment.metadata.name)
+  );
 };
 
 watch(
@@ -146,7 +146,6 @@ const handleSortFilterItemChange = (filterItem: {
 };
 </script>
 <template>
-  <ReplyCreationModal v-model:visible="replyModal" :comment="selectedComment" />
   <VPageHeader title="评论">
     <template #icon>
       <IconMessage class="mr-2 self-center" />
@@ -287,8 +286,7 @@ const handleSortFilterItemChange = (filterItem: {
         <li v-for="(comment, index) in comments.items" :key="index">
           <CommentListItem
             :comment="comment"
-            :is-selected="checkAll"
-            @reply="onTriggerReply"
+            :is-selected="checkSelection(comment)"
             @reload="handleFetchComments"
           >
             <template #checkbox>

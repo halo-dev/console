@@ -23,6 +23,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (event: "reload"): void;
+  (event: "reply", reply: Reply): void;
 }>();
 
 const dialog = useDialog();
@@ -44,6 +45,10 @@ const handleDelete = async () => {
       }
     },
   });
+};
+
+const handleTriggerReply = () => {
+  emit("reply", props.reply);
 };
 </script>
 
@@ -71,8 +76,13 @@ const handleDelete = async () => {
               {{ reply?.spec.content }}
             </div>
             <div class="flex items-center gap-3 text-xs">
-              <span class="text-gray-700 hover:text-gray-900"> 回复 </span>
-              <div class="flex items-center">
+              <span
+                class="select-none text-gray-700 hover:text-gray-900"
+                @click="handleTriggerReply"
+              >
+                回复
+              </span>
+              <div v-if="false" class="flex items-center">
                 <VTag>New</VTag>
               </div>
             </div>
