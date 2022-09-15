@@ -5,7 +5,7 @@ importers:
   .:
     specifiers:
       '@changesets/cli': ^2.24.4
-      '@faker-js/faker': ^7.5.0
+      '@emoji-mart/data': ^1.0.6
       '@formkit/addons': 1.0.0-beta.10
       '@formkit/auto-animate': 1.0.0-beta.3
       '@formkit/core': 1.0.0-beta.10
@@ -44,6 +44,7 @@ importers:
       colorjs.io: ^0.4.0
       cypress: ^9.7.0
       dayjs: ^1.11.5
+      emoji-mart: ^5.2.2
       eslint: ^8.23.0
       eslint-plugin-cypress: ^2.12.1
       eslint-plugin-vue: ^9.4.0
@@ -85,7 +86,7 @@ importers:
       vuedraggable: ^4.1.0
       yaml: ^2.1.1
     dependencies:
-      '@faker-js/faker': 7.5.0
+      '@emoji-mart/data': 1.0.6
       '@formkit/addons': 1.0.0-beta.10
       '@formkit/auto-animate': 1.0.0-beta.3
       '@formkit/core': 1.0.0-beta.10
@@ -104,6 +105,7 @@ importers:
       axios: 0.27.2
       colorjs.io: 0.4.0
       dayjs: 1.11.5
+      emoji-mart: 5.2.2
       filepond: 4.30.4
       floating-vue: 2.0.0-beta.20_vue@3.2.39
       lodash.clonedeep: 4.5.0
@@ -1738,6 +1740,10 @@ packages:
       - supports-color
     dev: true
 
+  /@emoji-mart/data/1.0.6:
+    resolution: {integrity: sha512-8wu3ec/kLCB0Y3K+pOKyY6Ob+xtQu3XhZvntdrpOTUQZ/PO6FW5PpFw7RE1kQ/up1fsVSJBl5mZ8Gs4SPwTYeg==}
+    dev: false
+
   /@esbuild/linux-loong64/0.15.7:
     resolution: {integrity: sha512-IKznSJOsVUuyt7cDzzSZyqBEcZe+7WlBqTVXiF1OXP/4Nm387ToaXZ0fyLwI1iBlI/bzpxVq411QE2/Bt2XWWw==}
     engines: {node: '>=12'}
@@ -1763,11 +1769,6 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
-
-  /@faker-js/faker/7.5.0:
-    resolution: {integrity: sha512-8wNUCCUHvfvI0gQpDUho/3gPzABffnCn5um65F8dzQ86zz6dlt4+nmAA7PQUc8L+eH+9RgR/qzy5N/8kN0Ozdw==}
-    engines: {node: '>=14.0.0', npm: '>=6.0.0'}
-    dev: false
 
   /@floating-ui/core/0.3.1:
     resolution: {integrity: sha512-ensKY7Ub59u16qsVIFEo2hwTCqZ/r9oZZFh51ivcLGHfUwTn8l1Xzng8RJUe91H/UP8PeqeBronAGx0qmzwk2g==}
@@ -4634,6 +4635,10 @@ packages:
     resolution: {integrity: sha512-Fl5Ftk6WwXE0wqCgNoseKWndjzZlDCwuPTcoVZfCP9R3EHQF8qUtr3YUPNETegRBOKqQKPW3n4kiIWngGi8tKg==}
     dependencies:
       batch-processor: 1.0.0
+    dev: false
+
+  /emoji-mart/5.2.2:
+    resolution: {integrity: sha512-BvcrX+Ps9MxSVEjnvxupclU3MBD6WVC4WZOY26csfC6oFdaWpFhdrzeVNVBmCLPOmzY1SE0aAsqZJRNVbZ1yhQ==}
     dev: false
 
   /emoji-regex/8.0.0:

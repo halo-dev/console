@@ -9,7 +9,8 @@ import {
   VSpace,
 } from "@halo-dev/components";
 import CommentListItem from "./components/CommentListItem.vue";
-import type { ListedCommentList } from "@halo-dev/api-client";
+import ReplyCreationModal from "./components/ReplyCreationModal.vue";
+import type { ListedComment, ListedCommentList } from "@halo-dev/api-client";
 import { onMounted, ref } from "vue";
 import { apiClient } from "@halo-dev/admin-shared";
 
@@ -25,6 +26,9 @@ const comments = ref<ListedCommentList>({
   hasNext: false,
   hasPrevious: false,
 });
+const selectedComment = ref<ListedComment>();
+
+const replyModal = ref(false);
 
 const handleFetchComments = async () => {
   try {
@@ -51,9 +55,15 @@ const handlePaginationChange = ({
   handleFetchComments();
 };
 
+const onTriggerReply = (comment: ListedComment) => {
+  selectedComment.value = comment;
+  replyModal.value = true;
+};
+
 onMounted(handleFetchComments);
 </script>
 <template>
+  <ReplyCreationModal v-model:visible="replyModal" :comment="selectedComment" />
   <VPageHeader title="评论">
     <template #icon>
       <IconMessage class="mr-2 self-center" />
@@ -123,7 +133,11 @@ onMounted(handleFetchComments);
       </template>
       <ul class="box-border h-full w-full divide-y divide-gray-100" role="list">
         <li v-for="(comment, index) in comments.items" :key="index">
-          <CommentListItem :comment="comment" :is-selected="checkAll" />
+          <CommentListItem
+            :comment="comment"
+            :is-selected="checkAll"
+            @reply="onTriggerReply"
+          />
         </li>
       </ul>
 

@@ -11,11 +11,10 @@ import type { ListedComment } from "@halo-dev/api-client";
 import { formatDatetime } from "@/utils/date";
 import { onMounted, ref } from "vue";
 import type { Reply } from "@halo-dev/api-client";
-import { faker } from "@faker-js/faker";
 import ReplyListItem from "./ReplyListItem.vue";
 import { apiClient } from "@halo-dev/admin-shared";
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     comment?: ListedComment;
     isSelected?: boolean;
@@ -28,13 +27,13 @@ withDefaults(
 
 const emit = defineEmits<{
   (event: "reload"): void;
+  (event: "reply", comment: ListedComment): void;
 }>();
 
 const dialog = useDialog();
 
-const showReplies = ref(false);
-
 const replies = ref<Reply[]>([] as Reply[]);
+const showReplies = ref(false);
 
 const handleDelete = async (comment: ListedComment | undefined) => {
   if (!comment) return;
@@ -56,45 +55,21 @@ const handleDelete = async (comment: ListedComment | undefined) => {
   });
 };
 
-onMounted(() => {
-  const result: Reply[] = [];
-
-  for (let i = 0; i <= 5; i++) {
-    const content = faker.lorem.paragraph(3);
-    result.push({
-      metadata: {
-        name: faker.datatype.uuid(),
-        creationTimestamp: faker.date.recent().toISOString(),
-      },
-      spec: {
-        raw: content,
-        content: content,
-        owner: {
-          kind: "Email",
-          name: faker.internet.email(),
-          displayName: faker.name.fullName(),
-          annotations: {
-            website: faker.internet.url(),
-            avatar: faker.internet.avatar(),
-          },
-        },
-        quoteReply: faker.datatype.uuid(),
-        commentName: faker.datatype.uuid(),
-        top: false,
-        priority: 0,
-        userAgent: faker.internet.userAgent(),
-        ipAddress: faker.internet.ip(),
-        allowNotification: false,
-        approved: true,
-        hidden: false,
-      },
-      kind: "Reply",
-      apiVersion: "content.halo.run/v1alpha1",
-    });
+const handleFetchReplies = async () => {
+  try {
+    const { data } =
+      await apiClient.extension.reply.listcontentHaloRunV1alpha1Reply();
+    replies.value = data.items;
+  } catch (error) {
+    console.error("Failed to fetch comment replies", error);
   }
+};
 
-  replies.value = result;
-});
+onMounted(handleFetchReplies);
+
+const handleTriggerReply = () => {
+  emit("reply", props.comment);
+};
 </script>
 
 <template>
@@ -147,6 +122,12 @@ onMounted(() => {
                 {{ comment?.comment?.status?.replyCount || 0 }} 条回复
               </span>
               <VStatusDot state="success" animate text="新回复" />
+              <span
+                class="select-none text-gray-700 hover:text-gray-900"
+                @click="handleTriggerReply"
+              >
+                回复
+              </span>
             </div>
           </div>
         </template>

@@ -25,7 +25,7 @@
     "packages/*"
   ],
   "dependencies": {
-    "@faker-js/faker": "^7.5.0",
+    "@emoji-mart/data": "^1.0.6",
     "@formkit/addons": "1.0.0-beta.10",
     "@formkit/auto-animate": "1.0.0-beta.3",
     "@formkit/core": "1.0.0-beta.10",
@@ -44,6 +44,7 @@
     "axios": "^0.27.2",
     "colorjs.io": "^0.4.0",
     "dayjs": "^1.11.5",
+    "emoji-mart": "^5.2.2",
     "filepond": "^4.30.4",
     "floating-vue": "2.0.0-beta.20",
     "lodash.clonedeep": "^4.5.0",
