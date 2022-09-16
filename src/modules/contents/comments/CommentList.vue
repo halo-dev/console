@@ -12,7 +12,12 @@ import {
   useDialog,
 } from "@halo-dev/components";
 import CommentListItem from "./components/CommentListItem.vue";
-import type { ListedComment, ListedCommentList } from "@halo-dev/api-client";
+import UserDropdownSelector from "@/components/dropdown-selector/UserDropdownSelector.vue";
+import type {
+  ListedComment,
+  ListedCommentList,
+  User,
+} from "@halo-dev/api-client";
 import { onMounted, ref, watch } from "vue";
 import { apiClient } from "@halo-dev/admin-shared";
 
@@ -32,6 +37,7 @@ const loading = ref(false);
 const checkAll = ref(false);
 const selectedComment = ref<ListedComment>();
 const selectedCommentNames = ref<string[]>([]);
+const keyword = ref("");
 
 const handleFetchComments = async () => {
   try {
@@ -41,6 +47,9 @@ const handleFetchComments = async () => {
       size: comments.value.size,
       approved: selectedApprovedFilterItem.value.value,
       sort: selectedSortFilterItem.value.value,
+      keyword: keyword.value,
+      ownerKind: "User",
+      ownerName: selectedUser.value?.metadata.name,
     });
     comments.value = data;
   } catch (error) {
@@ -160,6 +169,7 @@ const selectedSortFilterItem = ref<{
   label: string;
   value?: Sort;
 }>(SortFilterItems[0]);
+const selectedUser = ref<User>();
 
 const handleApprovedFilterItemChange = (filterItem: {
   label: string;
@@ -178,6 +188,11 @@ const handleSortFilterItemChange = (filterItem: {
   selectedCommentNames.value.length = 0;
   handlePaginationChange({ page: 1, size: 20 });
 };
+
+function handleSelectUser(user: User | undefined) {
+  selectedUser.value = user;
+  handlePaginationChange({ page: 1, size: 20 });
+}
 </script>
 <template>
   <VPageHeader title="评论">
@@ -206,7 +221,12 @@ const handleSortFilterItemChange = (filterItem: {
                 v-if="!selectedCommentNames.length"
                 class="flex items-center gap-2"
               >
-                <FormKit placeholder="输入关键词搜索" type="text"></FormKit>
+                <FormKit
+                  v-model="keyword"
+                  placeholder="输入关键词搜索"
+                  type="text"
+                  @keyup.enter="handleFetchComments"
+                ></FormKit>
                 <div
                   v-if="selectedApprovedFilterItem.value != undefined"
                   class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
@@ -219,6 +239,18 @@ const handleSortFilterItemChange = (filterItem: {
                     @click="
                       handleApprovedFilterItemChange(ApprovedFilterItems[0])
                     "
+                  />
+                </div>
+                <div
+                  v-if="selectedUser"
+                  class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                >
+                  <span class="text-xs text-gray-600 group-hover:text-gray-900">
+                    评论者：{{ selectedUser?.spec.displayName }}
+                  </span>
+                  <IconCloseCircle
+                    class="h-4 w-4 text-gray-600"
+                    @click="handleSelectUser(undefined)"
                   />
                 </div>
                 <div
@@ -274,14 +306,19 @@ const handleSortFilterItemChange = (filterItem: {
                     </div>
                   </template>
                 </FloatingDropdown>
-                <div
-                  class="flex cursor-pointer items-center text-sm text-gray-700 hover:text-black"
+                <UserDropdownSelector
+                  v-model:selected="selectedUser"
+                  @select="handleSelectUser"
                 >
-                  <span class="mr-0.5">评论者</span>
-                  <span>
-                    <IconArrowDown />
-                  </span>
-                </div>
+                  <div
+                    class="flex cursor-pointer select-none items-center text-sm text-gray-700 hover:text-black"
+                  >
+                    <span class="mr-0.5">评论者</span>
+                    <span>
+                      <IconArrowDown />
+                    </span>
+                  </div>
+                </UserDropdownSelector>
                 <FloatingDropdown>
                   <div
                     class="flex cursor-pointer select-none items-center text-sm text-gray-700 hover:text-black"
