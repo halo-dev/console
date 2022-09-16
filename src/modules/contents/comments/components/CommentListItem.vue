@@ -16,7 +16,7 @@ import type {
   SinglePage,
 } from "@halo-dev/api-client";
 import { formatDatetime } from "@/utils/date";
-import { computed, ref, watch } from "vue";
+import { computed, provide, ref, watch, type Ref } from "vue";
 import ReplyListItem from "./ReplyListItem.vue";
 import { apiClient } from "@halo-dev/admin-shared";
 import type { RouteLocationRaw } from "vue-router";
@@ -40,9 +40,12 @@ const dialog = useDialog();
 
 const replies = ref<ListedReply[]>([] as ListedReply[]);
 const selectedReply = ref<ListedReply>();
+const hoveredReply = ref<ListedReply>();
 const loading = ref(false);
 const showReplies = ref(false);
 const replyModal = ref(false);
+
+provide<Ref<ListedReply | undefined>>("hoveredReply", hoveredReply);
 
 const handleDelete = async () => {
   dialog.warning({
@@ -269,6 +272,7 @@ const subjectRefResult = computed(() => {
           v-for="reply in replies"
           :key="reply.reply.metadata.name"
           :reply="reply"
+          :replies="replies"
           @reload="handleFetchReplies"
           @reply="onTriggerReply"
         ></ReplyListItem>

@@ -7,17 +7,21 @@ import {
   VEntity,
   useDialog,
   VStatusDot,
+  IconReplyLine,
 } from "@halo-dev/components";
 import type { ListedReply } from "@halo-dev/api-client";
 import { formatDatetime } from "@/utils/date";
 import { apiClient } from "@halo-dev/admin-shared";
+import { computed, inject, type Ref } from "vue";
 
 const props = withDefaults(
   defineProps<{
     reply?: ListedReply;
+    replies?: ListedReply[];
   }>(),
   {
     reply: undefined,
+    replies: undefined,
   }
 );
 
@@ -27,6 +31,18 @@ const emit = defineEmits<{
 }>();
 
 const dialog = useDialog();
+
+const quoteReply = computed(() => {
+  const { quoteReply: replyName } = props.reply.reply.spec;
+
+  if (!replyName) {
+    return undefined;
+  }
+
+  return props.replies?.find(
+    (reply) => reply.reply.metadata.name === replyName
+  );
+});
 
 const handleDelete = async () => {
   dialog.warning({
@@ -50,10 +66,25 @@ const handleDelete = async () => {
 const handleTriggerReply = () => {
   emit("reply", props.reply);
 };
+
+// Show hovered reply
+const hoveredReply = inject<Ref<ListedReply | undefined>>("hoveredReply");
+
+const handleShowQuoteReply = (show: boolean) => {
+  if (hoveredReply) {
+    hoveredReply.value = show ? quoteReply.value : undefined;
+  }
+};
+
+const isHoveredReply = computed(() => {
+  return (
+    hoveredReply?.value?.reply.metadata.name === props.reply.reply.metadata.name
+  );
+});
 </script>
 
 <template>
-  <VEntity class="!px-0 !py-2">
+  <VEntity class="!px-0 !py-2" :class="{ 'animate-breath': isHoveredReply }">
     <template #start>
       <VEntityField>
         <template #description>
@@ -68,8 +99,21 @@ const handleTriggerReply = () => {
       <VEntityField>
         <template #description>
           <div class="flex flex-col gap-2">
-            <div class="w-1/2 text-sm text-gray-900">
-              {{ reply?.reply.spec.content }}
+            <div class="w-96 text-sm text-gray-800">
+              <p>
+                <a
+                  v-if="quoteReply"
+                  class="mr-1 inline-flex flex-row items-center gap-1 rounded bg-gray-200 py-0.5 px-1 text-xs font-medium text-gray-600 hover:text-blue-500 hover:underline"
+                  href="javascript:void(0)"
+                  @mouseenter="handleShowQuoteReply(true)"
+                  @mouseleave="handleShowQuoteReply(false)"
+                >
+                  <IconReplyLine />
+                  <span>{{ quoteReply.owner.displayName }}</span>
+                </a>
+                <br v-if="quoteReply" />
+                {{ reply?.reply.spec.content }}
+              </p>
             </div>
             <div class="flex items-center gap-3 text-xs">
               <span
