@@ -6,6 +6,9 @@ import {
   VEntity,
   VEntityField,
   VStatusDot,
+  VSpace,
+  VEmpty,
+  IconAddCircle,
 } from "@halo-dev/components";
 import ReplyCreationModal from "./ReplyCreationModal.vue";
 import type {
@@ -101,12 +104,8 @@ const onTriggerReply = (reply: ListedReply) => {
 };
 
 const onReplyCreationModalClose = () => {
-  if (selectedReply.value) {
-    handleFetchReplies();
-    selectedReply.value = undefined;
-    return;
-  }
-  emit("reload");
+  selectedReply.value = undefined;
+  handleFetchReplies();
 };
 
 // Subject ref processing
@@ -216,18 +215,18 @@ const subjectRefResult = computed(() => {
               {{ comment?.comment?.spec.content }}
             </div>
             <div class="flex items-center gap-3 text-xs">
+              <VStatusDot
+                v-if="comment?.comment?.status?.unreadReplyCount || 0 > 0"
+                v-tooltip="`有新的回复`"
+                state="success"
+                animate
+              />
               <span
                 class="select-none text-gray-700 hover:text-gray-900"
                 @click="showReplies = !showReplies"
               >
                 {{ comment?.comment?.status?.replyCount || 0 }} 条回复
               </span>
-              <VStatusDot
-                v-if="comment?.comment?.status?.unreadReplyCount || 0 > 0"
-                state="success"
-                animate
-                text="新回复"
-              />
               <span
                 class="select-none text-gray-700 hover:text-gray-900"
                 @click="handleTriggerReply"
@@ -268,8 +267,26 @@ const subjectRefResult = computed(() => {
       <div
         class="ml-8 mt-3 divide-y divide-gray-100 rounded-base border-t border-gray-100 pt-3"
       >
+        <VEmpty
+          v-if="!replies.length && !loading"
+          message="你可以尝试刷新或者创建新回复"
+          title="当前没有回复"
+        >
+          <template #actions>
+            <VSpace>
+              <VButton @click="handleFetchReplies">刷新</VButton>
+              <VButton type="secondary" @click="replyModal = true">
+                <template #icon>
+                  <IconAddCircle class="h-full w-full" />
+                </template>
+                创建新回复
+              </VButton>
+            </VSpace>
+          </template>
+        </VEmpty>
         <ReplyListItem
           v-for="reply in replies"
+          v-else
           :key="reply.reply.metadata.name"
           :reply="reply"
           :replies="replies"

@@ -8,13 +8,15 @@ import {
   VPagination,
   VSpace,
   IconCloseCircle,
+  VEmpty,
+  useDialog,
 } from "@halo-dev/components";
 import CommentListItem from "./components/CommentListItem.vue";
 import type { ListedComment, ListedCommentList } from "@halo-dev/api-client";
 import { onMounted, ref, watch } from "vue";
 import { apiClient } from "@halo-dev/admin-shared";
 
-const checkAll = ref(false);
+const dialog = useDialog();
 
 const comments = ref<ListedCommentList>({
   page: 1,
@@ -26,11 +28,14 @@ const comments = ref<ListedCommentList>({
   hasNext: false,
   hasPrevious: false,
 });
+const loading = ref(false);
+const checkAll = ref(false);
 const selectedComment = ref<ListedComment>();
 const selectedCommentNames = ref<string[]>([]);
 
 const handleFetchComments = async () => {
   try {
+    loading.value = true;
     const { data } = await apiClient.comment.listComments({
       page: comments.value.page,
       size: comments.value.size,
@@ -40,6 +45,8 @@ const handleFetchComments = async () => {
     comments.value = data;
   } catch (error) {
     console.log("Failed to fetch comments", error);
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -83,6 +90,31 @@ watch(
     checkAll.value = newValue.length === comments.value.items?.length;
   }
 );
+
+const handleDeleteInBatch = async () => {
+  dialog.warning({
+    title: "确定要删除所选的评论吗？",
+    description: "将同时删除所有评论下的回复，该操作不可恢复。",
+    confirmType: "danger",
+    onConfirm: async () => {
+      try {
+        const promises = selectedCommentNames.value.map((name) => {
+          return apiClient.extension.comment.deletecontentHaloRunV1alpha1Comment(
+            {
+              name,
+            }
+          );
+        });
+        await Promise.all(promises);
+        selectedCommentNames.value.length = 0;
+      } catch (e) {
+        console.error("Failed to delete comments", e);
+      } finally {
+        await handleFetchComments();
+      }
+    },
+  });
+};
 
 onMounted(handleFetchComments);
 
@@ -134,7 +166,8 @@ const handleApprovedFilterItemChange = (filterItem: {
   value?: boolean;
 }) => {
   selectedApprovedFilterItem.value = filterItem;
-  handleFetchComments();
+  selectedCommentNames.value.length = 0;
+  handlePaginationChange({ page: 1, size: 20 });
 };
 
 const handleSortFilterItemChange = (filterItem: {
@@ -142,7 +175,8 @@ const handleSortFilterItemChange = (filterItem: {
   value?: Sort;
 }) => {
   selectedSortFilterItem.value = filterItem;
-  handleFetchComments();
+  selectedCommentNames.value.length = 0;
+  handlePaginationChange({ page: 1, size: 20 });
 };
 </script>
 <template>
@@ -201,7 +235,9 @@ const handleSortFilterItemChange = (filterItem: {
                 </div>
               </div>
               <VSpace v-else>
-                <VButton type="danger">删除</VButton>
+                <VButton type="danger" @click="handleDeleteInBatch">
+                  删除
+                </VButton>
               </VSpace>
             </div>
             <div class="mt-4 flex sm:mt-0">
@@ -282,6 +318,17 @@ const handleSortFilterItemChange = (filterItem: {
           </div>
         </div>
       </template>
+      <VEmpty
+        v-if="!comments.items.length && !loading"
+        message="你可以尝试刷新或者修改筛选条件"
+        title="当前没有评论"
+      >
+        <template #actions>
+          <VSpace>
+            <VButton @click="handleFetchComments">刷新</VButton>
+          </VSpace>
+        </template>
+      </VEmpty>
       <ul class="box-border h-full w-full divide-y divide-gray-100" role="list">
         <li v-for="(comment, index) in comments.items" :key="index">
           <CommentListItem
