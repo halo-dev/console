@@ -192,11 +192,7 @@ const subjectRefResult = computed(() => {
     <template #start>
       <VEntityField>
         <template #description>
-          <VAvatar
-            circle
-            :src="comment?.comment?.spec.owner.annotations?.avatar"
-            size="md"
-          ></VAvatar>
+          <VAvatar circle :src="comment?.owner.avatar" size="md"></VAvatar>
         </template>
       </VEntityField>
       <VEntityField
