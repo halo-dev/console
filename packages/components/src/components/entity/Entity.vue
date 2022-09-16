@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { IconMore, VSpace } from "@halo-dev/components";
+import { VSpace } from "../space";
+import { IconMore } from "../../icons/icons";
 import { computed } from "vue";
 const props = withDefaults(
   defineProps<{
