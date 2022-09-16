@@ -23,6 +23,7 @@ import { computed, provide, ref, watch, type Ref } from "vue";
 import ReplyListItem from "./ReplyListItem.vue";
 import { apiClient } from "@halo-dev/admin-shared";
 import type { RouteLocationRaw } from "vue-router";
+import cloneDeep from "lodash.clonedeep";
 
 const props = withDefaults(
   defineProps<{
@@ -93,6 +94,21 @@ watch(
     }
   }
 );
+
+const handleToggleShowReplies = async () => {
+  showReplies.value = !showReplies.value;
+  if (showReplies.value) {
+    // update last read time
+    const commentToUpdate = cloneDeep(props.comment.comment);
+    commentToUpdate.spec.lastReadTime = new Date().toISOString();
+    await apiClient.extension.comment.updatecontentHaloRunV1alpha1Comment({
+      name: commentToUpdate.metadata.name,
+      comment: commentToUpdate,
+    });
+  } else {
+    emit("reload");
+  }
+};
 
 const handleTriggerReply = () => {
   replyModal.value = true;
@@ -176,6 +192,7 @@ const subjectRefResult = computed(() => {
 
 <template>
   <ReplyCreationModal
+    :key="comment?.comment.metadata.name"
     v-model:visible="replyModal"
     :comment="comment"
     :reply="selectedReply"
@@ -215,18 +232,18 @@ const subjectRefResult = computed(() => {
               {{ comment?.comment?.spec.content }}
             </div>
             <div class="flex items-center gap-3 text-xs">
+              <span
+                class="select-none text-gray-700 hover:text-gray-900"
+                @click="handleToggleShowReplies"
+              >
+                {{ comment?.comment?.status?.replyCount || 0 }} 条回复
+              </span>
               <VStatusDot
                 v-if="comment?.comment?.status?.unreadReplyCount || 0 > 0"
                 v-tooltip="`有新的回复`"
                 state="success"
                 animate
               />
-              <span
-                class="select-none text-gray-700 hover:text-gray-900"
-                @click="showReplies = !showReplies"
-              >
-                {{ comment?.comment?.status?.replyCount || 0 }} 条回复
-              </span>
               <span
                 class="select-none text-gray-700 hover:text-gray-900"
                 @click="handleTriggerReply"

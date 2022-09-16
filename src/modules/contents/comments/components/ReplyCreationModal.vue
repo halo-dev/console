@@ -38,7 +38,6 @@ const initialFormState: ReplyRequest = {
   raw: "",
   content: "",
   allowNotification: true,
-  owner: undefined,
   quoteReply: undefined,
 };
 
@@ -163,7 +162,7 @@ watchEffect(() => {
         <VButton
           type="secondary"
           :loading="saving"
-          @click="$formkit.submit('comment-reply-form')"
+          @click="submitForm('comment-reply-form')"
         >
           保存 ⌘ + ↵
         </VButton>
