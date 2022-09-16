@@ -9,6 +9,7 @@ import {
   VSpace,
   VEmpty,
   IconAddCircle,
+  IconExternalLinkLine,
 } from "@halo-dev/components";
 import ReplyCreationModal from "./ReplyCreationModal.vue";
 import type {
@@ -260,7 +261,18 @@ const subjectRefResult = computed(() => {
         :title="subjectRefResult.title"
         :description="subjectRefResult.label"
         :route="subjectRefResult.route"
-      ></VEntityField>
+      >
+        <template #extra>
+          <a
+            v-if="subjectRefResult.externalUrl"
+            :href="subjectRefResult.externalUrl"
+            target="_blank"
+            class="text-gray-600 hover:text-gray-900"
+          >
+            <IconExternalLinkLine class="h-3.5 w-3.5" />
+          </a>
+        </template>
+      </VEntityField>
       <VEntityField v-if="comment?.comment?.metadata.deletionTimestamp">
         <template #description>
           <VStatusDot v-tooltip="`删除中`" state="warning" animate />
