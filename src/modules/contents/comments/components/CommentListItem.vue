@@ -8,10 +8,9 @@ import {
   VStatusDot,
 } from "@halo-dev/components";
 import ReplyCreationModal from "./ReplyCreationModal.vue";
-import type { ListedComment } from "@halo-dev/api-client";
+import type { ListedComment, ListedReply } from "@halo-dev/api-client";
 import { formatDatetime } from "@/utils/date";
 import { ref, watch } from "vue";
-import type { Reply } from "@halo-dev/api-client";
 import ReplyListItem from "./ReplyListItem.vue";
 import { apiClient } from "@halo-dev/admin-shared";
 
@@ -32,8 +31,8 @@ const emit = defineEmits<{
 
 const dialog = useDialog();
 
-const replies = ref<Reply[]>([] as Reply[]);
-const selectedReply = ref<Reply>();
+const replies = ref<ListedReply[]>([] as ListedReply[]);
+const selectedReply = ref<ListedReply>();
 const loading = ref(false);
 const showReplies = ref(false);
 const replyModal = ref(false);
@@ -60,12 +59,9 @@ const handleDelete = async () => {
 const handleFetchReplies = async () => {
   try {
     loading.value = true;
-    const { data } =
-      await apiClient.extension.reply.listcontentHaloRunV1alpha1Reply({
-        labelSelector: [
-          `content.halo.run/comment-name=${props.comment.comment.metadata.name}`,
-        ],
-      });
+    const { data } = await apiClient.reply.listReplies({
+      commentName: props.comment.comment.metadata.name,
+    });
     replies.value = data.items;
   } catch (error) {
     console.error("Failed to fetch comment replies", error);
@@ -89,7 +85,7 @@ const handleTriggerReply = () => {
   replyModal.value = true;
 };
 
-const onTriggerReply = (reply: Reply) => {
+const onTriggerReply = (reply: ListedReply) => {
   selectedReply.value = reply;
   replyModal.value = true;
 };
@@ -199,7 +195,7 @@ const onReplyCreationModalClose = () => {
       >
         <ReplyListItem
           v-for="reply in replies"
-          :key="reply.metadata.name"
+          :key="reply.reply.metadata.name"
           :reply="reply"
           @reload="handleFetchReplies"
           @reply="onTriggerReply"

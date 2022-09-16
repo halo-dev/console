@@ -8,13 +8,13 @@ import {
   useDialog,
   VStatusDot,
 } from "@halo-dev/components";
-import type { Reply } from "@halo-dev/api-client";
+import type { ListedReply } from "@halo-dev/api-client";
 import { formatDatetime } from "@/utils/date";
 import { apiClient } from "@halo-dev/admin-shared";
 
 const props = withDefaults(
   defineProps<{
-    reply?: Reply;
+    reply?: ListedReply;
   }>(),
   {
     reply: undefined,
@@ -23,7 +23,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (event: "reload"): void;
-  (event: "reply", reply: Reply): void;
+  (event: "reply", reply: ListedReply): void;
 }>();
 
 const dialog = useDialog();
@@ -36,7 +36,7 @@ const handleDelete = async () => {
     onConfirm: async () => {
       try {
         await apiClient.extension.reply.deletecontentHaloRunV1alpha1Reply({
-          name: props.reply?.metadata.name as string,
+          name: props.reply?.reply.metadata.name as string,
         });
       } catch (error) {
         console.log("Failed to delete comment reply", error);
@@ -57,23 +57,19 @@ const handleTriggerReply = () => {
     <template #start>
       <VEntityField>
         <template #description>
-          <VAvatar
-            circle
-            :src="reply?.spec.owner.annotations?.avatar"
-            size="md"
-          ></VAvatar>
+          <VAvatar circle :src="reply?.owner.avatar" size="md"></VAvatar>
         </template>
       </VEntityField>
       <VEntityField
         class="w-28 min-w-[7rem]"
-        :title="reply?.spec.owner.displayName"
-        :description="reply?.spec.owner.name"
+        :title="reply?.owner.displayName"
+        :description="reply?.owner.email"
       ></VEntityField>
       <VEntityField>
         <template #description>
           <div class="flex flex-col gap-2">
             <div class="w-1/2 text-sm text-gray-900">
-              {{ reply?.spec.content }}
+              {{ reply?.reply.spec.content }}
             </div>
             <div class="flex items-center gap-3 text-xs">
               <span
@@ -91,13 +87,13 @@ const handleTriggerReply = () => {
       </VEntityField>
     </template>
     <template #end>
-      <VEntityField v-if="reply?.metadata.deletionTimestamp">
+      <VEntityField v-if="reply?.reply.metadata.deletionTimestamp">
         <template #description>
           <VStatusDot v-tooltip="`删除中`" state="warning" animate />
         </template>
       </VEntityField>
       <VEntityField
-        :description="formatDatetime(reply?.metadata.creationTimestamp)"
+        :description="formatDatetime(reply?.reply.metadata.creationTimestamp)"
       >
       </VEntityField>
     </template>

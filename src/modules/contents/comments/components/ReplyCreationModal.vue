@@ -1,6 +1,10 @@
 <script lang="ts" setup>
 import { VModal, VSpace, VButton, IconMotionLine } from "@halo-dev/components";
-import type { ListedComment, Reply, ReplyRequest } from "@halo-dev/api-client";
+import type {
+  ListedComment,
+  ListedReply,
+  ReplyRequest,
+} from "@halo-dev/api-client";
 // @ts-ignore
 import { Picker } from "emoji-mart";
 import data from "@emoji-mart/data";
@@ -16,7 +20,7 @@ const props = withDefaults(
   defineProps<{
     visible?: boolean;
     comment?: ListedComment;
-    reply?: Reply;
+    reply?: ListedReply;
   }>(),
   {
     visible: false,
@@ -83,7 +87,7 @@ const handleCreateReply = async () => {
   try {
     saving.value = true;
     if (props.reply) {
-      formState.value.quoteReply = props.reply.metadata.name;
+      formState.value.quoteReply = props.reply.reply.metadata.name;
     }
     await apiClient.comment.createReply({
       name: props.comment?.comment.metadata.name,

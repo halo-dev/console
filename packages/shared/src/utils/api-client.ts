@@ -5,6 +5,7 @@ import {
   ApiHaloRunV1alpha1SinglePageApi,
   ApiHaloRunV1alpha1ThemeApi,
   ApiHaloRunV1alpha1UserApi,
+  ApiHaloRunV1alpha1ReplyApi,
   ContentHaloRunV1alpha1CategoryApi,
   ContentHaloRunV1alpha1CommentApi,
   ContentHaloRunV1alpha1PostApi,
@@ -114,6 +115,7 @@ function setupApiClient(axios: AxiosInstance) {
     singlePage: new ApiHaloRunV1alpha1SinglePageApi(undefined, apiUrl, axios),
     content: new ApiHaloRunV1alpha1ContentApi(undefined, apiUrl, axios),
     comment: new ApiHaloRunV1alpha1CommentApi(undefined, apiUrl, axios),
+    reply: new ApiHaloRunV1alpha1ReplyApi(undefined, apiUrl, axios),
   };
 }
 
