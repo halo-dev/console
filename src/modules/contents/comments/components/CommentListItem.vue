@@ -114,7 +114,9 @@ interface SubjectRefResult {
   externalUrl?: string;
 }
 
-const SubjectRefProvider = ref([
+const SubjectRefProvider = ref<
+  Record<string, (subject: Extension) => SubjectRefResult>[]
+>([
   {
     Post: (subject: Extension): SubjectRefResult => {
       const post = subject as Post;
