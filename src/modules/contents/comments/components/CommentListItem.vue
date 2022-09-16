@@ -240,7 +240,7 @@ const subjectRefResult = computed(() => {
     :reply="selectedReply"
     @close="onReplyCreationModalClose"
   />
-  <VEntity :is-selected="isSelected">
+  <VEntity :is-selected="isSelected" :class="{ 'hover:bg-white': showReplies }">
     <template v-if="showReplies" #prepend>
       <div class="absolute inset-y-0 left-0 w-[1px] bg-black/50"></div>
       <div class="absolute inset-y-0 right-0 w-[1px] bg-black/50"></div>
@@ -384,6 +384,7 @@ const subjectRefResult = computed(() => {
           v-for="reply in replies"
           v-else
           :key="reply.reply.metadata.name"
+          :class="{ 'hover:bg-white': showReplies }"
           :reply="reply"
           :replies="replies"
           @reload="handleFetchReplies"
