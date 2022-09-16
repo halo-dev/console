@@ -71,6 +71,47 @@ const handleDelete = async () => {
   });
 };
 
+const handleApproveReplyInBatch = async () => {
+  dialog.warning({
+    title: "确定要审核通过该评论的所有回复吗？",
+    onConfirm: async () => {
+      try {
+        const repliesToUpdate = replies.value.filter((reply) => {
+          return !reply.reply.spec.approved;
+        });
+        const promises = repliesToUpdate.map((reply) => {
+          const replyToUpdate = reply.reply;
+          replyToUpdate.spec.approved = true;
+          return apiClient.extension.reply.updatecontentHaloRunV1alpha1Reply({
+            name: replyToUpdate.metadata.name,
+            reply: replyToUpdate,
+          });
+        });
+        await Promise.all(promises);
+      } catch (e) {
+        console.error("Failed to approve comment replies in batch", e);
+      } finally {
+        await handleFetchReplies();
+      }
+    },
+  });
+};
+
+const handleApprove = async () => {
+  try {
+    const commentToUpdate = cloneDeep(props.comment.comment);
+    commentToUpdate.spec.approved = true;
+    await apiClient.extension.comment.updatecontentHaloRunV1alpha1Comment({
+      name: commentToUpdate.metadata.name,
+      comment: commentToUpdate,
+    });
+  } catch (error) {
+    console.error("Failed to approve comment", error);
+  } finally {
+    emit("reload");
+  }
+};
+
 const handleFetchReplies = async () => {
   try {
     loading.value = true;
@@ -273,6 +314,15 @@ const subjectRefResult = computed(() => {
           </a>
         </template>
       </VEntityField>
+      <VEntityField v-if="!comment?.comment.spec.approved">
+        <template #description>
+          <VStatusDot state="success">
+            <template #text>
+              <span class="text-xs text-gray-500">待审核</span>
+            </template>
+          </VStatusDot>
+        </template>
+      </VEntityField>
       <VEntityField v-if="comment?.comment?.metadata.deletionTimestamp">
         <template #description>
           <VStatusDot v-tooltip="`删除中`" state="warning" animate />
@@ -286,6 +336,23 @@ const subjectRefResult = computed(() => {
       </VEntityField>
     </template>
     <template #dropdownItems>
+      <VButton
+        v-if="!comment?.comment.spec.approved"
+        v-close-popper
+        type="secondary"
+        block
+        @click="handleApprove"
+      >
+        审核通过
+      </VButton>
+      <VButton
+        v-close-popper
+        type="secondary"
+        block
+        @click="handleApproveReplyInBatch"
+      >
+        审核通过所有回复
+      </VButton>
       <VButton v-close-popper block type="danger" @click="handleDelete">
         删除
       </VButton>

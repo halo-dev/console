@@ -81,7 +81,7 @@ const handleCheckAllChange = (e: Event) => {
         return comment.comment.metadata.name;
       }) || [];
   } else {
-    selectedCommentNames.value.length = 0;
+    selectedCommentNames.value = [];
   }
 };
 
@@ -115,9 +115,42 @@ const handleDeleteInBatch = async () => {
           );
         });
         await Promise.all(promises);
-        selectedCommentNames.value.length = 0;
+        selectedCommentNames.value = [];
       } catch (e) {
         console.error("Failed to delete comments", e);
+      } finally {
+        await handleFetchComments();
+      }
+    },
+  });
+};
+
+const handleApproveInBatch = async () => {
+  dialog.warning({
+    title: "确定要审核通过所选评论吗？",
+    onConfirm: async () => {
+      try {
+        const commentsToUpdate = comments.value.items.filter((comment) => {
+          return (
+            selectedCommentNames.value.includes(
+              comment.comment.metadata.name
+            ) && !comment.comment.spec.approved
+          );
+        });
+        const promises = commentsToUpdate.map((comment) => {
+          const commentToUpdate = comment.comment;
+          commentToUpdate.spec.approved = true;
+          return apiClient.extension.comment.updatecontentHaloRunV1alpha1Comment(
+            {
+              name: commentToUpdate.metadata.name,
+              comment: commentToUpdate,
+            }
+          );
+        });
+        await Promise.all(promises);
+        selectedCommentNames.value = [];
+      } catch (e) {
+        console.error("Failed to approve comments in batch", e);
       } finally {
         await handleFetchComments();
       }
@@ -176,7 +209,7 @@ const handleApprovedFilterItemChange = (filterItem: {
   value?: boolean;
 }) => {
   selectedApprovedFilterItem.value = filterItem;
-  selectedCommentNames.value.length = 0;
+  selectedCommentNames.value = [];
   handlePaginationChange({ page: 1, size: 20 });
 };
 
@@ -185,7 +218,7 @@ const handleSortFilterItemChange = (filterItem: {
   value?: Sort;
 }) => {
   selectedSortFilterItem.value = filterItem;
-  selectedCommentNames.value.length = 0;
+  selectedCommentNames.value = [];
   handlePaginationChange({ page: 1, size: 20 });
 };
 
@@ -267,6 +300,9 @@ function handleSelectUser(user: User | undefined) {
                 </div>
               </div>
               <VSpace v-else>
+                <VButton type="secondary" @click="handleApproveInBatch">
+                  审核通过
+                </VButton>
                 <VButton type="danger" @click="handleDeleteInBatch">
                   删除
                 </VButton>

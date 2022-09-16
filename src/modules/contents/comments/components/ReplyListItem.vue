@@ -13,6 +13,7 @@ import type { ListedReply } from "@halo-dev/api-client";
 import { formatDatetime } from "@/utils/date";
 import { apiClient } from "@halo-dev/admin-shared";
 import { computed, inject, type Ref } from "vue";
+import cloneDeep from "lodash.clonedeep";
 
 const props = withDefaults(
   defineProps<{
@@ -61,6 +62,21 @@ const handleDelete = async () => {
       }
     },
   });
+};
+
+const handleApprove = async () => {
+  try {
+    const replyToUpdate = cloneDeep(props.reply.reply);
+    replyToUpdate.spec.approved = true;
+    await apiClient.extension.reply.updatecontentHaloRunV1alpha1Reply({
+      name: replyToUpdate.metadata.name,
+      reply: replyToUpdate,
+    });
+  } catch (error) {
+    console.error("Failed to approve comment reply", error);
+  } finally {
+    emit("reload");
+  }
 };
 
 const handleTriggerReply = () => {
@@ -131,6 +147,15 @@ const isHoveredReply = computed(() => {
       </VEntityField>
     </template>
     <template #end>
+      <VEntityField v-if="!reply?.reply.spec.approved">
+        <template #description>
+          <VStatusDot state="success">
+            <template #text>
+              <span class="text-xs text-gray-500">待审核</span>
+            </template>
+          </VStatusDot>
+        </template>
+      </VEntityField>
       <VEntityField v-if="reply?.reply.metadata.deletionTimestamp">
         <template #description>
           <VStatusDot v-tooltip="`删除中`" state="warning" animate />
@@ -142,6 +167,15 @@ const isHoveredReply = computed(() => {
       </VEntityField>
     </template>
     <template #dropdownItems>
+      <VButton
+        v-if="!reply?.reply.spec.approved"
+        v-close-popper
+        type="secondary"
+        block
+        @click="handleApprove"
+      >
+        审核通过
+      </VButton>
       <VButton v-close-popper block type="danger" @click="handleDelete">
         删除
       </VButton>
