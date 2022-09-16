@@ -9,7 +9,7 @@ import type {
 import { Picker } from "emoji-mart";
 import data from "@emoji-mart/data";
 import i18n from "@emoji-mart/data/i18n/zh.json";
-import { ref, watch, watchEffect } from "vue";
+import { computed, nextTick, ref, watch, watchEffect } from "vue";
 import { reset, submitForm } from "@formkit/core";
 import cloneDeep from "lodash.clonedeep";
 import { useMagicKeys } from "@vueuse/core";
@@ -51,6 +51,20 @@ watch(
   }
 );
 
+const formId = computed(() => {
+  return `comment-reply-form-${[
+    props.comment?.comment.metadata.name,
+    props.reply?.reply.metadata.name,
+  ].join("-")}`;
+});
+
+const contentInputId = computed(() => {
+  return `content-input-${[
+    props.comment?.comment.metadata.name,
+    props.reply?.reply.metadata.name,
+  ].join("-")}`;
+});
+
 const onVisibleChange = (visible: boolean) => {
   emit("update:visible", visible);
   if (!visible) {
@@ -60,22 +74,23 @@ const onVisibleChange = (visible: boolean) => {
 
 const handleResetForm = () => {
   formState.value = cloneDeep(initialFormState);
-  reset("comment-reply-form");
+  reset(formId.value);
 };
 
 const { Command_Enter } = useMagicKeys();
 
 watchEffect(() => {
   if (Command_Enter.value && props.visible) {
-    submitForm("comment-reply-form");
+    submitForm(formId.value);
   }
 });
 
 watch(
   () => props.visible,
-  (visible) => {
+  async (visible) => {
     if (visible) {
-      setFocus("contentInput");
+      await nextTick();
+      setFocus(contentInputId.value);
     } else {
       handleResetForm();
     }
@@ -116,7 +131,7 @@ const handleCreateEmojiPicker = () => {
 
 const onEmojiSelect = (emoji: { native: string }) => {
   formState.value.raw += emoji.native;
-  setFocus("contentInput");
+  setFocus(contentInputId.value);
 };
 
 watchEffect(() => {
@@ -134,13 +149,13 @@ watchEffect(() => {
     @update:visible="onVisibleChange"
   >
     <FormKit
-      id="comment-reply-form"
+      :id="formId"
       type="form"
       :config="{ validationVisibility: 'submit' }"
       @submit="handleCreateReply"
     >
       <FormKit
-        id="contentInput"
+        :id="contentInputId"
         v-model="formState.raw"
         type="textarea"
         validation="required"
@@ -159,11 +174,7 @@ watchEffect(() => {
     </div>
     <template #footer>
       <VSpace>
-        <VButton
-          type="secondary"
-          :loading="saving"
-          @click="submitForm('comment-reply-form')"
-        >
+        <VButton type="secondary" :loading="saving" @click="submitForm(formId)">
           保存 ⌘ + ↵
         </VButton>
         <VButton @click="onVisibleChange(false)">取消 Esc</VButton>
