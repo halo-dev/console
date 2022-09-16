@@ -8,11 +8,18 @@ import {
   VStatusDot,
 } from "@halo-dev/components";
 import ReplyCreationModal from "./ReplyCreationModal.vue";
-import type { ListedComment, ListedReply } from "@halo-dev/api-client";
+import type {
+  Extension,
+  ListedComment,
+  ListedReply,
+  Post,
+  SinglePage,
+} from "@halo-dev/api-client";
 import { formatDatetime } from "@/utils/date";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import ReplyListItem from "./ReplyListItem.vue";
 import { apiClient } from "@halo-dev/admin-shared";
+import type { RouteLocationRaw } from "vue-router";
 
 const props = withDefaults(
   defineProps<{
@@ -98,6 +105,69 @@ const onReplyCreationModalClose = () => {
   }
   emit("reload");
 };
+
+// Subject ref processing
+interface SubjectRefResult {
+  label: string;
+  title: string;
+  route?: RouteLocationRaw;
+  externalUrl?: string;
+}
+
+const SubjectRefProvider = ref([
+  {
+    Post: (subject: Extension): SubjectRefResult => {
+      const post = subject as Post;
+      return {
+        label: "文章",
+        title: post.spec.title,
+        externalUrl: post.status?.permalink,
+        route: {
+          name: "PostEditor",
+          query: {
+            name: post.metadata.name,
+          },
+        },
+      };
+    },
+  },
+  {
+    SinglePage: (subject: Extension): SubjectRefResult => {
+      const singlePage = subject as SinglePage;
+      return {
+        label: "单页",
+        title: singlePage.spec.title,
+        externalUrl: singlePage.status?.permalink,
+        route: {
+          name: "SinglePageEditor",
+          query: {
+            name: singlePage.metadata.name,
+          },
+        },
+      };
+    },
+  },
+]);
+
+const subjectRefResult = computed(() => {
+  const { subject } = props.comment;
+  if (!subject) {
+    return {
+      label: "未知",
+      title: "未知",
+    };
+  }
+  const subjectRef = SubjectRefProvider.value.find((provider) =>
+    Object.keys(provider).includes(subject.kind)
+  );
+  if (!subjectRef) {
+    return {
+      label: "未知",
+      title: "未知",
+    };
+  }
+  return subjectRef[subject.kind](subject);
+});
 </script>
 
 <template>
@@ -169,7 +239,11 @@ const onReplyCreationModalClose = () => {
       </VEntityField>
     </template>
     <template #end>
-      <VEntityField title="unknow" description="文章"></VEntityField>
+      <VEntityField
+        :title="subjectRefResult.title"
+        :description="subjectRefResult.label"
+        :route="subjectRefResult.route"
+      ></VEntityField>
       <VEntityField v-if="comment?.comment?.metadata.deletionTimestamp">
         <template #description>
           <VStatusDot v-tooltip="`删除中`" state="warning" animate />
