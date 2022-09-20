@@ -16,7 +16,7 @@ const tabs = [
   {
     id: "tokens",
     label: "个人令牌",
-    routeName: "PersonalAccessTokens",
+    routeName: "PersonalAccessToken",
   },
 ];
 

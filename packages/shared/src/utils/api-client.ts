@@ -7,6 +7,7 @@ import {
   ApiConsoleHaloRunV1alpha1UserApi,
   ApiConsoleHaloRunV1alpha1CommentApi,
   ApiConsoleHaloRunV1alpha1ReplyApi,
+  ApiConsoleHaloRunV1alpha1PersonalAccessTokenApi,
   ContentHaloRunV1alpha1CategoryApi,
   ContentHaloRunV1alpha1CommentApi,
   ContentHaloRunV1alpha1PostApi,
@@ -24,11 +25,12 @@ import {
   V1alpha1ConfigMapApi,
   V1alpha1MenuApi,
   V1alpha1MenuItemApi,
-  V1alpha1PersonalAccessTokenApi,
   V1alpha1RoleApi,
   V1alpha1RoleBindingApi,
   V1alpha1SettingApi,
   V1alpha1UserApi,
+  SecurityHaloRunV1alpha1PersonalAccessTokenApi,
+  SecurityHaloRunV1alpha1ScopeApi,
 } from "@halo-dev/api-client";
 import type { AxiosInstance } from "axios";
 import axios from "axios";
@@ -63,11 +65,12 @@ function setupApiClient(axios: AxiosInstance) {
   return {
     extension: {
       configMap: new V1alpha1ConfigMapApi(undefined, apiUrl, axios),
-      personalAccessToken: new V1alpha1PersonalAccessTokenApi(
+      personalAccessToken: new SecurityHaloRunV1alpha1PersonalAccessTokenApi(
         undefined,
         apiUrl,
         axios
       ),
+      scope: new SecurityHaloRunV1alpha1ScopeApi(undefined, apiUrl, axios),
       roleBinding: new V1alpha1RoleBindingApi(undefined, apiUrl, axios),
       role: new V1alpha1RoleApi(undefined, apiUrl, axios),
       setting: new V1alpha1SettingApi(undefined, apiUrl, axios),
@@ -120,6 +123,11 @@ function setupApiClient(axios: AxiosInstance) {
     content: new ApiConsoleHaloRunV1alpha1ContentApi(undefined, apiUrl, axios),
     comment: new ApiConsoleHaloRunV1alpha1CommentApi(undefined, apiUrl, axios),
     reply: new ApiConsoleHaloRunV1alpha1ReplyApi(undefined, apiUrl, axios),
+    personalAccessToken: new ApiConsoleHaloRunV1alpha1PersonalAccessTokenApi(
+      undefined,
+      apiUrl,
+      axios
+    ),
   };
 }
 

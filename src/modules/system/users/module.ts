@@ -2,7 +2,7 @@ import { BasicLayout, BlankLayout, definePlugin } from "@halo-dev/admin-shared";
 import UserProfileLayout from "./layouts/UserProfileLayout.vue";
 import UserList from "./UserList.vue";
 import UserDetail from "./UserDetail.vue";
-import PersonalAccessTokens from "./PersonalAccessTokens.vue";
+import PersonalAccessToken from "./PersonalAccessToken.vue";
 import Login from "./Login.vue";
 import { IconUserSettings } from "@halo-dev/components";
 
@@ -45,8 +45,8 @@ export default definePlugin({
             },
             {
               path: "tokens",
-              name: "PersonalAccessTokens",
-              component: PersonalAccessTokens,
+              name: "PersonalAccessToken",
+              component: PersonalAccessToken,
             },
           ],
         },
