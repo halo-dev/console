@@ -94,9 +94,9 @@ const handleFetchPosts = async () => {
       sort: selectedSortItem.value?.sort,
       sortOrder: selectedSortItem.value?.sortOrder,
       keyword: keyword.value,
-      categories,
-      tags,
-      contributors,
+      category: categories,
+      tag: tags,
+      contributor: contributors,
     });
     posts.value = data;
   } catch (e) {
