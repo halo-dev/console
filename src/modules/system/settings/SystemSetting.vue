@@ -6,13 +6,14 @@ import { computed, ref } from "vue";
 import { VButton } from "@halo-dev/components";
 
 // hooks
-import { useSettingForm } from "@halo-dev/admin-shared";
+import { useSettingForm } from "@/composables/use-setting-form";
 import { useRouteParams } from "@vueuse/router";
+import type { FormKitSchemaCondition, FormKitSchemaNode } from "@formkit/core";
 
 const group = useRouteParams<string>("group");
 
 const {
-  settings,
+  setting,
   configMapFormData,
   saving,
   handleFetchConfigMap,
@@ -21,11 +22,11 @@ const {
 } = useSettingForm(ref("system"), ref("system"));
 
 const formSchema = computed(() => {
-  if (!settings?.value?.spec) {
+  if (!setting.value) {
     return;
   }
-  return settings.value.spec.find((item) => item.group === group?.value)
-    ?.formSchema;
+  return setting.value.spec.forms.find((item) => item.group === group?.value)
+    ?.formSchema as (FormKitSchemaCondition | FormKitSchemaNode)[];
 });
 
 await handleFetchSettings();
