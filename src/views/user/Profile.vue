@@ -280,6 +280,9 @@ export default {
         visible: false
       },
       updateAvatarForm: {
+        username: undefined,
+        nickname: undefined,
+        email: undefined,
         avatar: undefined,
         visible: false,
         saving: false,
@@ -387,6 +390,10 @@ export default {
           this.userForm.model = response.data.user
           this.statistics.data = response.data
           this.mfaParam.mfaType = this.userForm.model.mfaType && this.userForm.model.mfaType
+          // 记录原始用户信息
+          this.updateAvatarForm.username = response.data.user.username
+          this.updateAvatarForm.nickname = response.data.user.nickname
+          this.updateAvatarForm.email = response.data.user.email
         })
         .finally(() => {
           this.statistics.loading = false
@@ -522,7 +529,18 @@ export default {
     },
     handleUpdateAvatar() {
       this.userForm.model.avatar = this.updateAvatarForm.avatar
-      this.updateAvatarForm.visible = false
+      apiClient.user
+        .updateProfile(this.updateAvatarForm)
+        .then(response => {
+          this.$message.success('更新头像成功!')
+          this.updateAvatarForm.visible = false
+          this.userForm.model.avatar = response.data.avatar
+          this.setUser(Object.assign({}, this.userForm.model))
+        })
+        .catch(() => {
+          this.$message.error('更新头像失败!')
+          this.updateAvatarForm.visible = true
+        })
     }
   }
 }
