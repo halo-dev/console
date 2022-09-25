@@ -520,9 +520,21 @@ export default {
         this.$refs.avatarInput.focus()
       })
     },
-    handleUpdateAvatar() {
-      this.userForm.model.avatar = this.updateAvatarForm.avatar
-      this.updateAvatarForm.visible = false
+    async handleUpdateAvatar() {
+      const { updateAvatarData } = await apiClient.user.getProfile()
+      updateAvatarData.avatar = this.updateAvatarForm.avatar
+      apiClient.user
+        .updateProfile(updateAvatarData)
+        .then(response => {
+          this.$message.success('更新头像成功!')
+          this.updateAvatarForm.visible = false
+          this.userForm.model.avatar = response.data.avatar
+          this.setUser(Object.assign({}, this.userForm.model))
+        })
+        .catch(() => {
+          this.$message.error('更新头像失败!')
+          this.updateAvatarForm.visible = true
+        })
     }
   }
 }
