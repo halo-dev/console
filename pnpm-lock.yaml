@@ -24,7 +24,6 @@ importers:
       '@tiptap/extension-character-count': 2.0.0-beta.31
       '@types/jsdom': ^20.0.0
       '@types/lodash.clonedeep': 4.5.7
-      '@types/lodash.groupby': ^4.6.7
       '@types/lodash.isequal': ^4.5.6
       '@types/lodash.merge': ^4.6.7
       '@types/node': ^17.0.45
@@ -139,7 +138,6 @@ importers:
       '@tailwindcss/aspect-ratio': 0.4.2_tailwindcss@3.1.8
       '@types/jsdom': 20.0.0
       '@types/lodash.clonedeep': 4.5.7
-      '@types/lodash.groupby': 4.6.7
       '@types/lodash.isequal': 4.5.6
       '@types/lodash.merge': 4.6.7
       '@types/node': 17.0.45
@@ -2977,12 +2975,6 @@ packages:
 
   /@types/lodash.clonedeep/4.5.7:
     resolution: {integrity: sha512-ccNqkPptFIXrpVqUECi60/DFxjNKsfoQxSQsgcBJCX/fuX1wgyQieojkcWH/KpE3xzLoWN/2k+ZeGqIN3paSvw==}
-    dependencies:
-      '@types/lodash': 4.14.182
-    dev: true
-
-  /@types/lodash.groupby/4.6.7:
-    resolution: {integrity: sha512-dFUR1pqdMgjIBbgPJ/8axJX6M1C7zsL+HF4qdYMQeJ7XOp0Qbf37I3zh9gpXr/ks6tgEYPDRqyZRAnFYvewYHQ==}
     dependencies:
       '@types/lodash': 4.14.182
     dev: true
