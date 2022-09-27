@@ -1,19 +1,19 @@
 <script lang="ts" setup>
 // core libs
-import { computed, ref, watch, watchEffect } from "vue";
+import { computed, ref, watch } from "vue";
 import { apiClient } from "@/utils/api-client";
 
 // components
 import { VButton, VModal, VSpace } from "@halo-dev/components";
+import SubmitButton from "@/components/button/SubmitButton.vue";
 
 // types
 import type { Category } from "@halo-dev/api-client";
 
 // libs
 import cloneDeep from "lodash.clonedeep";
-import { reset, submitForm } from "@formkit/core";
+import { reset } from "@formkit/core";
 import { setFocus } from "@/formkit/utils/focus";
-import { useMagicKeys } from "@vueuse/core";
 import { v4 as uuid } from "uuid";
 
 const props = withDefaults(
@@ -36,9 +36,9 @@ const initialFormState: Category = {
   spec: {
     displayName: "",
     slug: "",
-    description: undefined,
-    cover: undefined,
-    template: undefined,
+    description: "",
+    cover: "",
+    template: "",
     priority: 0,
     children: [],
   },
@@ -95,14 +95,6 @@ const handleResetForm = () => {
   reset("category-form");
 };
 
-const { Command_Enter } = useMagicKeys();
-
-watchEffect(() => {
-  if (Command_Enter.value && props.visible) {
-    submitForm("category-form");
-  }
-});
-
 watch(
   () => props.visible,
   (visible) => {
@@ -142,6 +134,7 @@ watch(
       <FormKit
         id="displayNameInput"
         v-model="formState.spec.displayName"
+        name="displayName"
         label="名称"
         type="text"
         validation="required"
@@ -149,19 +142,21 @@ watch(
       <FormKit
         v-model="formState.spec.slug"
         help="通常作为分类访问地址标识"
+        name="slug"
         label="别名"
         type="text"
         validation="required"
       ></FormKit>
-      <FormKit label="上级目录" type="select"></FormKit>
       <FormKit
         v-model="formState.spec.cover"
         help="需要主题适配以支持"
+        name="cover"
         label="封面图"
         type="text"
       ></FormKit>
       <FormKit
         v-model="formState.spec.description"
+        name="description"
         help="需要主题适配以支持"
         label="描述"
         type="textarea"
@@ -169,9 +164,13 @@ watch(
     </FormKit>
     <template #footer>
       <VSpace>
-        <VButton type="secondary" @click="$formkit.submit('category-form')">
-          保存 ⌘ + ↵
-        </VButton>
+        <SubmitButton
+          v-if="visible"
+          :loading="saving"
+          type="secondary"
+          @submit="$formkit.submit('category-form')"
+        >
+        </SubmitButton>
         <VButton @click="onVisibleChange(false)">取消 Esc</VButton>
       </VSpace>
     </template>

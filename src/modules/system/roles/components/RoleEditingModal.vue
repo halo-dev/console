@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { VButton, VModal, VSpace, VTabItem, VTabs } from "@halo-dev/components";
-import { computed, ref, watch, watchEffect } from "vue";
+import SubmitButton from "@/components/button/SubmitButton.vue";
+import { computed, ref, watch } from "vue";
 import { rbacAnnotations } from "@/constants/annotations";
 import type { Role } from "@halo-dev/api-client";
 import {
@@ -8,8 +9,7 @@ import {
   useRoleTemplateSelection,
 } from "@/modules/system/roles/composables/use-role";
 import cloneDeep from "lodash.clonedeep";
-import { reset, submitForm } from "@formkit/core";
-import { useMagicKeys } from "@vueuse/core";
+import { reset } from "@formkit/core";
 import { v4 as uuid } from "uuid";
 import { setFocus } from "@/formkit/utils/focus";
 
@@ -49,14 +49,6 @@ watch(
     }
   }
 );
-
-const { Command_Enter } = useMagicKeys();
-
-watchEffect(() => {
-  if (Command_Enter.value && props.visible) {
-    submitForm("role-form");
-  }
-});
 
 watch(
   () => props.visible,
@@ -145,6 +137,7 @@ const handleResetForm = () => {
             help="角色别名，用于区分角色，不能重复，创建之后不能修改"
             label="别名"
             type="text"
+            name="name"
             :disabled="isUpdateMode"
             validation="required"
           ></FormKit>
@@ -211,13 +204,13 @@ const handleResetForm = () => {
     </VTabs>
     <template #footer>
       <VSpace>
-        <VButton
+        <SubmitButton
+          v-if="visible"
           :loading="saving"
           type="secondary"
-          @click="$formkit.submit('role-form')"
+          @submit="$formkit.submit('role-form')"
         >
-          提交 ⌘ + ↵
-        </VButton>
+        </SubmitButton>
         <VButton @click="onVisibleChange(false)">取消 Esc</VButton>
       </VSpace>
     </template>

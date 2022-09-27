@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 // core libs
-import { computed, ref, watch, watchEffect } from "vue";
+import { computed, ref, watch } from "vue";
 import { apiClient } from "@/utils/api-client";
 import type { User } from "@halo-dev/api-client";
 
@@ -13,12 +13,12 @@ import {
   VModal,
   VSpace,
 } from "@halo-dev/components";
+import SubmitButton from "@/components/button/SubmitButton.vue";
 
 // libs
 import YAML from "yaml";
 import cloneDeep from "lodash.clonedeep";
-import { useMagicKeys } from "@vueuse/core";
-import { reset, submitForm } from "@formkit/core";
+import { reset } from "@formkit/core";
 
 // constants
 import { rbacAnnotations } from "@/constants/annotations";
@@ -90,14 +90,6 @@ const rolesMap = computed<FormKitOptionsList>(() => {
       value: role.metadata?.name,
     };
   });
-});
-
-const { Command_Enter } = useMagicKeys();
-
-watchEffect(() => {
-  if (Command_Enter.value && props.visible) {
-    submitForm("user-form");
-  }
 });
 
 watch(
@@ -209,6 +201,7 @@ const handleRawModeChange = () => {
           :disabled="isUpdateMode"
           label="用户名"
           type="text"
+          name="name"
           validation="required"
         ></FormKit>
         <FormKit
@@ -216,12 +209,14 @@ const handleRawModeChange = () => {
           v-model="formState.spec.displayName"
           label="显示名称"
           type="text"
+          name="displayName"
           validation="required"
         ></FormKit>
         <FormKit
           v-model="formState.spec.email"
           label="电子邮箱"
           type="email"
+          name="email"
           validation="required"
         ></FormKit>
         <FormKit
@@ -234,28 +229,31 @@ const handleRawModeChange = () => {
           v-model="formState.spec.phone"
           label="手机号"
           type="text"
+          name="phone"
         ></FormKit>
         <FormKit
           v-model="formState.spec.avatar"
           label="头像"
           type="text"
+          name="avatar"
         ></FormKit>
         <FormKit
           v-model="formState.spec.bio"
           label="描述"
           type="textarea"
+          name="bio"
         ></FormKit>
       </FormKit>
     </div>
     <template #footer>
       <VSpace>
-        <VButton
+        <SubmitButton
+          v-if="visible"
           :loading="saving"
           type="secondary"
-          @click="$formkit.submit('user-form')"
+          @submit="$formkit.submit('user-form')"
         >
-          保存 ⌘ + ↵
-        </VButton>
+        </SubmitButton>
         <VButton @click="onVisibleChange(false)">取消 Esc</VButton>
       </VSpace>
     </template>
