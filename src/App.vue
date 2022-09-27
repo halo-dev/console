@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import { RouterView, useRoute } from "vue-router";
 import { VDialogProvider } from "@halo-dev/components";
-import { provide, ref, watch, watchEffect, type Ref } from "vue";
-import { useTitle, useMagicKeys } from "@vueuse/core";
+import { onMounted, provide, ref, watch, type Ref } from "vue";
+import { useTitle } from "@vueuse/core";
 import GlobalSearchModal from "@/components/global-search/GlobalSearchModal.vue";
 
 const AppName = "Halo";
@@ -25,12 +25,18 @@ const globalSearchVisible = ref(false);
 
 provide<Ref<boolean>>("globalSearchVisible", globalSearchVisible);
 
-const { Command, k } = useMagicKeys();
+const isMac = /macintosh|mac os x/i.test(navigator.userAgent);
 
-watchEffect(() => {
-  if (Command.value && k.value) {
+const handleKeybinding = (e: KeyboardEvent) => {
+  const { key, ctrlKey, metaKey } = e;
+  if (key === "k" && ((ctrlKey && !isMac) || metaKey)) {
     globalSearchVisible.value = !globalSearchVisible.value;
+    e.preventDefault();
   }
+};
+
+onMounted(() => {
+  document.addEventListener("keydown", handleKeybinding);
 });
 </script>
 
