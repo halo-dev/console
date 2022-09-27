@@ -30,7 +30,7 @@ const isMac = /macintosh|mac os x/i.test(navigator.userAgent);
 const handleKeybinding = (e: KeyboardEvent) => {
   const { key, ctrlKey, metaKey } = e;
   if (key === "k" && ((ctrlKey && !isMac) || metaKey)) {
-    globalSearchVisible.value = !globalSearchVisible.value;
+    globalSearchVisible.value = true;
     e.preventDefault();
   }
 };

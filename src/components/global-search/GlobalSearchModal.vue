@@ -279,6 +279,7 @@ const handleKeydown = (e: KeyboardEvent) => {
 
   if (key === "ArrowUp" || (key === "k" && ctrlKey)) {
     selectedIndex.value = Math.max(0, selectedIndex.value - 1);
+    e.preventDefault();
   }
 
   if (key === "ArrowDown" || (key === "j" && ctrlKey)) {
@@ -286,6 +287,7 @@ const handleKeydown = (e: KeyboardEvent) => {
       searchResults.value.length - 1,
       selectedIndex.value + 1
     );
+    e.preventDefault();
   }
 
   if (key === "Enter") {
@@ -310,7 +312,11 @@ const handleRoute = async (item: SearchableItem) => {
 watch(
   () => selectedIndex.value,
   (index) => {
-    document.getElementById(`search-item-${index}`)?.scrollIntoView();
+    if (index > 0) {
+      document.getElementById(`search-item-${index}`)?.scrollIntoView();
+      return;
+    }
+    document.getElementById("search-input")?.scrollIntoView();
   }
 );
 
@@ -357,7 +363,7 @@ const onVisibleChange = (visible: boolean) => {
     :centered="false"
     @update:visible="onVisibleChange"
   >
-    <div class="border-b border-gray-100 px-4 py-2.5">
+    <div id="search-input" class="border-b border-gray-100 px-4 py-2.5">
       <input
         ref="globalSearchInput"
         v-model="keyword"
@@ -430,8 +436,14 @@ const onVisibleChange = (visible: boolean) => {
           ↓
         </kbd>
         <span class="mr-1 text-xs text-gray-600">确认</span>
-        <kbd class="rounded border p-0.5 text-[10px] text-gray-600 shadow-sm">
+        <kbd
+          class="mr-5 rounded border p-0.5 text-[10px] text-gray-600 shadow-sm"
+        >
           Enter
+        </kbd>
+        <span class="mr-1 text-xs text-gray-600">关闭</span>
+        <kbd class="rounded border p-0.5 text-[10px] text-gray-600 shadow-sm">
+          Esc
         </kbd>
       </div>
     </div>
