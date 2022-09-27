@@ -1,8 +1,9 @@
 <script lang="ts" setup>
 import { RouterView, useRoute } from "vue-router";
 import { VDialogProvider } from "@halo-dev/components";
-import { watch } from "vue";
-import { useTitle } from "@vueuse/core";
+import { provide, ref, watch, watchEffect, type Ref } from "vue";
+import { useTitle, useMagicKeys } from "@vueuse/core";
+import GlobalSearchModal from "@/components/global-search/GlobalSearchModal.vue";
 
 const AppName = "Halo";
 const route = useRoute();
@@ -19,11 +20,24 @@ watch(
     title.value = AppName;
   }
 );
+
+const globalSearchVisible = ref(false);
+
+provide<Ref<boolean>>("globalSearchVisible", globalSearchVisible);
+
+const { Command, k } = useMagicKeys();
+
+watchEffect(() => {
+  if (Command.value && k.value) {
+    globalSearchVisible.value = !globalSearchVisible.value;
+  }
+});
 </script>
 
 <template>
   <VDialogProvider>
     <RouterView />
+    <GlobalSearchModal v-model:visible="globalSearchVisible" />
   </VDialogProvider>
 </template>
 
