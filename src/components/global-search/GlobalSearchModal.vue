@@ -294,6 +294,11 @@ const handleKeydown = (e: KeyboardEvent) => {
     const searchResult = searchResults.value[selectedIndex.value];
     handleRoute(searchResult);
   }
+
+  if (key === "Escape") {
+    onVisibleChange(false);
+    e.preventDefault();
+  }
 };
 
 const handleRoute = async (item: SearchableItem) => {
