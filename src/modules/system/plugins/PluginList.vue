@@ -95,11 +95,11 @@ const EnabledItems: EnabledItem[] = [
 
 const SortItems: SortItem[] = [
   {
-    label: "较早安装",
+    label: "较近安装",
     value: "creationTimestamp,desc",
   },
   {
-    label: "较近安装",
+    label: "较早安装",
     value: "creationTimestamp,asc",
   },
 ];
