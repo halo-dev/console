@@ -345,6 +345,9 @@ export default {
       if (!raw.length) {
         return
       }
+      raw.sort((a, b) => {
+        return b['selectedCount'] - a['selectedCount']
+      })
       const photosToStage = raw.map(attachment => {
         return {
           name: attachment.name,
