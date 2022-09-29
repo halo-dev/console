@@ -68,6 +68,7 @@
           @mouseenter="$set(attachment, 'hover', true)"
           @mouseleave="$set(attachment, 'hover', false)"
         >
+          <a-badge :count="`${isItemSelect(attachment) ? attachment.selectedCount : 0}`"> </a-badge>
           <div class="group aspect-w-10 aspect-h-7 block w-full overflow-hidden bg-white">
             <img
               v-if="isImage(attachment)"
@@ -392,9 +393,16 @@ export default {
 
     handleSelect(attachment) {
       this.list.selected = [...this.list.selected, attachment]
+      attachment.selectedCount = this.list.selected.length
     },
 
     handleUnselect(attachment) {
+      for (let i = 0; i < this.list.selected.length; i++) {
+        if (this.list.selected[i].selectedCount > attachment.selectedCount) {
+          this.list.selected[i].selectedCount--
+        }
+      }
+      attachment.selectedCount = 0
       this.list.selected = this.list.selected.filter(item => item.id !== attachment.id)
     },
 
