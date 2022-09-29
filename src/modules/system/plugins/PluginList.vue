@@ -40,6 +40,9 @@ const handleFetchPlugins = async () => {
       size: plugins.value.size,
       keyword: keyword.value,
       enabled: selectedEnabledItem.value?.value,
+      sort: [selectedSortItem.value?.value].filter(
+        (item) => !!item
+      ) as string[],
     });
 
     plugins.value = data;
@@ -70,6 +73,11 @@ interface EnabledItem {
   value?: boolean;
 }
 
+interface SortItem {
+  label: string;
+  value: string;
+}
+
 const EnabledItems: EnabledItem[] = [
   {
     label: "全部",
@@ -85,10 +93,27 @@ const EnabledItems: EnabledItem[] = [
   },
 ];
 
+const SortItems: SortItem[] = [
+  {
+    label: "较早安装",
+    value: "creationTimestamp,desc",
+  },
+  {
+    label: "较近安装",
+    value: "creationTimestamp,asc",
+  },
+];
+
 const selectedEnabledItem = ref<EnabledItem>();
+const selectedSortItem = ref<SortItem>();
 
 function handleEnabledItemChange(enabledItem: EnabledItem) {
   selectedEnabledItem.value = enabledItem;
+  handleFetchPlugins();
+}
+
+function handleSortItemChange(sortItem?: SortItem) {
+  selectedSortItem.value = sortItem;
   handleFetchPlugins();
 }
 </script>
@@ -145,6 +170,18 @@ function handleEnabledItemChange(enabledItem: EnabledItem) {
                   @click="handleEnabledItemChange(EnabledItems[0])"
                 />
               </div>
+              <div
+                v-if="selectedSortItem"
+                class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+              >
+                <span class="text-xs text-gray-600 group-hover:text-gray-900">
+                  排序：{{ selectedSortItem.label }}
+                </span>
+                <IconCloseCircle
+                  class="h-4 w-4 text-gray-600"
+                  @click="handleSortItemChange()"
+                />
+              </div>
             </div>
             <div class="mt-4 flex sm:mt-0">
               <VSpace spacing="lg">
@@ -190,16 +227,13 @@ function handleEnabledItemChange(enabledItem: EnabledItem) {
                     <div class="w-72 p-4">
                       <ul class="space-y-1">
                         <li
+                          v-for="(sortItem, index) in SortItems"
+                          :key="index"
                           v-close-popper
                           class="flex cursor-pointer items-center rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                          @click="handleSortItemChange(sortItem)"
                         >
-                          <span class="truncate">较近安装</span>
-                        </li>
-                        <li
-                          v-close-popper
-                          class="flex cursor-pointer items-center rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                        >
-                          <span class="truncate">较晚安装</span>
+                          <span class="truncate">{{ sortItem.label }}</span>
                         </li>
                       </ul>
                     </div>
