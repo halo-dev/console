@@ -636,7 +636,7 @@ function handleContributorChange(user?: User) {
                                     <div
                                       class="cursor-pointer text-sm text-gray-500 hover:text-gray-900"
                                     >
-                                      {{ category.status?.posts?.length || 0 }}
+                                      {{ category.status?.postCount || 0 }}
                                       篇文章
                                     </div>
                                   </div>
@@ -704,7 +704,7 @@ function handleContributorChange(user?: User) {
                                     <div
                                       class="cursor-pointer text-sm text-gray-500 hover:text-gray-900"
                                     >
-                                      {{ tag.status?.posts?.length || 0 }}
+                                      {{ tag.status?.postCount || 0 }}
                                       篇文章
                                     </div>
                                   </div>
@@ -896,11 +896,13 @@ function handleContributorChange(user?: User) {
                   <VStatusDot v-tooltip="`删除中`" state="warning" animate />
                 </template>
               </VEntityField>
-              <VEntityField
-                :description="
-                  formatDatetime(post.post.metadata.creationTimestamp)
-                "
-              />
+              <VEntityField>
+                <template #description>
+                  <span class="truncate text-xs tabular-nums text-gray-500">
+                    {{ formatDatetime(post.post.metadata.creationTimestamp) }}
+                  </span>
+                </template>
+              </VEntityField>
             </template>
             <template #dropdownItems>
               <VButton
@@ -930,6 +932,7 @@ function handleContributorChange(user?: User) {
             :page="posts.page"
             :size="posts.size"
             :total="posts.total"
+            :size-options="[20, 30, 50, 100]"
             @change="handlePaginationChange"
           />
         </div>

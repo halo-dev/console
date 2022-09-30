@@ -167,6 +167,7 @@ watchEffect(() => {
     :visible="visible"
     :width="700"
     title="页面设置"
+    :centered="false"
     @update:visible="onVisibleChange"
   >
     <template #actions>
@@ -231,7 +232,7 @@ watchEffect(() => {
               { label: '否', value: false },
             ]"
             name="allowComment"
-            label="禁止评论"
+            label="允许评论"
             type="radio"
           ></FormKit>
           <FormKit
@@ -274,8 +275,8 @@ watchEffect(() => {
             name="cover"
           ></FormKit>
         </FormKit>
+        <!--TODO: add SEO/Metas/Inject Code form-->
       </VTabItem>
-      <!--TODO: add SEO/Metas/Inject Code form-->
     </VTabs>
 
     <template #footer>

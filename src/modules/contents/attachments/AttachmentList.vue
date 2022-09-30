@@ -26,7 +26,7 @@ import AttachmentDetailModal from "./components/AttachmentDetailModal.vue";
 import AttachmentUploadModal from "./components/AttachmentUploadModal.vue";
 import AttachmentPoliciesModal from "./components/AttachmentPoliciesModal.vue";
 import AttachmentGroupList from "./components/AttachmentGroupList.vue";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import type { Attachment, Group, Policy, User } from "@halo-dev/api-client";
 import { formatDatetime } from "@/utils/date";
 import prettyBytes from "pretty-bytes";
@@ -134,6 +134,8 @@ const handleCheckAllChange = (e: Event) => {
 
 const onDetailModalClose = () => {
   selectedAttachment.value = undefined;
+  nameQuery.value = undefined;
+  nameQueryAttachment.value = undefined;
   handleFetchAttachments();
 };
 
@@ -177,11 +179,37 @@ onMounted(() => {
     uploadVisible.value = true;
   }
 });
+
+const nameQuery = useRouteQuery<string | undefined>("name");
+const nameQueryAttachment = ref<Attachment>();
+
+watch(
+  () => selectedAttachment.value,
+  () => {
+    if (selectedAttachment.value) {
+      nameQuery.value = selectedAttachment.value.metadata.name;
+    }
+  }
+);
+
+onMounted(() => {
+  if (!nameQuery.value) {
+    return;
+  }
+  apiClient.extension.storage.attachment
+    .getstorageHaloRunV1alpha1Attachment({
+      name: nameQuery.value,
+    })
+    .then((response) => {
+      nameQueryAttachment.value = response.data;
+      detailVisible.value = true;
+    });
+});
 </script>
 <template>
   <AttachmentDetailModal
     v-model:visible="detailVisible"
-    :attachment="selectedAttachment"
+    :attachment="selectedAttachment || nameQueryAttachment"
     @close="onDetailModalClose"
   >
     <template #actions>
@@ -627,11 +655,19 @@ onMounted(() => {
                         />
                       </template>
                     </VEntityField>
-                    <VEntityField
-                      :description="
-                        formatDatetime(attachment.metadata.creationTimestamp)
-                      "
-                    />
+                    <VEntityField>
+                      <template #description>
+                        <span
+                          class="truncate text-xs tabular-nums text-gray-500"
+                        >
+                          {{
+                            formatDatetime(
+                              attachment.metadata.creationTimestamp
+                            )
+                          }}
+                        </span>
+                      </template>
+                    </VEntityField>
                   </template>
                   <template #dropdownItems>
                     <VButton
@@ -654,6 +690,7 @@ onMounted(() => {
                 :page="attachments.page"
                 :size="attachments.size"
                 :total="attachments.total"
+                :size-options="[60, 120, 200]"
                 @change="handlePaginationChange"
               />
             </div>

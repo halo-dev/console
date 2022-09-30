@@ -76,11 +76,15 @@ function onDelete(category: CategoryTree) {
               </template>
             </VEntityField>
             <VEntityField
-              :description="`${category.status?.posts?.length || 0} 篇文章`"
+              :description="`${category.status?.postCount || 0} 篇文章`"
             />
-            <VEntityField
-              :description="formatDatetime(category.metadata.creationTimestamp)"
-            />
+            <VEntityField>
+              <template #description>
+                <span class="truncate text-xs tabular-nums text-gray-500">
+                  {{ formatDatetime(category.metadata.creationTimestamp) }}
+                </span>
+              </template>
+            </VEntityField>
           </template>
           <template #dropdownItems>
             <VButton
