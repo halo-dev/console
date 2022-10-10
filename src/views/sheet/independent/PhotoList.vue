@@ -345,7 +345,7 @@ export default {
       if (!raw.length) {
         return
       }
-      const photosToStage = raw.map(attachment => {
+      const photosToStage = raw.reverse().map(attachment => {
         return {
           name: attachment.name,
           url: attachment.path,
