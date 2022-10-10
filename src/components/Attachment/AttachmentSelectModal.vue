@@ -68,7 +68,6 @@
           @mouseenter="$set(attachment, 'hover', true)"
           @mouseleave="$set(attachment, 'hover', false)"
         >
-          <a-badge :count="`${list.selected.indexOf(attachment) + 1}`"></a-badge>
           <div class="group aspect-w-10 aspect-h-7 block w-full overflow-hidden bg-white">
             <img
               v-if="isImage(attachment)"
