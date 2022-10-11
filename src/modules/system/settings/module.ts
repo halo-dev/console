@@ -1,4 +1,4 @@
-import { definePlugin } from "@halo-dev/admin-shared";
+import { definePlugin } from "@halo-dev/console-shared";
 import SystemSettingsLayout from "./layouts/SystemSettingsLayout.vue";
 import SystemSetting from "./SystemSetting.vue";
 import { IconSettings } from "@halo-dev/components";
@@ -18,6 +18,7 @@ export default definePlugin({
           component: SystemSetting,
           meta: {
             title: "系统设置",
+            permissions: ["system:settings:view"],
           },
         },
       ],

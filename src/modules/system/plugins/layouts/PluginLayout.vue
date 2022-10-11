@@ -12,11 +12,14 @@ import { useSettingForm } from "@/composables/use-setting-form";
 
 // components
 import { VButton, VCard, VPageHeader, VTabbar } from "@halo-dev/components";
-import { BasicLayout } from "@halo-dev/admin-shared";
+import { BasicLayout } from "@halo-dev/console-shared";
 
 // types
 import type { Ref } from "vue";
 import type { Plugin, SettingForm } from "@halo-dev/api-client";
+import { usePermission } from "@/utils/permission";
+
+const { currentUserHasPermission } = usePermission();
 
 interface PluginTab {
   id: string;
@@ -96,6 +99,12 @@ const handleTriggerTabChange = () => {
 
 onMounted(async () => {
   await handleFetchPlugin();
+
+  if (!currentUserHasPermission(["system:settings:view"])) {
+    handleTriggerTabChange();
+    return;
+  }
+
   await handleFetchSettings();
 
   tabs.value = cloneDeep(initialTabs);

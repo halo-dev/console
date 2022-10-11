@@ -1,4 +1,8 @@
-import { BasicLayout, BlankLayout, definePlugin } from "@halo-dev/admin-shared";
+import {
+  BasicLayout,
+  BlankLayout,
+  definePlugin,
+} from "@halo-dev/console-shared";
 import PluginLayout from "./layouts/PluginLayout.vue";
 import PluginList from "./PluginList.vue";
 import PluginSetting from "./PluginSetting.vue";
@@ -39,6 +43,7 @@ export default definePlugin({
               component: PluginDetail,
               meta: {
                 title: "插件详情",
+                permissions: ["system:plugins:view"],
               },
             },
             {
@@ -47,6 +52,7 @@ export default definePlugin({
               component: PluginSetting,
               meta: {
                 title: "插件设置",
+                permissions: ["system:settings:view"],
               },
             },
           ],

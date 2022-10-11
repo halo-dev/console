@@ -10,7 +10,7 @@ import cloneDeep from "lodash.clonedeep";
 // hooks
 import { useThemeLifeCycle } from "../composables/use-theme";
 // types
-import { BasicLayout } from "@halo-dev/admin-shared";
+import { BasicLayout } from "@halo-dev/console-shared";
 import { useSettingForm } from "@/composables/use-setting-form";
 
 // components
@@ -27,6 +27,9 @@ import {
 } from "@halo-dev/components";
 import ThemeListModal from "../components/ThemeListModal.vue";
 import type { SettingForm, Theme } from "@halo-dev/api-client";
+import { usePermission } from "@/utils/permission";
+
+const { currentUserHasPermission } = usePermission();
 
 interface ThemeTab {
   id: string;
@@ -83,6 +86,12 @@ watch(
     if (selectedTheme.value) {
       // reset tabs
       tabs.value = cloneDeep(initialTabs);
+
+      if (!currentUserHasPermission(["system:settings:view"])) {
+        handleTriggerTabChange();
+        return;
+      }
+
       await handleFetchSettings();
 
       if (setting.value) {
