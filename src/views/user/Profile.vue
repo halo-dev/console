@@ -255,7 +255,16 @@
       </a-form>
 
       <template #footer>
-        <a-button type="primary" @click="handleUpdateAvatar">确定</a-button>
+        <ReactiveButton
+          :errored="updateAvatarForm.errored"
+          :loading="updateAvatarForm.saving"
+          erroredText="保存失败"
+          loadedText="保存成功"
+          text="保存"
+          type="primary"
+          @callback="handleUpdateAvatarCallback"
+          @click="handleUpdateAvatar"
+        ></ReactiveButton>
         <a-button @click="updateAvatarForm.visible = false">关闭</a-button>
       </template>
     </a-modal>
@@ -521,20 +530,27 @@ export default {
       })
     },
     async handleUpdateAvatar() {
-      const { updateAvatarData } = await apiClient.user.getProfile()
-      updateAvatarData.avatar = this.updateAvatarForm.avatar
+      const { data: userToUpdate } = await apiClient.user.getProfile()
+      userToUpdate.avatar = this.updateAvatarForm.avatar
+      this.updateAvatarForm.saving = true
       apiClient.user
-        .updateProfile(updateAvatarData)
-        .then(response => {
-          this.$message.success('更新头像成功!')
-          this.updateAvatarForm.visible = false
-          this.userForm.model.avatar = response.data.avatar
-          this.setUser(Object.assign({}, this.userForm.model))
-        })
+        .updateProfile(userToUpdate)
         .catch(() => {
-          this.$message.error('更新头像失败!')
-          this.updateAvatarForm.visible = true
+          this.updateAvatarForm.saveErrored = true
         })
+        .finally(() => {
+          setTimeout(() => {
+            this.updateAvatarForm.saving = false
+          }, 400)
+          this.handleLoadStatistics()
+        })
+    },
+    handleUpdateAvatarCallback() {
+      if (this.updateAvatarForm.saveErrored) {
+        this.updateAvatarForm.saveErrored = false
+        return
+      }
+      this.updateAvatarForm.visible = false
     }
   }
 }
