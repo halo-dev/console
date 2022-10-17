@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed, onMounted, ref } from "vue";
-import { IconErrorWarning } from "@halo-dev/components";
+import { IconErrorWarning } from "../../icons/icons";
 import type { Size } from "./interface";
 
 const props = withDefaults(
