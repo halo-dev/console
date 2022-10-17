@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { VButton } from "@/components/button";
 import { VDialog } from "@/components/dialog";
+import { Toast } from "../toast";
 
 const initState = () => {
   return {
@@ -11,10 +12,10 @@ const initState = () => {
     cancelText: "取消",
     type: "info",
     onConfirm: () => {
-      alert("已删除");
+      Toast.info("已删除");
     },
     onCancel: () => {
-      alert("已取消");
+      Toast.info("已取消");
     },
   };
 };
