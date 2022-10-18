@@ -10,6 +10,7 @@ import RecentLoginWidget from "./widgets/RecentLoginWidget.vue";
 import RecentPublishedWidget from "./widgets/RecentPublishedWidget.vue";
 import UserStatsWidget from "./widgets/UserStatsWidget.vue";
 import ViewsStatsWidget from "./widgets/ViewsStatsWidget.vue";
+import { markRaw } from "vue";
 
 export default definePlugin({
   name: "dashboardModule",
@@ -35,19 +36,13 @@ export default definePlugin({
           meta: {
             title: "仪表盘",
             searchable: true,
+            menu: {
+              name: "仪表盘",
+              icon: markRaw(IconDashboard),
+              priority: 0,
+              mobile: true,
+            },
           },
-        },
-      ],
-    },
-  ],
-  menus: [
-    {
-      name: "",
-      items: [
-        {
-          name: "仪表盘",
-          path: "/dashboard",
-          icon: IconDashboard,
         },
       ],
     },

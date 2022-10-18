@@ -6,6 +6,7 @@ import PostList from "./PostList.vue";
 import PostEditor from "./PostEditor.vue";
 import CategoryList from "./categories/CategoryList.vue";
 import TagList from "./tags/TagList.vue";
+import { markRaw } from "vue";
 
 export default definePlugin({
   name: "postModule",
@@ -23,6 +24,13 @@ export default definePlugin({
             title: "文章",
             searchable: true,
             permissions: ["system:posts:view"],
+            menu: {
+              name: "文章",
+              group: "内容",
+              icon: markRaw(IconBookRead),
+              priority: 1,
+              mobile: true,
+            },
           },
         },
         {
@@ -66,18 +74,6 @@ export default definePlugin({
               },
             },
           ],
-        },
-      ],
-    },
-  ],
-  menus: [
-    {
-      name: "内容",
-      items: [
-        {
-          name: "文章",
-          path: "/posts",
-          icon: IconBookRead,
         },
       ],
     },

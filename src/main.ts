@@ -3,14 +3,9 @@ import { createApp } from "vue";
 import { createPinia } from "pinia";
 import App from "./App.vue";
 import router from "./router";
-import type {
-  MenuGroupType,
-  MenuItemType,
-  Plugin,
-} from "@halo-dev/console-shared";
+import type { Plugin } from "@halo-dev/console-shared";
 import { Toast } from "@halo-dev/components";
 import { apiClient } from "@/utils/api-client";
-import { menus, minimenus, registerMenu } from "./router/menus.config";
 // setup
 import "./setup/setupStyles";
 import { setupComponents } from "./setup/setupComponents";
@@ -51,19 +46,6 @@ function registerModule(pluginModule: Plugin) {
         router.addRoute(route.parentName, route.route);
       } else {
         router.addRoute(route);
-      }
-    }
-  }
-
-  if (pluginModule.menus) {
-    if (!Array.isArray(pluginModule.menus)) {
-      console.error(`${pluginModule.name}: Plugin menus must be an array`);
-      return;
-    }
-
-    for (const group of pluginModule.menus) {
-      for (const menu of group.items) {
-        registerMenu(group.name, menu);
       }
     }
   }
@@ -215,10 +197,6 @@ async function initApp() {
   } catch (e) {
     console.error(e);
   } finally {
-    app.provide<MenuGroupType[]>("menus", menus);
-    app.provide<MenuItemType[]>("minimenus", minimenus);
-    app.provide<string>("apiUrl", import.meta.env.VITE_API_URL);
-
     app.use(router);
     app.mount("#app");
   }

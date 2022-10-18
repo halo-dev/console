@@ -210,10 +210,7 @@ importers:
 
   packages/shared:
     specifiers:
-      '@halo-dev/components': workspace:*
       vite-plugin-dts: ^1.6.5
-    dependencies:
-      '@halo-dev/components': link:../components
     devDependencies:
       vite-plugin-dts: 1.6.5
 

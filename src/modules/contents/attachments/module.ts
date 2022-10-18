@@ -3,6 +3,7 @@ import BasicLayout from "@/layouts/BasicLayout.vue";
 import AttachmentList from "./AttachmentList.vue";
 import AttachmentSelectorModal from "./components/AttachmentSelectorModal.vue";
 import { IconFolder } from "@halo-dev/components";
+import { markRaw } from "vue";
 
 export default definePlugin({
   name: "attachmentModule",
@@ -19,19 +20,14 @@ export default definePlugin({
           meta: {
             title: "附件",
             permissions: ["system:attachments:view"],
+            menu: {
+              name: "附件",
+              group: "内容",
+              icon: markRaw(IconFolder),
+              priority: 4,
+              mobile: true,
+            },
           },
-        },
-      ],
-    },
-  ],
-  menus: [
-    {
-      name: "内容",
-      items: [
-        {
-          name: "附件",
-          path: "/attachments",
-          icon: IconFolder,
         },
       ],
     },

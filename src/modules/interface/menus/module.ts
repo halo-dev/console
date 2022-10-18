@@ -2,6 +2,7 @@ import { definePlugin } from "@halo-dev/console-shared";
 import BasicLayout from "@/layouts/BasicLayout.vue";
 import Menus from "./Menus.vue";
 import { IconListSettings } from "@halo-dev/components";
+import { markRaw } from "vue";
 
 export default definePlugin({
   name: "menuModule",
@@ -19,19 +20,13 @@ export default definePlugin({
             title: "菜单",
             searchable: true,
             permissions: ["system:menus:view"],
+            menu: {
+              name: "菜单",
+              group: "外观",
+              icon: markRaw(IconListSettings),
+              priority: 6,
+            },
           },
-        },
-      ],
-    },
-  ],
-  menus: [
-    {
-      name: "外观",
-      items: [
-        {
-          name: "菜单",
-          path: "/menus",
-          icon: IconListSettings,
         },
       ],
     },
