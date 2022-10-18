@@ -45,7 +45,6 @@ const emit = defineEmits<{
 
 const activeTab = ref("installed");
 const themes = ref<Theme[]>([] as Theme[]);
-const uninstalledThemes = ref<Theme[]>([] as Theme[]);
 const loading = ref(false);
 const themeInstall = ref(false);
 const creating = ref(false);
@@ -57,18 +56,23 @@ const modalTitle = computed(() => {
 const handleFetchThemes = async () => {
   try {
     loading.value = true;
-    const { data } = await apiClient.theme.listThemes({ uninstalled: false });
-    const { data: uninstalled } = await apiClient.theme.listThemes({
-      uninstalled: true,
+    const { data } = await apiClient.theme.listThemes({
+      uninstalled: activeTab.value !== "installed",
     });
     themes.value = data.items;
-    uninstalledThemes.value = uninstalled.items;
   } catch (e) {
     console.error("Failed to fetch themes", e);
   } finally {
     loading.value = false;
   }
 };
+
+watch(
+  () => activeTab.value,
+  () => {
+    handleFetchThemes();
+  }
+);
 
 const handleUninstall = async (theme: Theme, deleteExtensions?: boolean) => {
   Dialog.warning({
@@ -220,6 +224,7 @@ defineExpose({
                         class="group aspect-w-4 aspect-h-3 block w-full overflow-hidden rounded border bg-gray-100"
                       >
                         <LazyImage
+                          :key="theme.metadata.name"
                           :src="theme.spec.logo"
                           :alt="theme.spec.displayName"
                           classes="pointer-events-none object-cover group-hover:opacity-75"
@@ -319,10 +324,7 @@ defineExpose({
         </ul>
       </VTabItem>
       <VTabItem id="uninstalled" label="未安装" class="-mx-[16px]">
-        <VEmpty
-          v-if="!uninstalledThemes.length && !loading"
-          title="当前没有未安装的主题"
-        >
+        <VEmpty v-if="!themes.length && !loading" title="当前没有未安装的主题">
           <template #actions>
             <VSpace>
               <VButton :loading="loading" @click="handleFetchThemes">
@@ -337,7 +339,7 @@ defineExpose({
           class="box-border h-full w-full divide-y divide-gray-100"
           role="list"
         >
-          <li v-for="(theme, index) in uninstalledThemes" :key="index">
+          <li v-for="(theme, index) in themes" :key="index">
             <VEntity>
               <template #start>
                 <VEntityField>
@@ -347,6 +349,7 @@ defineExpose({
                         class="group aspect-w-4 aspect-h-3 block w-full overflow-hidden rounded border bg-gray-100"
                       >
                         <LazyImage
+                          :key="theme.metadata.name"
                           :src="theme.spec.logo"
                           :alt="theme.spec.displayName"
                           classes="pointer-events-none object-cover group-hover:opacity-75"
@@ -376,23 +379,9 @@ defineExpose({
                   :title="theme.spec.displayName"
                   :description="theme.spec.version"
                 >
-                  <template #extra>
-                    <VTag
-                      v-if="
-                        theme.metadata.name === activatedTheme?.metadata?.name
-                      "
-                    >
-                      当前启用
-                    </VTag>
-                  </template>
                 </VEntityField>
               </template>
               <template #end>
-                <VEntityField v-if="theme.metadata.deletionTimestamp">
-                  <template #description>
-                    <VStatusDot v-tooltip="`删除中`" state="warning" animate />
-                  </template>
-                </VEntityField>
                 <VEntityField>
                   <template #description>
                     <a
