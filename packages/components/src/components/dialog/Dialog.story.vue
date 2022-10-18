@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { VButton } from "@/components/button";
-import { VDialog } from "@/components/dialog";
 import { Toast } from "../toast";
+import { Dialog } from "@/components/dialog";
 
 const initState = () => {
   return {
@@ -19,19 +19,26 @@ const initState = () => {
     },
   };
 };
+
+function handleConfirm() {
+  Dialog.success({
+    title: "Hello",
+    description: "Hello World",
+    onConfirm: async () => {
+      await new Promise((resolve) =>
+        setTimeout(() => {
+          console.log("Timeout");
+          resolve("");
+        }, 1000)
+      );
+    },
+  });
+}
 </script>
 <template>
   <Story :init-state="initState" title="Dialog">
-    <template #default="{ state }">
-      <VButton type="danger" @click="state.visible = true">删除</VButton>
-      <VDialog
-        :cancel-text="state.cancelText"
-        :confirm-text="state.confirmText"
-        :description="state.description"
-        :title="state.title"
-        :type="state.type"
-        :visible="state.visible"
-      ></VDialog>
+    <template #default>
+      <VButton @click="handleConfirm">确定</VButton>
     </template>
   </Story>
 </template>

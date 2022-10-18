@@ -9,7 +9,7 @@ import type { Ref } from "vue";
 import { ref, watch } from "vue";
 import type { AttachmentLike } from "@halo-dev/console-shared";
 import { apiClient } from "@/utils/api-client";
-import { useDialog } from "@halo-dev/components";
+import { Dialog } from "@halo-dev/components";
 import type { Content, Editor } from "@halo-dev/richtext-editor";
 
 interface useAttachmentControlReturn {
@@ -64,20 +64,17 @@ export function useAttachmentControl(filterOptions?: {
   const selectedAttachments = ref<Set<Attachment>>(new Set<Attachment>());
   const checkedAll = ref(false);
 
-  const dialog = useDialog();
-
   const handleFetchAttachments = async () => {
     try {
       loading.value = true;
-      const { data } =
-        await apiClient.extension.storage.attachment.searchAttachments({
-          policy: policy?.value?.metadata.name,
-          displayName: keyword?.value,
-          group: group?.value?.metadata.name,
-          uploadedBy: user?.value?.metadata.name,
-          page: attachments.value.page,
-          size: attachments.value.size,
-        });
+      const { data } = await apiClient.attachment.searchAttachments({
+        policy: policy?.value?.metadata.name,
+        displayName: keyword?.value,
+        group: group?.value?.metadata.name,
+        uploadedBy: user?.value?.metadata.name,
+        page: attachments.value.page,
+        size: attachments.value.size,
+      });
       attachments.value = data;
     } catch (e) {
       console.error("Failed to fetch attachments", e);
@@ -134,7 +131,7 @@ export function useAttachmentControl(filterOptions?: {
   };
 
   const handleDelete = (attachment: Attachment) => {
-    dialog.warning({
+    Dialog.warning({
       title: "确定要删除该附件吗？",
       description: "删除之后将无法恢复",
       confirmType: "danger",
@@ -161,7 +158,7 @@ export function useAttachmentControl(filterOptions?: {
   };
 
   const handleDeleteInBatch = () => {
-    dialog.warning({
+    Dialog.warning({
       title: "确定要删除所选的附件吗？",
       description: "删除之后将无法恢复",
       confirmType: "danger",

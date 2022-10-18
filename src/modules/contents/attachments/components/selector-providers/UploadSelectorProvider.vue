@@ -4,7 +4,7 @@ import {
   IconCheckboxFill,
   VCard,
   IconDeleteBin,
-  useDialog,
+  Dialog,
 } from "@halo-dev/components";
 
 import type { AttachmentLike } from "@halo-dev/console-shared";
@@ -71,7 +71,7 @@ const selectedAttachments = ref<Set<Attachment>>(new Set<Attachment>());
 
 const uploadHandler = computed(() => {
   return (file, config) =>
-    apiClient.extension.storage.attachment.uploadAttachment(
+    apiClient.attachment.uploadAttachment(
       {
         file,
         policyName: selectedPolicy.value,
@@ -103,10 +103,8 @@ const handleSelect = async (attachment: Attachment | undefined) => {
   selectedAttachments.value.add(attachment);
 };
 
-const dialog = useDialog();
-
 const handleDelete = async (attachment: Attachment) => {
-  dialog.warning({
+  Dialog.warning({
     title: "确定要删除当前的附件吗？",
     confirmType: "danger",
     onConfirm: async () => {

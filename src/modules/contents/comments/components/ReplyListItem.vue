@@ -5,7 +5,7 @@ import {
   VTag,
   VEntityField,
   VEntity,
-  useDialog,
+  Dialog,
   VStatusDot,
   IconReplyLine,
 } from "@halo-dev/components";
@@ -31,8 +31,6 @@ const emit = defineEmits<{
   (event: "reply", reply: ListedReply): void;
 }>();
 
-const dialog = useDialog();
-
 const quoteReply = computed(() => {
   const { quoteReply: replyName } = props.reply.reply.spec;
 
@@ -46,7 +44,7 @@ const quoteReply = computed(() => {
 });
 
 const handleDelete = async () => {
-  dialog.warning({
+  Dialog.warning({
     title: "是否确认删除该回复？",
     description: "该操作不可恢复。",
     confirmType: "danger",
@@ -104,7 +102,12 @@ const isHoveredReply = computed(() => {
     <template #start>
       <VEntityField>
         <template #description>
-          <VAvatar circle :src="reply?.owner.avatar" size="md"></VAvatar>
+          <VAvatar
+            circle
+            :src="reply?.owner.avatar"
+            :alt="reply?.owner.displayName"
+            size="md"
+          ></VAvatar>
         </template>
       </VEntityField>
       <VEntityField
