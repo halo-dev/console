@@ -10,7 +10,7 @@ import {
   VButton,
   Dialog,
 } from "@halo-dev/components";
-import type { MenuGroupType, MenuItemType } from "../types/menus";
+import type { MenuGroupType, MenuItemType } from "@halo-dev/console-shared";
 import type { User } from "@halo-dev/api-client";
 import logo from "@/assets/logo.svg";
 import { RouterView, useRoute, useRouter } from "vue-router";
@@ -144,7 +144,7 @@ const isMac = /macintosh|mac os x/i.test(navigator.userAgent);
     <!--bottom nav bar-->
     <div
       v-if="minimenus"
-      class="bottom-nav-bar fixed left-0 bottom-0 right-0 grid grid-cols-6 border-t-2 border-black drop-shadow-2xl mt-safe pb-safe md:hidden bg-secondary"
+      class="bottom-nav-bar fixed left-0 bottom-0 right-0 grid grid-cols-6 border-t-2 border-black bg-secondary drop-shadow-2xl mt-safe pb-safe md:hidden"
     >
       <div
         v-for="(menu, index) in minimenus"
@@ -241,24 +241,24 @@ const isMac = /macintosh|mac os x/i.test(navigator.userAgent);
 
   .current-profile {
     height: 70px;
-    @apply w-64
-    bg-white
-    p-3
-    flex
-    fixed
+    @apply fixed
     left-0
     bottom-0
-    gap-3;
+    flex
+    w-64
+    gap-3
+    bg-white
+    p-3;
 
     .profile-avatar {
-      @apply self-center
-      flex 
-      items-center;
+      @apply flex
+      items-center 
+      self-center;
     }
 
     .profile-name {
-      @apply self-center
-      flex-1;
+      @apply flex-1
+      self-center;
     }
 
     .profile-control {

@@ -1,4 +1,5 @@
-import { BlankLayout, definePlugin } from "@halo-dev/console-shared";
+import { definePlugin } from "@halo-dev/console-shared";
+import BlankLayout from "@/layouts/BlankLayout.vue";
 import ThemeLayout from "./layouts/ThemeLayout.vue";
 import ThemeDetail from "./ThemeDetail.vue";
 import ThemeSetting from "./ThemeSetting.vue";

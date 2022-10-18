@@ -1,8 +1,6 @@
-import {
-  BasicLayout,
-  BlankLayout,
-  definePlugin,
-} from "@halo-dev/console-shared";
+import { definePlugin } from "@halo-dev/console-shared";
+import BasicLayout from "@/layouts/BasicLayout.vue";
+import BlankLayout from "@/layouts/BlankLayout.vue";
 import UserProfileLayout from "./layouts/UserProfileLayout.vue";
 import UserList from "./UserList.vue";
 import UserDetail from "./UserDetail.vue";

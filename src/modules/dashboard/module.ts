@@ -1,4 +1,5 @@
-import { BasicLayout, definePlugin } from "@halo-dev/console-shared";
+import { definePlugin } from "@halo-dev/console-shared";
+import BasicLayout from "@/layouts/BasicLayout.vue";
 import Dashboard from "./Dashboard.vue";
 import { IconDashboard } from "@halo-dev/components";
 
