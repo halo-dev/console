@@ -2,7 +2,7 @@
 
 export {};
 
-import type { CoreMenuGroupId } from "@/router/routes.config";
+import type { CoreMenuGroupId } from "@halo-dev/console-shared";
 
 import "vue-router";
 
