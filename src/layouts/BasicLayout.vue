@@ -24,6 +24,8 @@ import axios from "axios";
 import GlobalSearchModal from "@/components/global-search/GlobalSearchModal.vue";
 import { coreMenuGroups } from "@/router/routes.config";
 import sortBy from "lodash.sortby";
+import { useRoleStore } from "@/stores/role";
+import { hasPermission } from "@/utils/permission";
 
 const route = useRoute();
 const router = useRouter();
@@ -82,10 +84,22 @@ onUnmounted(() => {
 const menus = ref<MenuGroupType[]>([] as MenuGroupType[]);
 const minimenus = ref<MenuItemType[]>([] as MenuItemType[]);
 
+const roleStore = useRoleStore();
+const { uiPermissions } = roleStore.permissions;
+
 const generateMenus = () => {
   // sort by menu.priority and meta.core
   const currentRoutes = sortBy(
-    router.getRoutes().filter((route) => !!route.meta?.menu),
+    router.getRoutes().filter((route) => {
+      const { meta } = route;
+      if (!meta?.menu) {
+        return false;
+      }
+      if (meta.permissions) {
+        return hasPermission(uiPermissions, meta.permissions as string[], true);
+      }
+      return true;
+    }),
     [
       (route: RouteRecordRaw) => !route.meta?.core,
       (route: RouteRecordRaw) => route.meta?.menu?.priority || 0,
