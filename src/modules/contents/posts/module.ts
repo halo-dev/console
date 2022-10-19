@@ -26,9 +26,9 @@ export default definePlugin({
             permissions: ["system:posts:view"],
             menu: {
               name: "文章",
-              group: "内容",
+              group: "content",
               icon: markRaw(IconBookRead),
-              priority: 1,
+              priority: 0,
               mobile: true,
             },
           },

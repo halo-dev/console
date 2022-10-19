@@ -22,9 +22,9 @@ export default definePlugin({
             permissions: ["system:menus:view"],
             menu: {
               name: "菜单",
-              group: "外观",
+              group: "interface",
               icon: markRaw(IconListSettings),
-              priority: 6,
+              priority: 1,
             },
           },
         },

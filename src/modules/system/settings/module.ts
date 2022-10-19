@@ -17,9 +17,9 @@ export default definePlugin({
         permissions: ["system:settings:view"],
         menu: {
           name: "设置",
-          group: "系统",
+          group: "system",
           icon: markRaw(IconSettings),
-          priority: 9,
+          priority: 2,
         },
       },
       children: [

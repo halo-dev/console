@@ -22,9 +22,9 @@ export default definePlugin({
             permissions: ["system:attachments:view"],
             menu: {
               name: "附件",
-              group: "内容",
+              group: "content",
               icon: markRaw(IconFolder),
-              priority: 4,
+              priority: 3,
               mobile: true,
             },
           },

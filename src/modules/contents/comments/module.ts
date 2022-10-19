@@ -22,9 +22,9 @@ export default definePlugin({
             permissions: ["system:comments:view"],
             menu: {
               name: "评论",
-              group: "内容",
+              group: "content",
               icon: markRaw(IconMessage),
-              priority: 3,
+              priority: 2,
               mobile: true,
             },
           },

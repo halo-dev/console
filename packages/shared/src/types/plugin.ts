@@ -9,7 +9,7 @@ export type ExtensionPointState =
   | PagesPublicState
   | AttachmentSelectorPublicState;
 
-interface RouteRecordAppend {
+export interface RouteRecordAppend {
   parentName: RouteRecordName;
   route: RouteRecordRaw;
 }

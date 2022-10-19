@@ -13,10 +13,17 @@ import { RoutesMenu } from "@/components/menu/RoutesMenu";
 import type { MenuGroupType, MenuItemType } from "@halo-dev/console-shared";
 import type { User } from "@halo-dev/api-client";
 import logo from "@/assets/logo.svg";
-import { RouterView, useRoute, useRouter } from "vue-router";
+import {
+  RouterView,
+  useRoute,
+  useRouter,
+  type RouteRecordRaw,
+} from "vue-router";
 import { computed, inject, onMounted, onUnmounted, ref } from "vue";
 import axios from "axios";
 import GlobalSearchModal from "@/components/global-search/GlobalSearchModal.vue";
+import { coreMenuGroups } from "@/router/routes.config";
+import sortBy from "lodash.sortby";
 
 const route = useRoute();
 const router = useRouter();
@@ -76,13 +83,14 @@ const menus = ref<MenuGroupType[]>([] as MenuGroupType[]);
 const minimenus = ref<MenuItemType[]>([] as MenuItemType[]);
 
 const generateMenus = () => {
-  // sort by menu.priority
-  const currentRoutes = router
-    .getRoutes()
-    .filter((route) => !!route.meta?.menu)
-    .sort((a, b) => {
-      return (a.meta?.menu?.priority || 0) - (b.meta?.menu?.priority || 0);
-    });
+  // sort by menu.priority and meta.core
+  const currentRoutes = sortBy(
+    router.getRoutes().filter((route) => !!route.meta?.menu),
+    [
+      (route: RouteRecordRaw) => !route.meta?.core,
+      (route: RouteRecordRaw) => route.meta?.menu?.priority || 0,
+    ]
+  );
 
   // group by menu.group
   menus.value = currentRoutes.reduce((acc, route) => {
@@ -90,9 +98,11 @@ const generateMenus = () => {
     if (!menu) {
       return acc;
     }
-    const group = acc.find((item) => item.name === menu.group);
+    const group = acc.find((item) => item.id === menu.group);
     const childRoute = route.children[0];
     const childMetaMenu = childRoute?.meta?.menu;
+
+    // only support one level
     const menuChildren = childMetaMenu
       ? [
           {
@@ -103,20 +113,31 @@ const generateMenus = () => {
         ]
       : undefined;
     if (group) {
-      group.items.push({
+      group.items?.push({
         name: menu.name,
         path: route.path,
         icon: menu.icon,
+        mobile: menu.mobile,
         children: menuChildren,
       });
     } else {
+      const menuGroup = coreMenuGroups.find((item) => item.id === menu.group);
+      let name = "";
+      if (!menuGroup) {
+        name = menu.group;
+      } else if (menuGroup.name) {
+        name = menuGroup.name;
+      }
       acc.push({
-        name: menu.group,
+        id: menuGroup?.id || menu.group,
+        name: name,
+        priority: menuGroup?.priority || 0,
         items: [
           {
             name: menu.name,
             path: route.path,
             icon: menu.icon,
+            mobile: menu.mobile,
             children: menuChildren,
           },
         ],
@@ -125,21 +146,22 @@ const generateMenus = () => {
     return acc;
   }, [] as MenuGroupType[]);
 
-  minimenus.value = router
-    .getRoutes()
-    .filter((route) => {
-      return route.meta?.menu?.mobile;
-    })
-    .sort((a, b) => {
-      return (a.meta?.menu?.priority || 0) - (b.meta?.menu?.priority || 0);
-    })
-    .map((route): MenuItemType => {
-      return {
-        name: route.meta?.menu?.name + "",
-        path: route.path,
-        icon: route.meta?.menu?.icon,
-      };
-    });
+  // sort by menu.priority
+  menus.value = sortBy(menus.value, [
+    (menu: MenuGroupType) => {
+      return coreMenuGroups.findIndex((item) => item.id === menu.id) < 0;
+    },
+    (menu: MenuGroupType) => menu.priority || 0,
+  ]);
+
+  minimenus.value = menus.value
+    .reduce((acc, group) => {
+      if (group?.items) {
+        acc.push(...group.items);
+      }
+      return acc;
+    }, [] as MenuItemType[])
+    .filter((item) => item.mobile);
 };
 
 onMounted(generateMenus);

@@ -2,6 +2,8 @@
 
 export {};
 
+import type { CoreMenuGroupId } from "@/router/routes.config";
+
 import "vue-router";
 
 declare module "*.vue" {
@@ -16,12 +18,13 @@ declare module "vue-router" {
     title?: string;
     searchable?: boolean;
     permissions?: string[];
+    core?: boolean;
     menu?: {
       name: string;
-      group?: string;
+      group?: CoreMenuGroupId;
       icon?: Component;
       priority: number;
-      mobile?: true;
+      mobile?: boolean;
     };
   }
 }

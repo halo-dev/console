@@ -3,7 +3,7 @@ import { createApp } from "vue";
 import { createPinia } from "pinia";
 import App from "./App.vue";
 import router from "./router";
-import type { Plugin } from "@halo-dev/console-shared";
+import type { Plugin, RouteRecordAppend } from "@halo-dev/console-shared";
 import { Toast } from "@halo-dev/components";
 import { apiClient } from "@/utils/api-client";
 // setup
@@ -16,6 +16,7 @@ import { usePluginStore } from "@/stores/plugin";
 import type { User } from "@halo-dev/api-client";
 import { hasPermission } from "@/utils/permission";
 import { useRoleStore } from "@/stores/role";
+import type { RouteRecordRaw } from "vue-router";
 
 const app = createApp(App);
 
@@ -23,7 +24,7 @@ setupComponents(app);
 
 app.use(createPinia());
 
-function registerModule(pluginModule: Plugin) {
+function registerModule(pluginModule: Plugin, core: boolean) {
   if (pluginModule.components) {
     if (!Array.isArray(pluginModule.components)) {
       console.error(`${pluginModule.name}: Plugin components must be an array`);
@@ -41,6 +42,8 @@ function registerModule(pluginModule: Plugin) {
       return;
     }
 
+    resetRouteMeta(pluginModule.routes);
+
     for (const route of pluginModule.routes) {
       if ("parentName" in route) {
         router.addRoute(route.parentName, route.route);
@@ -49,10 +52,38 @@ function registerModule(pluginModule: Plugin) {
       }
     }
   }
+
+  function resetRouteMeta(routes: RouteRecordRaw[] | RouteRecordAppend[]) {
+    for (const route of routes) {
+      if ("parentName" in route) {
+        if (route.route.meta?.menu) {
+          route.route.meta = {
+            ...route.route.meta,
+            core,
+          };
+        }
+        if (route.route.children) {
+          resetRouteMeta(route.route.children);
+        }
+      } else {
+        if (route.meta?.menu) {
+          route.meta = {
+            ...route.meta,
+            core,
+          };
+        }
+        if (route.children) {
+          resetRouteMeta(route.children);
+        }
+      }
+    }
+  }
 }
 
 function loadCoreModules() {
-  coreModules.forEach(registerModule);
+  coreModules.forEach((module) => {
+    registerModule(module, true);
+  });
 }
 
 const pluginStore = usePluginStore();
@@ -115,7 +146,7 @@ async function loadPluginModules() {
         if (pluginModule) {
           // @ts-ignore
           plugin.spec.module = pluginModule;
-          registerModule(pluginModule);
+          registerModule(pluginModule, false);
         }
       } catch (e) {
         const message = `${plugin.metadata.name}: 加载插件入口文件失败`;

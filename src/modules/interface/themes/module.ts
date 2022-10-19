@@ -25,9 +25,9 @@ export default definePlugin({
             permissions: ["system:themes:view"],
             menu: {
               name: "主题",
-              group: "外观",
+              group: "interface",
               icon: markRaw(IconPalette),
-              priority: 5,
+              priority: 0,
             },
           },
         },

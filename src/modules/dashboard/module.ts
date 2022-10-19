@@ -27,6 +27,7 @@ export default definePlugin({
     {
       path: "/",
       component: BasicLayout,
+      name: "Root",
       redirect: "/dashboard",
       children: [
         {
@@ -38,6 +39,7 @@ export default definePlugin({
             searchable: true,
             menu: {
               name: "仪表盘",
+              group: "dashboard",
               icon: markRaw(IconDashboard),
               priority: 0,
               mobile: true,

@@ -36,9 +36,9 @@ export default definePlugin({
                 permissions: ["system:users:view"],
                 menu: {
                   name: "用户",
-                  group: "系统",
+                  group: "system",
                   icon: markRaw(IconUserSettings),
-                  priority: 8,
+                  priority: 1,
                   mobile: true,
                 },
               },

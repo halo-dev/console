@@ -30,9 +30,9 @@ export default definePlugin({
                 permissions: ["system:plugins:view"],
                 menu: {
                   name: "插件",
-                  group: "系统",
+                  group: "system",
                   icon: markRaw(IconPlug),
-                  priority: 7,
+                  priority: 0,
                 },
               },
             },

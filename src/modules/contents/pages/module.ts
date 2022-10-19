@@ -22,9 +22,9 @@ export default definePlugin({
       meta: {
         menu: {
           name: "页面",
-          group: "内容",
+          group: "content",
           icon: markRaw(IconPages),
-          priority: 2,
+          priority: 1,
         },
       },
       children: [
