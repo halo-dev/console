@@ -1,7 +1,7 @@
 <template>
   <a-tag :color="tag.color" :style="{ color: labelColor }">
     {{ tag.name }}
-    <span v-if="tag.postCount">({{ tag.postCount }})</span>
+    <span v-if="tag.postCount !== undefined">({{ tag.postCount }})</span>
   </a-tag>
 </template>
 <script>
