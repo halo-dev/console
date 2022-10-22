@@ -1,5 +1,8 @@
 <template>
-  <a-tag :color="tag.color" :style="{ color: labelColor }"> {{ tag.name }}({{ tag.postCount }})</a-tag>
+  <a-tag :color="tag.color" :style="{ color: labelColor }">
+    {{ tag.name }}
+    <span v-if="tag.postCount !== undefined">({{ tag.postCount }})</span>
+  </a-tag>
 </template>
 <script>
 import { isHex, isLight } from '@/utils/colorUtil'
