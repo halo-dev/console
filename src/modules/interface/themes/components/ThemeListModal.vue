@@ -20,6 +20,7 @@ import { computed, ref, watch } from "vue";
 import type { Theme } from "@halo-dev/api-client";
 import { apiClient } from "@/utils/api-client";
 import { usePermission } from "@/utils/permission";
+import { onBeforeRouteLeave } from "vue-router";
 
 const { currentUserHasPermission } = usePermission();
 
@@ -48,6 +49,7 @@ const themes = ref<Theme[]>([] as Theme[]);
 const loading = ref(false);
 const themeInstall = ref(false);
 const creating = ref(false);
+const refreshInterval = ref();
 
 const modalTitle = computed(() => {
   return activeTab.value === "installed" ? "已安装的主题" : "未安装的主题";
@@ -55,17 +57,39 @@ const modalTitle = computed(() => {
 
 const handleFetchThemes = async () => {
   try {
+    clearInterval(refreshInterval.value);
+
     loading.value = true;
     const { data } = await apiClient.theme.listThemes({
       uninstalled: activeTab.value !== "installed",
+      page: 0,
+      size: 0,
     });
     themes.value = data.items;
+
+    if (activeTab.value !== "installed") {
+      return;
+    }
+
+    const deletedThemes = themes.value.filter(
+      (theme) => !!theme.metadata.deletionTimestamp
+    );
+
+    if (deletedThemes.length) {
+      refreshInterval.value = setInterval(() => {
+        handleFetchThemes();
+      }, 3000);
+    }
   } catch (e) {
     console.error("Failed to fetch themes", e);
   } finally {
     loading.value = false;
   }
 };
+
+onBeforeRouteLeave(() => {
+  clearInterval(refreshInterval.value);
+});
 
 watch(
   () => activeTab.value,
@@ -154,6 +178,8 @@ watch(
   (visible) => {
     if (visible) {
       handleFetchThemes();
+    } else {
+      clearInterval(refreshInterval.value);
     }
   }
 );
