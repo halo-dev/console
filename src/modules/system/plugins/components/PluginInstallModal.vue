@@ -1,12 +1,12 @@
 <script lang="ts" setup>
 import { VModal, Dialog } from "@halo-dev/components";
-import FilePondUpload from "@/components/upload/FilePondUpload.vue";
+import UppyUpload from "@/components/upload/UppyUpload.vue";
 import { apiClient } from "@/utils/api-client";
 import type { Plugin } from "@halo-dev/api-client";
-import { computed, ref } from "vue";
-import type { AxiosResponse } from "axios";
+import { ref, watch } from "vue";
+import type { SuccessResponse } from "@uppy/core";
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     visible: boolean;
   }>(),
@@ -20,28 +20,19 @@ const emit = defineEmits<{
   (event: "close"): void;
 }>();
 
-const FilePondUploadRef = ref();
+const uploadVisible = ref(false);
 
 const handleVisibleChange = (visible: boolean) => {
   emit("update:visible", visible);
   if (!visible) {
     emit("close");
-    FilePondUploadRef.value.handleRemoveFiles();
   }
 };
 
-const uploadHandler = computed(() => {
-  return (file, config) =>
-    apiClient.plugin.installPlugin(
-      {
-        file: file,
-      },
-      config
-    );
-});
+const endpoint = "/apis/api.console.halo.run/v1alpha1/plugins/install";
 
-const onUploaded = async (response: AxiosResponse) => {
-  const plugin = response.data as Plugin;
+const onUploaded = async (response: SuccessResponse) => {
+  const plugin = response.body as Plugin;
   handleVisibleChange(false);
   Dialog.success({
     title: "上传成功",
@@ -66,19 +57,36 @@ const onUploaded = async (response: AxiosResponse) => {
     },
   });
 };
+
+watch(
+  () => props.visible,
+  (newValue) => {
+    if (newValue) {
+      uploadVisible.value = true;
+    } else {
+      const uploadVisibleTimer = setTimeout(() => {
+        uploadVisible.value = false;
+        clearTimeout(uploadVisibleTimer);
+      }, 200);
+    }
+  }
+);
 </script>
 <template>
   <VModal
     :visible="visible"
-    :width="500"
+    :width="600"
     title="安装插件"
     @update:visible="handleVisibleChange"
   >
-    <FilePondUpload
-      ref="FilePondUploadRef"
-      :allow-multiple="false"
-      :handler="uploadHandler"
-      label-idle="点击选择文件或者拖拽文件到此处"
+    <UppyUpload
+      v-if="uploadVisible"
+      :restrictions="{
+        maxNumberOfFiles: 1,
+        allowedFileTypes: ['.jar'],
+      }"
+      :endpoint="endpoint"
+      auto-proceed
       @uploaded="onUploaded"
     />
   </VModal>
