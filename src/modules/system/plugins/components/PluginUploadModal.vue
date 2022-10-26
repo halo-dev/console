@@ -3,15 +3,17 @@ import { VModal, Dialog } from "@halo-dev/components";
 import UppyUpload from "@/components/upload/UppyUpload.vue";
 import { apiClient } from "@/utils/api-client";
 import type { Plugin } from "@halo-dev/api-client";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import type { SuccessResponse } from "@uppy/core";
 
 const props = withDefaults(
   defineProps<{
     visible: boolean;
+    upgradePlugin?: Plugin;
   }>(),
   {
     visible: false,
+    upgradePlugin: undefined,
   }
 );
 
@@ -22,6 +24,12 @@ const emit = defineEmits<{
 
 const uploadVisible = ref(false);
 
+const modalTitle = computed(() => {
+  return props.upgradePlugin
+    ? `升级插件（${props.upgradePlugin.spec.displayName}）`
+    : "安装插件";
+});
+
 const handleVisibleChange = (visible: boolean) => {
   emit("update:visible", visible);
   if (!visible) {
@@ -29,9 +37,19 @@ const handleVisibleChange = (visible: boolean) => {
   }
 };
 
-const endpoint = "/apis/api.console.halo.run/v1alpha1/plugins/install";
+const endpoint = computed(() => {
+  if (props.upgradePlugin) {
+    return `/apis/api.console.halo.run/v1alpha1/plugins/${props.upgradePlugin.metadata.name}/upgrade`;
+  }
+  return "/apis/api.console.halo.run/v1alpha1/plugins/install";
+});
 
 const onUploaded = async (response: SuccessResponse) => {
+  if (props.upgradePlugin) {
+    handleVisibleChange(false);
+    return;
+  }
+
   const plugin = response.body as Plugin;
   handleVisibleChange(false);
   Dialog.success({
@@ -76,7 +94,7 @@ watch(
   <VModal
     :visible="visible"
     :width="600"
-    title="安装插件"
+    :title="modalTitle"
     @update:visible="handleVisibleChange"
   >
     <UppyUpload
