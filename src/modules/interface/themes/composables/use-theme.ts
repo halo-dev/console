@@ -1,5 +1,5 @@
 import type { ComputedRef, Ref } from "vue";
-import { computed, onMounted, ref } from "vue";
+import { computed, ref } from "vue";
 import type { Theme } from "@halo-dev/api-client";
 import { apiClient } from "@/utils/api-client";
 import { Dialog } from "@halo-dev/components";

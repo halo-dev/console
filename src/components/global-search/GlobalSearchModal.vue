@@ -12,7 +12,7 @@ import {
   IconPages,
   IconUserSettings,
 } from "@halo-dev/components";
-import { computed, markRaw, onMounted, ref, watch, type Component } from "vue";
+import { computed, markRaw, ref, watch, type Component } from "vue";
 import Fuse from "fuse.js";
 import { apiClient } from "@/utils/api-client";
 import { usePermission } from "@/utils/permission";
