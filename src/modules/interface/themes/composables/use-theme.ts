@@ -3,10 +3,11 @@ import { computed, onMounted, ref } from "vue";
 import type { Theme } from "@halo-dev/api-client";
 import { apiClient } from "@/utils/api-client";
 import { Dialog } from "@halo-dev/components";
+import { useThemeStore } from "@/stores/theme";
+import { storeToRefs } from "pinia";
 
 interface useThemeLifeCycleReturn {
   loading: Ref<boolean>;
-  activatedTheme: Ref<Theme | undefined>;
   isActivated: ComputedRef<boolean>;
   handleActiveTheme: () => void;
 }
@@ -14,42 +15,15 @@ interface useThemeLifeCycleReturn {
 export function useThemeLifeCycle(
   theme: Ref<Theme | undefined>
 ): useThemeLifeCycleReturn {
-  const activatedTheme = ref<Theme | undefined>();
   const loading = ref(false);
 
+  const themeStore = useThemeStore();
+
+  const { activatedTheme } = storeToRefs(themeStore);
+
   const isActivated = computed(() => {
-    return activatedTheme.value?.metadata.name === theme.value?.metadata.name;
+    return activatedTheme?.value?.metadata.name === theme.value?.metadata.name;
   });
-
-  const handleFetchActivatedTheme = async () => {
-    try {
-      loading.value = true;
-
-      const { data } = await apiClient.extension.configMap.getv1alpha1ConfigMap(
-        {
-          name: "system",
-        }
-      );
-
-      if (!data.data?.theme) {
-        // Todo: show error
-        return;
-      }
-      const themeConfig = JSON.parse(data.data.theme);
-
-      const { data: themeData } =
-        await apiClient.extension.theme.getthemeHaloRunV1alpha1Theme({
-          name: themeConfig.active,
-        });
-
-      theme.value = themeData;
-      activatedTheme.value = themeData;
-    } catch (e) {
-      console.error("Failed to fetch active theme", e);
-    } finally {
-      loading.value = false;
-    }
-  };
 
   const handleActiveTheme = async () => {
     Dialog.info({
@@ -77,17 +51,14 @@ export function useThemeLifeCycle(
         } catch (e) {
           console.error("Failed to active theme", e);
         } finally {
-          await handleFetchActivatedTheme();
+          themeStore.fetchActivatedTheme();
         }
       },
     });
   };
 
-  onMounted(handleFetchActivatedTheme);
-
   return {
     loading,
-    activatedTheme,
     isActivated,
     handleActiveTheme,
   };

@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import { RouterView, useRoute } from "vue-router";
-import { watch } from "vue";
+import { inject, onMounted, watch } from "vue";
 import { useTitle } from "@vueuse/core";
+import type { User } from "@halo-dev/api-client";
+import { useThemeStore } from "@/stores/theme";
 
 const AppName = "Halo";
 const route = useRoute();
