@@ -63,3 +63,36 @@ export function useThemeLifeCycle(
     handleActiveTheme,
   };
 }
+
+export function useThemeCustomTemplates(type: "post" | "page" | "category") {
+  const themeStore = useThemeStore();
+  const templates = computed(() => {
+    const defaultTemplate = [
+      {
+        label: "默认模板",
+        value: "",
+      },
+    ];
+
+    if (!themeStore.activatedTheme) {
+      return defaultTemplate;
+    }
+    const { customTemplates } = themeStore.activatedTheme.spec;
+    if (!customTemplates?.[type]) {
+      return defaultTemplate;
+    }
+    return [
+      ...defaultTemplate,
+      ...(customTemplates[type]?.map((template) => {
+        return {
+          value: template.file,
+          label: template.name || template.file,
+        };
+      }) || []),
+    ];
+  });
+
+  return {
+    templates,
+  };
+}

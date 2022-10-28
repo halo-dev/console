@@ -1,5 +1,5 @@
-import { inject, type DirectiveBinding } from "vue";
 import { createApp } from "vue";
+import type { DirectiveBinding } from "vue";
 import { createPinia } from "pinia";
 import App from "./App.vue";
 import router from "./router";
@@ -209,12 +209,7 @@ async function loadCurrentUser() {
 }
 
 async function loadActivatedTheme() {
-  if (!currentUser) {
-    return;
-  }
-
   const themeStore = useThemeStore();
-
   await themeStore.fetchActivatedTheme();
 }
 
@@ -232,14 +227,19 @@ async function initApp() {
   try {
     loadCoreModules();
 
+    await loadCurrentUser();
+
+    if (!currentUser) {
+      return;
+    }
+
+    await loadActivatedTheme();
+
     try {
       await loadPluginModules();
     } catch (e) {
       console.error("Failed to load plugins", e);
     }
-
-    await loadCurrentUser();
-    await loadActivatedTheme();
   } catch (e) {
     console.error(e);
   } finally {

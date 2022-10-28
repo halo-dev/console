@@ -356,6 +356,8 @@ watch(
   () => props.visible,
   (visible) => {
     if (visible) {
+      handleBuildSearchIndex();
+
       setTimeout(() => {
         globalSearchInput.value?.focus();
       }, 100);
@@ -368,10 +370,6 @@ watch(
     }
   }
 );
-
-onMounted(() => {
-  handleBuildSearchIndex();
-});
 
 const onVisibleChange = (visible: boolean) => {
   emit("update:visible", visible);

@@ -58,9 +58,7 @@ const modalTitle = computed(() => {
   return activeTab.value === "installed" ? "已安装的主题" : "未安装的主题";
 });
 
-const themeStore = useThemeStore();
-
-const { activatedTheme } = storeToRefs(themeStore);
+const { activatedTheme } = storeToRefs(useThemeStore());
 
 const handleFetchThemes = async () => {
   try {
