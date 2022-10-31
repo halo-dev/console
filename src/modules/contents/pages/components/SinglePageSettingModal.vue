@@ -271,7 +271,7 @@ watchEffect(() => {
           <FormKit
             v-model="formState.page.spec.cover"
             label="封面图"
-            type="text"
+            type="attachment"
             name="cover"
           ></FormKit>
         </FormKit>
