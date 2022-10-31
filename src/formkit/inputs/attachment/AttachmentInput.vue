@@ -2,7 +2,7 @@
 import type { FormKitFrameworkContext } from "@formkit/core";
 import { IconFolder } from "@halo-dev/components";
 import AttachmentSelectorModal from "@/modules/contents/attachments/components/AttachmentSelectorModal.vue";
-import { nextTick, onMounted, ref, type PropType } from "vue";
+import { ref, type PropType } from "vue";
 import type { AttachmentLike } from "@halo-dev/console-shared";
 
 const props = defineProps({
