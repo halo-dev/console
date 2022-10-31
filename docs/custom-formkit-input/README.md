@@ -8,6 +8,7 @@
 
 目前已提供以下类型：
 
+- `code`: 代码编辑器
 - `menuCheckbox`：选择一组菜单
 - `menuRadio`：选择一个菜单
 - `menuItemSelect`：选择菜单项
