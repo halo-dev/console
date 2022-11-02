@@ -4,6 +4,8 @@ import { createAutoAnimatePlugin } from "@formkit/addons";
 import { zh } from "@formkit/i18n";
 import type { DefaultConfigOptions } from "@formkit/vue";
 import { form } from "./inputs/form";
+import { attachment } from "./inputs/attachment";
+import { code } from "./inputs/code";
 import { menuCheckbox } from "./inputs/menu-checkbox";
 import { menuRadio } from "./inputs/menu-radio";
 import { menuItemSelect } from "./inputs/menu-item-select";
@@ -21,6 +23,8 @@ const config: DefaultConfigOptions = {
   plugins: [createAutoAnimatePlugin()],
   inputs: {
     form,
+    attachment,
+    code,
     menuCheckbox,
     menuRadio,
     menuItemSelect,

@@ -228,6 +228,7 @@ watchEffect(() => {
             label="自定义摘要"
             name="raw"
             type="textarea"
+            :rows="5"
           ></FormKit>
         </FormKit>
       </VTabItem>
@@ -284,7 +285,7 @@ watchEffect(() => {
             v-model="formState.post.spec.cover"
             name="cover"
             label="封面图"
-            type="text"
+            type="attachment"
           ></FormKit>
         </FormKit>
         <!--TODO: add SEO/Metas/Inject Code form-->

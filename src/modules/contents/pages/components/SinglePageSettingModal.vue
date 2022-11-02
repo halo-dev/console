@@ -214,6 +214,7 @@ watchEffect(() => {
             name="raw"
             label="自定义摘要"
             type="textarea"
+            :rows="5"
           ></FormKit>
         </FormKit>
       </VTabItem>
@@ -271,7 +272,7 @@ watchEffect(() => {
           <FormKit
             v-model="formState.page.spec.cover"
             label="封面图"
-            type="text"
+            type="attachment"
             name="cover"
           ></FormKit>
         </FormKit>
