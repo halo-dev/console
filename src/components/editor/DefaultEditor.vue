@@ -44,7 +44,6 @@ import {
   CommandCodeBlock,
   ExtensionCodeBlock,
   lowlight,
-  ExtensionKatexBlock,
   UndoMenuItem,
   RedoMenuItem,
   BoldMenuItem,
@@ -201,7 +200,6 @@ const editor = useEditor({
     ExtensionCodeBlock.configure({
       lowlight,
     }),
-    ExtensionKatexBlock,
     ExtensionCharacterCount,
     Extension.create({
       addGlobalAttributes() {

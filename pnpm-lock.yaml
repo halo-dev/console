@@ -16,7 +16,7 @@ importers:
       '@halo-dev/api-client': ^0.0.39
       '@halo-dev/components': workspace:*
       '@halo-dev/console-shared': workspace:*
-      '@halo-dev/richtext-editor': ^0.0.0-alpha.10
+      '@halo-dev/richtext-editor': ^0.0.0-alpha.11
       '@iconify-json/mdi': ^1.1.34
       '@iconify-json/vscode-icons': ^1.1.16
       '@rushstack/eslint-patch': ^1.2.0
@@ -111,7 +111,7 @@ importers:
       '@halo-dev/api-client': 0.0.39
       '@halo-dev/components': link:packages/components
       '@halo-dev/console-shared': link:packages/shared
-      '@halo-dev/richtext-editor': 0.0.0-alpha.10_vue@3.2.41
+      '@halo-dev/richtext-editor': 0.0.0-alpha.11_vue@3.2.41
       '@tiptap/extension-character-count': 2.0.0-beta.199
       '@uppy/core': 3.0.4
       '@uppy/dashboard': 3.1.0_@uppy+core@3.0.4
@@ -1957,8 +1957,8 @@ packages:
     resolution: {integrity: sha512-GuTTJDOj0PPMXo3KTiNYGACRUXqJKnjnApK303eNPWqVodgR3mJVLFTXwa+euAJOkcSG3KkB5OtUFAkZeHRbPA==}
     dev: false
 
-  /@halo-dev/richtext-editor/0.0.0-alpha.10_vue@3.2.41:
-    resolution: {integrity: sha512-6Eb0pdGMDqPYZB8PAAWPKPRYW28s0P+CUzIFc57ENplJFwO/fHVn4KkhboEB2pL4RX2Z14nfOG5Q4avl1eeFJQ==}
+  /@halo-dev/richtext-editor/0.0.0-alpha.11_vue@3.2.41:
+    resolution: {integrity: sha512-JtUBwzTp57lrBi3HUvypQaMyZIU/g9KER34PRoYgtc+12Uhjq7XXosrtaOrEL1pHjYPqyjxawUyPUJuzXONuig==}
     peerDependencies:
       vue: ^3.2.37
     dependencies:
