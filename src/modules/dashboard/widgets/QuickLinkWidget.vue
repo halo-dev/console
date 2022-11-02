@@ -90,16 +90,16 @@ const router = useRouter();
 </script>
 <template>
   <VCard
-    :body-class="['h-full', 'overflow-y-auto', '!p-0']"
+    :body-class="['h-full', 'overflow-y-auto']"
     class="h-full"
     title="快捷访问"
   >
-    <div class="overflow-hidden sm:grid sm:grid-cols-3 sm:gap-px">
+    <div class="grid grid-cols-1 gap-2 overflow-hidden sm:grid-cols-3">
       <div
         v-for="(action, index) in actions"
         :key="index"
         v-permission="action.permissions"
-        class="group relative cursor-pointer bg-white p-6 transition-all hover:bg-gray-50"
+        class="group relative cursor-pointer rounded-lg bg-gray-50 p-4 transition-all hover:bg-gray-100"
         @click="router.push(action.route)"
       >
         <div>
@@ -110,14 +110,13 @@ const router = useRouter();
           </span>
         </div>
         <div class="mt-8">
-          <h3 class="text-base font-medium">
-            <span aria-hidden="true" class="absolute inset-0"></span>
+          <h3 class="text-sm font-semibold">
             {{ action.title }}
           </h3>
         </div>
         <span
           aria-hidden="true"
-          class="pointer-events-none absolute top-6 right-6 text-gray-300 group-hover:text-gray-400"
+          class="pointer-events-none absolute top-6 right-6 text-gray-300 transition-all group-hover:translate-x-1 group-hover:text-gray-400"
         >
           <IconArrowRight />
         </span>

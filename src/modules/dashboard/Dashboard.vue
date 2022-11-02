@@ -200,6 +200,7 @@ function handleRemove(item: any) {
 .vue-grid-layout {
   @apply -m-[10px];
 }
+
 .vue-grid-item {
   transition: none !important;
 }
