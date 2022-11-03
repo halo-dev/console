@@ -171,7 +171,7 @@ onMounted(async () => {
       v-model="formState.content.raw"
       :owner="formState.page.spec.owner"
       :permalink="formState.page.status?.permalink"
-      :creation-time="formState.page.metadata.creationTimestamp"
+      :publish-time="formState.page.spec.publishTime"
     />
   </div>
 </template>

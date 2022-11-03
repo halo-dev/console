@@ -87,13 +87,13 @@ const props = withDefaults(
     modelValue?: string;
     owner?: string;
     permalink?: string;
-    creationTime?: string | null;
+    publishTime?: string | null;
   }>(),
   {
     modelValue: "",
     owner: undefined,
     permalink: undefined,
-    creationTime: undefined,
+    publishTime: undefined,
   }
 );
 
@@ -181,14 +181,6 @@ const editor = useEditor({
             CommandHeader5,
             CommandHeader6,
             CommandCodeBlock,
-            {
-              icon: markRaw(MdiFileImageBox),
-              title: "附件库",
-              keywords: ["attachments", "fujianku"],
-              command: () => {
-                attachmentSelectorModal.value = true;
-              },
-            },
           ].filter((item) =>
             [...item.keywords, item.title].some((keyword) =>
               keyword.includes(query)
@@ -421,7 +413,7 @@ watch(
                 </div>
               </div>
 
-              <div class="grid grid-cols-1 gap-2">
+              <div v-if="publishTime" class="grid grid-cols-1 gap-2">
                 <div
                   class="group flex cursor-pointer flex-col gap-y-5 rounded-md bg-gray-100 px-1.5 py-1 transition-all"
                 >
@@ -429,7 +421,7 @@ watch(
                     <div
                       class="text-sm text-gray-500 group-hover:text-gray-900"
                     >
-                      创建时间
+                      发布时间
                     </div>
                     <div class="rounded bg-gray-200 p-0.5">
                       <IconCalendar
@@ -438,11 +430,11 @@ watch(
                     </div>
                   </div>
                   <div class="text-base font-medium text-gray-900">
-                    {{ formatDatetime(creationTime) || "未发布" }}
+                    {{ formatDatetime(publishTime) || "未发布" }}
                   </div>
                 </div>
               </div>
-              <div class="grid grid-cols-1 gap-2">
+              <div v-if="owner" class="grid grid-cols-1 gap-2">
                 <div
                   class="group flex cursor-pointer flex-col gap-y-5 rounded-md bg-gray-100 px-1.5 py-1 transition-all"
                 >
@@ -463,7 +455,7 @@ watch(
                   </div>
                 </div>
               </div>
-              <div class="grid grid-cols-1 gap-2">
+              <div v-if="permalink" class="grid grid-cols-1 gap-2">
                 <div
                   class="group flex cursor-pointer flex-col gap-y-5 rounded-md bg-gray-100 px-1.5 py-1 transition-all"
                 >
