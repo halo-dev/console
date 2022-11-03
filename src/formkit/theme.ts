@@ -11,8 +11,8 @@ const boxClassification = {
   label: textClassification.label,
   legend: `${textClassification.label} px-2`,
   fieldset:
-    "border border-gray-300 rounded-base px-2 py-2 focus-within:border-primary max-w-lg",
-  wrapper: "flex items-center mb-1 cursor-pointer px-2",
+    "group border border-gray-300 rounded-base px-2 py-2 focus-within:border-primary max-w-lg",
+  wrapper: "flex items-center mb-1 cursor-pointer group-[.formkit-fieldset]:px-2",
   help: "mb-2 mt-0",
   input:
     "form-check-input h-4 w-4 mr-2 border border-gray-500 rounded-sm bg-white checked:bg-primary focus:outline-none focus:ring-0 transition duration-200",
