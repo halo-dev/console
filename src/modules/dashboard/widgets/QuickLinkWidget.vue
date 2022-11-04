@@ -14,7 +14,7 @@ import {
 import { inject, markRaw, ref, type Component } from "vue";
 import { useRouter } from "vue-router";
 import type { User } from "@halo-dev/api-client";
-import ThemePreviewModal from "@/modules/interface/themes/components/ThemePreviewModal.vue";
+import ThemePreviewModal from "@/modules/interface/themes/components/preview/ThemePreviewModal.vue";
 
 interface Action {
   icon: Component;
