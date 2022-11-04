@@ -163,6 +163,7 @@ watch(
         <VAlert
           title="没有存储策略"
           description="在上传之前，需要新建一个存储策略"
+          :closable="false"
         />
       </div>
       <UppyUpload
