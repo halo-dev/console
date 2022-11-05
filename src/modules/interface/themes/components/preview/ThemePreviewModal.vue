@@ -16,6 +16,7 @@ import {
   IconComputer,
   IconPhone,
   IconTablet,
+  IconRefreshLine,
 } from "@halo-dev/components";
 import { storeToRefs } from "pinia";
 import { computed, markRaw, ref, watch } from "vue";
@@ -167,6 +168,10 @@ const formSchema = computed(() => {
 
 const handleSaveThemeConfigMap = async () => {
   await handleSaveConfigMap();
+  handleRefresh();
+};
+
+const handleRefresh = () => {
   previewFrame.value?.contentWindow?.location.reload();
 };
 
@@ -228,6 +233,9 @@ const iframeClasses = computed(() => {
         @click="handleOpenSettings(undefined)"
       >
         <IconSettings />
+      </span>
+      <span v-tooltip="{ content: '刷新', delay: 300 }" @click="handleRefresh">
+        <IconRefreshLine />
       </span>
       <span v-tooltip="{ content: '新窗口打开', delay: 300 }">
         <a :href="previewUrl" target="_blank">
