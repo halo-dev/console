@@ -45,6 +45,7 @@ const { activatedTheme } = storeToRefs(useThemeStore());
 const previewFrame = ref<HTMLIFrameElement | null>(null);
 const themes = ref<Theme[]>([] as Theme[]);
 const themesVisible = ref(false);
+const switching = ref(false);
 const selectedTheme = ref<Theme>();
 
 const handleFetchThemes = async () => {
@@ -195,16 +196,18 @@ const formSchema = computed(() => {
       class="flex h-full items-center justify-center divide-x divide-gray-100 transition-all"
     >
       <transition
-        enter-active-class="transform transition ease-in-out duration-150"
+        enter-active-class="transform transition ease-in-out duration-300"
         enter-from-class="-translate-x-full"
         enter-to-class="translate-x-0"
-        leave-active-class="transform transition ease-in-out duration-150"
+        leave-active-class="transform transition ease-in-out duration-300"
         leave-from-class="translate-x-0"
         leave-to-class="-translate-x-full"
+        appear
       >
         <div
-          v-show="themesVisible || settingsVisible"
+          v-if="themesVisible || settingsVisible"
           class="relative h-full w-96 overflow-y-auto"
+          :class="{ '!overflow-hidden': switching }"
         >
           <transition
             enter-active-class="transform transition ease-in-out duration-300 delay-150"
@@ -213,6 +216,10 @@ const formSchema = computed(() => {
             leave-active-class="transform transition ease-in-out duration-300"
             leave-from-class="-translate-x-0"
             leave-to-class="translate-x-full"
+            @before-enter="switching = true"
+            @after-enter="switching = false"
+            @before-leave="switching = true"
+            @after-leave="switching = false"
           >
             <div v-show="settingsVisible" class="mb-20">
               <VTabbar
@@ -262,6 +269,10 @@ const formSchema = computed(() => {
             leave-active-class="transform transition ease-in-out duration-300"
             leave-from-class="translate-x-0"
             leave-to-class="-translate-x-full"
+            @before-enter="switching = true"
+            @after-enter="switching = false"
+            @before-leave="switching = true"
+            @after-leave="switching = false"
           >
             <ul
               v-show="themesVisible"
