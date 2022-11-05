@@ -13,9 +13,12 @@ import {
   IconArrowLeft,
   VTabbar,
   VButton,
+  IconComputer,
+  IconPhone,
+  IconTablet,
 } from "@halo-dev/components";
 import { storeToRefs } from "pinia";
-import { computed, ref, watch } from "vue";
+import { computed, markRaw, ref, watch } from "vue";
 
 const props = withDefaults(
   defineProps<{
@@ -166,6 +169,34 @@ const handleSaveThemeConfigMap = async () => {
   await handleSaveConfigMap();
   previewFrame.value?.contentWindow?.location.reload();
 };
+
+// mock devices
+const mockDevices = [
+  {
+    id: "desktop",
+    icon: markRaw(IconComputer),
+  },
+  {
+    id: "tablet",
+    icon: markRaw(IconTablet),
+  },
+  {
+    id: "phone",
+    icon: markRaw(IconPhone),
+  },
+];
+
+const deviceActiveId = ref(mockDevices[0].id);
+
+const iframeClasses = computed(() => {
+  if (deviceActiveId.value === "desktop") {
+    return "w-full h-full";
+  }
+  if (deviceActiveId.value === "tablet") {
+    return "w-2/3 h-2/3 ring-2 rounded ring-gray-300";
+  }
+  return "w-96 h-[50rem] ring-2 rounded ring-gray-300";
+});
 </script>
 <template>
   <VModal
@@ -176,6 +207,13 @@ const handleSaveThemeConfigMap = async () => {
     :mount-to-body="true"
     @update:visible="onVisibleChange"
   >
+    <template #center>
+      <VTabbar
+        v-model:active-id="deviceActiveId"
+        :items="mockDevices"
+        type="outline"
+      ></VTabbar>
+    </template>
     <template #actions>
       <span
         v-tooltip="{ content: '切换主题', delay: 300 }"
@@ -320,11 +358,14 @@ const handleSaveThemeConfigMap = async () => {
           </transition>
         </div>
       </transition>
-      <div class="h-full flex-1 transition-all">
+      <div
+        class="flex h-full flex-1 items-center justify-center transition-all duration-300"
+      >
         <iframe
           v-if="visible"
           ref="previewFrame"
-          class="h-full w-full border-none transition-all duration-300"
+          class="border-none transition-all duration-500"
+          :class="iframeClasses"
           :src="previewUrl"
         ></iframe>
       </div>
