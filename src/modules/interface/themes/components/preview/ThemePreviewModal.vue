@@ -161,6 +161,11 @@ const formSchema = computed(() => {
   return forms.find((item) => item.group === activeSettingTab.value)
     ?.formSchema as (FormKitSchemaCondition | FormKitSchemaNode)[];
 });
+
+const handleSaveThemeConfigMap = async () => {
+  await handleSaveConfigMap();
+  previewFrame.value?.contentWindow?.location.reload();
+};
 </script>
 <template>
   <VModal
@@ -243,7 +248,7 @@ const formSchema = computed(() => {
                     :actions="false"
                     :preserve="true"
                     type="form"
-                    @submit="handleSaveConfigMap"
+                    @submit="handleSaveThemeConfigMap"
                   >
                     <FormKitSchema :schema="formSchema" />
                   </FormKit>
