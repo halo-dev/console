@@ -259,6 +259,7 @@ const iframeClasses = computed(() => {
           v-if="themesVisible || settingsVisible"
           class="relative h-full w-96 overflow-y-auto"
           :class="{ '!overflow-hidden': switching }"
+          style="overflow-y: overlay"
         >
           <transition
             enter-active-class="transform transition ease-in-out duration-300 delay-150"
@@ -276,10 +277,10 @@ const iframeClasses = computed(() => {
               <VTabbar
                 v-model:active-id="activeSettingTab"
                 :items="settingTabs"
-                class="w-full overflow-x-auto overflow-y-hidden !rounded-none"
+                class="w-full !rounded-none"
                 type="outline"
               ></VTabbar>
-              <div class="bg-white p-2">
+              <div class="bg-white p-3">
                 <div v-for="(tab, index) in settingTabs" :key="index">
                   <FormKit
                     v-if="
