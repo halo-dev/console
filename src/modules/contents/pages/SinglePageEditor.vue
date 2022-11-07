@@ -31,7 +31,7 @@ const initialFormState: SinglePageRequest = {
       template: "",
       cover: "",
       deleted: false,
-      published: false,
+      publish: false,
       publishTime: "",
       pinned: false,
       allowComment: true,

@@ -15,7 +15,7 @@ const initialFormState: PostRequest = {
       template: "",
       cover: "",
       deleted: false,
-      published: false,
+      publish: false,
       publishTime: "",
       pinned: false,
       allowComment: true,
@@ -138,7 +138,7 @@ const handlePublishCanceling = async () => {
 
     // Update published spec = false
     const postToUpdate = cloneDeep(formState.value);
-    postToUpdate.post.spec.published = false;
+    postToUpdate.post.spec.publish = false;
     await apiClient.post.updateDraftPost({
       name: postToUpdate.post.metadata.name,
       postRequest: postToUpdate,

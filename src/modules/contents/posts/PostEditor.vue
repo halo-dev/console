@@ -46,7 +46,7 @@ const initialFormState: PostRequest = {
       template: "",
       cover: "",
       deleted: false,
-      published: false,
+      publish: false,
       publishTime: "",
       pinned: false,
       allowComment: true,

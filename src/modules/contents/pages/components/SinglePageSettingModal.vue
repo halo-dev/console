@@ -15,7 +15,7 @@ const initialFormState: SinglePageRequest = {
       template: "",
       cover: "",
       deleted: false,
-      published: false,
+      publish: false,
       publishTime: "",
       pinned: false,
       allowComment: true,
@@ -136,7 +136,7 @@ const handleCancelPublish = async () => {
 
     // Update published spec = false
     const singlePageToUpdate = cloneDeep(formState.value);
-    singlePageToUpdate.page.spec.published = false;
+    singlePageToUpdate.page.spec.publish = false;
     await apiClient.singlePage.updateDraftSinglePage({
       name: singlePageToUpdate.page.metadata.name,
       singlePageRequest: singlePageToUpdate,
