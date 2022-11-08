@@ -15,7 +15,7 @@ import {
 import PostSettingModal from "./components/PostSettingModal.vue";
 import PostPreviewModal from "./components/PostPreviewModal.vue";
 import AttachmentSelectorModal from "../attachments/components/AttachmentSelectorModal.vue";
-import type { PostRequest } from "@halo-dev/api-client";
+import type { Post, PostRequest } from "@halo-dev/api-client";
 import { computed, markRaw, nextTick, onMounted, ref, watch } from "vue";
 import cloneDeep from "lodash.clonedeep";
 import { apiClient } from "@/utils/api-client";
@@ -201,6 +201,7 @@ const handleSave = async () => {
     if (!formState.value.post.spec.title) {
       formState.value.post.spec.title = "无标题文章";
     }
+
     if (!formState.value.post.spec.slug) {
       formState.value.post.spec.slug = uuid();
     }
@@ -238,13 +239,13 @@ const handleFetchContent = async () => {
   formState.value.content = data;
 };
 
-const onSettingSaved = (post: PostRequest) => {
+const onSettingSaved = (post: Post) => {
   // Set route query parameter
   if (!isUpdateMode.value) {
-    name.value = post.post.metadata.name;
+    name.value = post.metadata.name;
   }
 
-  formState.value = post;
+  formState.value.post = post;
   settingModal.value = false;
 };
 
@@ -269,7 +270,7 @@ onMounted(async () => {
 <template>
   <PostSettingModal
     v-model:visible="settingModal"
-    :post="formState"
+    :post="formState.post"
     @saved="onSettingSaved"
   />
   <PostPreviewModal v-model:visible="previewModal" :post="formState.post" />

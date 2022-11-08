@@ -13,7 +13,7 @@ const handleFetchPosts = async () => {
     const { data } = await apiClient.post.listPosts({
       labelSelector: [`${postLabels.PUBLISHED}=true`],
       sort: "PUBLISH_TIME",
-      sortOrder: true,
+      sortOrder: false,
       page: 1,
       size: 10,
     });

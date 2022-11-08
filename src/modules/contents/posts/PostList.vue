@@ -25,13 +25,12 @@ import {
 import UserDropdownSelector from "@/components/dropdown-selector/UserDropdownSelector.vue";
 import PostSettingModal from "./components/PostSettingModal.vue";
 import PostTag from "../posts/tags/components/PostTag.vue";
-import { onMounted, ref, watch, watchEffect } from "vue";
+import { onMounted, ref, watch } from "vue";
 import type {
   User,
   Category,
   ListedPostList,
   Post,
-  PostRequest,
   Tag,
 } from "@halo-dev/api-client";
 import { apiClient } from "@/utils/api-client";
@@ -57,8 +56,7 @@ const posts = ref<ListedPostList>({
 });
 const loading = ref(false);
 const settingModal = ref(false);
-const selectedPost = ref<Post | null>(null);
-const selectedPostWithContent = ref<PostRequest | null>(null);
+const selectedPost = ref<Post>();
 const checkedAll = ref(false);
 const selectedPostNames = ref<string[]>([]);
 const refreshInterval = ref();
@@ -152,8 +150,7 @@ const handleOpenSettingModal = async (post: Post) => {
 };
 
 const onSettingModalClose = () => {
-  selectedPost.value = null;
-  selectedPostWithContent.value = null;
+  selectedPost.value = undefined;
   handleFetchPosts();
 };
 
@@ -270,21 +267,6 @@ const handleDeleteInBatch = async () => {
 
 watch(selectedPostNames, (newValue) => {
   checkedAll.value = newValue.length === posts.value.items?.length;
-});
-
-watchEffect(async () => {
-  if (!selectedPost.value || !selectedPost.value.spec.headSnapshot) {
-    return;
-  }
-
-  const { data: content } = await apiClient.content.obtainSnapshotContent({
-    snapshotName: selectedPost.value.spec.headSnapshot,
-  });
-
-  selectedPostWithContent.value = {
-    post: selectedPost.value,
-    content: content,
-  };
 });
 
 onMounted(() => {
@@ -410,7 +392,7 @@ function handleContributorChange(user?: User) {
 <template>
   <PostSettingModal
     v-model:visible="settingModal"
-    :post="selectedPostWithContent"
+    :post="selectedPost"
     @close="onSettingModalClose"
   >
     <template #actions>
