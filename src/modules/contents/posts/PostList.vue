@@ -41,14 +41,9 @@ import { usePostTag } from "@/modules/contents/posts/tags/composables/use-post-t
 import { usePermission } from "@/utils/permission";
 import { onBeforeRouteLeave } from "vue-router";
 import cloneDeep from "lodash.clonedeep";
+import { postLabels } from "@/constants/labels";
 
 const { currentUserHasPermission } = usePermission();
-
-enum PostPhase {
-  DRAFT = "未发布",
-  PENDING_APPROVAL = "待审核",
-  PUBLISHED = "已发布",
-}
 
 const posts = ref<ListedPostList>({
   page: 1,
@@ -77,6 +72,7 @@ const handleFetchPosts = async () => {
     let categories: string[] | undefined;
     let tags: string[] | undefined;
     let contributors: string[] | undefined;
+    const labelSelector: string[] = ["content.halo.run/deleted=false"];
 
     if (selectedCategory.value) {
       categories = [
@@ -93,12 +89,17 @@ const handleFetchPosts = async () => {
       contributors = [selectedContributor.value.metadata.name];
     }
 
+    if (selectedPublishStatusItem.value.value !== undefined) {
+      labelSelector.push(
+        `${postLabels.PUBLISHED}=${selectedPublishStatusItem.value.value}`
+      );
+    }
+
     const { data } = await apiClient.post.listPosts({
-      labelSelector: [`content.halo.run/deleted=false`],
+      labelSelector,
       page: posts.value.page,
       size: posts.value.size,
       visible: selectedVisibleItem.value?.value,
-      publishPhase: selectedPublishPhaseItem.value?.value,
       sort: selectedSortItem.value?.sort,
       sortOrder: selectedSortItem.value?.sortOrder,
       keyword: keyword.value,
@@ -203,11 +204,9 @@ const checkSelection = (post: Post) => {
   );
 };
 
-const finalStatus = (post: Post) => {
-  if (post.status?.phase) {
-    return PostPhase[post.status.phase];
-  }
-  return "";
+const getPublishStatus = (post: Post) => {
+  const { labels } = post.metadata;
+  return labels?.[postLabels.PUBLISHED] === "true" ? "已发布" : "未发布";
 };
 
 const handleCheckAllChange = (e: Event) => {
@@ -299,9 +298,9 @@ interface VisibleItem {
   value?: "PUBLIC" | "INTERNAL" | "PRIVATE";
 }
 
-interface PublishPhaseItem {
+interface PublishStatuItem {
   label: string;
-  value?: "DRAFT" | "PENDING_APPROVAL" | "PUBLISHED";
+  value?: boolean;
 }
 
 interface SortItem {
@@ -329,22 +328,18 @@ const VisibleItems: VisibleItem[] = [
   },
 ];
 
-const PublishPhaseItems: PublishPhaseItem[] = [
+const PublishStatuItems: PublishStatuItem[] = [
   {
     label: "全部",
     value: undefined,
   },
   {
     label: "已发布",
-    value: "PUBLISHED",
+    value: true,
   },
   {
     label: "未发布",
-    value: "DRAFT",
-  },
-  {
-    label: "待审核",
-    value: "PENDING_APPROVAL",
+    value: false,
   },
 ];
 
@@ -375,7 +370,7 @@ const { categories } = usePostCategory({ fetchOnMounted: true });
 const { tags } = usePostTag({ fetchOnMounted: true });
 
 const selectedVisibleItem = ref<VisibleItem>(VisibleItems[0]);
-const selectedPublishPhaseItem = ref<PublishPhaseItem>(PublishPhaseItems[0]);
+const selectedPublishStatusItem = ref<PublishStatuItem>(PublishStatuItems[0]);
 const selectedSortItem = ref<SortItem>();
 const selectedCategory = ref<Category>();
 const selectedTag = ref<Tag>();
@@ -387,8 +382,8 @@ function handleVisibleItemChange(visibleItem: VisibleItem) {
   handleFetchPosts();
 }
 
-function handlePublishPhaseItemChange(publishPhaseItem: PublishPhaseItem) {
-  selectedPublishPhaseItem.value = publishPhaseItem;
+function handlePublishStatusItemChange(publishStatusItem: PublishStatuItem) {
+  selectedPublishStatusItem.value = publishStatusItem;
   handleFetchPosts();
 }
 
@@ -482,15 +477,15 @@ function handleContributorChange(user?: User) {
                 ></FormKit>
 
                 <div
-                  v-if="selectedPublishPhaseItem.value"
+                  v-if="selectedPublishStatusItem.value"
                   class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
                 >
                   <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                    状态：{{ selectedPublishPhaseItem.label }}
+                    状态：{{ selectedPublishStatusItem.label }}
                   </span>
                   <IconCloseCircle
                     class="h-4 w-4 text-gray-600"
-                    @click="handlePublishPhaseItemChange(PublishPhaseItems[0])"
+                    @click="handlePublishStatusItemChange(PublishStatuItems[0])"
                   />
                 </div>
                 <div
@@ -576,16 +571,16 @@ function handleContributorChange(user?: User) {
                     <div class="w-72 p-4">
                       <ul class="space-y-1">
                         <li
-                          v-for="(filterItem, index) in PublishPhaseItems"
+                          v-for="(filterItem, index) in PublishStatuItems"
                           :key="index"
                           v-close-popper
                           :class="{
                             'bg-gray-100':
-                              selectedPublishPhaseItem.value ===
+                              selectedPublishStatusItem.value ===
                               filterItem.value,
                           }"
                           class="flex cursor-pointer items-center rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                          @click="handlePublishPhaseItemChange(filterItem)"
+                          @click="handlePublishStatusItemChange(filterItem)"
                         >
                           <span class="truncate">{{ filterItem.label }}</span>
                         </li>
@@ -934,7 +929,7 @@ function handleContributorChange(user?: User) {
                 </template>
               </VEntityField>
               <VEntityField
-                :description="finalStatus(post.post)"
+                :description="getPublishStatus(post.post)"
               ></VEntityField>
               <VEntityField>
                 <template #description>

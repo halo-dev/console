@@ -34,14 +34,9 @@ import { formatDatetime } from "@/utils/date";
 import { onBeforeRouteLeave, RouterLink } from "vue-router";
 import cloneDeep from "lodash.clonedeep";
 import { usePermission } from "@/utils/permission";
+import { singlePageLabels } from "@/constants/labels";
 
 const { currentUserHasPermission } = usePermission();
-
-enum SinglePagePhase {
-  DRAFT = "未发布",
-  PENDING_APPROVAL = "待审核",
-  PUBLISHED = "已发布",
-}
 
 const singlePages = ref<ListedSinglePageList>({
   page: 1,
@@ -68,18 +63,24 @@ const handleFetchSinglePages = async () => {
     loading.value = true;
 
     let contributors: string[] | undefined;
+    const labelSelector: string[] = ["content.halo.run/deleted=false"];
 
     if (selectedContributor.value) {
       contributors = [selectedContributor.value.metadata.name];
     }
 
+    if (selectedPublishStatusItem.value.value !== undefined) {
+      labelSelector.push(
+        `${singlePageLabels.PUBLISHED}=${selectedPublishStatusItem.value.value}`
+      );
+    }
+
     const { data } = await apiClient.singlePage.listSinglePages({
-      labelSelector: [`content.halo.run/deleted=false`],
+      labelSelector,
       page: singlePages.value.page,
       size: singlePages.value.size,
       visible: selectedVisibleItem.value.value,
       sort: selectedSortItem.value?.sort,
-      publishPhase: selectedPublishPhaseItem.value.value,
       sortOrder: selectedSortItem.value?.sortOrder,
       keyword: keyword.value,
       contributor: contributors,
@@ -264,11 +265,9 @@ const handleDeleteInBatch = async () => {
   });
 };
 
-const finalStatus = (singlePage: SinglePage) => {
-  if (singlePage.status?.phase) {
-    return SinglePagePhase[singlePage.status.phase];
-  }
-  return "";
+const getPublishStatus = (singlePage: SinglePage) => {
+  const { labels } = singlePage.metadata;
+  return labels?.[singlePageLabels.PUBLISHED] === "true" ? "已发布" : "未发布";
 };
 
 watch(selectedPageNames, (newValue) => {
@@ -302,9 +301,9 @@ interface VisibleItem {
   value?: "PUBLIC" | "INTERNAL" | "PRIVATE";
 }
 
-interface PublishPhaseItem {
+interface PublishStatusItem {
   label: string;
-  value?: "DRAFT" | "PENDING_APPROVAL" | "PUBLISHED";
+  value?: boolean;
 }
 
 interface SortItem {
@@ -332,22 +331,18 @@ const VisibleItems: VisibleItem[] = [
   },
 ];
 
-const PublishPhaseItems: PublishPhaseItem[] = [
+const PublishStatusItems: PublishStatusItem[] = [
   {
     label: "全部",
     value: undefined,
   },
   {
     label: "已发布",
-    value: "PUBLISHED",
+    value: true,
   },
   {
     label: "未发布",
-    value: "DRAFT",
-  },
-  {
-    label: "待审核",
-    value: "PENDING_APPROVAL",
+    value: false,
   },
 ];
 
@@ -376,7 +371,7 @@ const SortItems: SortItem[] = [
 
 const selectedContributor = ref<User>();
 const selectedVisibleItem = ref<VisibleItem>(VisibleItems[0]);
-const selectedPublishPhaseItem = ref<PublishPhaseItem>(PublishPhaseItems[0]);
+const selectedPublishStatusItem = ref<PublishStatusItem>(PublishStatusItems[0]);
 const selectedSortItem = ref<SortItem>();
 const keyword = ref("");
 
@@ -390,8 +385,8 @@ const handleSelectUser = (user?: User) => {
   handleFetchSinglePages();
 };
 
-function handlePublishPhaseItemChange(publishPhaseItem: PublishPhaseItem) {
-  selectedPublishPhaseItem.value = publishPhaseItem;
+function handlePublishStatusItemChange(publishStatusItem: PublishStatusItem) {
+  selectedPublishStatusItem.value = publishStatusItem;
   handleFetchSinglePages();
 }
 
@@ -446,15 +441,15 @@ function handleSortItemChange(sortItem?: SortItem) {
                 @keyup.enter="handleFetchSinglePages"
               ></FormKit>
               <div
-                v-if="selectedPublishPhaseItem.value"
+                v-if="selectedPublishStatusItem.value"
                 class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
               >
                 <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                  状态：{{ selectedPublishPhaseItem.label }}
+                  状态：{{ selectedPublishStatusItem.label }}
                 </span>
                 <IconCloseCircle
                   class="h-4 w-4 text-gray-600"
-                  @click="handlePublishPhaseItemChange(PublishPhaseItems[0])"
+                  @click="handlePublishStatusItemChange(PublishStatusItems[0])"
                 />
               </div>
               <div
@@ -513,15 +508,16 @@ function handleSortItemChange(sortItem?: SortItem) {
                   <div class="w-72 p-4">
                     <ul class="space-y-1">
                       <li
-                        v-for="(filterItem, index) in PublishPhaseItems"
+                        v-for="(filterItem, index) in PublishStatusItems"
                         :key="index"
                         v-close-popper
                         :class="{
                           'bg-gray-100':
-                            selectedPublishPhaseItem.value === filterItem.value,
+                            selectedPublishStatusItem.value ===
+                            filterItem.value,
                         }"
                         class="flex cursor-pointer items-center rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                        @click="handlePublishPhaseItemChange(filterItem)"
+                        @click="handlePublishStatusItemChange(filterItem)"
                       >
                         <span class="truncate">{{ filterItem.label }}</span>
                       </li>
@@ -713,7 +709,7 @@ function handleSortItemChange(sortItem?: SortItem) {
                 </RouterLink>
               </template>
             </VEntityField>
-            <VEntityField :description="finalStatus(singlePage.page)" />
+            <VEntityField :description="getPublishStatus(singlePage.page)" />
             <VEntityField>
               <template #description>
                 <IconEye
