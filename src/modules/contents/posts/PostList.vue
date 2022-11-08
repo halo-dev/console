@@ -107,14 +107,19 @@ const handleFetchPosts = async () => {
     });
     posts.value = data;
 
-    const deletedPosts = posts.value.items.filter(
-      (post) => post.post.spec.deleted
-    );
+    // When an post is in the process of deleting or publishing, the list needs to be refreshed regularly
+    const abnormalPosts = posts.value.items.filter((post) => {
+      const { spec, metadata } = post.post;
+      return (
+        spec.deleted ||
+        (spec.publish && metadata.labels?.[postLabels.PUBLISHED] !== "true")
+      );
+    });
 
-    if (deletedPosts.length) {
+    if (abnormalPosts.length) {
       refreshInterval.value = setInterval(() => {
         handleFetchPosts();
-      }, 3000);
+      }, 1000);
     }
   } catch (e) {
     console.error("Failed to fetch posts", e);
@@ -910,9 +915,17 @@ function handleContributorChange(user?: User) {
                   </RouterLink>
                 </template>
               </VEntityField>
-              <VEntityField
-                :description="getPublishStatus(post.post)"
-              ></VEntityField>
+              <VEntityField :description="getPublishStatus(post.post)">
+                <template
+                  v-if="
+                    post.post.spec.publish &&
+                    post.post.metadata.labels?.[postLabels.PUBLISHED] !== 'true'
+                  "
+                  #description
+                >
+                  <VStatusDot text="发布中" animate />
+                </template>
+              </VEntityField>
               <VEntityField>
                 <template #description>
                   <IconEye

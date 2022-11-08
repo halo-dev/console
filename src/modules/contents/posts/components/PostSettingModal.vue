@@ -268,34 +268,25 @@ const { templates } = useThemeCustomTemplates("post");
     <template #footer>
       <VSpace>
         <VButton
+          v-if="formState.metadata.labels?.[postLabels.PUBLISHED] !== 'true'"
           :loading="publishing"
           type="secondary"
           @click="handleSwitchPublish(true)"
         >
-          {{
-            formState.metadata.labels?.[postLabels.PUBLISHED] === "true"
-              ? "重新发布"
-              : "发布"
-          }}
+          发布
         </VButton>
         <VButton
-          :loading="saving"
-          size="sm"
-          type="secondary"
-          @click="handleSave"
-        >
-          保存
-        </VButton>
-        <VButton
-          v-if="formState.status?.phase === 'PUBLISHED'"
+          v-else
           :loading="publishCanceling"
           type="danger"
-          size="sm"
           @click="handleSwitchPublish(false)"
         >
           取消发布
         </VButton>
-        <VButton size="sm" type="default" @click="handleVisibleChange(false)">
+        <VButton :loading="saving" type="secondary" @click="handleSave">
+          保存
+        </VButton>
+        <VButton type="default" @click="handleVisibleChange(false)">
           关闭
         </VButton>
       </VSpace>

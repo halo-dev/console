@@ -6,6 +6,8 @@ import {
   IconLink,
   IconSave,
   IconUserFollow,
+  IconSettings,
+  IconSendPlaneFill,
   VButton,
   VPageHeader,
   VSpace,
@@ -228,10 +230,23 @@ const handleSave = async () => {
   }
 };
 
+const handlePublish = () => {
+  // TODO
+};
+
+const handlePublishClick = () => {
+  if (isUpdateMode.value) {
+    handlePublish();
+  } else {
+    settingModal.value = true;
+  }
+};
+
 const handleFetchContent = async () => {
   if (!formState.value.post.spec.headSnapshot) {
     return;
   }
+
   const { data } = await apiClient.content.obtainSnapshotContent({
     snapshotName: formState.value.post.spec.headSnapshot,
   });
@@ -294,11 +309,25 @@ onMounted(async () => {
           预览
         </VButton>
         <VButton :loading="saving" size="sm" type="default" @click="handleSave">
-          保存
-        </VButton>
-        <VButton type="secondary" @click="settingModal = true">
           <template #icon>
             <IconSave class="h-full w-full" />
+          </template>
+          保存
+        </VButton>
+        <VButton
+          v-if="isUpdateMode"
+          size="sm"
+          type="default"
+          @click="settingModal = true"
+        >
+          <template #icon>
+            <IconSettings class="h-full w-full" />
+          </template>
+          设置
+        </VButton>
+        <VButton type="secondary" @click="handlePublishClick">
+          <template #icon>
+            <IconSendPlaneFill class="h-full w-full" />
           </template>
           发布
         </VButton>
