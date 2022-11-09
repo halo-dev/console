@@ -156,6 +156,25 @@ const handlePublish = async () => {
     formState.value.content.content = formState.value.content.raw;
 
     if (isUpdateMode.value) {
+      const { headSnapshot } = formState.value.page.spec;
+      const { name: singlePageName } = formState.value.page.metadata;
+      const { data: latestContent } =
+        await apiClient.content.updateSnapshotContent({
+          snapshotName: headSnapshot as string,
+          contentRequest: {
+            raw: formState.value.content.raw as string,
+            content: formState.value.content.content as string,
+            rawType: formState.value.content.rawType as string,
+            headSnapshotName: headSnapshot,
+            subjectRef: {
+              kind: "SinglePage",
+              version: "v1alpha1",
+              group: "content.halo.run",
+              name: singlePageName,
+            },
+          },
+        });
+
       // Get latest single page
       const { data: latestSinglePage } =
         await apiClient.extension.singlePage.getcontentHaloRunV1alpha1SinglePage(
@@ -166,13 +185,16 @@ const handlePublish = async () => {
 
       formState.value.page = latestSinglePage;
       formState.value.page.spec.publish = true;
+      formState.value.page.spec.headSnapshot = latestContent.snapshotName;
       formState.value.page.spec.releaseSnapshot =
         formState.value.page.spec.headSnapshot;
 
-      await apiClient.singlePage.updateDraftSinglePage({
-        name: formState.value.page.metadata.name,
-        singlePageRequest: formState.value,
-      });
+      await apiClient.extension.singlePage.updatecontentHaloRunV1alpha1SinglePage(
+        {
+          name: singlePageName,
+          singlePage: formState.value.page,
+        }
+      );
     } else {
       formState.value.page.spec.publish = true;
       await apiClient.singlePage.draftSinglePage({

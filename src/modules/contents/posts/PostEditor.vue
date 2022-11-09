@@ -251,20 +251,40 @@ const handlePublish = async () => {
     formState.value.content.content = formState.value.content.raw;
 
     if (isUpdateMode.value) {
+      const { headSnapshot } = formState.value.post.spec;
+      const { name: postName } = formState.value.post.metadata;
+      const { data: latestContent } =
+        await apiClient.content.updateSnapshotContent({
+          snapshotName: headSnapshot as string,
+          contentRequest: {
+            raw: formState.value.content.raw as string,
+            content: formState.value.content.content as string,
+            rawType: formState.value.content.rawType as string,
+            headSnapshotName: headSnapshot,
+            subjectRef: {
+              kind: "Post",
+              version: "v1alpha1",
+              group: "content.halo.run",
+              name: postName,
+            },
+          },
+        });
+
       // Get latest post
       const { data: latestPost } =
         await apiClient.extension.post.getcontentHaloRunV1alpha1Post({
-          name: formState.value.post.metadata.name,
+          name: postName,
         });
 
       formState.value.post = latestPost;
       formState.value.post.spec.publish = true;
+      formState.value.post.spec.headSnapshot = latestContent.snapshotName;
       formState.value.post.spec.releaseSnapshot =
         formState.value.post.spec.headSnapshot;
 
-      await apiClient.post.updateDraftPost({
-        name: formState.value.post.metadata.name,
-        postRequest: formState.value,
+      await apiClient.extension.post.updatecontentHaloRunV1alpha1Post({
+        name: postName,
+        post: formState.value.post,
       });
     } else {
       formState.value.post.spec.publish = true;
