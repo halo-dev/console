@@ -22,11 +22,10 @@ import {
 } from "@halo-dev/components";
 import SinglePageSettingModal from "./components/SinglePageSettingModal.vue";
 import UserDropdownSelector from "@/components/dropdown-selector/UserDropdownSelector.vue";
-import { onMounted, ref, watch, watchEffect } from "vue";
+import { onMounted, ref, watch } from "vue";
 import type {
   ListedSinglePageList,
   SinglePage,
-  SinglePageRequest,
   User,
 } from "@halo-dev/api-client";
 import { apiClient } from "@/utils/api-client";
@@ -51,7 +50,6 @@ const singlePages = ref<ListedSinglePageList>({
 const loading = ref(false);
 const settingModal = ref(false);
 const selectedSinglePage = ref<SinglePage>();
-const selectedSinglePageWithContent = ref<SinglePageRequest>();
 const selectedPageNames = ref<string[]>([]);
 const checkedAll = ref(false);
 const refreshInterval = ref();
@@ -87,14 +85,20 @@ const handleFetchSinglePages = async () => {
     });
     singlePages.value = data;
 
-    const deletedSinglePages = singlePages.value.items.filter(
-      (singlePage) => singlePage.page.spec.deleted
-    );
+    const deletedSinglePages = singlePages.value.items.filter((singlePage) => {
+      const { spec, metadata, status } = singlePage.page;
+      return (
+        spec.deleted ||
+        (spec.publish &&
+          metadata.labels?.[singlePageLabels.PUBLISHED] !== "true") ||
+        (spec.releaseSnapshot === spec.headSnapshot && status?.inProgress)
+      );
+    });
 
     if (deletedSinglePages.length) {
       refreshInterval.value = setInterval(() => {
         handleFetchSinglePages();
-      }, 3000);
+      }, 1000);
     }
   } catch (error) {
     console.error("Failed to fetch single pages", error);
@@ -130,27 +134,8 @@ const handleOpenSettingModal = async (singlePage: SinglePage) => {
 
 const onSettingModalClose = () => {
   selectedSinglePage.value = undefined;
-  selectedSinglePageWithContent.value = undefined;
   handleFetchSinglePages();
 };
-
-watchEffect(async () => {
-  if (
-    !selectedSinglePage.value ||
-    !selectedSinglePage.value.spec.headSnapshot
-  ) {
-    return;
-  }
-
-  const { data: content } = await apiClient.content.obtainSnapshotContent({
-    snapshotName: selectedSinglePage.value.spec.headSnapshot,
-  });
-
-  selectedSinglePageWithContent.value = {
-    page: selectedSinglePage.value,
-    content: content,
-  };
-});
 
 const handleSelectPrevious = async () => {
   const { items, hasPrevious } = singlePages.value;
@@ -270,26 +255,17 @@ const getPublishStatus = (singlePage: SinglePage) => {
   return labels?.[singlePageLabels.PUBLISHED] === "true" ? "已发布" : "未发布";
 };
 
+const isPublishing = (singlePage: SinglePage) => {
+  const { spec, status, metadata } = singlePage;
+  return (
+    (spec.publish &&
+      metadata.labels?.[singlePageLabels.PUBLISHED] !== "true") ||
+    (spec.releaseSnapshot === spec.headSnapshot && status?.inProgress)
+  );
+};
+
 watch(selectedPageNames, (newValue) => {
   checkedAll.value = newValue.length === singlePages.value.items?.length;
-});
-
-watchEffect(async () => {
-  if (
-    !selectedSinglePage.value ||
-    !selectedSinglePage.value.spec.headSnapshot
-  ) {
-    return;
-  }
-
-  const { data: content } = await apiClient.content.obtainSnapshotContent({
-    snapshotName: selectedSinglePage.value.spec.headSnapshot,
-  });
-
-  selectedSinglePageWithContent.value = {
-    page: selectedSinglePage.value,
-    content: content,
-  };
 });
 
 onMounted(handleFetchSinglePages);
@@ -399,7 +375,7 @@ function handleSortItemChange(sortItem?: SortItem) {
 <template>
   <SinglePageSettingModal
     v-model:visible="settingModal"
-    :single-page="selectedSinglePageWithContent"
+    :single-page="selectedSinglePage"
     @close="onSettingModalClose"
   >
     <template #actions>
@@ -709,7 +685,11 @@ function handleSortItemChange(sortItem?: SortItem) {
                 </RouterLink>
               </template>
             </VEntityField>
-            <VEntityField :description="getPublishStatus(singlePage.page)" />
+            <VEntityField :description="getPublishStatus(singlePage.page)">
+              <template v-if="isPublishing(singlePage.page)" #description>
+                <VStatusDot text="发布中" animate />
+              </template>
+            </VEntityField>
             <VEntityField>
               <template #description>
                 <IconEye

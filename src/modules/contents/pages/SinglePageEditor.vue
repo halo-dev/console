@@ -2,6 +2,8 @@
 import {
   VPageHeader,
   IconPages,
+  IconSettings,
+  IconSendPlaneFill,
   VSpace,
   VButton,
   IconSave,
@@ -14,7 +16,7 @@ import {
   RichTextEditor,
   useEditor,
 } from "@halo-dev/richtext-editor";
-import type { SinglePageRequest } from "@halo-dev/api-client";
+import type { SinglePage, SinglePageRequest } from "@halo-dev/api-client";
 import { v4 as uuid } from "uuid";
 import { computed, onMounted, ref, watch } from "vue";
 import { apiClient } from "@/utils/api-client";
@@ -22,6 +24,9 @@ import { useRouteQuery } from "@vueuse/router";
 import cloneDeep from "lodash.clonedeep";
 import { useAttachmentSelect } from "../attachments/composables/use-attachment";
 import MdiFileImageBox from "~icons/mdi/file-image-box";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 const initialFormState: SinglePageRequest = {
   page: {
@@ -59,6 +64,7 @@ const initialFormState: SinglePageRequest = {
 
 const formState = ref<SinglePageRequest>(cloneDeep(initialFormState));
 const saving = ref(false);
+const publishing = ref(false);
 const settingModal = ref(false);
 const previewModal = ref(false);
 const attachmentSelectorModal = ref(false);
@@ -110,10 +116,21 @@ const handleSave = async () => {
     }
 
     if (isUpdateMode.value) {
+      // Get latest single page
+      const { data: latestSinglePage } =
+        await apiClient.extension.singlePage.getcontentHaloRunV1alpha1SinglePage(
+          {
+            name: formState.value.page.metadata.name,
+          }
+        );
+
+      formState.value.page = latestSinglePage;
+
       const { data } = await apiClient.singlePage.updateDraftSinglePage({
         name: formState.value.page.metadata.name,
         singlePageRequest: formState.value,
       });
+
       formState.value.page = data;
     } else {
       const { data } = await apiClient.singlePage.draftSinglePage({
@@ -122,11 +139,60 @@ const handleSave = async () => {
       formState.value.page = data;
       routeQueryName.value = data.metadata.name;
     }
+
     await handleFetchContent();
   } catch (error) {
     console.error("Failed to save single page", error);
   } finally {
     saving.value = false;
+  }
+};
+
+const handlePublish = async () => {
+  try {
+    publishing.value = true;
+
+    // Set rendered content
+    formState.value.content.content = formState.value.content.raw;
+
+    if (isUpdateMode.value) {
+      // Get latest single page
+      const { data: latestSinglePage } =
+        await apiClient.extension.singlePage.getcontentHaloRunV1alpha1SinglePage(
+          {
+            name: formState.value.page.metadata.name,
+          }
+        );
+
+      formState.value.page = latestSinglePage;
+      formState.value.page.spec.publish = true;
+      formState.value.page.spec.releaseSnapshot =
+        formState.value.page.spec.headSnapshot;
+
+      await apiClient.singlePage.updateDraftSinglePage({
+        name: formState.value.page.metadata.name,
+        singlePageRequest: formState.value,
+      });
+    } else {
+      formState.value.page.spec.publish = true;
+      await apiClient.singlePage.draftSinglePage({
+        singlePageRequest: formState.value,
+      });
+    }
+
+    router.push({ name: "SinglePages" });
+  } catch (error) {
+    console.error("Failed to publish single page", error);
+  } finally {
+    publishing.value = false;
+  }
+};
+
+const handlePublishClick = () => {
+  if (isUpdateMode.value) {
+    handlePublish();
+  } else {
+    settingModal.value = true;
   }
 };
 
@@ -141,14 +207,33 @@ const handleFetchContent = async () => {
   formState.value.content = data;
 };
 
-const onSettingSaved = (page: SinglePageRequest) => {
+const handleOpenSettingModal = async () => {
+  const { data: latestSinglePage } =
+    await apiClient.extension.singlePage.getcontentHaloRunV1alpha1SinglePage({
+      name: formState.value.page.metadata.name,
+    });
+  formState.value.page = latestSinglePage;
+  settingModal.value = true;
+};
+
+const onSettingSaved = (page: SinglePage) => {
   // Set route query parameter
   if (!isUpdateMode.value) {
-    routeQueryName.value = page.page.metadata.name;
+    routeQueryName.value = page.metadata.name;
   }
 
-  formState.value = page;
+  formState.value.page = page;
   settingModal.value = false;
+
+  if (!isUpdateMode.value) {
+    handleSave();
+  }
+};
+
+const onSettingPublished = (singlePage: SinglePage) => {
+  formState.value.page = singlePage;
+  settingModal.value = false;
+  handlePublish();
 };
 
 onMounted(async () => {
@@ -168,8 +253,11 @@ onMounted(async () => {
 <template>
   <SinglePageSettingModal
     v-model:visible="settingModal"
-    :single-page="formState"
+    :single-page="formState.page"
+    :publish-support="!isUpdateMode"
+    :only-emit="!isUpdateMode"
     @saved="onSettingSaved"
+    @published="onSettingPublished"
   />
   <PostPreviewModal v-model:visible="previewModal" />
   <AttachmentSelectorModal
@@ -192,11 +280,29 @@ onMounted(async () => {
           预览
         </VButton>
         <VButton :loading="saving" size="sm" type="default" @click="handleSave">
-          保存
-        </VButton>
-        <VButton type="secondary" @click="settingModal = true">
           <template #icon>
             <IconSave class="h-full w-full" />
+          </template>
+          保存
+        </VButton>
+        <VButton
+          v-if="isUpdateMode"
+          size="sm"
+          type="default"
+          @click="handleOpenSettingModal"
+        >
+          <template #icon>
+            <IconSettings class="h-full w-full" />
+          </template>
+          设置
+        </VButton>
+        <VButton
+          type="secondary"
+          :loading="publishing"
+          @click="handlePublishClick"
+        >
+          <template #icon>
+            <IconSendPlaneFill class="h-full w-full" />
           </template>
           发布
         </VButton>
