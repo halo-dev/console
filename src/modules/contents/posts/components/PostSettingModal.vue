@@ -41,10 +41,14 @@ const props = withDefaults(
   defineProps<{
     visible: boolean;
     post?: Post;
+    publishSupport?: boolean;
+    onlyEmit?: boolean;
   }>(),
   {
     visible: false,
     post: undefined,
+    publishSupport: true,
+    onlyEmit: false,
   }
 );
 
@@ -52,6 +56,7 @@ const emit = defineEmits<{
   (event: "update:visible", visible: boolean): void;
   (event: "close"): void;
   (event: "saved", post: Post): void;
+  (event: "published", post: Post): void;
 }>();
 
 const activeTab = ref("general");
@@ -72,6 +77,11 @@ const handleVisibleChange = (visible: boolean) => {
 };
 
 const handleSave = async () => {
+  if (props.onlyEmit) {
+    emit("saved", formState.value);
+    return;
+  }
+
   try {
     saving.value = true;
 
@@ -96,6 +106,11 @@ const handleSave = async () => {
 };
 
 const handleSwitchPublish = async (publish: boolean) => {
+  if (props.onlyEmit) {
+    emit("published", formState.value);
+    return;
+  }
+
   try {
     if (publish) {
       publishing.value = true;
@@ -116,7 +131,10 @@ const handleSwitchPublish = async (publish: boolean) => {
       });
 
     formState.value = data;
-    emit("saved", data);
+
+    if (publish) {
+      emit("published", data);
+    }
 
     handleVisibleChange(false);
   } catch (e) {
@@ -267,22 +285,24 @@ const { templates } = useThemeCustomTemplates("post");
 
     <template #footer>
       <VSpace>
-        <VButton
-          v-if="formState.metadata.labels?.[postLabels.PUBLISHED] !== 'true'"
-          :loading="publishing"
-          type="secondary"
-          @click="handleSwitchPublish(true)"
-        >
-          发布
-        </VButton>
-        <VButton
-          v-else
-          :loading="publishCanceling"
-          type="danger"
-          @click="handleSwitchPublish(false)"
-        >
-          取消发布
-        </VButton>
+        <template v-if="publishSupport">
+          <VButton
+            v-if="formState.metadata.labels?.[postLabels.PUBLISHED] !== 'true'"
+            :loading="publishing"
+            type="secondary"
+            @click="handleSwitchPublish(true)"
+          >
+            发布
+          </VButton>
+          <VButton
+            v-else
+            :loading="publishCanceling"
+            type="danger"
+            @click="handleSwitchPublish(false)"
+          >
+            取消发布
+          </VButton>
+        </template>
         <VButton :loading="saving" type="secondary" @click="handleSave">
           保存
         </VButton>

@@ -39,6 +39,9 @@ import MdiFormatHeader3 from "~icons/mdi/format-header-3";
 import MdiFormatHeader4 from "~icons/mdi/format-header-4";
 import MdiFormatHeader5 from "~icons/mdi/format-header-5";
 import MdiFormatHeader6 from "~icons/mdi/format-header-6";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 const initialFormState: PostRequest = {
   post: {
@@ -80,6 +83,7 @@ const formState = ref<PostRequest>(cloneDeep(initialFormState));
 const settingModal = ref(false);
 const previewModal = ref(false);
 const saving = ref(false);
+const publishing = ref(false);
 const extraActiveId = ref("toc");
 const attachmentSelectorModal = ref(false);
 
@@ -209,10 +213,19 @@ const handleSave = async () => {
     }
 
     if (isUpdateMode.value) {
+      // Get latest post
+      const { data: latestPost } =
+        await apiClient.extension.post.getcontentHaloRunV1alpha1Post({
+          name: formState.value.post.metadata.name,
+        });
+
+      formState.value.post = latestPost;
+
       const { data } = await apiClient.post.updateDraftPost({
         name: formState.value.post.metadata.name,
         postRequest: formState.value,
       });
+
       formState.value.post = data;
     } else {
       const { data } = await apiClient.post.draftPost({
@@ -230,8 +243,42 @@ const handleSave = async () => {
   }
 };
 
-const handlePublish = () => {
-  // TODO
+const handlePublish = async () => {
+  try {
+    publishing.value = true;
+
+    // Set rendered content
+    formState.value.content.content = formState.value.content.raw;
+
+    if (isUpdateMode.value) {
+      // Get latest post
+      const { data: latestPost } =
+        await apiClient.extension.post.getcontentHaloRunV1alpha1Post({
+          name: formState.value.post.metadata.name,
+        });
+
+      formState.value.post = latestPost;
+      formState.value.post.spec.publish = true;
+      formState.value.post.spec.releaseSnapshot =
+        formState.value.post.spec.headSnapshot;
+
+      await apiClient.post.updateDraftPost({
+        name: formState.value.post.metadata.name,
+        postRequest: formState.value,
+      });
+    } else {
+      formState.value.post.spec.publish = true;
+      await apiClient.post.draftPost({
+        postRequest: formState.value,
+      });
+    }
+
+    router.push({ name: "Posts" });
+  } catch (error) {
+    console.error("Failed to publish post", error);
+  } finally {
+    publishing.value = false;
+  }
 };
 
 const handlePublishClick = () => {
@@ -254,6 +301,15 @@ const handleFetchContent = async () => {
   formState.value.content = data;
 };
 
+const handleOpenSettingModal = async () => {
+  const { data: latestPost } =
+    await apiClient.extension.post.getcontentHaloRunV1alpha1Post({
+      name: formState.value.post.metadata.name,
+    });
+  formState.value.post = latestPost;
+  settingModal.value = true;
+};
+
 const onSettingSaved = (post: Post) => {
   // Set route query parameter
   if (!isUpdateMode.value) {
@@ -262,6 +318,16 @@ const onSettingSaved = (post: Post) => {
 
   formState.value.post = post;
   settingModal.value = false;
+
+  if (!isUpdateMode.value) {
+    handleSave();
+  }
+};
+
+const onSettingPublished = (post: Post) => {
+  formState.value.post = post;
+  settingModal.value = false;
+  handlePublish();
 };
 
 // Get post data when the route contains the name parameter
@@ -286,7 +352,10 @@ onMounted(async () => {
   <PostSettingModal
     v-model:visible="settingModal"
     :post="formState.post"
+    :publish-support="!isUpdateMode"
+    :only-emit="!isUpdateMode"
     @saved="onSettingSaved"
+    @published="onSettingPublished"
   />
   <PostPreviewModal v-model:visible="previewModal" :post="formState.post" />
   <AttachmentSelectorModal
@@ -318,14 +387,18 @@ onMounted(async () => {
           v-if="isUpdateMode"
           size="sm"
           type="default"
-          @click="settingModal = true"
+          @click="handleOpenSettingModal"
         >
           <template #icon>
             <IconSettings class="h-full w-full" />
           </template>
           设置
         </VButton>
-        <VButton type="secondary" @click="handlePublishClick">
+        <VButton
+          type="secondary"
+          :loading="publishing"
+          @click="handlePublishClick"
+        >
           <template #icon>
             <IconSendPlaneFill class="h-full w-full" />
           </template>

@@ -109,10 +109,11 @@ const handleFetchPosts = async () => {
 
     // When an post is in the process of deleting or publishing, the list needs to be refreshed regularly
     const abnormalPosts = posts.value.items.filter((post) => {
-      const { spec, metadata } = post.post;
+      const { spec, metadata, status } = post.post;
       return (
         spec.deleted ||
-        (spec.publish && metadata.labels?.[postLabels.PUBLISHED] !== "true")
+        (spec.publish && metadata.labels?.[postLabels.PUBLISHED] !== "true") ||
+        (spec.releaseSnapshot === spec.headSnapshot && status?.inProgress)
       );
     });
 
@@ -209,6 +210,14 @@ const checkSelection = (post: Post) => {
 const getPublishStatus = (post: Post) => {
   const { labels } = post.metadata;
   return labels?.[postLabels.PUBLISHED] === "true" ? "已发布" : "未发布";
+};
+
+const isPublishing = (post: Post) => {
+  const { spec, status, metadata } = post;
+  return (
+    (spec.publish && metadata.labels?.[postLabels.PUBLISHED] !== "true") ||
+    (spec.releaseSnapshot === spec.headSnapshot && status?.inProgress)
+  );
 };
 
 const handleCheckAllChange = (e: Event) => {
@@ -916,13 +925,7 @@ function handleContributorChange(user?: User) {
                 </template>
               </VEntityField>
               <VEntityField :description="getPublishStatus(post.post)">
-                <template
-                  v-if="
-                    post.post.spec.publish &&
-                    post.post.metadata.labels?.[postLabels.PUBLISHED] !== 'true'
-                  "
-                  #description
-                >
+                <template v-if="isPublishing(post.post)" #description>
                   <VStatusDot text="发布中" animate />
                 </template>
               </VEntityField>
