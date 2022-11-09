@@ -122,6 +122,10 @@ const handleSwitchPublish = async (publish: boolean) => {
       publishCanceling.value = true;
     }
 
+    if (publish) {
+      formState.value.spec.releaseSnapshot = formState.value.spec.headSnapshot;
+    }
+
     const { data } =
       await apiClient.extension.singlePage.updatecontentHaloRunV1alpha1SinglePage(
         {

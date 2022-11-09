@@ -85,7 +85,7 @@ const handleFetchSinglePages = async () => {
     });
     singlePages.value = data;
 
-    const deletedSinglePages = singlePages.value.items.filter((singlePage) => {
+    const abnormalSinglePages = singlePages.value.items.filter((singlePage) => {
       const { spec, metadata, status } = singlePage.page;
       return (
         spec.deleted ||
@@ -95,7 +95,7 @@ const handleFetchSinglePages = async () => {
       );
     });
 
-    if (deletedSinglePages.length) {
+    if (abnormalSinglePages.length) {
       refreshInterval.value = setInterval(() => {
         handleFetchSinglePages();
       }, 1000);
