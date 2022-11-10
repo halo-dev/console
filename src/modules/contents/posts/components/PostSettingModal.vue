@@ -4,7 +4,6 @@ import { computed, ref, watchEffect } from "vue";
 import type { PostRequest } from "@halo-dev/api-client";
 import cloneDeep from "lodash.clonedeep";
 import { apiClient } from "@/utils/api-client";
-import { v4 as uuid } from "uuid";
 import { useThemeCustomTemplates } from "@/modules/interface/themes/composables/use-theme";
 
 const initialFormState: PostRequest = {
@@ -33,7 +32,8 @@ const initialFormState: PostRequest = {
     apiVersion: "content.halo.run/v1alpha1",
     kind: "Post",
     metadata: {
-      name: uuid(),
+      name: "",
+      generateName: "post-",
     },
   },
   content: {

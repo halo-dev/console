@@ -10,7 +10,6 @@ import DefaultEditor from "@/components/editor/DefaultEditor.vue";
 import SinglePageSettingModal from "./components/SinglePageSettingModal.vue";
 import PostPreviewModal from "../posts/components/PostPreviewModal.vue";
 import type { SinglePageRequest } from "@halo-dev/api-client";
-import { v4 as uuid } from "uuid";
 import { computed, onMounted, ref } from "vue";
 import { apiClient } from "@/utils/api-client";
 import { useRouteQuery } from "@vueuse/router";
@@ -40,7 +39,8 @@ const initialFormState: SinglePageRequest = {
     apiVersion: "content.halo.run/v1alpha1",
     kind: "SinglePage",
     metadata: {
-      name: uuid(),
+      name: "",
+      generateName: "single-page-",
     },
   },
   content: {
@@ -73,7 +73,7 @@ const handleSave = async () => {
       formState.value.page.spec.title = "无标题页面";
     }
     if (!formState.value.page.spec.slug) {
-      formState.value.page.spec.slug = uuid();
+      formState.value.page.spec.slug = new Date().getTime().toString();
     }
 
     if (isUpdateMode.value) {

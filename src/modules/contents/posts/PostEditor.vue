@@ -14,7 +14,6 @@ import { computed, onMounted, ref } from "vue";
 import cloneDeep from "lodash.clonedeep";
 import { apiClient } from "@/utils/api-client";
 import { useRouteQuery } from "@vueuse/router";
-import { v4 as uuid } from "uuid";
 
 const initialFormState: PostRequest = {
   post: {
@@ -42,7 +41,8 @@ const initialFormState: PostRequest = {
     apiVersion: "content.halo.run/v1alpha1",
     kind: "Post",
     metadata: {
-      name: uuid(),
+      name: "",
+      generateName: "post-",
     },
   },
   content: {
@@ -73,7 +73,7 @@ const handleSave = async () => {
       formState.value.post.spec.title = "无标题文章";
     }
     if (!formState.value.post.spec.slug) {
-      formState.value.post.spec.slug = uuid();
+      formState.value.post.spec.slug = new Date().getTime().toString();
     }
 
     if (isUpdateMode.value) {

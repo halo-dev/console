@@ -4,7 +4,6 @@ import { computed, ref, watchEffect } from "vue";
 import type { SinglePageRequest } from "@halo-dev/api-client";
 import cloneDeep from "lodash.clonedeep";
 import { apiClient } from "@/utils/api-client";
-import { v4 as uuid } from "uuid";
 import { useThemeCustomTemplates } from "@/modules/interface/themes/composables/use-theme";
 
 const initialFormState: SinglePageRequest = {
@@ -31,7 +30,8 @@ const initialFormState: SinglePageRequest = {
     apiVersion: "content.halo.run/v1alpha1",
     kind: "SinglePage",
     metadata: {
-      name: uuid(),
+      name: "",
+      generateName: "single-page-",
     },
   },
   content: {
