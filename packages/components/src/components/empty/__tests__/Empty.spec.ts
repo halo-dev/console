@@ -70,7 +70,7 @@ describe("Empty", () => {
     });
 
     expect(wrapper.find(".empty-image > img").attributes().src).toEqual(
-      "/src/components/empty/Empty.svg"
+      "/packages/components/src/components/empty/Empty.svg"
     );
 
     await wrapper.setData({ image: "./empty.png" });
