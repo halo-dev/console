@@ -5,6 +5,7 @@ import type { DefaultConfigOptions } from "@formkit/vue";
 import { form } from "./inputs/form";
 import { attachment } from "./inputs/attachment";
 import { code } from "./inputs/code";
+import { repeater } from "./inputs/repeater";
 import { menuCheckbox } from "./inputs/menu-checkbox";
 import { menuRadio } from "./inputs/menu-radio";
 import { menuItemSelect } from "./inputs/menu-item-select";
@@ -23,6 +24,7 @@ const config: DefaultConfigOptions = {
     form,
     attachment,
     code,
+    repeater,
     menuCheckbox,
     menuRadio,
     menuItemSelect,

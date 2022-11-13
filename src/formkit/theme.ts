@@ -79,6 +79,18 @@ const theme: Record<string, Record<string, string>> = {
     input:
       textClassification.input.replace("resize-none", "resize-y") + " py-2",
   },
+  repeater: {
+    label: textClassification.label,
+    legend: `${textClassification.label} px-2`,
+    fieldset: boxClassification.fieldset,
+    wrapper: boxClassification.wrapper,
+    help: boxClassification.wrapper,
+    inner: "flex flex-col gap-4",
+    items: "flex flex-col w-full gap-2",
+    item: "border rounded-base grid grid-cols-12 focus-within:border-primary transition-all overflow-hidden focus-within:shadow-sm",
+    content: "flex-1 p-2 col-span-11",
+    controls: "bg-gray-200 col-span-1 flex items-center justify-center",
+  },
 };
 
 export default theme;
