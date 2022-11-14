@@ -17,14 +17,18 @@ const props = defineProps({
   },
 });
 
-const handleAppend = async () => {
-  await props.context.node.input([...props.context._value, {}]);
+const handleAppend = (index: number) => {
+  const value = cloneDeep(props.context._value);
+  value.splice(index + 1, 0, {});
+  props.context.node.input(value);
 };
 
-const handleRemove = async (index: number) => {
+const handleRemove = (index: number) => {
   const value = cloneDeep(props.context._value);
   value.splice(index, 1);
-  await props.context.node.input(value);
+  props.context.node.input(value);
+
+  props.context.node.at(`$self.${index}`)?.destroy();
 };
 
 const handleMoveUp = (index: number) => {
@@ -51,17 +55,21 @@ const handleMoveDown = (index: number) => {
 <template>
   <ul :class="context.classes.items">
     <li
-      v-for="(item, index) in context._value"
+      v-for="(_, index) in context._value"
       :key="index"
       :class="context.classes.item"
     >
       <div :class="context.classes.content">
-        <FormKit type="group">
+        <FormKit
+          :id="`${context.node.name}-group-${index}`"
+          :key="`${context.node.name}-group-${index}`"
+          type="group"
+        >
           <slot />
         </FormKit>
       </div>
       <div :class="context.classes.controls">
-        <ul class="flex flex-col items-center justify-center gap-4">
+        <ul class="flex flex-col items-center justify-center gap-1.5 py-2">
           <li
             class="cursor-pointer text-gray-500 transition-all hover:text-primary"
             :class="{
@@ -69,14 +77,19 @@ const handleMoveDown = (index: number) => {
             }"
           >
             <IconArrowUpCircleLine
-              class="h-6 w-6"
+              class="h-5 w-5"
               @click="handleMoveUp(index)"
             />
           </li>
           <li
             class="cursor-pointer text-gray-500 transition-all hover:text-primary"
           >
-            <IconCloseCircle class="h-6 w-6" @click="handleRemove(index)" />
+            <IconCloseCircle class="h-5 w-5" @click="handleRemove(index)" />
+          </li>
+          <li
+            class="cursor-pointer text-gray-500 transition-all hover:text-primary"
+          >
+            <IconAddCircle class="h-5 w-5" @click="handleAppend(index)" />
           </li>
           <li
             class="cursor-pointer text-gray-500 transition-all hover:text-primary"
@@ -86,7 +99,7 @@ const handleMoveDown = (index: number) => {
             }"
           >
             <IconArrowDownCircleLine
-              class="h-6 w-6"
+              class="h-5 w-5"
               @click="handleMoveDown(index)"
             />
           </li>
@@ -95,7 +108,7 @@ const handleMoveDown = (index: number) => {
     </li>
   </ul>
   <div :class="context.classes.add">
-    <VButton type="secondary" @click="handleAppend">
+    <VButton type="secondary" @click="handleAppend(context._value.length)">
       <template #icon>
         <IconAddCircle class="h-full w-full" />
       </template>

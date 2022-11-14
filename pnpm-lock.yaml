@@ -10,6 +10,7 @@ importers:
       '@formkit/i18n': ^1.0.0-beta.11
       '@formkit/inputs': ^1.0.0-beta.11
       '@formkit/themes': ^1.0.0-beta.11
+      '@formkit/utils': 1.0.0-beta.11
       '@formkit/vue': ^1.0.0-beta.11
       '@halo-dev/api-client': ^0.0.46
       '@halo-dev/components': workspace:*
@@ -103,6 +104,7 @@ importers:
       '@formkit/i18n': 1.0.0-beta.11
       '@formkit/inputs': 1.0.0-beta.11
       '@formkit/themes': 1.0.0-beta.11_tailwindcss@3.2.1
+      '@formkit/utils': 1.0.0-beta.11
       '@formkit/vue': 1.0.0-beta.11_vjnbgdptsk6bkj7ab5a6mk2cwm
       '@halo-dev/api-client': 0.0.46
       '@halo-dev/components': link:packages/components

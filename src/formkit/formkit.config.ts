@@ -16,10 +16,13 @@ import { tagSelect } from "./inputs/tag-select";
 import { categoryCheckbox } from "./inputs/category-checkbox";
 import { tagCheckbox } from "./inputs/tag-checkbox";
 
+import radioAlt from "./plugins/radio-alt";
+
 const config: DefaultConfigOptions = {
   config: {
     classes: generateClasses(theme),
   },
+  plugins: [radioAlt],
   inputs: {
     form,
     attachment,
