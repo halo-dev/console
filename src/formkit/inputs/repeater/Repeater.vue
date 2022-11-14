@@ -27,8 +27,6 @@ const handleRemove = (index: number) => {
   const value = cloneDeep(props.context._value);
   value.splice(index, 1);
   props.context.node.input(value);
-
-  props.context.node.at(`$self.${index}`)?.destroy();
 };
 
 const handleMoveUp = (index: number) => {
@@ -55,7 +53,7 @@ const handleMoveDown = (index: number) => {
 <template>
   <ul :class="context.classes.items">
     <li
-      v-for="(_, index) in context._value"
+      v-for="(item, index) in context._value"
       :key="index"
       :class="context.classes.item"
     >
@@ -63,6 +61,7 @@ const handleMoveDown = (index: number) => {
         <FormKit
           :id="`${context.node.name}-group-${index}`"
           :key="`${context.node.name}-group-${index}`"
+          :model-value="item"
           type="group"
         >
           <slot />
