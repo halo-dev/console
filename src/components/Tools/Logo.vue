@@ -36,8 +36,7 @@ export default {
         this.clickCount = 0
       } else if (this.clickCount < 10) {
         this.$message.info(`再点击 ${10 - this.clickCount} 次即可启用开发者选项！`)
-      }
-      if (this.clickCount === 10) {
+      } else if (this.clickCount === 10) {
         try {
           await apiClient.option.saveMapView({ developer_mode: true })
           await this.refreshOptionsCache()
