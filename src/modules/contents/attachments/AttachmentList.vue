@@ -504,6 +504,7 @@ onMounted(() => {
               v-model:selected-group="selectedGroup"
               @select="onGroupChange"
               @update="handleFetchGroups"
+              @reload-attachments="handleFetchAttachments"
             />
           </div>
 
