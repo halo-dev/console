@@ -6,6 +6,7 @@ import cloneDeep from "lodash.clonedeep";
 import { apiClient } from "@/utils/api-client";
 import { useThemeCustomTemplates } from "@/modules/interface/themes/composables/use-theme";
 import { postLabels } from "@/constants/labels";
+import { randomUUID } from "@/utils/id";
 
 const initialFormState: Post = {
   spec: {
@@ -32,8 +33,7 @@ const initialFormState: Post = {
   apiVersion: "content.halo.run/v1alpha1",
   kind: "Post",
   metadata: {
-    name: "",
-    generateName: "post-",
+    name: randomUUID(),
   },
 };
 

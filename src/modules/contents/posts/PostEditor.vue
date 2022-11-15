@@ -17,6 +17,7 @@ import cloneDeep from "lodash.clonedeep";
 import { apiClient } from "@/utils/api-client";
 import { useRouteQuery } from "@vueuse/router";
 import { useRouter } from "vue-router";
+import { randomUUID } from "@/utils/id";
 
 const router = useRouter();
 
@@ -46,8 +47,7 @@ const initialFormState: PostRequest = {
     apiVersion: "content.halo.run/v1alpha1",
     kind: "Post",
     metadata: {
-      name: "",
-      generateName: "post-",
+      name: randomUUID(),
     },
   },
   content: {

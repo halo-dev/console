@@ -17,6 +17,7 @@ import { apiClient } from "@/utils/api-client";
 import { useRouteQuery } from "@vueuse/router";
 import cloneDeep from "lodash.clonedeep";
 import { useRouter } from "vue-router";
+import { randomUUID } from "@/utils/id";
 
 const router = useRouter();
 
@@ -44,8 +45,7 @@ const initialFormState: SinglePageRequest = {
     apiVersion: "content.halo.run/v1alpha1",
     kind: "SinglePage",
     metadata: {
-      name: "",
-      generateName: "single-page-",
+      name: randomUUID(),
     },
   },
   content: {

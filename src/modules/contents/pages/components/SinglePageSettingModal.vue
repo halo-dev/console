@@ -6,6 +6,7 @@ import cloneDeep from "lodash.clonedeep";
 import { apiClient } from "@/utils/api-client";
 import { useThemeCustomTemplates } from "@/modules/interface/themes/composables/use-theme";
 import { singlePageLabels } from "@/constants/labels";
+import { randomUUID } from "@/utils/id";
 
 const initialFormState: SinglePage = {
   spec: {
@@ -30,8 +31,7 @@ const initialFormState: SinglePage = {
   apiVersion: "content.halo.run/v1alpha1",
   kind: "SinglePage",
   metadata: {
-    name: "",
-    generateName: "single-page-",
+    name: randomUUID(),
   },
 };
 
