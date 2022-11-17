@@ -96,8 +96,11 @@ const handleDelete = (group: Group) => {
       "此操作将删除分组，并将分组下的附件移动至未分组，此操作无法恢复。",
     confirmType: "danger",
     onConfirm: async () => {
+      // TODO: 后续将修改为在后端进行批量操作处理
       const { data } = await apiClient.attachment.searchAttachments({
         group: group.metadata.name,
+        page: 0,
+        size: 0,
       });
 
       await apiClient.extension.storage.group.deletestorageHaloRunV1alpha1Group(
@@ -131,8 +134,11 @@ const handleDeleteWithAttachments = (group: Group) => {
     description: "此操作将删除分组以及分组下的所有附件，此操作无法恢复。",
     confirmType: "danger",
     onConfirm: async () => {
+      // TODO: 后续将修改为在后端进行批量操作处理
       const { data } = await apiClient.attachment.searchAttachments({
         group: group.metadata.name,
+        page: 0,
+        size: 0,
       });
 
       await apiClient.extension.storage.group.deletestorageHaloRunV1alpha1Group(
