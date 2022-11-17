@@ -31,10 +31,14 @@ export default {
     ...mapActions(['refreshOptionsCache']),
     onLogoClick: throttle(async function () {
       this.clickCount++
-      if (this.clickCount === 10) {
+      if (this.options.developer_mode) {
+        this.$message.info(`当前已启用开发者选项！`)
+        this.clickCount = 0
+      } else if (this.clickCount < 10) {
+        this.$message.info(`再点击 ${10 - this.clickCount} 次即可启用开发者选项！`)
+      } else if (this.clickCount === 10) {
         try {
           await apiClient.option.saveMapView({ developer_mode: true })
-
           await this.refreshOptionsCache()
           this.$message.success(`开发者选项已启用！`)
           this.clickCount = 0
@@ -43,14 +47,8 @@ export default {
           this.$log.error(e)
         }
         return
-      }
-      if (this.clickCount >= 5) {
-        if (this.options.developer_mode) {
-          this.$message.info(`当前已启用开发者选项！`)
-          this.clickCount = 0
-        } else {
-          this.$message.info(`再点击 ${10 - this.clickCount} 次即可启用开发者选项！`)
-        }
+      } else {
+        this.$message.info('正在启用开发者选项！')
       }
     }, 200)
   }
