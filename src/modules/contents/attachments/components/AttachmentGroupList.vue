@@ -122,6 +122,7 @@ const handleDelete = (group: Group) => {
 
       handleFetchGroups();
       emit("reload-attachments");
+      emit("update");
 
       Toast.success(`删除成功，${data.total} 个附件已移动至未分组`);
     },
@@ -155,6 +156,7 @@ const handleDeleteWithAttachments = (group: Group) => {
 
       handleFetchGroups();
       emit("reload-attachments");
+      emit("update");
 
       Toast.success(`删除成功，${data.total} 个附件已被同时删除`);
     },
