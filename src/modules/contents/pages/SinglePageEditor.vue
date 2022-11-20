@@ -108,6 +108,8 @@ const handleSave = async () => {
   }
 };
 
+const returnTo = useRouteQuery<string>("returnTo");
+
 const handlePublish = async () => {
   try {
     publishing.value = true;
@@ -135,7 +137,11 @@ const handlePublish = async () => {
 
     Toast.success("发布成功");
 
-    router.push({ name: "SinglePages" });
+    if (returnTo.value) {
+      window.location.href = returnTo.value;
+    } else {
+      router.push({ name: "SinglePages" });
+    }
   } catch (error) {
     console.error("Failed to publish single page", error);
     Toast.error("发布失败，请重试");

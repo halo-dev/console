@@ -109,6 +109,8 @@ const handleSave = async () => {
   }
 };
 
+const returnTo = useRouteQuery<string>("returnTo");
+
 const handlePublish = async () => {
   try {
     publishing.value = true;
@@ -139,7 +141,11 @@ const handlePublish = async () => {
 
     Toast.success("发布成功", { duration: 2000 });
 
-    router.push({ name: "Posts" });
+    if (returnTo.value) {
+      window.location.href = returnTo.value;
+    } else {
+      router.push({ name: "Posts" });
+    }
   } catch (error) {
     console.error("Failed to publish post", error);
     Toast.error("发布失败，请重试");
