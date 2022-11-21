@@ -13,12 +13,12 @@ import { setupComponents } from "./setup/setupComponents";
 import { coreModules } from "./modules";
 import { useScriptTag } from "@vueuse/core";
 import { usePluginStore } from "@/stores/plugin";
-import type { User } from "@halo-dev/api-client";
 import { hasPermission } from "@/utils/permission";
 import { useRoleStore } from "@/stores/role";
 import type { RouteRecordRaw } from "vue-router";
 import { useThemeStore } from "./stores/theme";
 import { useSystemStatesStore } from "./stores/system-states";
+import { useUserStore } from "./stores/user";
 
 const app = createApp(App);
 
@@ -177,13 +177,7 @@ async function loadPluginModules() {
   }
 }
 
-let currentUser: User | undefined = undefined;
-
-async function loadCurrentUser() {
-  const { data: user } = await apiClient.user.getCurrentUserDetail();
-  app.provide<User>("currentUser", user);
-  currentUser = user;
-
+async function loadUserPermissions() {
   const { data: currentPermissions } = await apiClient.user.getPermissions({
     name: "-",
   });
@@ -228,12 +222,18 @@ async function initApp() {
   try {
     loadCoreModules();
 
-    await loadCurrentUser();
+    // load system setup state
+    const systemStateStore = useSystemStatesStore();
+    await systemStateStore.fetchSystemStates();
 
-    if (!currentUser) {
+    const userStore = useUserStore();
+    await userStore.fetchCurrentUser();
+
+    if (userStore.isAnonymous) {
       return;
     }
 
+    await loadUserPermissions();
     await loadActivatedTheme();
 
     try {
@@ -241,9 +241,6 @@ async function initApp() {
     } catch (e) {
       console.error("Failed to load plugins", e);
     }
-
-    const systemStateStore = useSystemStatesStore();
-    await systemStateStore.fetchSystemStates();
   } catch (e) {
     console.error(e);
   } finally {
