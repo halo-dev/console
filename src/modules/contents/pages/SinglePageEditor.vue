@@ -108,7 +108,7 @@ const handleSave = async () => {
   }
 };
 
-const returnTo = useRouteQuery<string>("returnTo");
+const returnToView = useRouteQuery<string>("returnToView");
 
 const handlePublish = async () => {
   try {
@@ -119,6 +119,7 @@ const handlePublish = async () => {
 
     if (isUpdateMode.value) {
       const { name: singlePageName } = formState.value.page.metadata;
+      const { permalink } = formState.value.page.status || {};
 
       await apiClient.singlePage.updateSinglePageContent({
         name: singlePageName,
@@ -128,6 +129,12 @@ const handlePublish = async () => {
       await apiClient.singlePage.publishSinglePage({
         name: singlePageName,
       });
+
+      if (returnToView.value && permalink) {
+        window.location.href = permalink;
+      } else {
+        router.push({ name: "SinglePages" });
+      }
     } else {
       formState.value.page.spec.publish = true;
       await apiClient.singlePage.draftSinglePage({
@@ -136,12 +143,6 @@ const handlePublish = async () => {
     }
 
     Toast.success("发布成功");
-
-    if (returnTo.value) {
-      window.location.href = returnTo.value;
-    } else {
-      router.push({ name: "SinglePages" });
-    }
   } catch (error) {
     console.error("Failed to publish single page", error);
     Toast.error("发布失败，请重试");
