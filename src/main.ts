@@ -222,10 +222,6 @@ async function initApp() {
   try {
     loadCoreModules();
 
-    // load system setup state
-    const systemStateStore = useSystemStatesStore();
-    await systemStateStore.fetchSystemStates();
-
     const userStore = useUserStore();
     await userStore.fetchCurrentUser();
 
@@ -241,6 +237,10 @@ async function initApp() {
     } catch (e) {
       console.error("Failed to load plugins", e);
     }
+
+    // load system setup state
+    const systemStateStore = useSystemStatesStore();
+    await systemStateStore.fetchSystemStates();
   } catch (e) {
     console.error(e);
   } finally {
