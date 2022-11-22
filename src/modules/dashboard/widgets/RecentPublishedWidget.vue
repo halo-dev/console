@@ -1,5 +1,5 @@
 <script lang="ts" name="RecentPublishedWidget" setup>
-import { VCard, VSpace } from "@halo-dev/components";
+import { VCard, VSpace, VEntity, VEntityField } from "@halo-dev/components";
 import { onMounted, ref } from "vue";
 import type { ListedPost } from "@halo-dev/api-client";
 import { apiClient } from "@/utils/api-client";
@@ -11,7 +11,10 @@ const posts = ref<ListedPost[]>([] as ListedPost[]);
 const handleFetchPosts = async () => {
   try {
     const { data } = await apiClient.post.listPosts({
-      labelSelector: [`${postLabels.PUBLISHED}=true`],
+      labelSelector: [
+        `${postLabels.DELETED}=false`,
+        `${postLabels.PUBLISHED}=true`,
+      ],
       sort: "PUBLISH_TIME",
       sortOrder: false,
       page: 1,
@@ -31,38 +34,40 @@ onMounted(handleFetchPosts);
     class="h-full"
     title="最近文章"
   >
-    <div class="h-full">
-      <ul class="divide-y divide-gray-200" role="list">
-        <li
-          v-for="(post, index) in posts"
-          :key="index"
-          class="cursor-pointer p-4 hover:bg-gray-50"
-        >
-          <div class="flex items-center space-x-4">
-            <div class="min-w-0 flex-1">
-              <p class="truncate text-sm font-medium text-gray-900">
-                {{ post.post.spec.title }}
-              </p>
-              <div class="mt-1 flex">
+    <ul class="box-border h-full w-full divide-y divide-gray-100" role="list">
+      <li v-for="(post, index) in posts" :key="index">
+        <VEntity>
+          <template #start>
+            <VEntityField
+              :title="post.post.spec.title"
+              :route="{
+                name: 'PostEditor',
+                query: { name: post.post.metadata.name },
+              }"
+            >
+              <template #description>
                 <VSpace>
                   <span class="text-xs text-gray-500">
-                    阅读 {{ post.stats.visit }}
+                    访问量 {{ post.stats.visit || 0 }}
                   </span>
                   <span class="text-xs text-gray-500">
-                    评论 {{ post.stats.totalComment }}
+                    评论 {{ post.stats.totalComment || 0 }}
                   </span>
                 </VSpace>
-              </div>
-            </div>
-
-            <div>
-              <time class="text-sm tabular-nums text-gray-500">
-                {{ formatDatetime(post.post.spec.publishTime) }}
-              </time>
-            </div>
-          </div>
-        </li>
-      </ul>
-    </div>
+              </template>
+            </VEntityField>
+          </template>
+          <template #end>
+            <VEntityField>
+              <template #description>
+                <span class="truncate text-xs tabular-nums text-gray-500">
+                  {{ formatDatetime(post.post.spec.publishTime) }}
+                </span>
+              </template>
+            </VEntityField>
+          </template>
+        </VEntity>
+      </li>
+    </ul>
   </VCard>
 </template>
