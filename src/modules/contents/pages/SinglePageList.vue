@@ -34,6 +34,7 @@ import { onBeforeRouteLeave, RouterLink } from "vue-router";
 import cloneDeep from "lodash.clonedeep";
 import { usePermission } from "@/utils/permission";
 import { singlePageLabels } from "@/constants/labels";
+import FilterTag from "@/components/tag/FilterTag.vue";
 
 const { currentUserHasPermission } = usePermission();
 
@@ -417,54 +418,31 @@ function handleSortItemChange(sortItem?: SortItem) {
                 type="text"
                 @keyup.enter="handleFetchSinglePages"
               ></FormKit>
-              <div
-                v-if="selectedPublishStatusItem.value"
-                class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+
+              <FilterTag
+                v-if="selectedPublishStatusItem.value !== undefined"
+                @close="handlePublishStatusItemChange(PublishStatusItems[0])"
               >
-                <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                  状态：{{ selectedPublishStatusItem.label }}
-                </span>
-                <IconCloseCircle
-                  class="h-4 w-4 text-gray-600"
-                  @click="handlePublishStatusItemChange(PublishStatusItems[0])"
-                />
-              </div>
-              <div
+                状态：{{ selectedPublishStatusItem.label }}
+              </FilterTag>
+
+              <FilterTag
                 v-if="selectedVisibleItem.value"
-                class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                @close="handleVisibleItemChange(VisibleItems[0])"
               >
-                <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                  可见性：{{ selectedVisibleItem.label }}
-                </span>
-                <IconCloseCircle
-                  class="h-4 w-4 text-gray-600"
-                  @click="handleVisibleItemChange(VisibleItems[0])"
-                />
-              </div>
-              <div
-                v-if="selectedContributor"
-                class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
-              >
-                <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                  作者：{{ selectedContributor?.spec.displayName }}
-                </span>
-                <IconCloseCircle
-                  class="h-4 w-4 text-gray-600"
-                  @click="handleSelectUser(undefined)"
-                />
-              </div>
-              <div
+                可见性：{{ selectedVisibleItem.label }}
+              </FilterTag>
+
+              <FilterTag v-if="selectedContributor" @close="handleSelectUser()">
+                作者：{{ selectedContributor?.spec.displayName }}
+              </FilterTag>
+
+              <FilterTag
                 v-if="selectedSortItem"
-                class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                @close="handleSortItemChange()"
               >
-                <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                  排序：{{ selectedSortItem.label }}
-                </span>
-                <IconCloseCircle
-                  class="h-4 w-4 text-gray-600"
-                  @click="handleSortItemChange()"
-                />
-              </div>
+                排序：{{ selectedSortItem.label }}
+              </FilterTag>
             </div>
             <VSpace v-else>
               <VButton type="danger" @click="handleDeleteInBatch">删除</VButton>

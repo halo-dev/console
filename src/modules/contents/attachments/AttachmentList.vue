@@ -40,6 +40,7 @@ import { isImage } from "@/utils/image";
 import { useRouteQuery } from "@vueuse/router";
 import { useFetchAttachmentGroup } from "./composables/use-attachment-group";
 import { usePermission } from "@/utils/permission";
+import FilterTag from "@/components/tag/FilterTag.vue";
 
 const { currentUserHasPermission } = usePermission();
 
@@ -329,50 +330,26 @@ onMounted(() => {
                       @keyup.enter="handleFetchAttachments()"
                     ></FormKit>
 
-                    <div
+                    <FilterTag
                       v-if="selectedPolicy"
-                      class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                      @close="handleSelectPolicy(undefined)"
                     >
-                      <span
-                        class="text-xs text-gray-600 group-hover:text-gray-900"
-                      >
-                        存储策略：{{ selectedPolicy?.spec.displayName }}
-                      </span>
-                      <IconCloseCircle
-                        class="h-4 w-4 text-gray-600"
-                        @click="handleSelectPolicy(undefined)"
-                      />
-                    </div>
+                      存储策略：{{ selectedPolicy?.spec.displayName }}
+                    </FilterTag>
 
-                    <div
+                    <FilterTag
                       v-if="selectedUser"
-                      class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                      @close="handleSelectUser(undefined)"
                     >
-                      <span
-                        class="text-xs text-gray-600 group-hover:text-gray-900"
-                      >
-                        上传者：{{ selectedUser?.spec.displayName }}
-                      </span>
-                      <IconCloseCircle
-                        class="h-4 w-4 text-gray-600"
-                        @click="handleSelectUser(undefined)"
-                      />
-                    </div>
+                      上传者：{{ selectedUser?.spec.displayName }}
+                    </FilterTag>
 
-                    <div
+                    <FilterTag
                       v-if="selectedSortItem"
-                      class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                      @click="handleSortItemChange()"
                     >
-                      <span
-                        class="text-xs text-gray-600 group-hover:text-gray-900"
-                      >
-                        排序：{{ selectedSortItem.label }}
-                      </span>
-                      <IconCloseCircle
-                        class="h-4 w-4 text-gray-600"
-                        @click="handleSortItemChange()"
-                      />
-                    </div>
+                      排序：{{ selectedSortItem.label }}
+                    </FilterTag>
                   </div>
                   <VSpace v-else>
                     <VButton type="danger" @click="handleDeleteInBatch">

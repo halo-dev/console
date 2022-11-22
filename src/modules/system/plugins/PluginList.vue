@@ -19,6 +19,7 @@ import { apiClient } from "@/utils/api-client";
 import type { PluginList } from "@halo-dev/api-client";
 import { usePermission } from "@/utils/permission";
 import { onBeforeRouteLeave } from "vue-router";
+import FilterTag from "@/components/tag/FilterTag.vue";
 
 const { currentUserHasPermission } = usePermission();
 
@@ -176,35 +177,26 @@ function handleSortItemChange(sortItem?: SortItem) {
               <FormKit
                 v-model="keyword"
                 placeholder="输入关键词搜索"
+                outer-class="!p-0"
                 type="text"
                 @keyup.enter="
                   handlePaginationChange({ page: 1, size: plugins.size })
                 "
               ></FormKit>
-              <div
+
+              <FilterTag
                 v-if="selectedEnabledItem?.value !== undefined"
-                class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                @close="handleEnabledItemChange(EnabledItems[0])"
               >
-                <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                  启用状态：{{ selectedEnabledItem.label }}
-                </span>
-                <IconCloseCircle
-                  class="h-4 w-4 text-gray-600"
-                  @click="handleEnabledItemChange(EnabledItems[0])"
-                />
-              </div>
-              <div
+                启用状态：{{ selectedEnabledItem.label }}
+              </FilterTag>
+
+              <FilterTag
                 v-if="selectedSortItem"
-                class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                @close="handleSortItemChange()"
               >
-                <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                  排序：{{ selectedSortItem.label }}
-                </span>
-                <IconCloseCircle
-                  class="h-4 w-4 text-gray-600"
-                  @click="handleSortItemChange()"
-                />
-              </div>
+                排序：{{ selectedSortItem.label }}
+              </FilterTag>
             </div>
             <div class="mt-4 flex sm:mt-0">
               <VSpace spacing="lg">

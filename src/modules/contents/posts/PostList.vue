@@ -40,6 +40,7 @@ import { usePostTag } from "@/modules/contents/posts/tags/composables/use-post-t
 import { usePermission } from "@/utils/permission";
 import { onBeforeRouteLeave } from "vue-router";
 import { postLabels } from "@/constants/labels";
+import FilterTag from "@/components/tag/FilterTag.vue";
 
 const { currentUserHasPermission } = usePermission();
 
@@ -469,79 +470,44 @@ function handleContributorChange(user?: User) {
                   @keyup.enter="handleFetchPosts"
                 ></FormKit>
 
-                <div
-                  v-if="selectedPublishStatusItem.value"
-                  class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                <FilterTag
+                  v-if="selectedPublishStatusItem.value !== undefined"
+                  @close="handlePublishStatusItemChange(PublishStatuItems[0])"
                 >
-                  <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                    状态：{{ selectedPublishStatusItem.label }}
-                  </span>
-                  <IconCloseCircle
-                    class="h-4 w-4 text-gray-600"
-                    @click="handlePublishStatusItemChange(PublishStatuItems[0])"
-                  />
-                </div>
-                <div
-                  v-if="selectedVisibleItem.value"
-                  class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
-                >
-                  <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                    可见性：{{ selectedVisibleItem.label }}
-                  </span>
-                  <IconCloseCircle
-                    class="h-4 w-4 text-gray-600"
-                    @click="handleVisibleItemChange(VisibleItems[0])"
-                  />
-                </div>
+                  状态：{{ selectedPublishStatusItem.label }}
+                </FilterTag>
 
-                <div
+                <FilterTag
+                  v-if="selectedVisibleItem.value"
+                  @close="handleVisibleItemChange(VisibleItems[0])"
+                >
+                  可见性：{{ selectedVisibleItem.label }}
+                </FilterTag>
+
+                <FilterTag
                   v-if="selectedCategory"
-                  class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                  @close="handleCategoryChange()"
                 >
-                  <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                    分类：{{ selectedCategory.spec.displayName }}
-                  </span>
-                  <IconCloseCircle
-                    class="h-4 w-4 text-gray-600"
-                    @click="handleCategoryChange()"
-                  />
-                </div>
-                <div
-                  v-if="selectedTag"
-                  class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
-                >
-                  <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                    标签：{{ selectedTag.spec.displayName }}
-                  </span>
-                  <IconCloseCircle
-                    class="h-4 w-4 text-gray-600"
-                    @click="handleTagChange()"
-                  />
-                </div>
-                <div
+                  分类：{{ selectedCategory.spec.displayName }}
+                </FilterTag>
+
+                <FilterTag v-if="selectedTag" @click="handleTagChange()">
+                  标签：{{ selectedTag.spec.displayName }}
+                </FilterTag>
+
+                <FilterTag
                   v-if="selectedContributor"
-                  class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                  @close="handleContributorChange()"
                 >
-                  <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                    作者：{{ selectedContributor.spec.displayName }}
-                  </span>
-                  <IconCloseCircle
-                    class="h-4 w-4 text-gray-600"
-                    @click="handleContributorChange()"
-                  />
-                </div>
-                <div
+                  作者：{{ selectedContributor.spec.displayName }}
+                </FilterTag>
+
+                <FilterTag
                   v-if="selectedSortItem"
-                  class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                  @close="handleSortItemChange()"
                 >
-                  <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                    排序：{{ selectedSortItem.label }}
-                  </span>
-                  <IconCloseCircle
-                    class="h-4 w-4 text-gray-600"
-                    @click="handleSortItemChange()"
-                  />
-                </div>
+                  排序：{{ selectedSortItem.label }}
+                </FilterTag>
               </div>
               <VSpace v-else>
                 <VButton type="danger" @click="handleDeleteInBatch">

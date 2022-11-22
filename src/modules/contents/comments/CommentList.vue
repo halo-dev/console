@@ -22,6 +22,7 @@ import type {
 import { onMounted, ref, watch } from "vue";
 import { apiClient } from "@/utils/api-client";
 import { onBeforeRouteLeave } from "vue-router";
+import FilterTag from "@/components/tag/FilterTag.vue";
 
 const comments = ref<ListedCommentList>({
   page: 1,
@@ -277,47 +278,33 @@ function handleSelectUser(user: User | undefined) {
                 <FormKit
                   v-model="keyword"
                   placeholder="输入关键词搜索"
+                  outer-class="!p-0"
                   type="text"
                   @keyup.enter="handleFetchComments"
                 ></FormKit>
-                <div
+
+                <FilterTag
                   v-if="selectedApprovedFilterItem.value != undefined"
-                  class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                  @close="
+                    handleApprovedFilterItemChange(ApprovedFilterItems[0])
+                  "
                 >
-                  <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                    状态：{{ selectedApprovedFilterItem.label }}
-                  </span>
-                  <IconCloseCircle
-                    class="h-4 w-4 text-gray-600"
-                    @click="
-                      handleApprovedFilterItemChange(ApprovedFilterItems[0])
-                    "
-                  />
-                </div>
-                <div
+                  状态：{{ selectedApprovedFilterItem.label }}
+                </FilterTag>
+
+                <FilterTag
                   v-if="selectedUser"
-                  class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                  @close="handleSelectUser(undefined)"
                 >
-                  <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                    评论者：{{ selectedUser?.spec.displayName }}
-                  </span>
-                  <IconCloseCircle
-                    class="h-4 w-4 text-gray-600"
-                    @click="handleSelectUser(undefined)"
-                  />
-                </div>
-                <div
+                  评论者：{{ selectedUser?.spec.displayName }}
+                </FilterTag>
+
+                <FilterTag
                   v-if="selectedSortFilterItem.value != 'LAST_REPLY_TIME'"
-                  class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                  @close="handleSortFilterItemChange(SortFilterItems[0])"
                 >
-                  <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                    排序：{{ selectedSortFilterItem.label }}
-                  </span>
-                  <IconCloseCircle
-                    class="h-4 w-4 text-gray-600"
-                    @click="handleSortFilterItemChange(SortFilterItems[0])"
-                  />
-                </div>
+                  排序：{{ selectedSortFilterItem.label }}
+                </FilterTag>
               </div>
               <VSpace v-else>
                 <VButton type="secondary" @click="handleApproveInBatch">
