@@ -6,7 +6,6 @@ import {
   IconEye,
   IconEyeOff,
   IconTeam,
-  IconCloseCircle,
   IconAddCircle,
   IconRefreshLine,
   VButton,
@@ -22,7 +21,7 @@ import {
 } from "@halo-dev/components";
 import SinglePageSettingModal from "./components/SinglePageSettingModal.vue";
 import UserDropdownSelector from "@/components/dropdown-selector/UserDropdownSelector.vue";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import type {
   ListedSinglePageList,
   SinglePage,
@@ -34,7 +33,9 @@ import { onBeforeRouteLeave, RouterLink } from "vue-router";
 import cloneDeep from "lodash.clonedeep";
 import { usePermission } from "@/utils/permission";
 import { singlePageLabels } from "@/constants/labels";
-import FilterTag from "@/components/tag/FilterTag.vue";
+import FilterTag from "@/components/filter/FilterTag.vue";
+import FilterCleanButton from "@/components/filter/FilterCleanButton.vue";
+import { getNode } from "@formkit/core";
 
 const { currentUserHasPermission } = usePermission();
 
@@ -56,7 +57,7 @@ const selectedPageNames = ref<string[]>([]);
 const checkedAll = ref(false);
 const refreshInterval = ref();
 
-const handleFetchSinglePages = async () => {
+const handleFetchSinglePages = async (page?: number) => {
   try {
     clearInterval(refreshInterval.value);
 
@@ -73,6 +74,10 @@ const handleFetchSinglePages = async () => {
       labelSelector.push(
         `${singlePageLabels.PUBLISHED}=${selectedPublishStatusItem.value.value}`
       );
+    }
+
+    if (page) {
+      singlePages.value.page = page;
     }
 
     const { data } = await apiClient.singlePage.listSinglePages({
@@ -355,22 +360,54 @@ const keyword = ref("");
 
 function handleVisibleItemChange(visibleItem: VisibleItem) {
   selectedVisibleItem.value = visibleItem;
-  handleFetchSinglePages();
+  handleFetchSinglePages(1);
 }
 
 const handleSelectUser = (user?: User) => {
   selectedContributor.value = user;
-  handleFetchSinglePages();
+  handleFetchSinglePages(1);
 };
 
 function handlePublishStatusItemChange(publishStatusItem: PublishStatusItem) {
   selectedPublishStatusItem.value = publishStatusItem;
-  handleFetchSinglePages();
+  handleFetchSinglePages(1);
 }
 
 function handleSortItemChange(sortItem?: SortItem) {
   selectedSortItem.value = sortItem;
-  handleFetchSinglePages();
+  handleFetchSinglePages(1);
+}
+
+function handleKeywordChange() {
+  const keywordNode = getNode("keywordInput");
+  if (keywordNode) {
+    keyword.value = keywordNode._value as string;
+  }
+  handleFetchSinglePages(1);
+}
+
+function handleClearKeyword() {
+  keyword.value = "";
+  handleFetchSinglePages(1);
+}
+
+const hasFilters = computed(() => {
+  return (
+    selectedContributor.value ||
+    selectedVisibleItem.value.value ||
+    selectedPublishStatusItem.value.value !== undefined ||
+    selectedSortItem.value ||
+    keyword.value
+  );
+});
+
+function handleClearFilters() {
+  selectedContributor.value = undefined;
+  selectedVisibleItem.value = VisibleItems[0];
+  selectedPublishStatusItem.value = PublishStatusItems[0];
+  selectedSortItem.value = undefined;
+  keyword.value = "";
+  handleFetchSinglePages(1);
 }
 </script>
 
@@ -412,12 +449,18 @@ function handleSortItemChange(sortItem?: SortItem) {
               class="flex items-center gap-2"
             >
               <FormKit
-                v-model="keyword"
+                id="keywordInput"
                 outer-class="!p-0"
                 placeholder="输入关键词搜索"
                 type="text"
-                @keyup.enter="handleFetchSinglePages"
+                name="keyword"
+                :model-value="keyword"
+                @keyup.enter="handleKeywordChange"
               ></FormKit>
+
+              <FilterTag v-if="keyword" @close="handleClearKeyword()">
+                关键词：{{ keyword }}
+              </FilterTag>
 
               <FilterTag
                 v-if="selectedPublishStatusItem.value !== undefined"
@@ -443,6 +486,11 @@ function handleSortItemChange(sortItem?: SortItem) {
               >
                 排序：{{ selectedSortItem.label }}
               </FilterTag>
+
+              <FilterCleanButton
+                v-if="hasFilters"
+                @click="handleClearFilters"
+              />
             </div>
             <VSpace v-else>
               <VButton type="danger" @click="handleDeleteInBatch">删除</VButton>

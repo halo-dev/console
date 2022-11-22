@@ -8,7 +8,6 @@ import {
   IconEye,
   IconEyeOff,
   IconTeam,
-  IconCloseCircle,
   IconRefreshLine,
   Dialog,
   VButton,
@@ -25,7 +24,7 @@ import {
 import UserDropdownSelector from "@/components/dropdown-selector/UserDropdownSelector.vue";
 import PostSettingModal from "./components/PostSettingModal.vue";
 import PostTag from "../posts/tags/components/PostTag.vue";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import type {
   User,
   Category,
@@ -40,7 +39,9 @@ import { usePostTag } from "@/modules/contents/posts/tags/composables/use-post-t
 import { usePermission } from "@/utils/permission";
 import { onBeforeRouteLeave } from "vue-router";
 import { postLabels } from "@/constants/labels";
-import FilterTag from "@/components/tag/FilterTag.vue";
+import FilterTag from "@/components/filter/FilterTag.vue";
+import FilteCleanButton from "@/components/filter/FilterCleanButton.vue";
+import { getNode } from "@formkit/core";
 
 const { currentUserHasPermission } = usePermission();
 
@@ -62,7 +63,7 @@ const checkedAll = ref(false);
 const selectedPostNames = ref<string[]>([]);
 const refreshInterval = ref();
 
-const handleFetchPosts = async () => {
+const handleFetchPosts = async (page?: number) => {
   try {
     clearInterval(refreshInterval.value);
 
@@ -92,6 +93,10 @@ const handleFetchPosts = async () => {
       labelSelector.push(
         `${postLabels.PUBLISHED}=${selectedPublishStatusItem.value.value}`
       );
+    }
+
+    if (page) {
+      posts.value.page = page;
     }
 
     const { data } = await apiClient.post.listPosts({
@@ -373,33 +378,69 @@ const keyword = ref("");
 
 function handleVisibleItemChange(visibleItem: VisibleItem) {
   selectedVisibleItem.value = visibleItem;
-  handleFetchPosts();
+  handleFetchPosts(1);
 }
 
 function handlePublishStatusItemChange(publishStatusItem: PublishStatuItem) {
   selectedPublishStatusItem.value = publishStatusItem;
-  handleFetchPosts();
+  handleFetchPosts(1);
 }
 
 function handleSortItemChange(sortItem?: SortItem) {
   selectedSortItem.value = sortItem;
-  handleFetchPosts();
+  handleFetchPosts(1);
 }
 
 function handleCategoryChange(category?: Category) {
   selectedCategory.value = category;
-  handleFetchPosts();
+  handleFetchPosts(1);
 }
 
 function handleTagChange(tag?: Tag) {
   selectedTag.value = tag;
-  handleFetchPosts();
+  handleFetchPosts(1);
 }
 
 function handleContributorChange(user?: User) {
   selectedContributor.value = user;
-  handleFetchPosts();
+  handleFetchPosts(1);
 }
+
+function handleKeywordChange() {
+  const keywordNode = getNode("keywordInput");
+  if (keywordNode) {
+    keyword.value = keywordNode._value as string;
+  }
+  handleFetchPosts(1);
+}
+
+function handleClearKeyword() {
+  keyword.value = "";
+  handleFetchPosts(1);
+}
+
+function handleClearFilters() {
+  selectedVisibleItem.value = VisibleItems[0];
+  selectedPublishStatusItem.value = PublishStatuItems[0];
+  selectedSortItem.value = undefined;
+  selectedCategory.value = undefined;
+  selectedTag.value = undefined;
+  selectedContributor.value = undefined;
+  keyword.value = "";
+  handleFetchPosts(1);
+}
+
+const hasFilters = computed(() => {
+  return (
+    selectedVisibleItem.value.value ||
+    selectedPublishStatusItem.value.value !== undefined ||
+    selectedSortItem.value ||
+    selectedCategory.value ||
+    selectedTag.value ||
+    selectedContributor.value ||
+    keyword.value
+  );
+});
 </script>
 <template>
   <PostSettingModal
@@ -463,12 +504,18 @@ function handleContributorChange(user?: User) {
                 class="flex items-center gap-2"
               >
                 <FormKit
-                  v-model="keyword"
+                  id="keywordInput"
                   outer-class="!p-0"
                   placeholder="输入关键词搜索"
                   type="text"
-                  @keyup.enter="handleFetchPosts"
+                  name="keyword"
+                  :model-value="keyword"
+                  @keyup.enter="handleKeywordChange"
                 ></FormKit>
+
+                <FilterTag v-if="keyword" @close="handleClearKeyword()">
+                  关键词：{{ keyword }}
+                </FilterTag>
 
                 <FilterTag
                   v-if="selectedPublishStatusItem.value !== undefined"
@@ -508,6 +555,11 @@ function handleContributorChange(user?: User) {
                 >
                   排序：{{ selectedSortItem.label }}
                 </FilterTag>
+
+                <FilteCleanButton
+                  v-if="hasFilters"
+                  @click="handleClearFilters"
+                />
               </div>
               <VSpace v-else>
                 <VButton type="danger" @click="handleDeleteInBatch">

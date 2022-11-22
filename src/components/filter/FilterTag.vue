@@ -8,7 +8,7 @@ const emit = defineEmits<{
 
 <template>
   <div
-    class="group flex cursor-pointer items-center justify-center gap-1.5 rounded-full bg-primary px-2 py-1 ring-1 ring-primary transition-all duration-300 hover:shadow-sm hover:ring-opacity-50"
+    class="group inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full bg-primary px-2 py-1 ring-1 ring-primary transition-all duration-300 hover:shadow-sm hover:ring-opacity-50"
   >
     <span v-if="$slots.default" class="text-xs text-white transition-all">
       <slot />
