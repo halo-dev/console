@@ -62,6 +62,8 @@ const searchResults = computed((): SearchableItem[] => {
 });
 
 const handleBuildSearchIndex = () => {
+  fuse.remove(() => true);
+
   const routes = router.getRoutes().filter((route) => {
     return !!route.meta?.title && route.meta?.searchable;
   });
@@ -105,7 +107,7 @@ const handleBuildSearchIndex = () => {
           fuse.add({
             title: plugin.spec.displayName as string,
             icon: {
-              src: plugin.spec.logo as string,
+              src: plugin.status?.logo as string,
             },
             group: "插件",
             route: {

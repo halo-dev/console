@@ -22,11 +22,10 @@ import {
 } from "@halo-dev/components";
 import SinglePageSettingModal from "./components/SinglePageSettingModal.vue";
 import UserDropdownSelector from "@/components/dropdown-selector/UserDropdownSelector.vue";
-import { onMounted, ref, watchEffect } from "vue";
+import { onMounted, ref, watch } from "vue";
 import type {
   ListedSinglePageList,
   SinglePage,
-  SinglePageRequest,
   User,
 } from "@halo-dev/api-client";
 import { apiClient } from "@/utils/api-client";
@@ -34,14 +33,9 @@ import { formatDatetime } from "@/utils/date";
 import { onBeforeRouteLeave, RouterLink } from "vue-router";
 import cloneDeep from "lodash.clonedeep";
 import { usePermission } from "@/utils/permission";
+import { singlePageLabels } from "@/constants/labels";
 
 const { currentUserHasPermission } = usePermission();
-
-enum SinglePagePhase {
-  DRAFT = "未发布",
-  PENDING_APPROVAL = "待审核",
-  PUBLISHED = "已发布",
-}
 
 const singlePages = ref<ListedSinglePageList>({
   page: 1,
@@ -52,12 +46,13 @@ const singlePages = ref<ListedSinglePageList>({
   last: false,
   hasNext: false,
   hasPrevious: false,
+  totalPages: 0,
 });
 const loading = ref(false);
 const settingModal = ref(false);
 const selectedSinglePage = ref<SinglePage>();
-const selectedSinglePageWithContent = ref<SinglePageRequest>();
-const checkAll = ref(false);
+const selectedPageNames = ref<string[]>([]);
+const checkedAll = ref(false);
 const refreshInterval = ref();
 
 const handleFetchSinglePages = async () => {
@@ -67,31 +62,44 @@ const handleFetchSinglePages = async () => {
     loading.value = true;
 
     let contributors: string[] | undefined;
+    const labelSelector: string[] = ["content.halo.run/deleted=false"];
 
     if (selectedContributor.value) {
       contributors = [selectedContributor.value.metadata.name];
     }
 
+    if (selectedPublishStatusItem.value.value !== undefined) {
+      labelSelector.push(
+        `${singlePageLabels.PUBLISHED}=${selectedPublishStatusItem.value.value}`
+      );
+    }
+
     const { data } = await apiClient.singlePage.listSinglePages({
+      labelSelector,
       page: singlePages.value.page,
       size: singlePages.value.size,
       visible: selectedVisibleItem.value.value,
       sort: selectedSortItem.value?.sort,
-      publishPhase: selectedPublishPhaseItem.value.value,
       sortOrder: selectedSortItem.value?.sortOrder,
       keyword: keyword.value,
       contributor: contributors,
     });
     singlePages.value = data;
 
-    const deletedSinglePages = singlePages.value.items.filter(
-      (singlePage) => !!singlePage.page.metadata.deletionTimestamp
-    );
+    const abnormalSinglePages = singlePages.value.items.filter((singlePage) => {
+      const { spec, metadata, status } = singlePage.page;
+      return (
+        spec.deleted ||
+        (spec.publish &&
+          metadata.labels?.[singlePageLabels.PUBLISHED] !== "true") ||
+        (spec.releaseSnapshot === spec.headSnapshot && status?.inProgress)
+      );
+    });
 
-    if (deletedSinglePages.length) {
+    if (abnormalSinglePages.length) {
       refreshInterval.value = setInterval(() => {
         handleFetchSinglePages();
-      }, 3000);
+      }, 1000);
     }
   } catch (error) {
     console.error("Failed to fetch single pages", error);
@@ -127,27 +135,8 @@ const handleOpenSettingModal = async (singlePage: SinglePage) => {
 
 const onSettingModalClose = () => {
   selectedSinglePage.value = undefined;
-  selectedSinglePageWithContent.value = undefined;
   handleFetchSinglePages();
 };
-
-watchEffect(async () => {
-  if (
-    !selectedSinglePage.value ||
-    !selectedSinglePage.value.spec.headSnapshot
-  ) {
-    return;
-  }
-
-  const { data: content } = await apiClient.content.obtainSnapshotContent({
-    snapshotName: selectedSinglePage.value.spec.headSnapshot,
-  });
-
-  selectedSinglePageWithContent.value = {
-    page: selectedSinglePage.value,
-    content: content,
-  };
-});
 
 const handleSelectPrevious = async () => {
   const { items, hasPrevious } = singlePages.value;
@@ -192,9 +181,30 @@ const handleSelectNext = async () => {
   }
 };
 
+const checkSelection = (singlePage: SinglePage) => {
+  return (
+    singlePage.metadata.name === selectedSinglePage.value?.metadata.name ||
+    selectedPageNames.value.includes(singlePage.metadata.name)
+  );
+};
+
+const handleCheckAllChange = (e: Event) => {
+  const { checked } = e.target as HTMLInputElement;
+
+  if (checked) {
+    selectedPageNames.value =
+      singlePages.value.items.map((singlePage) => {
+        return singlePage.page.metadata.name;
+      }) || [];
+  } else {
+    selectedPageNames.value = [];
+  }
+};
+
 const handleDelete = async (singlePage: SinglePage) => {
   Dialog.warning({
     title: "是否确认删除该自定义页面？",
+    description: "此操作会将自定义页面放入回收站，后续可以从回收站恢复",
     confirmType: "danger",
     onConfirm: async () => {
       const singlePageToUpdate = cloneDeep(singlePage);
@@ -210,12 +220,54 @@ const handleDelete = async (singlePage: SinglePage) => {
   });
 };
 
-const finalStatus = (singlePage: SinglePage) => {
-  if (singlePage.status?.phase) {
-    return SinglePagePhase[singlePage.status.phase];
-  }
-  return "";
+const handleDeleteInBatch = async () => {
+  Dialog.warning({
+    title: "是否确认删除选中的自定义页面？",
+    description: "此操作会将自定义页面放入回收站，后续可以从回收站恢复",
+    confirmType: "danger",
+    onConfirm: async () => {
+      await Promise.all(
+        selectedPageNames.value.map((name) => {
+          const page = singlePages.value.items.find(
+            (item) => item.page.metadata.name === name
+          )?.page;
+
+          if (!page) {
+            return Promise.resolve();
+          }
+
+          page.spec.deleted = true;
+          return apiClient.extension.singlePage.updatecontentHaloRunV1alpha1SinglePage(
+            {
+              name: page.metadata.name,
+              singlePage: page,
+            }
+          );
+        })
+      );
+      await handleFetchSinglePages();
+      selectedPageNames.value = [];
+    },
+  });
 };
+
+const getPublishStatus = (singlePage: SinglePage) => {
+  const { labels } = singlePage.metadata;
+  return labels?.[singlePageLabels.PUBLISHED] === "true" ? "已发布" : "未发布";
+};
+
+const isPublishing = (singlePage: SinglePage) => {
+  const { spec, status, metadata } = singlePage;
+  return (
+    (spec.publish &&
+      metadata.labels?.[singlePageLabels.PUBLISHED] !== "true") ||
+    (spec.releaseSnapshot === spec.headSnapshot && status?.inProgress)
+  );
+};
+
+watch(selectedPageNames, (newValue) => {
+  checkedAll.value = newValue.length === singlePages.value.items?.length;
+});
 
 onMounted(handleFetchSinglePages);
 
@@ -226,9 +278,9 @@ interface VisibleItem {
   value?: "PUBLIC" | "INTERNAL" | "PRIVATE";
 }
 
-interface PublishPhaseItem {
+interface PublishStatusItem {
   label: string;
-  value?: "DRAFT" | "PENDING_APPROVAL" | "PUBLISHED";
+  value?: boolean;
 }
 
 interface SortItem {
@@ -256,22 +308,18 @@ const VisibleItems: VisibleItem[] = [
   },
 ];
 
-const PublishPhaseItems: PublishPhaseItem[] = [
+const PublishStatusItems: PublishStatusItem[] = [
   {
     label: "全部",
     value: undefined,
   },
   {
     label: "已发布",
-    value: "PUBLISHED",
+    value: true,
   },
   {
     label: "未发布",
-    value: "DRAFT",
-  },
-  {
-    label: "待审核",
-    value: "PENDING_APPROVAL",
+    value: false,
   },
 ];
 
@@ -300,7 +348,7 @@ const SortItems: SortItem[] = [
 
 const selectedContributor = ref<User>();
 const selectedVisibleItem = ref<VisibleItem>(VisibleItems[0]);
-const selectedPublishPhaseItem = ref<PublishPhaseItem>(PublishPhaseItems[0]);
+const selectedPublishStatusItem = ref<PublishStatusItem>(PublishStatusItems[0]);
 const selectedSortItem = ref<SortItem>();
 const keyword = ref("");
 
@@ -314,8 +362,8 @@ const handleSelectUser = (user?: User) => {
   handleFetchSinglePages();
 };
 
-function handlePublishPhaseItemChange(publishPhaseItem: PublishPhaseItem) {
-  selectedPublishPhaseItem.value = publishPhaseItem;
+function handlePublishStatusItemChange(publishStatusItem: PublishStatusItem) {
+  selectedPublishStatusItem.value = publishStatusItem;
   handleFetchSinglePages();
 }
 
@@ -328,7 +376,7 @@ function handleSortItemChange(sortItem?: SortItem) {
 <template>
   <SinglePageSettingModal
     v-model:visible="settingModal"
-    :single-page="selectedSinglePageWithContent"
+    :single-page="selectedSinglePage"
     @close="onSettingModalClose"
   >
     <template #actions>
@@ -351,29 +399,34 @@ function handleSortItemChange(sortItem?: SortItem) {
             class="mr-4 hidden items-center sm:flex"
           >
             <input
-              v-model="checkAll"
+              v-model="checkedAll"
               class="h-4 w-4 rounded border-gray-300 text-indigo-600"
               type="checkbox"
+              @change="handleCheckAllChange"
             />
           </div>
           <div class="flex w-full flex-1 items-center sm:w-auto">
-            <div v-if="!checkAll" class="flex items-center gap-2">
+            <div
+              v-if="!selectedPageNames.length"
+              class="flex items-center gap-2"
+            >
               <FormKit
                 v-model="keyword"
+                outer-class="!p-0"
                 placeholder="输入关键词搜索"
                 type="text"
                 @keyup.enter="handleFetchSinglePages"
               ></FormKit>
               <div
-                v-if="selectedPublishPhaseItem.value"
+                v-if="selectedPublishStatusItem.value"
                 class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
               >
                 <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                  状态：{{ selectedPublishPhaseItem.label }}
+                  状态：{{ selectedPublishStatusItem.label }}
                 </span>
                 <IconCloseCircle
                   class="h-4 w-4 text-gray-600"
-                  @click="handlePublishPhaseItemChange(PublishPhaseItems[0])"
+                  @click="handlePublishStatusItemChange(PublishStatusItems[0])"
                 />
               </div>
               <div
@@ -414,8 +467,7 @@ function handleSortItemChange(sortItem?: SortItem) {
               </div>
             </div>
             <VSpace v-else>
-              <VButton type="default">设置</VButton>
-              <VButton type="danger">删除</VButton>
+              <VButton type="danger" @click="handleDeleteInBatch">删除</VButton>
             </VSpace>
           </div>
           <div class="mt-4 flex sm:mt-0">
@@ -433,15 +485,16 @@ function handleSortItemChange(sortItem?: SortItem) {
                   <div class="w-72 p-4">
                     <ul class="space-y-1">
                       <li
-                        v-for="(filterItem, index) in PublishPhaseItems"
+                        v-for="(filterItem, index) in PublishStatusItems"
                         :key="index"
                         v-close-popper
                         :class="{
                           'bg-gray-100':
-                            selectedPublishPhaseItem.value === filterItem.value,
+                            selectedPublishStatusItem.value ===
+                            filterItem.value,
                         }"
                         class="flex cursor-pointer items-center rounded px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                        @click="handlePublishPhaseItemChange(filterItem)"
+                        @click="handlePublishStatusItemChange(filterItem)"
                       >
                         <span class="truncate">{{ filterItem.label }}</span>
                       </li>
@@ -561,13 +614,14 @@ function handleSortItemChange(sortItem?: SortItem) {
       role="list"
     >
       <li v-for="(singlePage, index) in singlePages.items" :key="index">
-        <VEntity :is-selected="checkAll">
+        <VEntity :is-selected="checkSelection(singlePage.page)">
           <template
             v-if="currentUserHasPermission(['system:singlepages:manage'])"
             #checkbox
           >
             <input
-              v-model="checkAll"
+              v-model="selectedPageNames"
+              :value="singlePage.page.metadata.name"
               class="h-4 w-4 rounded border-gray-300 text-indigo-600"
               type="checkbox"
             />
@@ -632,7 +686,11 @@ function handleSortItemChange(sortItem?: SortItem) {
                 </RouterLink>
               </template>
             </VEntityField>
-            <VEntityField :description="finalStatus(singlePage.page)" />
+            <VEntityField :description="getPublishStatus(singlePage.page)">
+              <template v-if="isPublishing(singlePage.page)" #description>
+                <VStatusDot text="发布中" animate />
+              </template>
+            </VEntityField>
             <VEntityField>
               <template #description>
                 <IconEye
@@ -650,6 +708,11 @@ function handleSortItemChange(sortItem?: SortItem) {
                   v-tooltip="`内部成员可访问`"
                   class="cursor-pointer text-sm transition-all hover:text-blue-600"
                 />
+              </template>
+            </VEntityField>
+            <VEntityField v-if="singlePage?.page?.spec.deleted">
+              <template #description>
+                <VStatusDot v-tooltip="`删除中`" state="warning" animate />
               </template>
             </VEntityField>
             <VEntityField>

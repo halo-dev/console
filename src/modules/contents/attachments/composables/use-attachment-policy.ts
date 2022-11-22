@@ -1,12 +1,18 @@
-import { onMounted, ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 import type { Ref } from "vue";
-import type { Policy } from "@halo-dev/api-client";
+import type { Policy, PolicyTemplate } from "@halo-dev/api-client";
 import { apiClient } from "@/utils/api-client";
 
 interface useFetchAttachmentPolicyReturn {
   policies: Ref<Policy[]>;
   loading: Ref<boolean>;
   handleFetchPolicies: () => void;
+}
+
+interface useFetchAttachmentPolicyTemplatesReturn {
+  policyTemplates: Ref<PolicyTemplate[]>;
+  loading: Ref<boolean>;
+  handleFetchPolicyTemplates: () => void;
 }
 
 export function useFetchAttachmentPolicy(options?: {
@@ -16,13 +22,26 @@ export function useFetchAttachmentPolicy(options?: {
 
   const policies = ref<Policy[]>([] as Policy[]);
   const loading = ref<boolean>(false);
+  const refreshInterval = ref();
 
   const handleFetchPolicies = async () => {
     try {
+      clearInterval(refreshInterval.value);
+
       loading.value = true;
       const { data } =
         await apiClient.extension.storage.policy.liststorageHaloRunV1alpha1Policy();
       policies.value = data.items;
+
+      const deletedPolicies = policies.value.filter(
+        (policy) => !!policy.metadata.deletionTimestamp
+      );
+
+      if (deletedPolicies.length) {
+        refreshInterval.value = setInterval(() => {
+          handleFetchPolicies();
+        }, 1000);
+      }
     } catch (e) {
       console.error("Failed to fetch attachment policies", e);
     } finally {
@@ -34,9 +53,45 @@ export function useFetchAttachmentPolicy(options?: {
     fetchOnMounted && handleFetchPolicies();
   });
 
+  onUnmounted(() => {
+    clearInterval(refreshInterval.value);
+  });
+
   return {
     policies,
     loading,
     handleFetchPolicies,
+  };
+}
+
+export function useFetchAttachmentPolicyTemplate(options?: {
+  fetchOnMounted: boolean;
+}): useFetchAttachmentPolicyTemplatesReturn {
+  const { fetchOnMounted } = options || {};
+
+  const policyTemplates = ref<PolicyTemplate[]>([] as PolicyTemplate[]);
+  const loading = ref<boolean>(false);
+
+  const handleFetchPolicyTemplates = async () => {
+    try {
+      loading.value = true;
+      const { data } =
+        await apiClient.extension.storage.policyTemplate.liststorageHaloRunV1alpha1PolicyTemplate();
+      policyTemplates.value = data.items;
+    } catch (e) {
+      console.error("Failed to fetch attachment policy templates", e);
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  onMounted(() => {
+    fetchOnMounted && handleFetchPolicyTemplates();
+  });
+
+  return {
+    policyTemplates,
+    loading,
+    handleFetchPolicyTemplates,
   };
 }

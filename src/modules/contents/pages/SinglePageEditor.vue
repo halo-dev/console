@@ -2,26 +2,25 @@
 import {
   VPageHeader,
   IconPages,
+  IconSettings,
+  IconSendPlaneFill,
   VSpace,
   VButton,
   IconSave,
+  Toast,
 } from "@halo-dev/components";
+import DefaultEditor from "@/components/editor/DefaultEditor.vue";
 import SinglePageSettingModal from "./components/SinglePageSettingModal.vue";
 import PostPreviewModal from "../posts/components/PostPreviewModal.vue";
-import AttachmentSelectorModal from "../attachments/components/AttachmentSelectorModal.vue";
-import {
-  allExtensions,
-  RichTextEditor,
-  useEditor,
-} from "@halo-dev/richtext-editor";
-import type { SinglePageRequest } from "@halo-dev/api-client";
-import { v4 as uuid } from "uuid";
-import { computed, onMounted, ref, watch } from "vue";
+import type { SinglePage, SinglePageRequest } from "@halo-dev/api-client";
+import { computed, onMounted, ref } from "vue";
 import { apiClient } from "@/utils/api-client";
 import { useRouteQuery } from "@vueuse/router";
 import cloneDeep from "lodash.clonedeep";
-import { useAttachmentSelect } from "../attachments/composables/use-attachment";
-import MdiFileImageBox from "~icons/mdi/file-image-box";
+import { useRouter } from "vue-router";
+import { randomUUID } from "@/utils/id";
+
+const router = useRouter();
 
 const initialFormState: SinglePageRequest = {
   page: {
@@ -31,12 +30,11 @@ const initialFormState: SinglePageRequest = {
       template: "",
       cover: "",
       deleted: false,
-      published: false,
+      publish: false,
       publishTime: "",
       pinned: false,
       allowComment: true,
       visible: "PUBLIC",
-      version: 1,
       priority: 0,
       excerpt: {
         autoGenerate: true,
@@ -47,7 +45,7 @@ const initialFormState: SinglePageRequest = {
     apiVersion: "content.halo.run/v1alpha1",
     kind: "SinglePage",
     metadata: {
-      name: uuid(),
+      name: randomUUID(),
     },
   },
   content: {
@@ -59,38 +57,13 @@ const initialFormState: SinglePageRequest = {
 
 const formState = ref<SinglePageRequest>(cloneDeep(initialFormState));
 const saving = ref(false);
+const publishing = ref(false);
 const settingModal = ref(false);
 const previewModal = ref(false);
-const attachmentSelectorModal = ref(false);
 
 const isUpdateMode = computed(() => {
   return !!formState.value.page.metadata.creationTimestamp;
 });
-
-// Editor
-const editor = useEditor({
-  content: formState.value.content.raw,
-  extensions: [...allExtensions],
-  autofocus: "start",
-  onUpdate: () => {
-    formState.value.content.raw = editor.value?.getHTML() + "";
-  },
-});
-
-watch(
-  () => formState.value.content.raw,
-  (newValue) => {
-    const isSame = editor.value?.getHTML() === newValue;
-
-    if (isSame) {
-      return;
-    }
-
-    editor.value?.commands.setContent(newValue as string, false);
-  }
-);
-
-const { onAttachmentSelect } = useAttachmentSelect(editor);
 
 const routeQueryName = useRouteQuery<string>("name");
 
@@ -106,14 +79,15 @@ const handleSave = async () => {
       formState.value.page.spec.title = "无标题页面";
     }
     if (!formState.value.page.spec.slug) {
-      formState.value.page.spec.slug = uuid();
+      formState.value.page.spec.slug = new Date().getTime().toString();
     }
 
     if (isUpdateMode.value) {
-      const { data } = await apiClient.singlePage.updateDraftSinglePage({
+      const { data } = await apiClient.singlePage.updateSinglePageContent({
         name: formState.value.page.metadata.name,
-        singlePageRequest: formState.value,
+        content: formState.value.content,
       });
+
       formState.value.page = data;
     } else {
       const { data } = await apiClient.singlePage.draftSinglePage({
@@ -122,11 +96,66 @@ const handleSave = async () => {
       formState.value.page = data;
       routeQueryName.value = data.metadata.name;
     }
+
+    Toast.success("保存成功");
+
     await handleFetchContent();
   } catch (error) {
     console.error("Failed to save single page", error);
+    Toast.error("保存失败，请重试");
   } finally {
     saving.value = false;
+  }
+};
+
+const returnToView = useRouteQuery<string>("returnToView");
+
+const handlePublish = async () => {
+  try {
+    publishing.value = true;
+
+    // Set rendered content
+    formState.value.content.content = formState.value.content.raw;
+
+    if (isUpdateMode.value) {
+      const { name: singlePageName } = formState.value.page.metadata;
+      const { permalink } = formState.value.page.status || {};
+
+      await apiClient.singlePage.updateSinglePageContent({
+        name: singlePageName,
+        content: formState.value.content,
+      });
+
+      await apiClient.singlePage.publishSinglePage({
+        name: singlePageName,
+      });
+
+      if (returnToView.value && permalink) {
+        window.location.href = permalink;
+      } else {
+        router.push({ name: "SinglePages" });
+      }
+    } else {
+      formState.value.page.spec.publish = true;
+      await apiClient.singlePage.draftSinglePage({
+        singlePageRequest: formState.value,
+      });
+    }
+
+    Toast.success("发布成功");
+  } catch (error) {
+    console.error("Failed to publish single page", error);
+    Toast.error("发布失败，请重试");
+  } finally {
+    publishing.value = false;
+  }
+};
+
+const handlePublishClick = () => {
+  if (isUpdateMode.value) {
+    handlePublish();
+  } else {
+    settingModal.value = true;
   }
 };
 
@@ -141,14 +170,33 @@ const handleFetchContent = async () => {
   formState.value.content = data;
 };
 
-const onSettingSaved = (page: SinglePageRequest) => {
+const handleOpenSettingModal = async () => {
+  const { data: latestSinglePage } =
+    await apiClient.extension.singlePage.getcontentHaloRunV1alpha1SinglePage({
+      name: formState.value.page.metadata.name,
+    });
+  formState.value.page = latestSinglePage;
+  settingModal.value = true;
+};
+
+const onSettingSaved = (page: SinglePage) => {
   // Set route query parameter
   if (!isUpdateMode.value) {
-    routeQueryName.value = page.page.metadata.name;
+    routeQueryName.value = page.metadata.name;
   }
 
-  formState.value = page;
+  formState.value.page = page;
   settingModal.value = false;
+
+  if (!isUpdateMode.value) {
+    handleSave();
+  }
+};
+
+const onSettingPublished = (singlePage: SinglePage) => {
+  formState.value.page = singlePage;
+  settingModal.value = false;
+  handlePublish();
 };
 
 onMounted(async () => {
@@ -168,14 +216,13 @@ onMounted(async () => {
 <template>
   <SinglePageSettingModal
     v-model:visible="settingModal"
-    :single-page="formState"
+    :single-page="formState.page"
+    :publish-support="!isUpdateMode"
+    :only-emit="!isUpdateMode"
     @saved="onSettingSaved"
+    @published="onSettingPublished"
   />
   <PostPreviewModal v-model:visible="previewModal" />
-  <AttachmentSelectorModal
-    v-model:visible="attachmentSelectorModal"
-    @select="onAttachmentSelect"
-  />
   <VPageHeader title="自定义页面">
     <template #icon>
       <IconPages class="mr-2 self-center" />
@@ -192,11 +239,29 @@ onMounted(async () => {
           预览
         </VButton>
         <VButton :loading="saving" size="sm" type="default" @click="handleSave">
-          保存
-        </VButton>
-        <VButton type="secondary" @click="settingModal = true">
           <template #icon>
             <IconSave class="h-full w-full" />
+          </template>
+          保存
+        </VButton>
+        <VButton
+          v-if="isUpdateMode"
+          size="sm"
+          type="default"
+          @click="handleOpenSettingModal"
+        >
+          <template #icon>
+            <IconSettings class="h-full w-full" />
+          </template>
+          设置
+        </VButton>
+        <VButton
+          type="secondary"
+          :loading="publishing"
+          @click="handlePublishClick"
+        >
+          <template #icon>
+            <IconSendPlaneFill class="h-full w-full" />
           </template>
           发布
         </VButton>
@@ -204,19 +269,11 @@ onMounted(async () => {
     </template>
   </VPageHeader>
   <div class="editor border-t" style="height: calc(100vh - 3.5rem)">
-    <RichTextEditor
-      v-if="editor"
-      :editor="editor"
-      :additional-menu-items="[
-        {
-          type: 'button',
-          icon: MdiFileImageBox,
-          title: 'SuperScript',
-          action: () => (attachmentSelectorModal = true),
-          isActive: () => false,
-        },
-      ]"
-    >
-    </RichTextEditor>
+    <DefaultEditor
+      v-model="formState.content.raw"
+      :owner="formState.page.spec.owner"
+      :permalink="formState.page.status?.permalink"
+      :publish-time="formState.page.spec.publishTime"
+    />
   </div>
 </template>
