@@ -14,6 +14,7 @@ import {
   VPageHeader,
   VTabbar,
   IconSettings,
+  VLoading,
 } from "@halo-dev/components";
 import type { SettingForm } from "@halo-dev/api-client";
 
@@ -109,17 +110,17 @@ watch([() => route.name, () => route.params], async () => {
           ></VTabbar>
         </template>
       </VCard>
-      <div>
+      <div class="bg-white">
         <RouterView :key="activeTab" v-slot="{ Component }">
           <template v-if="Component">
-            <Suspense>
-              <component :is="Component"></component>
-              <template #fallback>
-                <div class="flex h-32 w-full justify-center bg-white">
-                  <span class="text-sm text-gray-600">加载中...</span>
-                </div>
-              </template>
-            </Suspense>
+            <Transition appear mode="out-in" name="fade">
+              <Suspense>
+                <component :is="Component"></component>
+                <template #fallback>
+                  <VLoading />
+                </template>
+              </Suspense>
+            </Transition>
           </template>
         </RouterView>
       </div>
