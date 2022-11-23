@@ -290,17 +290,11 @@ const subjectRefResult = computed(() => {
         class="w-28 min-w-[7rem]"
         :title="comment?.owner?.displayName"
         :description="comment?.owner?.email"
-        :route="{
-          name: 'UserDetail',
-          params: {
-            name: comment?.owner?.name,
-          },
-        }"
       ></VEntityField>
       <VEntityField>
         <template #description>
           <div class="flex flex-col gap-2">
-            <div class="w-1/2 text-sm text-gray-900">
+            <div class="text-sm text-gray-900">
               {{ comment?.comment?.spec.content }}
             </div>
             <div class="flex items-center gap-3 text-xs">
