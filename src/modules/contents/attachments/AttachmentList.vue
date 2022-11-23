@@ -540,7 +540,7 @@ onMounted(() => {
                     <div class="flex flex-row gap-2">
                       <div
                         class="group cursor-pointer rounded p-1 hover:bg-gray-200"
-                        @click="handleFetchAttachments"
+                        @click="handleFetchAttachments()"
                       >
                         <IconRefreshLine
                           :class="{ 'animate-spin text-gray-900': loading }"
