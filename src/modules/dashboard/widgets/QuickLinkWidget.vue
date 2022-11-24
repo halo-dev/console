@@ -117,11 +117,11 @@ const actions: Action[] = [
 </script>
 <template>
   <VCard
-    :body-class="['h-full', 'overflow-y-auto']"
+    :body-class="['h-full', 'overflow-y-auto', '@container']"
     class="h-full"
     title="快捷访问"
   >
-    <div class="grid grid-cols-1 gap-2 overflow-hidden sm:grid-cols-3">
+    <div class="grid grid-cols-1 gap-2 overflow-hidden @sm:grid-cols-3">
       <div
         v-for="(action, index) in actions"
         :key="index"

@@ -20,6 +20,7 @@ importers:
       '@iconify-json/vscode-icons': ^1.1.16
       '@rushstack/eslint-patch': ^1.2.0
       '@tailwindcss/aspect-ratio': ^0.4.2
+      '@tailwindcss/container-queries': ^0.1.0
       '@tiptap/extension-character-count': ^2.0.0-beta.202
       '@types/jsdom': ^20.0.1
       '@types/lodash.clonedeep': 4.5.7
@@ -147,6 +148,7 @@ importers:
       '@iconify-json/vscode-icons': 1.1.16
       '@rushstack/eslint-patch': 1.2.0
       '@tailwindcss/aspect-ratio': 0.4.2_tailwindcss@3.2.4
+      '@tailwindcss/container-queries': 0.1.0_tailwindcss@3.2.4
       '@types/jsdom': 20.0.1
       '@types/lodash.clonedeep': 4.5.7
       '@types/lodash.isequal': 4.5.6
@@ -2675,6 +2677,14 @@ packages:
     resolution: {integrity: sha512-8QPrypskfBa7QIMuKHg2TA7BqES6vhBrDLOv8Unb6FcFyd3TjKbc6lcmb9UPQHxfl24sXoJ41ux/H7qQQvfaSQ==}
     peerDependencies:
       tailwindcss: '>=2.0.0 || >=3.0.0 || >=3.0.0-alpha.1'
+    dependencies:
+      tailwindcss: 3.2.4_postcss@8.4.19
+    dev: true
+
+  /@tailwindcss/container-queries/0.1.0_tailwindcss@3.2.4:
+    resolution: {integrity: sha512-t1GeJ9P8ual160BvKy6Y1sG7bjChArMaK6iRXm3ZYjZGN2FTzmqb5ztsTDb9AsTSJD4NMHtsnaI2ielrXEk+hw==}
+    peerDependencies:
+      tailwindcss: '>=3.2.0'
     dependencies:
       tailwindcss: 3.2.4_postcss@8.4.19
     dev: true
