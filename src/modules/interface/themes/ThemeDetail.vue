@@ -35,7 +35,7 @@ const handleReloadThemeSetting = async () => {
           return;
         }
 
-        await apiClient.theme.reloadThemeSetting({
+        await apiClient.theme.reload({
           name: selectedTheme.value.metadata.name as string,
         });
 
