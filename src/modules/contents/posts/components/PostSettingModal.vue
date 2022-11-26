@@ -7,6 +7,7 @@ import { apiClient } from "@/utils/api-client";
 import { useThemeCustomTemplates } from "@/modules/interface/themes/composables/use-theme";
 import { postLabels } from "@/constants/labels";
 import { randomUUID } from "@/utils/id";
+import { toDatetimeLocal, toISOString } from "@/utils/date";
 
 const initialFormState: Post = {
   spec: {
@@ -153,6 +154,20 @@ watchEffect(() => {
 
 // custom templates
 const { templates } = useThemeCustomTemplates("post");
+
+// publishTime convert
+const publishTime = computed(() => {
+  const { publishTime } = formState.value.spec;
+  if (publishTime) {
+    console.log(toDatetimeLocal(publishTime));
+    return toDatetimeLocal(publishTime);
+  }
+  return "";
+});
+
+const onPublishTimeChange = (value: string) => {
+  formState.value.spec.publishTime = toISOString(value);
+};
 </script>
 <template>
   <VModal
@@ -262,9 +277,10 @@ const { templates } = useThemeCustomTemplates("post");
             type="select"
           ></FormKit>
           <FormKit
-            v-model="formState.spec.publishTime"
+            :value="publishTime"
             label="发表时间"
             type="datetime-local"
+            @input="onPublishTimeChange"
           ></FormKit>
           <FormKit
             v-model="formState.spec.template"
