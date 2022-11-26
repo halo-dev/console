@@ -8,15 +8,17 @@ import {
   VPageHeader,
   VSpace,
   Toast,
+  Dialog,
 } from "@halo-dev/components";
 import DefaultEditor from "@/components/editor/DefaultEditor.vue";
 import PostSettingModal from "./components/PostSettingModal.vue";
 import PostPreviewModal from "./components/PostPreviewModal.vue";
 import type { Post, PostRequest } from "@halo-dev/api-client";
-import { computed, onMounted, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import cloneDeep from "lodash.clonedeep";
 import { apiClient } from "@/utils/api-client";
 import { useRouteQuery } from "@vueuse/router";
+import { useLocalStorage } from "@vueuse/core";
 import { useRouter } from "vue-router";
 import { randomUUID } from "@/utils/id";
 
@@ -62,6 +64,13 @@ const settingModal = ref(false);
 const previewModal = ref(false);
 const saving = ref(false);
 const publishing = ref(false);
+const timer = ref();
+const postStorageTime = ref(10000);
+const postStorageContent = useLocalStorage(
+  "post_storage_content",
+  formState.value.content.raw
+);
+const postStorageName = useLocalStorage("post_storage_name", "");
 
 const isUpdateMode = computed(() => {
   return !!formState.value.post.metadata.creationTimestamp;
@@ -99,7 +108,7 @@ const handleSave = async () => {
     }
 
     Toast.success("保存成功");
-
+    handleRemoveLocalStorage();
     await handleFetchContent();
   } catch (e) {
     console.error("Failed to save post", e);
@@ -149,6 +158,7 @@ const handlePublish = async () => {
     }
 
     Toast.success("发布成功", { duration: 2000 });
+    handleRemoveLocalStorage();
   } catch (error) {
     console.error("Failed to publish post", error);
     Toast.error("发布失败，请重试");
@@ -206,6 +216,56 @@ const onSettingPublished = (post: Post) => {
   handlePublish();
 };
 
+const handleSavePostLocalBackup = (name = "") => {
+  timer.value = setInterval(() => {
+    postStorageContent.value = formState.value.content.raw;
+    postStorageName.value = name;
+  }, postStorageTime.value);
+};
+
+const handlePostStorageTips = () => {
+  Dialog.warning({
+    title: "提示",
+    description: "当前存在未保存或未发布的文章，是否继续编辑!",
+    confirmType: "secondary",
+    confirmText: "继续编辑",
+    cancelText: "算了",
+    onConfirm: async () => {
+      formState.value.content.raw = postStorageContent.value;
+      handleSavePostLocalBackup();
+    },
+    onCancel: () => {
+      postStorageContent.value = null;
+      handleSavePostLocalBackup();
+    },
+  });
+};
+
+// When editing an article, you need to check whether the current article is cached locally
+const handleEditPostStorageTips = () => {
+  Dialog.warning({
+    title: "提示",
+    description: "当前文章存在缓存，是否使用缓存数据!",
+    confirmType: "secondary",
+    confirmText: "确定",
+    cancelText: "算了",
+    onConfirm: async () => {
+      formState.value.content.raw = postStorageContent.value;
+      handleSavePostLocalBackup();
+    },
+    onCancel: () => {
+      postStorageContent.value = null;
+      handleSavePostLocalBackup();
+    },
+  });
+};
+// Remove cache and clear timer
+const handleRemoveLocalStorage = () => {
+  postStorageName.value = null;
+  postStorageContent.value = null;
+  timer.value && clearInterval(timer.value);
+};
+
 // Get post data when the route contains the name parameter
 const name = useRouteQuery("name");
 onMounted(async () => {
@@ -219,7 +279,31 @@ onMounted(async () => {
 
     // fetch post content
     await handleFetchContent();
+
+    if (postStorageContent.value && postStorageName.value === name.value) {
+      // Prompt that there is a cache pop-up window
+      handleEditPostStorageTips();
+    } else {
+      handleSavePostLocalBackup(name.value as string);
+    }
+  } else {
+    if (postStorageName.value) {
+      postStorageName.value = null;
+      postStorageContent.value = null;
+    }
+    // Cache exists
+    if (postStorageContent.value) {
+      // Prompt that there is a cache pop-up window
+      handlePostStorageTips();
+    } else {
+      // Start timing cache
+      handleSavePostLocalBackup();
+    }
   }
+});
+onBeforeUnmount(() => {
+  // Leave Page Destroy Timer
+  timer.value && clearInterval(timer.value);
 });
 </script>
 
