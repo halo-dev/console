@@ -14,9 +14,11 @@ describe("date#formatDatetime", () => {
 
 describe("date#toISOString", () => {
   it("should return ISO string", () => {
-    const isoString = toISOString("2022-08-17T14:01");
+    const currentDate = new Date();
 
-    expect(isoString).toEqual("2022-08-17T06:01:00.000Z");
+    const isoString = toISOString(currentDate);
+
+    expect(isoString).toEqual(currentDate.toISOString());
   });
 });
 
