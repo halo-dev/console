@@ -18,14 +18,11 @@ export function formatDatetime(
   return dayjs(date).tz(tz).format("YYYY-MM-DD HH:mm");
 }
 
-export function toISOString(
-  date: string | Date | undefined | null,
-  tz?: string
-): string {
+export function toISOString(date: string | Date | undefined | null): string {
   if (!date) {
     return "";
   }
-  return dayjs(date).utc(false).tz(tz, false).toISOString();
+  return dayjs(date).utc(false).toISOString();
 }
 
 export function toDatetimeLocal(

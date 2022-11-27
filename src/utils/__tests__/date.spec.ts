@@ -14,7 +14,7 @@ describe("date#formatDatetime", () => {
 
 describe("date#toISOString", () => {
   it("should return ISO string", () => {
-    const isoString = toISOString("2022-08-17T14:01", "Asia/Shanghai");
+    const isoString = toISOString("2022-08-17T14:01");
 
     expect(isoString).toEqual("2022-08-17T06:01:00.000Z");
   });
