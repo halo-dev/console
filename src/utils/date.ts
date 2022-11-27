@@ -8,26 +8,33 @@ dayjs.extend(utc);
 
 dayjs.locale("zh-cn");
 
-export function formatDatetime(date: string | Date | undefined | null): string {
+export function formatDatetime(
+  date: string | Date | undefined | null,
+  tz?: string
+): string {
   if (!date) {
     return "";
   }
-  return dayjs(date).format("YYYY-MM-DD HH:mm");
+  return dayjs(date).tz(tz).format("YYYY-MM-DD HH:mm");
 }
 
-export function toISOString(date: string | Date | undefined | null): string {
+export function toISOString(
+  date: string | Date | undefined | null,
+  tz?: string
+): string {
   if (!date) {
     return "";
   }
-  return dayjs(date).utc(false).toISOString();
+  return dayjs(date).utc(false).tz(tz).toISOString();
 }
 
 export function toDatetimeLocal(
-  date: string | Date | undefined | null
+  date: string | Date | undefined | null,
+  tz?: string
 ): string {
   if (!date) {
     return "";
   }
   // see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/datetime-local#the_y10k_problem_often_client-side
-  return dayjs(date).format("YYYY-MM-DDTHH:mm");
+  return dayjs(date).tz(tz).format("YYYY-MM-DDTHH:mm");
 }

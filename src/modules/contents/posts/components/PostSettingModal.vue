@@ -72,6 +72,9 @@ const isUpdateMode = computed(() => {
 const handleVisibleChange = (visible: boolean) => {
   emit("update:visible", visible);
   if (!visible) {
+    setTimeout(() => {
+      activeTab.value = "general";
+    }, 200);
     emit("close");
   }
 };
