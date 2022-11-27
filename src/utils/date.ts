@@ -25,7 +25,7 @@ export function toISOString(
   if (!date) {
     return "";
   }
-  return dayjs(date).utc(false).tz(tz).toISOString();
+  return dayjs(date).utc(false).tz(tz, false).toISOString();
 }
 
 export function toDatetimeLocal(
