@@ -32,10 +32,9 @@ import {
   V1alpha1SettingApi,
   V1alpha1UserApi,
 } from "@halo-dev/api-client";
-import type { AxiosError, AxiosInstance } from "axios";
+import type { AxiosInstance } from "axios";
 import axios from "axios";
 import router from "@/router";
-import { Toast } from "@halo-dev/components";
 
 const baseURL = import.meta.env.VITE_API_URL;
 
@@ -48,34 +47,13 @@ axiosInstance.interceptors.response.use(
   (response) => {
     return response;
   },
-  async (error: AxiosError) => {
-    if (/Network Error/.test(error.message)) {
-      Toast.error("网络错误，请检查网络连接");
-      return Promise.reject(error);
-    }
-
-    const response = error.response;
-
-    if (!response) {
-      Toast.error(`网络异常：${error.message}`);
-      return Promise.reject(error);
-    }
-
-    const { status } = error.response || {};
-
-    if (status === 401) {
+  async (error) => {
+    if (error.response.status === 401) {
       localStorage.removeItem("logged_in");
       router.push({
         name: "Login",
       });
-    } else if (status === 403) {
-      Toast.error("当前资源没有访问权限");
-    } else if (status === 400) {
-      Toast.error(`请求参数错误：${response.data.title}`);
-    } else if (status === 500) {
-      Toast.error(`服务器异常：${response.data.title}`);
     }
-
     return Promise.reject(error);
   }
 );

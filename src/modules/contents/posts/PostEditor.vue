@@ -83,8 +83,6 @@ const handleSave = async () => {
       formState.value.post.spec.slug = new Date().getTime().toString();
     }
 
-    delete formState.value.post.spec.title;
-
     if (isUpdateMode.value) {
       const { data } = await apiClient.post.updatePostContent({
         name: formState.value.post.metadata.name,
@@ -119,8 +117,6 @@ const handlePublish = async () => {
 
     // Set rendered content
     formState.value.content.content = formState.value.content.raw;
-
-    
 
     if (isUpdateMode.value) {
       const { name: postName } = formState.value.post.metadata;
