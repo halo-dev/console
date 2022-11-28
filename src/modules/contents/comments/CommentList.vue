@@ -157,7 +157,7 @@ const handleDeleteInBatch = async () => {
 
 const handleApproveInBatch = async () => {
   Dialog.warning({
-    title: "确定要审核通过所选评论吗？",
+    title: "确定要审核通过所选的评论吗？",
     onConfirm: async () => {
       try {
         const commentsToUpdate = comments.value.items.filter((comment) => {
@@ -170,6 +170,8 @@ const handleApproveInBatch = async () => {
         const promises = commentsToUpdate.map((comment) => {
           const commentToUpdate = comment.comment;
           commentToUpdate.spec.approved = true;
+          // TODO: 暂时由前端设置发布时间。see https://github.com/halo-dev/halo/pull/2746
+          commentToUpdate.spec.approvedTime = new Date().toISOString();
           return apiClient.extension.comment.updatecontentHaloRunV1alpha1Comment(
             {
               name: commentToUpdate.metadata.name,
