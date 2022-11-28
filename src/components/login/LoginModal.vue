@@ -24,6 +24,6 @@ const onLoginSucceed = () => {
     title="重新登录"
     @update:visible="onVisibleChange"
   >
-    <LoginForm @succeed="onLoginSucceed" />
+    <LoginForm v-if="userStore.loginModalVisible" @succeed="onLoginSucceed" />
   </VModal>
 </template>
