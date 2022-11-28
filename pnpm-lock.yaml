@@ -64,6 +64,7 @@ importers:
       husky: ^8.0.2
       jsdom: ^20.0.3
       lodash.clonedeep: ^4.5.0
+      lodash.debounce: ^4.0.8
       lodash.isequal: ^4.5.0
       lodash.merge: ^4.6.2
       lodash.sortby: ^4.7.0
@@ -129,6 +130,7 @@ importers:
       floating-vue: 2.0.0-beta.20_vue@3.2.45
       fuse.js: 6.6.2
       lodash.clonedeep: 4.5.0
+      lodash.debounce: 4.0.8
       lodash.isequal: 4.5.0
       lodash.merge: 4.6.2
       lodash.sortby: 4.7.0
@@ -176,7 +178,7 @@ importers:
       randomstring: 1.2.3
       sass: 1.56.1
       start-server-and-test: 1.14.0
-      tailwindcss: 3.2.4_postcss@8.4.19
+      tailwindcss: 3.2.4
       tailwindcss-safe-area: 0.2.2
       tailwindcss-themer: 2.0.2_tailwindcss@3.2.4
       typescript: 4.7.4
@@ -1927,7 +1929,7 @@ packages:
         optional: true
     dependencies:
       '@formkit/core': 1.0.0-beta.12-e579559
-      tailwindcss: 3.2.4_postcss@8.4.19
+      tailwindcss: 3.2.4
     dev: false
 
   /@formkit/utils/1.0.0-beta.12-e579559:
@@ -2668,7 +2670,7 @@ packages:
     peerDependencies:
       tailwindcss: '>=2.0.0 || >=3.0.0 || >=3.0.0-alpha.1'
     dependencies:
-      tailwindcss: 3.2.4_postcss@8.4.19
+      tailwindcss: 3.2.4
     dev: true
 
   /@tiptap/core/2.0.0-beta.195:
@@ -8525,15 +8527,13 @@ packages:
       just-unique: 4.1.1
       lodash.merge: 4.6.2
       lodash.mergewith: 4.6.2
-      tailwindcss: 3.2.4_postcss@8.4.19
+      tailwindcss: 3.2.4
     dev: true
 
-  /tailwindcss/3.2.4_postcss@8.4.19:
+  /tailwindcss/3.2.4:
     resolution: {integrity: sha512-AhwtHCKMtR71JgeYDaswmZXhPcW9iuI9Sp2LvZPo9upDZ7231ZJ7eA9RaURbhpXGVlrjX4cFNlB4ieTetEb7hQ==}
     engines: {node: '>=12.13.0'}
     hasBin: true
-    peerDependencies:
-      postcss: ^8.0.9
     dependencies:
       arg: 5.0.2
       chokidar: 3.5.3
