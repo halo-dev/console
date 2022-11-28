@@ -18,6 +18,7 @@ import {
   useRoleForm,
   useRoleTemplateSelection,
 } from "@/modules/system/roles/composables/use-role";
+import { useUserFetch } from "@/modules/system/users/composables/use-user";
 
 const route = useRoute();
 
@@ -27,6 +28,8 @@ const { roleTemplateGroups, handleRoleTemplateSelect, selectedRoleTemplates } =
   useRoleTemplateSelection();
 
 const { formState, saving, handleCreateOrUpdate } = useRoleForm();
+
+const { users } = useUserFetch({ fetchOnMounted: false });
 
 watch(
   () => selectedRoleTemplates.value,
