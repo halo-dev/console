@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Toast, VButton, VModal, VSpace } from "@halo-dev/components";
+import { VButton, VModal, VSpace } from "@halo-dev/components";
 import SubmitButton from "@/components/button/SubmitButton.vue";
 import { computed, ref, watch } from "vue";
 import type { Menu, MenuItem, Ref } from "@halo-dev/api-client";
