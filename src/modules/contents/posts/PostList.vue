@@ -8,8 +8,8 @@ import {
   IconEye,
   IconEyeOff,
   IconTeam,
-  IconCloseCircle,
   IconRefreshLine,
+  IconExternalLinkLine,
   Dialog,
   VButton,
   VCard,
@@ -21,11 +21,13 @@ import {
   VStatusDot,
   VEntity,
   VEntityField,
+  VLoading,
 } from "@halo-dev/components";
 import UserDropdownSelector from "@/components/dropdown-selector/UserDropdownSelector.vue";
+import CategoryDropdownSelector from "@/components/dropdown-selector/CategoryDropdownSelector.vue";
 import PostSettingModal from "./components/PostSettingModal.vue";
 import PostTag from "../posts/tags/components/PostTag.vue";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import type {
   User,
   Category,
@@ -35,11 +37,13 @@ import type {
 } from "@halo-dev/api-client";
 import { apiClient } from "@/utils/api-client";
 import { formatDatetime } from "@/utils/date";
-import { usePostCategory } from "@/modules/contents/posts/categories/composables/use-post-category";
-import { usePostTag } from "@/modules/contents/posts/tags/composables/use-post-tag";
 import { usePermission } from "@/utils/permission";
 import { onBeforeRouteLeave } from "vue-router";
 import { postLabels } from "@/constants/labels";
+import FilterTag from "@/components/filter/FilterTag.vue";
+import FilteCleanButton from "@/components/filter/FilterCleanButton.vue";
+import { getNode } from "@formkit/core";
+import TagDropdownSelector from "@/components/dropdown-selector/TagDropdownSelector.vue";
 
 const { currentUserHasPermission } = usePermission();
 
@@ -61,11 +65,16 @@ const checkedAll = ref(false);
 const selectedPostNames = ref<string[]>([]);
 const refreshInterval = ref();
 
-const handleFetchPosts = async () => {
+const handleFetchPosts = async (options?: {
+  mute?: boolean;
+  page?: number;
+}) => {
   try {
     clearInterval(refreshInterval.value);
 
-    loading.value = true;
+    if (!options?.mute) {
+      loading.value = true;
+    }
 
     let categories: string[] | undefined;
     let tags: string[] | undefined;
@@ -91,6 +100,10 @@ const handleFetchPosts = async () => {
       labelSelector.push(
         `${postLabels.PUBLISHED}=${selectedPublishStatusItem.value.value}`
       );
+    }
+
+    if (options?.page) {
+      posts.value.page = options.page;
     }
 
     const { data } = await apiClient.post.listPosts({
@@ -119,8 +132,8 @@ const handleFetchPosts = async () => {
 
     if (abnormalPosts.length) {
       refreshInterval.value = setInterval(() => {
-        handleFetchPosts();
-      }, 1000);
+        handleFetchPosts({ mute: true });
+      }, 3000);
     }
   } catch (e) {
     console.error("Failed to fetch posts", e);
@@ -157,7 +170,7 @@ const handleOpenSettingModal = async (post: Post) => {
 
 const onSettingModalClose = () => {
   selectedPost.value = undefined;
-  handleFetchPosts();
+  handleFetchPosts({ mute: true });
 };
 
 const handleSelectPrevious = async () => {
@@ -235,8 +248,8 @@ const handleCheckAllChange = (e: Event) => {
 
 const handleDelete = async (post: Post) => {
   Dialog.warning({
-    title: "是否确认删除该文章？",
-    description: "此操作会将文章放入回收站，后续可以从回收站恢复",
+    title: "确定要删除该文章吗？",
+    description: "该操作会将文章放入回收站，后续可以从回收站恢复",
     confirmType: "danger",
     onConfirm: async () => {
       await apiClient.post.recyclePost({
@@ -249,8 +262,8 @@ const handleDelete = async (post: Post) => {
 
 const handleDeleteInBatch = async () => {
   Dialog.warning({
-    title: "是否确认删除选中的文章？",
-    description: "此操作会将文章放入回收站，后续可以从回收站恢复",
+    title: "确定要删除选中的文章吗？",
+    description: "该操作会将文章放入回收站，后续可以从回收站恢复",
     confirmType: "danger",
     onConfirm: async () => {
       await Promise.all(
@@ -311,10 +324,11 @@ const VisibleItems: VisibleItem[] = [
     label: "公开",
     value: "PUBLIC",
   },
-  {
-    label: "内部成员可访问",
-    value: "INTERNAL",
-  },
+  // TODO: 支持内部成员可访问
+  // {
+  //   label: "内部成员可访问",
+  //   value: "INTERNAL",
+  // },
   {
     label: "私有",
     value: "PRIVATE",
@@ -359,9 +373,6 @@ const SortItems: SortItem[] = [
   },
 ];
 
-const { categories } = usePostCategory({ fetchOnMounted: true });
-const { tags } = usePostTag({ fetchOnMounted: true });
-
 const selectedVisibleItem = ref<VisibleItem>(VisibleItems[0]);
 const selectedPublishStatusItem = ref<PublishStatuItem>(PublishStatuItems[0]);
 const selectedSortItem = ref<SortItem>();
@@ -372,33 +383,69 @@ const keyword = ref("");
 
 function handleVisibleItemChange(visibleItem: VisibleItem) {
   selectedVisibleItem.value = visibleItem;
-  handleFetchPosts();
+  handleFetchPosts({ page: 1 });
 }
 
 function handlePublishStatusItemChange(publishStatusItem: PublishStatuItem) {
   selectedPublishStatusItem.value = publishStatusItem;
-  handleFetchPosts();
+  handleFetchPosts({ page: 1 });
 }
 
 function handleSortItemChange(sortItem?: SortItem) {
   selectedSortItem.value = sortItem;
-  handleFetchPosts();
+  handleFetchPosts({ page: 1 });
 }
 
 function handleCategoryChange(category?: Category) {
   selectedCategory.value = category;
-  handleFetchPosts();
+  handleFetchPosts({ page: 1 });
 }
 
 function handleTagChange(tag?: Tag) {
   selectedTag.value = tag;
-  handleFetchPosts();
+  handleFetchPosts({ page: 1 });
 }
 
 function handleContributorChange(user?: User) {
   selectedContributor.value = user;
-  handleFetchPosts();
+  handleFetchPosts({ page: 1 });
 }
+
+function handleKeywordChange() {
+  const keywordNode = getNode("keywordInput");
+  if (keywordNode) {
+    keyword.value = keywordNode._value as string;
+  }
+  handleFetchPosts({ page: 1 });
+}
+
+function handleClearKeyword() {
+  keyword.value = "";
+  handleFetchPosts({ page: 1 });
+}
+
+function handleClearFilters() {
+  selectedVisibleItem.value = VisibleItems[0];
+  selectedPublishStatusItem.value = PublishStatuItems[0];
+  selectedSortItem.value = undefined;
+  selectedCategory.value = undefined;
+  selectedTag.value = undefined;
+  selectedContributor.value = undefined;
+  keyword.value = "";
+  handleFetchPosts({ page: 1 });
+}
+
+const hasFilters = computed(() => {
+  return (
+    selectedVisibleItem.value.value ||
+    selectedPublishStatusItem.value.value !== undefined ||
+    selectedSortItem.value ||
+    selectedCategory.value ||
+    selectedTag.value ||
+    selectedContributor.value ||
+    keyword.value
+  );
+});
 </script>
 <template>
   <PostSettingModal
@@ -462,86 +509,62 @@ function handleContributorChange(user?: User) {
                 class="flex items-center gap-2"
               >
                 <FormKit
-                  v-model="keyword"
+                  id="keywordInput"
                   outer-class="!p-0"
                   placeholder="输入关键词搜索"
                   type="text"
-                  @keyup.enter="handleFetchPosts"
+                  name="keyword"
+                  :model-value="keyword"
+                  @keyup.enter="handleKeywordChange"
                 ></FormKit>
 
-                <div
-                  v-if="selectedPublishStatusItem.value"
-                  class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
-                >
-                  <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                    状态：{{ selectedPublishStatusItem.label }}
-                  </span>
-                  <IconCloseCircle
-                    class="h-4 w-4 text-gray-600"
-                    @click="handlePublishStatusItemChange(PublishStatuItems[0])"
-                  />
-                </div>
-                <div
-                  v-if="selectedVisibleItem.value"
-                  class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
-                >
-                  <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                    可见性：{{ selectedVisibleItem.label }}
-                  </span>
-                  <IconCloseCircle
-                    class="h-4 w-4 text-gray-600"
-                    @click="handleVisibleItemChange(VisibleItems[0])"
-                  />
-                </div>
+                <FilterTag v-if="keyword" @close="handleClearKeyword()">
+                  关键词：{{ keyword }}
+                </FilterTag>
 
-                <div
+                <FilterTag
+                  v-if="selectedPublishStatusItem.value !== undefined"
+                  @close="handlePublishStatusItemChange(PublishStatuItems[0])"
+                >
+                  状态：{{ selectedPublishStatusItem.label }}
+                </FilterTag>
+
+                <FilterTag
+                  v-if="selectedVisibleItem.value"
+                  @close="handleVisibleItemChange(VisibleItems[0])"
+                >
+                  可见性：{{ selectedVisibleItem.label }}
+                </FilterTag>
+
+                <FilterTag
                   v-if="selectedCategory"
-                  class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                  @close="handleCategoryChange()"
                 >
-                  <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                    分类：{{ selectedCategory.spec.displayName }}
-                  </span>
-                  <IconCloseCircle
-                    class="h-4 w-4 text-gray-600"
-                    @click="handleCategoryChange()"
-                  />
-                </div>
-                <div
-                  v-if="selectedTag"
-                  class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
-                >
-                  <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                    标签：{{ selectedTag.spec.displayName }}
-                  </span>
-                  <IconCloseCircle
-                    class="h-4 w-4 text-gray-600"
-                    @click="handleTagChange()"
-                  />
-                </div>
-                <div
+                  分类：{{ selectedCategory.spec.displayName }}
+                </FilterTag>
+
+                <FilterTag v-if="selectedTag" @click="handleTagChange()">
+                  标签：{{ selectedTag.spec.displayName }}
+                </FilterTag>
+
+                <FilterTag
                   v-if="selectedContributor"
-                  class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                  @close="handleContributorChange()"
                 >
-                  <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                    作者：{{ selectedContributor.spec.displayName }}
-                  </span>
-                  <IconCloseCircle
-                    class="h-4 w-4 text-gray-600"
-                    @click="handleContributorChange()"
-                  />
-                </div>
-                <div
+                  作者：{{ selectedContributor.spec.displayName }}
+                </FilterTag>
+
+                <FilterTag
                   v-if="selectedSortItem"
-                  class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                  @close="handleSortItemChange()"
                 >
-                  <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                    排序：{{ selectedSortItem.label }}
-                  </span>
-                  <IconCloseCircle
-                    class="h-4 w-4 text-gray-600"
-                    @click="handleSortItemChange()"
-                  />
-                </div>
+                  排序：{{ selectedSortItem.label }}
+                </FilterTag>
+
+                <FilteCleanButton
+                  v-if="hasFilters"
+                  @click="handleClearFilters"
+                />
               </div>
               <VSpace v-else>
                 <VButton type="danger" @click="handleDeleteInBatch">
@@ -612,7 +635,10 @@ function handleContributorChange(user?: User) {
                     </div>
                   </template>
                 </FloatingDropdown>
-                <FloatingDropdown>
+                <CategoryDropdownSelector
+                  v-model:selected="selectedCategory"
+                  @select="handleCategoryChange"
+                >
                   <div
                     class="flex cursor-pointer select-none items-center text-sm text-gray-700 hover:text-black"
                   >
@@ -621,69 +647,11 @@ function handleContributorChange(user?: User) {
                       <IconArrowDown />
                     </span>
                   </div>
-                  <template #popper>
-                    <div class="h-96 w-80">
-                      <div class="bg-white p-4">
-                        <FormKit
-                          placeholder="输入关键词搜索"
-                          type="text"
-                        ></FormKit>
-                      </div>
-                      <div class="mt-2">
-                        <ul
-                          class="box-border h-full w-full divide-y divide-gray-100"
-                        >
-                          <li
-                            v-for="(category, index) in categories"
-                            :key="index"
-                            v-close-popper
-                            @click="handleCategoryChange(category)"
-                          >
-                            <div
-                              class="group relative block cursor-pointer px-4 py-3 transition-all hover:bg-gray-50"
-                              :class="{
-                                'bg-gray-100':
-                                  selectedCategory?.metadata.name ===
-                                  category.metadata.name,
-                              }"
-                            >
-                              <div class="relative flex flex-row items-center">
-                                <div class="flex-1">
-                                  <div class="flex flex-col sm:flex-row">
-                                    <span
-                                      class="mr-0 truncate text-sm font-medium text-gray-900 sm:mr-2"
-                                    >
-                                      {{ category.spec.displayName }}
-                                    </span>
-                                    <VSpace class="mt-1 sm:mt-0"></VSpace>
-                                  </div>
-                                  <div class="mt-1 flex">
-                                    <span class="text-xs text-gray-500">
-                                      {{ category.status?.permalink }}
-                                    </span>
-                                  </div>
-                                </div>
-                                <div class="flex">
-                                  <div
-                                    class="inline-flex flex-col items-end gap-4 sm:flex-row sm:items-center sm:gap-6"
-                                  >
-                                    <div
-                                      class="cursor-pointer text-sm text-gray-500 hover:text-gray-900"
-                                    >
-                                      {{ category.status?.postCount || 0 }}
-                                      篇文章
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  </template>
-                </FloatingDropdown>
-                <FloatingDropdown>
+                </CategoryDropdownSelector>
+                <TagDropdownSelector
+                  v-model:selected="selectedTag"
+                  @select="handleTagChange"
+                >
                   <div
                     class="flex cursor-pointer select-none items-center text-sm text-gray-700 hover:text-black"
                   >
@@ -692,65 +660,7 @@ function handleContributorChange(user?: User) {
                       <IconArrowDown />
                     </span>
                   </div>
-                  <template #popper>
-                    <div class="h-96 w-80">
-                      <div class="bg-white p-4">
-                        <FormKit
-                          placeholder="输入关键词搜索"
-                          type="text"
-                        ></FormKit>
-                      </div>
-
-                      <div class="mt-2">
-                        <ul
-                          class="box-border h-full w-full divide-y divide-gray-100"
-                          role="list"
-                        >
-                          <li
-                            v-for="(tag, index) in tags"
-                            :key="index"
-                            v-close-popper
-                            @click="handleTagChange(tag)"
-                          >
-                            <div
-                              class="relative block cursor-pointer px-4 py-3 transition-all hover:bg-gray-50"
-                              :class="{
-                                'bg-gray-100':
-                                  selectedTag?.metadata.name ===
-                                  tag.metadata.name,
-                              }"
-                            >
-                              <div class="relative flex flex-row items-center">
-                                <div class="flex-1">
-                                  <div class="flex flex-col sm:flex-row">
-                                    <PostTag :tag="tag" />
-                                  </div>
-                                  <div class="mt-1 flex">
-                                    <span class="text-xs text-gray-500">
-                                      {{ tag.status?.permalink }}
-                                    </span>
-                                  </div>
-                                </div>
-                                <div class="flex">
-                                  <div
-                                    class="inline-flex flex-col items-end gap-4 sm:flex-row sm:items-center sm:gap-6"
-                                  >
-                                    <div
-                                      class="cursor-pointer text-sm text-gray-500 hover:text-gray-900"
-                                    >
-                                      {{ tag.status?.postCount || 0 }}
-                                      篇文章
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  </template>
-                </FloatingDropdown>
+                </TagDropdownSelector>
                 <UserDropdownSelector
                   v-model:selected="selectedContributor"
                   @select="handleContributorChange"
@@ -792,7 +702,7 @@ function handleContributorChange(user?: User) {
                 <div class="flex flex-row gap-2">
                   <div
                     class="group cursor-pointer rounded p-1 hover:bg-gray-200"
-                    @click="handleFetchPosts"
+                    @click="handleFetchPosts()"
                   >
                     <IconRefreshLine
                       :class="{ 'animate-spin text-gray-900': loading }"
@@ -805,183 +715,203 @@ function handleContributorChange(user?: User) {
           </div>
         </div>
       </template>
-
-      <VEmpty
-        v-if="!posts.items.length && !loading"
-        message="你可以尝试刷新或者新建文章"
-        title="当前没有文章"
-      >
-        <template #actions>
-          <VSpace>
-            <VButton @click="handleFetchPosts">刷新</VButton>
-            <VButton
-              v-permission="['system:posts:manage']"
-              :route="{ name: 'PostEditor' }"
-              type="primary"
-            >
-              <template #icon>
-                <IconAddCircle class="h-full w-full" />
-              </template>
-              新建文章
-            </VButton>
-          </VSpace>
-        </template>
-      </VEmpty>
-      <ul
-        v-else
-        class="box-border h-full w-full divide-y divide-gray-100"
-        role="list"
-      >
-        <li v-for="(post, index) in posts.items" :key="index">
-          <VEntity :is-selected="checkSelection(post.post)">
-            <template
-              v-if="currentUserHasPermission(['system:posts:manage'])"
-              #checkbox
-            >
-              <input
-                v-model="selectedPostNames"
-                :value="post.post.metadata.name"
-                class="h-4 w-4 rounded border-gray-300 text-indigo-600"
-                name="post-checkbox"
-                type="checkbox"
-              />
-            </template>
-            <template #start>
-              <VEntityField
-                :title="post.post.spec.title"
-                :route="{
-                  name: 'PostEditor',
-                  query: { name: post.post.metadata.name },
-                }"
+      <VLoading v-if="loading" />
+      <Transition v-else-if="!posts.items.length" appear name="fade">
+        <VEmpty message="你可以尝试刷新或者新建文章" title="当前没有文章">
+          <template #actions>
+            <VSpace>
+              <VButton @click="handleFetchPosts">刷新</VButton>
+              <VButton
+                v-permission="['system:posts:manage']"
+                :route="{ name: 'PostEditor' }"
+                type="primary"
               >
-                <template #extra>
-                  <VSpace class="mt-1 sm:mt-0">
+                <template #icon>
+                  <IconAddCircle class="h-full w-full" />
+                </template>
+                新建文章
+              </VButton>
+            </VSpace>
+          </template>
+        </VEmpty>
+      </Transition>
+      <Transition v-else appear name="fade">
+        <ul
+          class="box-border h-full w-full divide-y divide-gray-100"
+          role="list"
+        >
+          <li v-for="(post, index) in posts.items" :key="index">
+            <VEntity :is-selected="checkSelection(post.post)">
+              <template
+                v-if="currentUserHasPermission(['system:posts:manage'])"
+                #checkbox
+              >
+                <input
+                  v-model="selectedPostNames"
+                  :value="post.post.metadata.name"
+                  class="h-4 w-4 rounded border-gray-300 text-indigo-600"
+                  name="post-checkbox"
+                  type="checkbox"
+                />
+              </template>
+              <template #start>
+                <VEntityField
+                  :title="post.post.spec.title"
+                  :route="{
+                    name: 'PostEditor',
+                    query: { name: post.post.metadata.name },
+                  }"
+                >
+                  <template #extra>
+                    <VSpace class="mt-1 sm:mt-0">
+                      <RouterLink
+                        v-if="post.post.status?.inProgress"
+                        v-tooltip="`当前有内容已保存，但还未发布。`"
+                        :to="{
+                          name: 'PostEditor',
+                          query: { name: post.post.metadata.name },
+                        }"
+                        class="flex items-center"
+                      >
+                        <VStatusDot state="success" animate />
+                      </RouterLink>
+                      <PostTag
+                        v-for="(tag, tagIndex) in post.tags"
+                        :key="tagIndex"
+                        :tag="tag"
+                        route
+                      ></PostTag>
+                      <a
+                        v-if="post.post.status?.permalink"
+                        target="_blank"
+                        :href="post.post.status?.permalink"
+                        :title="post.post.status?.permalink"
+                        class="hidden text-gray-600 transition-all hover:text-gray-900 group-hover:inline-block"
+                      >
+                        <IconExternalLinkLine class="h-3.5 w-3.5" />
+                      </a>
+                    </VSpace>
+                  </template>
+                  <template #description>
+                    <VSpace>
+                      <p
+                        v-if="post.categories.length"
+                        class="inline-flex flex-wrap gap-1 text-xs text-gray-500"
+                      >
+                        分类：<a
+                          v-for="(category, categoryIndex) in post.categories"
+                          :key="categoryIndex"
+                          :href="category.status?.permalink"
+                          :title="category.status?.permalink"
+                          target="_blank"
+                          class="cursor-pointer hover:text-gray-900"
+                        >
+                          {{ category.spec.displayName }}
+                        </a>
+                      </p>
+                      <span class="text-xs text-gray-500">
+                        访问量 {{ post.stats.visit || 0 }}
+                      </span>
+                      <span class="text-xs text-gray-500">
+                        评论 {{ post.stats.totalComment || 0 }}
+                      </span>
+                      <span
+                        v-if="post.post.spec.pinned"
+                        class="text-xs text-gray-500"
+                      >
+                        已置顶
+                      </span>
+                    </VSpace>
+                  </template>
+                </VEntityField>
+              </template>
+              <template #end>
+                <VEntityField>
+                  <template #description>
                     <RouterLink
-                      v-if="post.post.status?.inProgress"
-                      v-tooltip="`当前有内容已保存，但还未发布。`"
+                      v-for="(
+                        contributor, contributorIndex
+                      ) in post.contributors"
+                      :key="contributorIndex"
                       :to="{
-                        name: 'PostEditor',
-                        query: { name: post.post.metadata.name },
+                        name: 'UserDetail',
+                        params: { name: contributor.name },
                       }"
                       class="flex items-center"
                     >
-                      <VStatusDot state="success" animate />
+                      <VAvatar
+                        v-tooltip="contributor.displayName"
+                        size="xs"
+                        :src="contributor.avatar"
+                        :alt="contributor.displayName"
+                        circle
+                      ></VAvatar>
                     </RouterLink>
-                    <PostTag
-                      v-for="(tag, tagIndex) in post.tags"
-                      :key="tagIndex"
-                      :tag="tag"
-                      route
-                    ></PostTag>
-                  </VSpace>
-                </template>
-                <template #description>
-                  <VSpace>
-                    <p
-                      v-if="post.categories.length"
-                      class="inline-flex flex-wrap gap-1 text-xs text-gray-500"
-                    >
-                      分类：<span
-                        v-for="(category, categoryIndex) in post.categories"
-                        :key="categoryIndex"
-                        class="cursor-pointer hover:text-gray-900"
-                      >
-                        {{ category.spec.displayName }}
-                      </span>
-                    </p>
-                    <span class="text-xs text-gray-500">
-                      访问量 {{ post.stats.visit || 0 }}
+                  </template>
+                </VEntityField>
+                <VEntityField :description="getPublishStatus(post.post)">
+                  <template v-if="isPublishing(post.post)" #description>
+                    <VStatusDot text="发布中" animate />
+                  </template>
+                </VEntityField>
+                <VEntityField>
+                  <template #description>
+                    <IconEye
+                      v-if="post.post.spec.visible === 'PUBLIC'"
+                      v-tooltip="`公开访问`"
+                      class="cursor-pointer text-sm transition-all hover:text-blue-600"
+                    />
+                    <IconEyeOff
+                      v-if="post.post.spec.visible === 'PRIVATE'"
+                      v-tooltip="`私有访问`"
+                      class="cursor-pointer text-sm transition-all hover:text-blue-600"
+                    />
+                    <!-- TODO: 支持内部成员可访问 -->
+                    <IconTeam
+                      v-if="false"
+                      v-tooltip="`内部成员可访问`"
+                      class="cursor-pointer text-sm transition-all hover:text-blue-600"
+                    />
+                  </template>
+                </VEntityField>
+                <VEntityField v-if="post?.post?.spec.deleted">
+                  <template #description>
+                    <VStatusDot v-tooltip="`删除中`" state="warning" animate />
+                  </template>
+                </VEntityField>
+                <VEntityField>
+                  <template #description>
+                    <span class="truncate text-xs tabular-nums text-gray-500">
+                      {{ formatDatetime(post.post.spec.publishTime) }}
                     </span>
-                    <span class="text-xs text-gray-500">
-                      评论 {{ post.stats.totalComment || 0 }}
-                    </span>
-                  </VSpace>
-                </template>
-              </VEntityField>
-            </template>
-            <template #end>
-              <VEntityField>
-                <template #description>
-                  <RouterLink
-                    v-for="(contributor, contributorIndex) in post.contributors"
-                    :key="contributorIndex"
-                    :to="{
-                      name: 'UserDetail',
-                      params: { name: contributor.name },
-                    }"
-                    class="flex items-center"
-                  >
-                    <VAvatar
-                      v-tooltip="contributor.displayName"
-                      size="xs"
-                      :src="contributor.avatar"
-                      :alt="contributor.displayName"
-                      circle
-                    ></VAvatar>
-                  </RouterLink>
-                </template>
-              </VEntityField>
-              <VEntityField :description="getPublishStatus(post.post)">
-                <template v-if="isPublishing(post.post)" #description>
-                  <VStatusDot text="发布中" animate />
-                </template>
-              </VEntityField>
-              <VEntityField>
-                <template #description>
-                  <IconEye
-                    v-if="post.post.spec.visible === 'PUBLIC'"
-                    v-tooltip="`公开访问`"
-                    class="cursor-pointer text-sm transition-all hover:text-blue-600"
-                  />
-                  <IconEyeOff
-                    v-if="post.post.spec.visible === 'PRIVATE'"
-                    v-tooltip="`私有访问`"
-                    class="cursor-pointer text-sm transition-all hover:text-blue-600"
-                  />
-                  <IconTeam
-                    v-if="post.post.spec.visible === 'INTERNAL'"
-                    v-tooltip="`内部成员可访问`"
-                    class="cursor-pointer text-sm transition-all hover:text-blue-600"
-                  />
-                </template>
-              </VEntityField>
-              <VEntityField v-if="post?.post?.spec.deleted">
-                <template #description>
-                  <VStatusDot v-tooltip="`删除中`" state="warning" animate />
-                </template>
-              </VEntityField>
-              <VEntityField>
-                <template #description>
-                  <span class="truncate text-xs tabular-nums text-gray-500">
-                    {{ formatDatetime(post.post.spec.publishTime) }}
-                  </span>
-                </template>
-              </VEntityField>
-            </template>
-            <template
-              v-if="currentUserHasPermission(['system:posts:manage'])"
-              #dropdownItems
-            >
-              <VButton
-                v-close-popper
-                block
-                type="secondary"
-                @click="handleOpenSettingModal(post.post)"
+                  </template>
+                </VEntityField>
+              </template>
+              <template
+                v-if="currentUserHasPermission(['system:posts:manage'])"
+                #dropdownItems
               >
-                设置
-              </VButton>
-              <VButton
-                v-close-popper
-                block
-                type="danger"
-                @click="handleDelete(post.post)"
-              >
-                删除
-              </VButton>
-            </template>
-          </VEntity>
-        </li>
-      </ul>
+                <VButton
+                  v-close-popper
+                  block
+                  type="secondary"
+                  @click="handleOpenSettingModal(post.post)"
+                >
+                  设置
+                </VButton>
+                <VButton
+                  v-close-popper
+                  block
+                  type="danger"
+                  @click="handleDelete(post.post)"
+                >
+                  删除
+                </VButton>
+              </template>
+            </VEntity>
+          </li>
+        </ul>
+      </Transition>
 
       <template #footer>
         <div class="bg-white sm:flex sm:items-center sm:justify-end">

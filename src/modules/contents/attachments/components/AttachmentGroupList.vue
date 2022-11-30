@@ -57,7 +57,7 @@ const defaultGroups: Group[] = [
     apiVersion: "",
     kind: "",
     metadata: {
-      name: "none",
+      name: "ungrouped",
     },
   },
 ];
@@ -68,7 +68,7 @@ const groupToUpdate = ref<Group | null>(null);
 const loading = ref<boolean>(false);
 const editingModal = ref(false);
 
-const routeQuery = useRouteQuery("group");
+const routeQuery = useRouteQuery<string>("group");
 
 const handleSelectGroup = (group: Group) => {
   emit("update:selectedGroup", group);
@@ -91,9 +91,8 @@ const onEditingModalClose = () => {
 
 const handleDelete = (group: Group) => {
   Dialog.warning({
-    title: "是否确认删除该分组？",
-    description:
-      "此操作将删除分组，并将分组下的附件移动至未分组，此操作无法恢复。",
+    title: "确定要删除该分组吗？",
+    description: "将删除分组，并将分组下的附件移动至未分组，该操作不可恢复。",
     confirmType: "danger",
     onConfirm: async () => {
       // TODO: 后续将修改为在后端进行批量操作处理
@@ -109,7 +108,7 @@ const handleDelete = (group: Group) => {
 
       // move attachments to none group
       const moveToUnGroupRequests = data.items.map((attachment) => {
-        attachment.spec.groupRef = undefined;
+        attachment.spec.groupName = undefined;
         return apiClient.extension.storage.attachment.updatestorageHaloRunV1alpha1Attachment(
           {
             name: attachment.metadata.name,
@@ -131,8 +130,8 @@ const handleDelete = (group: Group) => {
 
 const handleDeleteWithAttachments = (group: Group) => {
   Dialog.warning({
-    title: "是否确认删除该分组？",
-    description: "此操作将删除分组以及分组下的所有附件，此操作无法恢复。",
+    title: "确定要删除该分组吗？",
+    description: "将删除分组以及分组下的所有附件，该操作不可恢复。",
     confirmType: "danger",
     onConfirm: async () => {
       // TODO: 后续将修改为在后端进行批量操作处理
@@ -166,7 +165,8 @@ const handleDeleteWithAttachments = (group: Group) => {
 watch(
   () => groups.value.length,
   () => {
-    const groupIndex = groups.value.findIndex(
+    const allGroups = [...defaultGroups, ...groups.value];
+    const groupIndex = allGroups.findIndex(
       (group) => group.metadata.name === routeQuery.value
     );
 
@@ -186,8 +186,8 @@ onMounted(async () => {
     );
     if (group) {
       handleSelectGroup(group);
+      return;
     }
-    return;
   }
 
   handleSelectGroup(defaultGroups[0]);

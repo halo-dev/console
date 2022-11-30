@@ -2,7 +2,6 @@
 import {
   IconAddCircle,
   IconArrowDown,
-  IconCloseCircle,
   IconPlug,
   IconRefreshLine,
   VButton,
@@ -11,14 +10,18 @@ import {
   VPageHeader,
   VPagination,
   VSpace,
+  VLoading,
 } from "@halo-dev/components";
 import PluginListItem from "./components/PluginListItem.vue";
 import PluginUploadModal from "./components/PluginUploadModal.vue";
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { apiClient } from "@/utils/api-client";
 import type { PluginList } from "@halo-dev/api-client";
 import { usePermission } from "@/utils/permission";
 import { onBeforeRouteLeave } from "vue-router";
+import FilterTag from "@/components/filter/FilterTag.vue";
+import FilteCleanButton from "@/components/filter/FilterCleanButton.vue";
+import { getNode } from "@formkit/core";
 
 const { currentUserHasPermission } = usePermission();
 
@@ -38,11 +41,20 @@ const pluginInstall = ref(false);
 const keyword = ref("");
 const refreshInterval = ref();
 
-const handleFetchPlugins = async () => {
+const handleFetchPlugins = async (options?: {
+  mute?: boolean;
+  page?: number;
+}) => {
   try {
     clearInterval(refreshInterval.value);
 
-    loading.value = true;
+    if (!options?.mute) {
+      loading.value = true;
+    }
+
+    if (options?.page) {
+      plugins.value.page = options.page;
+    }
 
     const { data } = await apiClient.plugin.listPlugins({
       page: plugins.value.page,
@@ -62,7 +74,7 @@ const handleFetchPlugins = async () => {
 
     if (deletedPlugins.length) {
       refreshInterval.value = setInterval(() => {
-        handleFetchPlugins();
+        handleFetchPlugins({ mute: true });
       }, 3000);
     }
   } catch (e) {
@@ -132,19 +144,47 @@ const selectedSortItem = ref<SortItem>();
 
 function handleEnabledItemChange(enabledItem: EnabledItem) {
   selectedEnabledItem.value = enabledItem;
-  handleFetchPlugins();
+  handleFetchPlugins({ page: 1 });
 }
 
 function handleSortItemChange(sortItem?: SortItem) {
   selectedSortItem.value = sortItem;
-  handleFetchPlugins();
+  handleFetchPlugins({ page: 1 });
+}
+
+function handleKeywordChange() {
+  const keywordNode = getNode("keywordInput");
+  if (keywordNode) {
+    keyword.value = keywordNode._value as string;
+  }
+  handleFetchPlugins({ page: 1 });
+}
+
+function handleClearKeyword() {
+  keyword.value = "";
+  handleFetchPlugins({ page: 1 });
+}
+
+const hasFilters = computed(() => {
+  return (
+    selectedEnabledItem.value?.value !== undefined ||
+    selectedSortItem.value?.value ||
+    keyword.value
+  );
+});
+
+function handleClearFilters() {
+  selectedEnabledItem.value = undefined;
+  selectedSortItem.value = undefined;
+  keyword.value = "";
+  handleFetchPlugins({ page: 1 });
 }
 </script>
 <template>
   <PluginUploadModal
     v-if="currentUserHasPermission(['system:plugins:manage'])"
     v-model:visible="pluginInstall"
-    @close="handleFetchPlugins"
+    @close="handleFetchPlugins()"
   />
 
   <VPageHeader title="插件">
@@ -174,37 +214,34 @@ function handleSortItemChange(sortItem?: SortItem) {
           >
             <div class="flex w-full flex-1 items-center gap-2 sm:w-auto">
               <FormKit
-                v-model="keyword"
+                id="keywordInput"
+                outer-class="!p-0"
                 placeholder="输入关键词搜索"
                 type="text"
-                @keyup.enter="
-                  handlePaginationChange({ page: 1, size: plugins.size })
-                "
+                name="keyword"
+                :model-value="keyword"
+                @keyup.enter="handleKeywordChange"
               ></FormKit>
-              <div
+
+              <FilterTag v-if="keyword" @close="handleClearKeyword()">
+                关键词：{{ keyword }}
+              </FilterTag>
+
+              <FilterTag
                 v-if="selectedEnabledItem?.value !== undefined"
-                class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                @close="handleEnabledItemChange(EnabledItems[0])"
               >
-                <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                  启用状态：{{ selectedEnabledItem.label }}
-                </span>
-                <IconCloseCircle
-                  class="h-4 w-4 text-gray-600"
-                  @click="handleEnabledItemChange(EnabledItems[0])"
-                />
-              </div>
-              <div
+                启用状态：{{ selectedEnabledItem.label }}
+              </FilterTag>
+
+              <FilterTag
                 v-if="selectedSortItem"
-                class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                @close="handleSortItemChange()"
               >
-                <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                  排序：{{ selectedSortItem.label }}
-                </span>
-                <IconCloseCircle
-                  class="h-4 w-4 text-gray-600"
-                  @click="handleSortItemChange()"
-                />
-              </div>
+                排序：{{ selectedSortItem.label }}
+              </FilterTag>
+
+              <FilteCleanButton v-if="hasFilters" @click="handleClearFilters" />
             </div>
             <div class="mt-4 flex sm:mt-0">
               <VSpace spacing="lg">
@@ -265,7 +302,7 @@ function handleSortItemChange(sortItem?: SortItem) {
                 <div class="flex flex-row gap-2">
                   <div
                     class="group cursor-pointer rounded p-1 hover:bg-gray-200"
-                    @click="handleFetchPlugins"
+                    @click="handleFetchPlugins()"
                   >
                     <IconRefreshLine
                       :class="{ 'animate-spin text-gray-900': loading }"
@@ -279,37 +316,41 @@ function handleSortItemChange(sortItem?: SortItem) {
         </div>
       </template>
 
-      <VEmpty
-        v-if="!plugins.total && !loading"
-        message="当前没有已安装的插件，你可以尝试刷新或者安装新插件"
-        title="当前没有已安装的插件"
-      >
-        <template #actions>
-          <VSpace>
-            <VButton @click="handleFetchPlugins">刷新</VButton>
-            <VButton
-              v-permission="['system:plugins:manage']"
-              type="secondary"
-              @click="pluginInstall = true"
-            >
-              <template #icon>
-                <IconAddCircle class="h-full w-full" />
-              </template>
-              安装插件
-            </VButton>
-          </VSpace>
-        </template>
-      </VEmpty>
+      <VLoading v-if="loading" />
 
-      <ul
-        v-else
-        class="box-border h-full w-full divide-y divide-gray-100"
-        role="list"
-      >
-        <li v-for="(plugin, index) in plugins.items" :key="index">
-          <PluginListItem :plugin="plugin" @reload="handleFetchPlugins" />
-        </li>
-      </ul>
+      <Transition v-else-if="!plugins.total" appear name="fade">
+        <VEmpty
+          message="当前没有已安装的插件，你可以尝试刷新或者安装新插件"
+          title="当前没有已安装的插件"
+        >
+          <template #actions>
+            <VSpace>
+              <VButton @click="handleFetchPlugins()">刷新</VButton>
+              <VButton
+                v-permission="['system:plugins:manage']"
+                type="secondary"
+                @click="pluginInstall = true"
+              >
+                <template #icon>
+                  <IconAddCircle class="h-full w-full" />
+                </template>
+                安装插件
+              </VButton>
+            </VSpace>
+          </template>
+        </VEmpty>
+      </Transition>
+
+      <Transition v-else appear name="fade">
+        <ul
+          class="box-border h-full w-full divide-y divide-gray-100"
+          role="list"
+        >
+          <li v-for="(plugin, index) in plugins.items" :key="index">
+            <PluginListItem :plugin="plugin" @reload="handleFetchPlugins()" />
+          </li>
+        </ul>
+      </Transition>
 
       <template #footer>
         <div class="bg-white sm:flex sm:items-center sm:justify-end">

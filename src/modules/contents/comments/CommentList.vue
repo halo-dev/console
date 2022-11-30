@@ -7,10 +7,10 @@ import {
   VPageHeader,
   VPagination,
   VSpace,
-  IconCloseCircle,
   IconRefreshLine,
   VEmpty,
   Dialog,
+  VLoading,
 } from "@halo-dev/components";
 import CommentListItem from "./components/CommentListItem.vue";
 import UserDropdownSelector from "@/components/dropdown-selector/UserDropdownSelector.vue";
@@ -19,9 +19,12 @@ import type {
   ListedCommentList,
   User,
 } from "@halo-dev/api-client";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { apiClient } from "@/utils/api-client";
 import { onBeforeRouteLeave } from "vue-router";
+import FilterTag from "@/components/filter/FilterTag.vue";
+import FilterCleanButton from "@/components/filter/FilterCleanButton.vue";
+import { getNode } from "@formkit/core";
 
 const comments = ref<ListedCommentList>({
   page: 1,
@@ -41,11 +44,21 @@ const selectedCommentNames = ref<string[]>([]);
 const keyword = ref("");
 const refreshInterval = ref();
 
-const handleFetchComments = async () => {
+const handleFetchComments = async (options?: {
+  mute?: boolean;
+  page?: number;
+}) => {
   try {
     clearInterval(refreshInterval.value);
 
-    loading.value = true;
+    if (!options?.mute) {
+      loading.value = true;
+    }
+
+    if (options?.page) {
+      comments.value.page = options.page;
+    }
+
     const { data } = await apiClient.comment.listComments({
       page: comments.value.page,
       size: comments.value.size,
@@ -62,7 +75,7 @@ const handleFetchComments = async () => {
 
     if (deletedComments.length) {
       refreshInterval.value = setInterval(() => {
-        handleFetchComments();
+        handleFetchComments({ mute: true });
       }, 3000);
     }
   } catch (error) {
@@ -144,7 +157,7 @@ const handleDeleteInBatch = async () => {
 
 const handleApproveInBatch = async () => {
   Dialog.warning({
-    title: "确定要审核通过所选评论吗？",
+    title: "确定要审核通过所选的评论吗？",
     onConfirm: async () => {
       try {
         const commentsToUpdate = comments.value.items.filter((comment) => {
@@ -157,6 +170,8 @@ const handleApproveInBatch = async () => {
         const promises = commentsToUpdate.map((comment) => {
           const commentToUpdate = comment.comment;
           commentToUpdate.spec.approved = true;
+          // TODO: 暂时由前端设置发布时间。see https://github.com/halo-dev/halo/pull/2746
+          commentToUpdate.spec.approvedTime = new Date().toISOString();
           return apiClient.extension.comment.updatecontentHaloRunV1alpha1Comment(
             {
               name: commentToUpdate.metadata.name,
@@ -212,13 +227,16 @@ const SortFilterItems: {
     value: "CREATE_TIME",
   },
 ];
+
 const selectedApprovedFilterItem = ref<{ label: string; value?: boolean }>(
   ApprovedFilterItems[0]
 );
+
 const selectedSortFilterItem = ref<{
   label: string;
   value?: Sort;
 }>(SortFilterItems[0]);
+
 const selectedUser = ref<User>();
 
 const handleApprovedFilterItemChange = (filterItem: {
@@ -227,7 +245,7 @@ const handleApprovedFilterItemChange = (filterItem: {
 }) => {
   selectedApprovedFilterItem.value = filterItem;
   selectedCommentNames.value = [];
-  handlePaginationChange({ page: 1, size: 20 });
+  handleFetchComments({ page: 1 });
 };
 
 const handleSortFilterItemChange = (filterItem: {
@@ -236,12 +254,42 @@ const handleSortFilterItemChange = (filterItem: {
 }) => {
   selectedSortFilterItem.value = filterItem;
   selectedCommentNames.value = [];
-  handlePaginationChange({ page: 1, size: 20 });
+  handleFetchComments({ page: 1 });
 };
 
 function handleSelectUser(user: User | undefined) {
   selectedUser.value = user;
-  handlePaginationChange({ page: 1, size: 20 });
+  handleFetchComments({ page: 1 });
+}
+
+function handleKeywordChange() {
+  const keywordNode = getNode("keywordInput");
+  if (keywordNode) {
+    keyword.value = keywordNode._value as string;
+  }
+  handleFetchComments({ page: 1 });
+}
+
+function handleClearKeyword() {
+  keyword.value = "";
+  handleFetchComments({ page: 1 });
+}
+
+const hasFilters = computed(() => {
+  return (
+    selectedApprovedFilterItem.value.value !== undefined ||
+    selectedSortFilterItem.value.value !== "LAST_REPLY_TIME" ||
+    selectedUser.value ||
+    keyword.value
+  );
+});
+
+function handleClearFilters() {
+  selectedApprovedFilterItem.value = ApprovedFilterItems[0];
+  selectedSortFilterItem.value = SortFilterItems[0];
+  selectedUser.value = undefined;
+  keyword.value = "";
+  handleFetchComments({ page: 1 });
 }
 </script>
 <template>
@@ -275,49 +323,46 @@ function handleSelectUser(user: User | undefined) {
                 class="flex items-center gap-2"
               >
                 <FormKit
-                  v-model="keyword"
+                  id="keywordInput"
+                  outer-class="!p-0"
                   placeholder="输入关键词搜索"
                   type="text"
-                  @keyup.enter="handleFetchComments"
+                  name="keyword"
+                  :model-value="keyword"
+                  @keyup.enter="handleKeywordChange"
                 ></FormKit>
-                <div
+
+                <FilterTag v-if="keyword" @close="handleClearKeyword()">
+                  关键词：{{ keyword }}
+                </FilterTag>
+
+                <FilterTag
                   v-if="selectedApprovedFilterItem.value != undefined"
-                  class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                  @close="
+                    handleApprovedFilterItemChange(ApprovedFilterItems[0])
+                  "
                 >
-                  <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                    状态：{{ selectedApprovedFilterItem.label }}
-                  </span>
-                  <IconCloseCircle
-                    class="h-4 w-4 text-gray-600"
-                    @click="
-                      handleApprovedFilterItemChange(ApprovedFilterItems[0])
-                    "
-                  />
-                </div>
-                <div
+                  状态：{{ selectedApprovedFilterItem.label }}
+                </FilterTag>
+
+                <FilterTag
                   v-if="selectedUser"
-                  class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                  @close="handleSelectUser(undefined)"
                 >
-                  <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                    评论者：{{ selectedUser?.spec.displayName }}
-                  </span>
-                  <IconCloseCircle
-                    class="h-4 w-4 text-gray-600"
-                    @click="handleSelectUser(undefined)"
-                  />
-                </div>
-                <div
+                  评论者：{{ selectedUser?.spec.displayName }}
+                </FilterTag>
+
+                <FilterTag
                   v-if="selectedSortFilterItem.value != 'LAST_REPLY_TIME'"
-                  class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                  @close="handleSortFilterItemChange(SortFilterItems[0])"
                 >
-                  <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                    排序：{{ selectedSortFilterItem.label }}
-                  </span>
-                  <IconCloseCircle
-                    class="h-4 w-4 text-gray-600"
-                    @click="handleSortFilterItemChange(SortFilterItems[0])"
-                  />
-                </div>
+                  排序：{{ selectedSortFilterItem.label }}
+                </FilterTag>
+
+                <FilterCleanButton
+                  v-if="hasFilters"
+                  @click="handleClearFilters"
+                />
               </div>
               <VSpace v-else>
                 <VButton type="secondary" @click="handleApproveInBatch">
@@ -409,7 +454,7 @@ function handleSelectUser(user: User | undefined) {
                 <div class="flex flex-row gap-2">
                   <div
                     class="group cursor-pointer rounded p-1 hover:bg-gray-200"
-                    @click="handleFetchComments"
+                    @click="handleFetchComments()"
                   >
                     <IconRefreshLine
                       :class="{ 'animate-spin text-gray-900': loading }"
@@ -422,36 +467,40 @@ function handleSelectUser(user: User | undefined) {
           </div>
         </div>
       </template>
-      <VEmpty
-        v-if="!comments.items.length && !loading"
-        message="你可以尝试刷新或者修改筛选条件"
-        title="当前没有评论"
-      >
-        <template #actions>
-          <VSpace>
-            <VButton @click="handleFetchComments">刷新</VButton>
-          </VSpace>
-        </template>
-      </VEmpty>
-      <ul class="box-border h-full w-full divide-y divide-gray-100" role="list">
-        <li v-for="(comment, index) in comments.items" :key="index">
-          <CommentListItem
-            :comment="comment"
-            :is-selected="checkSelection(comment)"
-            @reload="handleFetchComments"
-          >
-            <template #checkbox>
-              <input
-                v-model="selectedCommentNames"
-                :value="comment?.comment?.metadata.name"
-                class="h-4 w-4 rounded border-gray-300 text-indigo-600"
-                name="comment-checkbox"
-                type="checkbox"
-              />
-            </template>
-          </CommentListItem>
-        </li>
-      </ul>
+      <VLoading v-if="loading" />
+      <Transition v-else-if="!comments.items.length" appear name="fade">
+        <VEmpty message="你可以尝试刷新或者修改筛选条件" title="当前没有评论">
+          <template #actions>
+            <VSpace>
+              <VButton @click="handleFetchComments">刷新</VButton>
+            </VSpace>
+          </template>
+        </VEmpty>
+      </Transition>
+      <Transition v-else appear name="fade">
+        <ul
+          class="box-border h-full w-full divide-y divide-gray-100"
+          role="list"
+        >
+          <li v-for="(comment, index) in comments.items" :key="index">
+            <CommentListItem
+              :comment="comment"
+              :is-selected="checkSelection(comment)"
+              @reload="handleFetchComments({ mute: true })"
+            >
+              <template #checkbox>
+                <input
+                  v-model="selectedCommentNames"
+                  :value="comment?.comment?.metadata.name"
+                  class="h-4 w-4 rounded border-gray-300 text-indigo-600"
+                  name="comment-checkbox"
+                  type="checkbox"
+                />
+              </template>
+            </CommentListItem>
+          </li>
+        </ul>
+      </Transition>
 
       <template #footer>
         <div class="bg-white sm:flex sm:items-center sm:justify-end">

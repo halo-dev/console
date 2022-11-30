@@ -121,13 +121,14 @@ watch(
         label="菜单名称"
         type="text"
         name="displayName"
-        validation="required"
+        validation="required|length:0,100"
       ></FormKit>
     </FormKit>
     <template #footer>
       <VSpace>
         <SubmitButton
           v-if="visible"
+          :loading="saving"
           type="secondary"
           @submit="$formkit.submit('menu-form')"
         >

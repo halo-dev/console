@@ -60,12 +60,8 @@ const handleOpenCreateNewPolicyModal = (policyTemplate: PolicyTemplate) => {
   selectedPolicy.value = {
     spec: {
       displayName: "",
-      templateRef: {
-        name: policyTemplate.metadata.name,
-      },
-      configMapRef: {
-        name: "",
-      },
+      templateName: policyTemplate.metadata.name,
+      configMapName: "",
     },
     apiVersion: "storage.halo.run/v1alpha1",
     kind: "Policy",
@@ -91,7 +87,7 @@ const handleDelete = async (policy: Policy) => {
   }
 
   Dialog.warning({
-    title: "确定删除该策略吗？",
+    title: "确定要删除该策略吗？",
     description: "当前策略下没有已上传的附件。",
     onConfirm: async () => {
       await apiClient.extension.storage.policy.deletestorageHaloRunV1alpha1Policy(
@@ -195,7 +191,7 @@ watch(
           <template #start>
             <VEntityField
               :title="policy.spec.displayName"
-              :description="policy.spec.templateRef?.name"
+              :description="policy.spec.templateName"
             ></VEntityField>
           </template>
           <template #end>

@@ -7,6 +7,7 @@ import { apiClient } from "@/utils/api-client";
 import { useThemeCustomTemplates } from "@/modules/interface/themes/composables/use-theme";
 import { singlePageLabels } from "@/constants/labels";
 import { randomUUID } from "@/utils/id";
+import { toDatetimeLocal, toISOString } from "@/utils/date";
 
 const initialFormState: SinglePage = {
   spec: {
@@ -69,6 +70,9 @@ const isUpdateMode = computed(() => {
 const onVisibleChange = (visible: boolean) => {
   emit("update:visible", visible);
   if (!visible) {
+    setTimeout(() => {
+      activeTab.value = "general";
+    }, 200);
     emit("close");
   }
 };
@@ -162,6 +166,19 @@ watchEffect(() => {
 
 // custom templates
 const { templates } = useThemeCustomTemplates("page");
+
+// publishTime
+const publishTime = computed(() => {
+  const { publishTime } = formState.value.spec;
+  if (publishTime) {
+    return toDatetimeLocal(publishTime);
+  }
+  return "";
+});
+
+const onPublishTimeChange = (value: string) => {
+  formState.value.spec.publishTime = toISOString(value);
+};
 </script>
 
 <template>
@@ -190,14 +207,14 @@ const { templates } = useThemeCustomTemplates("page");
             label="标题"
             type="text"
             name="title"
-            validation="required"
+            validation="required|length:0,100"
           ></FormKit>
           <FormKit
             v-model="formState.spec.slug"
             label="别名"
             name="slug"
             type="text"
-            validation="required"
+            validation="required|length:0,100"
           ></FormKit>
           <FormKit
             v-model="formState.spec.excerpt.autoGenerate"
@@ -216,6 +233,7 @@ const { templates } = useThemeCustomTemplates("page");
             name="raw"
             label="自定义摘要"
             type="textarea"
+            validation="length:0,1024"
             :rows="5"
           ></FormKit>
         </FormKit>
@@ -252,7 +270,6 @@ const { templates } = useThemeCustomTemplates("page");
             v-model="formState.spec.visible"
             :options="[
               { label: '公开', value: 'PUBLIC' },
-              { label: '内部成员可访问', value: 'INTERNAL' },
               { label: '私有', value: 'PRIVATE' },
             ]"
             label="可见性"
@@ -260,10 +277,11 @@ const { templates } = useThemeCustomTemplates("page");
             type="select"
           ></FormKit>
           <FormKit
-            v-model="formState.spec.publishTime"
+            :value="publishTime"
             label="发表时间"
             type="datetime-local"
             name="publishTime"
+            @input="onPublishTimeChange"
           ></FormKit>
           <FormKit
             v-model="formState.spec.template"
@@ -277,6 +295,7 @@ const { templates } = useThemeCustomTemplates("page");
             label="封面图"
             type="attachment"
             name="cover"
+            validation="length:0,1024"
           ></FormKit>
         </FormKit>
         <!--TODO: add SEO/Metas/Inject Code form-->

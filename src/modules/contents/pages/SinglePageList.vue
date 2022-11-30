@@ -6,9 +6,9 @@ import {
   IconEye,
   IconEyeOff,
   IconTeam,
-  IconCloseCircle,
   IconAddCircle,
   IconRefreshLine,
+  IconExternalLinkLine,
   VButton,
   VCard,
   VPagination,
@@ -19,10 +19,11 @@ import {
   VStatusDot,
   VEntity,
   VEntityField,
+  VLoading,
 } from "@halo-dev/components";
 import SinglePageSettingModal from "./components/SinglePageSettingModal.vue";
 import UserDropdownSelector from "@/components/dropdown-selector/UserDropdownSelector.vue";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import type {
   ListedSinglePageList,
   SinglePage,
@@ -34,6 +35,9 @@ import { onBeforeRouteLeave, RouterLink } from "vue-router";
 import cloneDeep from "lodash.clonedeep";
 import { usePermission } from "@/utils/permission";
 import { singlePageLabels } from "@/constants/labels";
+import FilterTag from "@/components/filter/FilterTag.vue";
+import FilterCleanButton from "@/components/filter/FilterCleanButton.vue";
+import { getNode } from "@formkit/core";
 
 const { currentUserHasPermission } = usePermission();
 
@@ -55,11 +59,16 @@ const selectedPageNames = ref<string[]>([]);
 const checkedAll = ref(false);
 const refreshInterval = ref();
 
-const handleFetchSinglePages = async () => {
+const handleFetchSinglePages = async (options?: {
+  mute?: boolean;
+  page?: number;
+}) => {
   try {
     clearInterval(refreshInterval.value);
 
-    loading.value = true;
+    if (!options?.mute) {
+      loading.value = true;
+    }
 
     let contributors: string[] | undefined;
     const labelSelector: string[] = ["content.halo.run/deleted=false"];
@@ -72,6 +81,10 @@ const handleFetchSinglePages = async () => {
       labelSelector.push(
         `${singlePageLabels.PUBLISHED}=${selectedPublishStatusItem.value.value}`
       );
+    }
+
+    if (options?.page) {
+      singlePages.value.page = options.page;
     }
 
     const { data } = await apiClient.singlePage.listSinglePages({
@@ -98,8 +111,8 @@ const handleFetchSinglePages = async () => {
 
     if (abnormalSinglePages.length) {
       refreshInterval.value = setInterval(() => {
-        handleFetchSinglePages();
-      }, 1000);
+        handleFetchSinglePages({ mute: true });
+      }, 3000);
     }
   } catch (error) {
     console.error("Failed to fetch single pages", error);
@@ -135,7 +148,7 @@ const handleOpenSettingModal = async (singlePage: SinglePage) => {
 
 const onSettingModalClose = () => {
   selectedSinglePage.value = undefined;
-  handleFetchSinglePages();
+  handleFetchSinglePages({ mute: true });
 };
 
 const handleSelectPrevious = async () => {
@@ -203,8 +216,8 @@ const handleCheckAllChange = (e: Event) => {
 
 const handleDelete = async (singlePage: SinglePage) => {
   Dialog.warning({
-    title: "是否确认删除该自定义页面？",
-    description: "此操作会将自定义页面放入回收站，后续可以从回收站恢复",
+    title: "确定要删除该自定义页面吗？",
+    description: "该操作会将自定义页面放入回收站，后续可以从回收站恢复",
     confirmType: "danger",
     onConfirm: async () => {
       const singlePageToUpdate = cloneDeep(singlePage);
@@ -222,8 +235,8 @@ const handleDelete = async (singlePage: SinglePage) => {
 
 const handleDeleteInBatch = async () => {
   Dialog.warning({
-    title: "是否确认删除选中的自定义页面？",
-    description: "此操作会将自定义页面放入回收站，后续可以从回收站恢复",
+    title: "确定要删除选中的自定义页面吗？",
+    description: "该操作会将自定义页面放入回收站，后续可以从回收站恢复",
     confirmType: "danger",
     onConfirm: async () => {
       await Promise.all(
@@ -298,10 +311,11 @@ const VisibleItems: VisibleItem[] = [
     label: "公开",
     value: "PUBLIC",
   },
-  {
-    label: "内部成员可访问",
-    value: "INTERNAL",
-  },
+  // TODO: 支持内部成员可访问
+  // {
+  //   label: "内部成员可访问",
+  //   value: "INTERNAL",
+  // },
   {
     label: "私有",
     value: "PRIVATE",
@@ -354,22 +368,54 @@ const keyword = ref("");
 
 function handleVisibleItemChange(visibleItem: VisibleItem) {
   selectedVisibleItem.value = visibleItem;
-  handleFetchSinglePages();
+  handleFetchSinglePages({ page: 1 });
 }
 
 const handleSelectUser = (user?: User) => {
   selectedContributor.value = user;
-  handleFetchSinglePages();
+  handleFetchSinglePages({ page: 1 });
 };
 
 function handlePublishStatusItemChange(publishStatusItem: PublishStatusItem) {
   selectedPublishStatusItem.value = publishStatusItem;
-  handleFetchSinglePages();
+  handleFetchSinglePages({ page: 1 });
 }
 
 function handleSortItemChange(sortItem?: SortItem) {
   selectedSortItem.value = sortItem;
-  handleFetchSinglePages();
+  handleFetchSinglePages({ page: 1 });
+}
+
+function handleKeywordChange() {
+  const keywordNode = getNode("keywordInput");
+  if (keywordNode) {
+    keyword.value = keywordNode._value as string;
+  }
+  handleFetchSinglePages({ page: 1 });
+}
+
+function handleClearKeyword() {
+  keyword.value = "";
+  handleFetchSinglePages({ page: 1 });
+}
+
+const hasFilters = computed(() => {
+  return (
+    selectedContributor.value ||
+    selectedVisibleItem.value.value ||
+    selectedPublishStatusItem.value.value !== undefined ||
+    selectedSortItem.value ||
+    keyword.value
+  );
+});
+
+function handleClearFilters() {
+  selectedContributor.value = undefined;
+  selectedVisibleItem.value = VisibleItems[0];
+  selectedPublishStatusItem.value = PublishStatusItems[0];
+  selectedSortItem.value = undefined;
+  keyword.value = "";
+  handleFetchSinglePages({ page: 1 });
 }
 </script>
 
@@ -411,60 +457,48 @@ function handleSortItemChange(sortItem?: SortItem) {
               class="flex items-center gap-2"
             >
               <FormKit
-                v-model="keyword"
+                id="keywordInput"
                 outer-class="!p-0"
                 placeholder="输入关键词搜索"
                 type="text"
-                @keyup.enter="handleFetchSinglePages"
+                name="keyword"
+                :model-value="keyword"
+                @keyup.enter="handleKeywordChange"
               ></FormKit>
-              <div
-                v-if="selectedPublishStatusItem.value"
-                class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+
+              <FilterTag v-if="keyword" @close="handleClearKeyword()">
+                关键词：{{ keyword }}
+              </FilterTag>
+
+              <FilterTag
+                v-if="selectedPublishStatusItem.value !== undefined"
+                @close="handlePublishStatusItemChange(PublishStatusItems[0])"
               >
-                <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                  状态：{{ selectedPublishStatusItem.label }}
-                </span>
-                <IconCloseCircle
-                  class="h-4 w-4 text-gray-600"
-                  @click="handlePublishStatusItemChange(PublishStatusItems[0])"
-                />
-              </div>
-              <div
+                状态：{{ selectedPublishStatusItem.label }}
+              </FilterTag>
+
+              <FilterTag
                 v-if="selectedVisibleItem.value"
-                class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                @close="handleVisibleItemChange(VisibleItems[0])"
               >
-                <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                  可见性：{{ selectedVisibleItem.label }}
-                </span>
-                <IconCloseCircle
-                  class="h-4 w-4 text-gray-600"
-                  @click="handleVisibleItemChange(VisibleItems[0])"
-                />
-              </div>
-              <div
-                v-if="selectedContributor"
-                class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
-              >
-                <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                  作者：{{ selectedContributor?.spec.displayName }}
-                </span>
-                <IconCloseCircle
-                  class="h-4 w-4 text-gray-600"
-                  @click="handleSelectUser(undefined)"
-                />
-              </div>
-              <div
+                可见性：{{ selectedVisibleItem.label }}
+              </FilterTag>
+
+              <FilterTag v-if="selectedContributor" @close="handleSelectUser()">
+                作者：{{ selectedContributor?.spec.displayName }}
+              </FilterTag>
+
+              <FilterTag
                 v-if="selectedSortItem"
-                class="group flex cursor-pointer items-center justify-center gap-1 rounded-full bg-gray-200 px-2 py-1 hover:bg-gray-300"
+                @close="handleSortItemChange()"
               >
-                <span class="text-xs text-gray-600 group-hover:text-gray-900">
-                  排序：{{ selectedSortItem.label }}
-                </span>
-                <IconCloseCircle
-                  class="h-4 w-4 text-gray-600"
-                  @click="handleSortItemChange()"
-                />
-              </div>
+                排序：{{ selectedSortItem.label }}
+              </FilterTag>
+
+              <FilterCleanButton
+                v-if="hasFilters"
+                @click="handleClearFilters"
+              />
             </div>
             <VSpace v-else>
               <VButton type="danger" @click="handleDeleteInBatch">删除</VButton>
@@ -574,7 +608,7 @@ function handleSortItemChange(sortItem?: SortItem) {
               <div class="flex flex-row gap-2">
                 <div
                   class="group cursor-pointer rounded p-1 hover:bg-gray-200"
-                  @click="handleFetchSinglePages"
+                  @click="handleFetchSinglePages()"
                 >
                   <IconRefreshLine
                     :class="{ 'animate-spin text-gray-900': loading }"
@@ -587,166 +621,174 @@ function handleSortItemChange(sortItem?: SortItem) {
         </div>
       </div>
     </template>
-    <VEmpty
-      v-if="!singlePages.items.length && !loading"
-      message="你可以尝试刷新或者新建页面"
-      title="当前没有页面"
-    >
-      <template #actions>
-        <VSpace>
-          <VButton @click="handleFetchSinglePages">刷新</VButton>
-          <VButton
-            v-permission="['system:singlepages:manage']"
-            :route="{ name: 'SinglePageEditor' }"
-            type="primary"
-          >
-            <template #icon>
-              <IconAddCircle class="h-full w-full" />
+    <VLoading v-if="loading" />
+    <Transition v-else-if="!singlePages.items.length" appear name="fade">
+      <VEmpty message="你可以尝试刷新或者新建页面" title="当前没有页面">
+        <template #actions>
+          <VSpace>
+            <VButton @click="handleFetchSinglePages">刷新</VButton>
+            <VButton
+              v-permission="['system:singlepages:manage']"
+              :route="{ name: 'SinglePageEditor' }"
+              type="primary"
+            >
+              <template #icon>
+                <IconAddCircle class="h-full w-full" />
+              </template>
+              新建页面
+            </VButton>
+          </VSpace>
+        </template>
+      </VEmpty>
+    </Transition>
+    <Transition v-else appear name="fade">
+      <ul class="box-border h-full w-full divide-y divide-gray-100" role="list">
+        <li v-for="(singlePage, index) in singlePages.items" :key="index">
+          <VEntity :is-selected="checkSelection(singlePage.page)">
+            <template
+              v-if="currentUserHasPermission(['system:singlepages:manage'])"
+              #checkbox
+            >
+              <input
+                v-model="selectedPageNames"
+                :value="singlePage.page.metadata.name"
+                class="h-4 w-4 rounded border-gray-300 text-indigo-600"
+                type="checkbox"
+              />
             </template>
-            新建页面
-          </VButton>
-        </VSpace>
-      </template>
-    </VEmpty>
-    <ul
-      v-else
-      class="box-border h-full w-full divide-y divide-gray-100"
-      role="list"
-    >
-      <li v-for="(singlePage, index) in singlePages.items" :key="index">
-        <VEntity :is-selected="checkSelection(singlePage.page)">
-          <template
-            v-if="currentUserHasPermission(['system:singlepages:manage'])"
-            #checkbox
-          >
-            <input
-              v-model="selectedPageNames"
-              :value="singlePage.page.metadata.name"
-              class="h-4 w-4 rounded border-gray-300 text-indigo-600"
-              type="checkbox"
-            />
-          </template>
-          <template #start>
-            <VEntityField
-              :title="singlePage.page.spec.title"
-              :route="{
-                name: 'SinglePageEditor',
-                query: { name: singlePage.page.metadata.name },
-              }"
-            >
-              <template #extra>
-                <RouterLink
-                  v-if="singlePage.page.status?.inProgress"
-                  v-tooltip="`当前有内容已保存，但还未发布。`"
-                  :to="{
-                    name: 'SinglePageEditor',
-                    query: { name: singlePage.page.metadata.name },
-                  }"
-                  class="flex items-center"
-                >
-                  <VStatusDot state="success" animate />
-                </RouterLink>
-              </template>
-              <template #description>
-                <VSpace>
-                  <span class="text-xs text-gray-500">
-                    {{ singlePage.page.status?.permalink }}
+            <template #start>
+              <VEntityField
+                :title="singlePage.page.spec.title"
+                :route="{
+                  name: 'SinglePageEditor',
+                  query: { name: singlePage.page.metadata.name },
+                }"
+              >
+                <template #extra>
+                  <VSpace>
+                    <RouterLink
+                      v-if="singlePage.page.status?.inProgress"
+                      v-tooltip="`当前有内容已保存，但还未发布。`"
+                      :to="{
+                        name: 'SinglePageEditor',
+                        query: { name: singlePage.page.metadata.name },
+                      }"
+                      class="flex items-center"
+                    >
+                      <VStatusDot state="success" animate />
+                    </RouterLink>
+                    <a
+                      v-if="singlePage.page.status?.permalink"
+                      target="_blank"
+                      :href="singlePage.page.status?.permalink"
+                      :title="singlePage.page.status?.permalink"
+                      class="hidden text-gray-600 transition-all hover:text-gray-900 group-hover:inline-block"
+                    >
+                      <IconExternalLinkLine class="h-3.5 w-3.5" />
+                    </a>
+                  </VSpace>
+                </template>
+                <template #description>
+                  <div class="flex w-full flex-col gap-1">
+                    <VSpace class="w-full">
+                      <span class="text-xs text-gray-500">
+                        访问量 {{ singlePage.stats.visit || 0 }}
+                      </span>
+                      <span class="text-xs text-gray-500">
+                        评论 {{ singlePage.stats.totalComment || 0 }}
+                      </span>
+                    </VSpace>
+                  </div>
+                </template>
+              </VEntityField>
+            </template>
+            <template #end>
+              <VEntityField>
+                <template #description>
+                  <RouterLink
+                    v-for="(
+                      contributor, contributorIndex
+                    ) in singlePage.contributors"
+                    :key="contributorIndex"
+                    :to="{
+                      name: 'UserDetail',
+                      params: { name: contributor.name },
+                    }"
+                    class="flex items-center"
+                  >
+                    <VAvatar
+                      v-tooltip="contributor.displayName"
+                      size="xs"
+                      :src="contributor.avatar"
+                      :alt="contributor.displayName"
+                      circle
+                    ></VAvatar>
+                  </RouterLink>
+                </template>
+              </VEntityField>
+              <VEntityField :description="getPublishStatus(singlePage.page)">
+                <template v-if="isPublishing(singlePage.page)" #description>
+                  <VStatusDot text="发布中" animate />
+                </template>
+              </VEntityField>
+              <VEntityField>
+                <template #description>
+                  <IconEye
+                    v-if="singlePage.page.spec.visible === 'PUBLIC'"
+                    v-tooltip="`公开访问`"
+                    class="cursor-pointer text-sm transition-all hover:text-blue-600"
+                  />
+                  <IconEyeOff
+                    v-if="singlePage.page.spec.visible === 'PRIVATE'"
+                    v-tooltip="`私有访问`"
+                    class="cursor-pointer text-sm transition-all hover:text-blue-600"
+                  />
+                  <!-- TODO: 支持内部成员可访问 -->
+                  <IconTeam
+                    v-if="false"
+                    v-tooltip="`内部成员可访问`"
+                    class="cursor-pointer text-sm transition-all hover:text-blue-600"
+                  />
+                </template>
+              </VEntityField>
+              <VEntityField v-if="singlePage?.page?.spec.deleted">
+                <template #description>
+                  <VStatusDot v-tooltip="`删除中`" state="warning" animate />
+                </template>
+              </VEntityField>
+              <VEntityField>
+                <template #description>
+                  <span class="truncate text-xs tabular-nums text-gray-500">
+                    {{ formatDatetime(singlePage.page.spec.publishTime) }}
                   </span>
-                  <span class="text-xs text-gray-500">
-                    访问量 {{ singlePage.stats.visit || 0 }}
-                  </span>
-                  <span class="text-xs text-gray-500">
-                    评论 {{ singlePage.stats.totalComment || 0 }}
-                  </span>
-                </VSpace>
-              </template>
-            </VEntityField>
-          </template>
-          <template #end>
-            <VEntityField>
-              <template #description>
-                <RouterLink
-                  v-for="(
-                    contributor, contributorIndex
-                  ) in singlePage.contributors"
-                  :key="contributorIndex"
-                  :to="{
-                    name: 'UserDetail',
-                    params: { name: contributor.name },
-                  }"
-                  class="flex items-center"
-                >
-                  <VAvatar
-                    v-tooltip="contributor.displayName"
-                    size="xs"
-                    :src="contributor.avatar"
-                    :alt="contributor.displayName"
-                    circle
-                  ></VAvatar>
-                </RouterLink>
-              </template>
-            </VEntityField>
-            <VEntityField :description="getPublishStatus(singlePage.page)">
-              <template v-if="isPublishing(singlePage.page)" #description>
-                <VStatusDot text="发布中" animate />
-              </template>
-            </VEntityField>
-            <VEntityField>
-              <template #description>
-                <IconEye
-                  v-if="singlePage.page.spec.visible === 'PUBLIC'"
-                  v-tooltip="`公开访问`"
-                  class="cursor-pointer text-sm transition-all hover:text-blue-600"
-                />
-                <IconEyeOff
-                  v-if="singlePage.page.spec.visible === 'PRIVATE'"
-                  v-tooltip="`私有访问`"
-                  class="cursor-pointer text-sm transition-all hover:text-blue-600"
-                />
-                <IconTeam
-                  v-if="singlePage.page.spec.visible === 'INTERNAL'"
-                  v-tooltip="`内部成员可访问`"
-                  class="cursor-pointer text-sm transition-all hover:text-blue-600"
-                />
-              </template>
-            </VEntityField>
-            <VEntityField v-if="singlePage?.page?.spec.deleted">
-              <template #description>
-                <VStatusDot v-tooltip="`删除中`" state="warning" animate />
-              </template>
-            </VEntityField>
-            <VEntityField>
-              <template #description>
-                <span class="truncate text-xs tabular-nums text-gray-500">
-                  {{ formatDatetime(singlePage.page.spec.publishTime) }}
-                </span>
-              </template>
-            </VEntityField>
-          </template>
-          <template
-            v-if="currentUserHasPermission(['system:singlepages:manage'])"
-            #dropdownItems
-          >
-            <VButton
-              v-close-popper
-              block
-              type="secondary"
-              @click="handleOpenSettingModal(singlePage.page)"
+                </template>
+              </VEntityField>
+            </template>
+            <template
+              v-if="currentUserHasPermission(['system:singlepages:manage'])"
+              #dropdownItems
             >
-              设置
-            </VButton>
-            <VButton
-              v-close-popper
-              block
-              type="danger"
-              @click="handleDelete(singlePage.page)"
-            >
-              删除
-            </VButton>
-          </template>
-        </VEntity>
-      </li>
-    </ul>
+              <VButton
+                v-close-popper
+                block
+                type="secondary"
+                @click="handleOpenSettingModal(singlePage.page)"
+              >
+                设置
+              </VButton>
+              <VButton
+                v-close-popper
+                block
+                type="danger"
+                @click="handleDelete(singlePage.page)"
+              >
+                删除
+              </VButton>
+            </template>
+          </VEntity>
+        </li>
+      </ul>
+    </Transition>
 
     <template #footer>
       <div class="bg-white sm:flex sm:items-center sm:justify-end">

@@ -8,6 +8,7 @@ import {
   VEmpty,
   VPageHeader,
   VSpace,
+  VLoading,
 } from "@halo-dev/components";
 import MenuItemEditingModal from "./components/MenuItemEditingModal.vue";
 import MenuItemListItem from "./components/MenuItemListItem.vue";
@@ -37,11 +38,13 @@ const menuListRef = ref();
 const menuItemEditingModal = ref();
 const refreshInterval = ref();
 
-const handleFetchMenuItems = async () => {
+const handleFetchMenuItems = async (options?: { mute?: boolean }) => {
   try {
     clearInterval(refreshInterval.value);
 
-    loading.value = true;
+    if (!options?.mute) {
+      loading.value = true;
+    }
 
     if (!selectedMenu.value?.spec.menuItems) {
       return;
@@ -64,9 +67,11 @@ const handleFetchMenuItems = async () => {
 
     if (deletedMenuItems.length) {
       refreshInterval.value = setInterval(() => {
-        handleFetchMenuItems();
+        handleFetchMenuItems({ mute: true });
       }, 3000);
     }
+
+    await handleResetMenuItems();
   } catch (e) {
     console.error("Failed to fetch menu items", e);
   } finally {
@@ -83,8 +88,14 @@ onBeforeRouteLeave(() => {
 });
 
 const handleOpenEditingModal = (menuItem: MenuTreeItem) => {
-  selectedMenuItem.value = convertMenuTreeItemToMenuItem(menuItem);
-  menuItemEditingModal.value = true;
+  apiClient.extension.menuItem
+    .getv1alpha1MenuItem({
+      name: menuItem.metadata.name,
+    })
+    .then((response) => {
+      selectedMenuItem.value = response.data;
+      menuItemEditingModal.value = true;
+    });
 };
 
 const handleOpenCreateByParentModal = (menuItem: MenuTreeItem) => {
@@ -100,11 +111,17 @@ const onMenuItemEditingModalClose = () => {
 const onMenuItemSaved = async (menuItem: MenuItem) => {
   const menuToUpdate = cloneDeep(selectedMenu.value);
 
-  if (menuToUpdate) {
-    const menuItemsToUpdate = cloneDeep(menuToUpdate.spec.menuItems) || [];
-    menuItemsToUpdate.push(menuItem.metadata.name);
+  // update menu items
+  if (
+    menuToUpdate &&
+    !menuToUpdate.spec.menuItems?.includes(menuItem.metadata.name)
+  ) {
+    if (menuToUpdate.spec.menuItems) {
+      menuToUpdate.spec.menuItems.push(menuItem.metadata.name);
+    } else {
+      menuToUpdate.spec.menuItems = [menuItem.metadata.name];
+    }
 
-    menuToUpdate.spec.menuItems = menuItemsToUpdate;
     await apiClient.extension.menu.updatev1alpha1Menu({
       name: menuToUpdate.metadata.name,
       menu: menuToUpdate,
@@ -112,7 +129,7 @@ const onMenuItemSaved = async (menuItem: MenuItem) => {
   }
 
   await menuListRef.value.handleFetchMenus();
-  await handleFetchMenuItems();
+  await handleFetchMenuItems({ mute: true });
 };
 
 const handleUpdateInBatch = useDebounceFn(async () => {
@@ -130,14 +147,14 @@ const handleUpdateInBatch = useDebounceFn(async () => {
     console.log("Failed to update menu items", e);
   } finally {
     await menuListRef.value.handleFetchMenus();
-    await handleFetchMenuItems();
+    await handleFetchMenuItems({ mute: true });
   }
-}, 500);
+}, 300);
 
 const handleDelete = async (menuItem: MenuTreeItem) => {
   Dialog.info({
-    title: "是否确定删除该菜单？",
-    description: "删除后将无法恢复",
+    title: "确定要删除该菜单项吗？",
+    description: "将同时删除所有子菜单项，删除后将无法恢复",
     confirmType: "danger",
     onConfirm: async () => {
       await apiClient.extension.menuItem.deletev1alpha1MenuItem({
@@ -147,27 +164,38 @@ const handleDelete = async (menuItem: MenuTreeItem) => {
       const childrenNames = getChildrenNames(menuItem);
 
       if (childrenNames.length) {
-        setTimeout(() => {
-          Dialog.info({
-            title: "检查到当前菜单下包含子菜单，是否删除？",
-            description: "如果选择否，那么所有子菜单将转移到一级菜单",
-            confirmType: "danger",
-            onConfirm: async () => {
-              const promises = childrenNames.map((name) =>
-                apiClient.extension.menuItem.deletev1alpha1MenuItem({
-                  name,
-                })
-              );
-              await Promise.all(promises);
-            },
-          });
-        }, 200);
+        const deleteChildrenRequests = childrenNames.map((name) =>
+          apiClient.extension.menuItem.deletev1alpha1MenuItem({
+            name,
+          })
+        );
+        await Promise.all(deleteChildrenRequests);
       }
 
-      await menuListRef.value.handleFetchMenus();
       await handleFetchMenuItems();
     },
   });
+};
+
+const handleResetMenuItems = async () => {
+  if (!selectedMenu.value) {
+    return;
+  }
+
+  const menuToUpdate = cloneDeep(selectedMenu.value);
+
+  const menuItemNames = menuItems.value.map((menuItem) => {
+    return menuItem.metadata.name;
+  });
+
+  menuToUpdate.spec.menuItems = menuItemNames;
+
+  await apiClient.extension.menu.updatev1alpha1Menu({
+    name: menuToUpdate.metadata.name,
+    menu: menuToUpdate,
+  });
+
+  await menuListRef.value.handleFetchMenus({ mute: true });
 };
 </script>
 <template>
@@ -190,7 +218,7 @@ const handleDelete = async (menuItem: MenuTreeItem) => {
         <MenuList
           ref="menuListRef"
           v-model:selected-menu="selectedMenu"
-          @select="handleFetchMenuItems"
+          @select="handleFetchMenuItems()"
         />
       </div>
       <div class="flex-1">
@@ -220,35 +248,38 @@ const handleDelete = async (menuItem: MenuTreeItem) => {
               </div>
             </div>
           </template>
-          <VEmpty
-            v-if="!menuItems.length && !loading"
-            message="你可以尝试刷新或者新建菜单项"
-            title="当前没有菜单项"
-          >
-            <template #actions>
-              <VSpace>
-                <VButton @click="handleFetchMenuItems"> 刷新</VButton>
-                <VButton
-                  v-permission="['system:menus:manage']"
-                  type="primary"
-                  @click="menuItemEditingModal = true"
-                >
-                  <template #icon>
-                    <IconAddCircle class="h-full w-full" />
-                  </template>
-                  新增菜单项
-                </VButton>
-              </VSpace>
-            </template>
-          </VEmpty>
-          <MenuItemListItem
-            v-else
-            :menu-tree-items="menuTreeItems"
-            @change="handleUpdateInBatch"
-            @delete="handleDelete"
-            @open-editing="handleOpenEditingModal"
-            @open-create-by-parent="handleOpenCreateByParentModal"
-          />
+          <VLoading v-if="loading" />
+          <Transition v-else-if="!menuItems.length" appear name="fade">
+            <VEmpty
+              message="你可以尝试刷新或者新建菜单项"
+              title="当前没有菜单项"
+            >
+              <template #actions>
+                <VSpace>
+                  <VButton @click="handleFetchMenuItems()"> 刷新</VButton>
+                  <VButton
+                    v-permission="['system:menus:manage']"
+                    type="primary"
+                    @click="menuItemEditingModal = true"
+                  >
+                    <template #icon>
+                      <IconAddCircle class="h-full w-full" />
+                    </template>
+                    新增菜单项
+                  </VButton>
+                </VSpace>
+              </template>
+            </VEmpty>
+          </Transition>
+          <Transition v-else appear name="fade">
+            <MenuItemListItem
+              :menu-tree-items="menuTreeItems"
+              @change="handleUpdateInBatch"
+              @delete="handleDelete"
+              @open-editing="handleOpenEditingModal"
+              @open-create-by-parent="handleOpenCreateByParentModal"
+            />
+          </Transition>
         </VCard>
       </div>
     </div>
