@@ -285,7 +285,7 @@ const onMenuItemSourceChange = () => {
       />
 
       <FormKit
-        v-if="selectedRef"
+        v-if="selectedRef?.ref"
         :id="selectedRef.inputType"
         :key="selectedRef.inputType"
         v-model="selectedRefName"
