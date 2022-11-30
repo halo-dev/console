@@ -227,7 +227,7 @@ onMounted(async () => {
 
 const { handleSetContentCache, handleResetCache, handleClearCache } =
   useContentCache(
-    "post-catche",
+    "post-content-cache",
     name.value as string,
     toRef(formState.value.content, "raw")
   );
