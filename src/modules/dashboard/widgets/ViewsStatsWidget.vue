@@ -1,25 +1,27 @@
 <script lang="ts" setup>
-import { apiClient } from "@/utils/api-client";
 import type { DashboardStats } from "@halo-dev/api-client";
-import { VCard } from "@halo-dev/components";
-import { onMounted, ref } from "vue";
+import { VCard, IconEye } from "@halo-dev/components";
+import { inject, type Ref } from "vue";
 
-const stats = ref<DashboardStats>({
-  visits: 0,
-});
-
-const handleFetchStats = async () => {
-  const { data } = await apiClient.stats.getStats();
-  stats.value = data;
-};
-
-onMounted(handleFetchStats);
+const dashboardStats = inject<Ref<DashboardStats>>("dashboardStats");
 </script>
 <template>
-  <VCard class="h-full">
-    <dt class="truncate text-sm font-medium text-gray-500">浏览量</dt>
-    <dd class="mt-1 text-3xl font-semibold text-gray-900">
-      {{ stats.visits || 0 }}
-    </dd>
+  <VCard class="h-full" :body-class="['h-full']">
+    <div class="flex h-full">
+      <div class="flex items-center gap-4">
+        <span
+          class="hidden rounded-full bg-gray-100 p-2.5 text-gray-600 sm:block"
+        >
+          <IconEye class="h-5 w-5" />
+        </span>
+
+        <div>
+          <span class="text-sm text-gray-500">浏览量</span>
+          <p class="text-2xl font-medium text-gray-900">
+            {{ dashboardStats?.visits || 0 }}
+          </p>
+        </div>
+      </div>
+    </div>
   </VCard>
 </template>

@@ -1,23 +1,27 @@
 <script lang="ts" setup>
-import { apiClient } from "@/utils/api-client";
-import { VCard } from "@halo-dev/components";
-import { onMounted, ref } from "vue";
+import type { DashboardStats } from "@halo-dev/api-client";
+import { VCard, IconMessage } from "@halo-dev/components";
+import { inject, type Ref } from "vue";
 
-const commentTotal = ref<number>(0);
-
-const handleFetchComments = async () => {
-  const { data } =
-    await apiClient.extension.comment.listcontentHaloRunV1alpha1Comment();
-  commentTotal.value = data.total;
-};
-
-onMounted(handleFetchComments);
+const dashboardStats = inject<Ref<DashboardStats>>("dashboardStats");
 </script>
 <template>
-  <VCard class="h-full">
-    <dt class="truncate text-sm font-medium text-gray-500">评论</dt>
-    <dd class="mt-1 text-3xl font-semibold text-gray-900">
-      {{ commentTotal }}
-    </dd>
+  <VCard class="h-full" :body-class="['h-full']">
+    <div class="flex h-full">
+      <div class="flex items-center gap-4">
+        <span
+          class="hidden rounded-full bg-gray-100 p-2.5 text-gray-600 sm:block"
+        >
+          <IconMessage class="h-5 w-5" />
+        </span>
+
+        <div>
+          <span class="text-sm text-gray-500">评论</span>
+          <p class="text-2xl font-medium text-gray-900">
+            {{ dashboardStats?.approvedComments }}
+          </p>
+        </div>
+      </div>
+    </div>
   </VCard>
 </template>

@@ -1,21 +1,27 @@
 <script lang="ts" setup>
-import { VCard } from "@halo-dev/components";
-import { onMounted, ref } from "vue";
-import { apiClient } from "@/utils/api-client";
+import { VCard, IconBookRead } from "@halo-dev/components";
+import { inject, type Ref } from "vue";
+import type { DashboardStats } from "@halo-dev/api-client/index";
 
-const postTotal = ref<number>(0);
-
-const handleFetchPosts = async () => {
-  const { data } =
-    await apiClient.extension.post.listcontentHaloRunV1alpha1Post();
-  postTotal.value = data.total;
-};
-
-onMounted(handleFetchPosts);
+const dashboardStats = inject<Ref<DashboardStats>>("dashboardStats");
 </script>
 <template>
-  <VCard class="h-full">
-    <dt class="truncate text-sm font-medium text-gray-500">文章</dt>
-    <dd class="mt-1 text-3xl font-semibold text-gray-900">{{ postTotal }}</dd>
+  <VCard class="h-full" :body-class="['h-full']">
+    <div class="flex h-full">
+      <div class="flex items-center gap-4">
+        <span
+          class="hidden rounded-full bg-gray-100 p-2.5 text-gray-600 sm:block"
+        >
+          <IconBookRead class="h-5 w-5" />
+        </span>
+
+        <div>
+          <span class="text-sm text-gray-500">文章</span>
+          <p class="text-2xl font-medium text-gray-900">
+            {{ dashboardStats?.posts || 0 }}
+          </p>
+        </div>
+      </div>
+    </div>
   </VCard>
 </template>
