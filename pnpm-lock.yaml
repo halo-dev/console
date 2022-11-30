@@ -12,7 +12,7 @@ importers:
       '@formkit/themes': ^1.0.0-beta.12
       '@formkit/utils': ^1.0.0-beta.12
       '@formkit/vue': ^1.0.0-beta.12
-      '@halo-dev/api-client': ^0.0.58
+      '@halo-dev/api-client': ^0.0.59
       '@halo-dev/components': workspace:*
       '@halo-dev/console-shared': workspace:*
       '@halo-dev/richtext-editor': ^0.0.0-alpha.16
@@ -106,7 +106,7 @@ importers:
       '@formkit/themes': 1.0.0-beta.12-e579559_tailwindcss@3.2.4
       '@formkit/utils': 1.0.0-beta.12-e579559
       '@formkit/vue': 1.0.0-beta.12-e579559_ior6jr3fpijijuwpr34w2i25va
-      '@halo-dev/api-client': 0.0.58
+      '@halo-dev/api-client': 0.0.59
       '@halo-dev/components': link:packages/components
       '@halo-dev/console-shared': link:packages/shared
       '@halo-dev/richtext-editor': 0.0.0-alpha.16_vue@3.2.45
@@ -180,7 +180,7 @@ importers:
       randomstring: 1.2.3
       sass: 1.56.1
       start-server-and-test: 1.14.0
-      tailwindcss: 3.2.4
+      tailwindcss: 3.2.4_postcss@8.4.19
       tailwindcss-safe-area: 0.2.2
       tailwindcss-themer: 2.0.2_tailwindcss@3.2.4
       typescript: 4.7.4
@@ -1931,7 +1931,7 @@ packages:
         optional: true
     dependencies:
       '@formkit/core': 1.0.0-beta.12-e579559
-      tailwindcss: 3.2.4
+      tailwindcss: 3.2.4_postcss@8.4.19
     dev: false
 
   /@formkit/utils/1.0.0-beta.12-e579559:
@@ -1966,8 +1966,8 @@ packages:
       - windicss
     dev: false
 
-  /@halo-dev/api-client/0.0.58:
-    resolution: {integrity: sha512-CGDsHYrtVXD47Lt3S+KYJkyFZsrO85KE8wcuVb2y1iFLspTkKAPxD20Fuhf4TJYS/FVfjEi/esvU4sptTdLVjQ==}
+  /@halo-dev/api-client/0.0.59:
+    resolution: {integrity: sha512-e/LQvDbLpFsynSjppvytTyF7ZpYw+qRN40HAXylVWV/WVhtWmK/SD635OlvIjH789vS9KKugOmWV9VtZXlu8pA==}
     dev: false
 
   /@halo-dev/richtext-editor/0.0.0-alpha.16_vue@3.2.45:
@@ -2675,7 +2675,7 @@ packages:
     peerDependencies:
       tailwindcss: '>=2.0.0 || >=3.0.0 || >=3.0.0-alpha.1'
     dependencies:
-      tailwindcss: 3.2.4
+      tailwindcss: 3.2.4_postcss@8.4.19
     dev: true
 
   /@tiptap/core/2.0.0-beta.202:
@@ -8532,13 +8532,15 @@ packages:
       just-unique: 4.1.1
       lodash.merge: 4.6.2
       lodash.mergewith: 4.6.2
-      tailwindcss: 3.2.4
+      tailwindcss: 3.2.4_postcss@8.4.19
     dev: true
 
-  /tailwindcss/3.2.4:
+  /tailwindcss/3.2.4_postcss@8.4.19:
     resolution: {integrity: sha512-AhwtHCKMtR71JgeYDaswmZXhPcW9iuI9Sp2LvZPo9upDZ7231ZJ7eA9RaURbhpXGVlrjX4cFNlB4ieTetEb7hQ==}
     engines: {node: '>=12.13.0'}
     hasBin: true
+    peerDependencies:
+      postcss: ^8.0.9
     dependencies:
       arg: 5.0.2
       chokidar: 3.5.3
