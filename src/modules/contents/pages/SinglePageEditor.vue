@@ -219,7 +219,7 @@ onMounted(async () => {
 
 const { handleSetContentCache, handleResetCache, handleClearCache } =
   useContentCache(
-    "page-catche",
+    "singlePage-content-cache",
     routeQueryName.value as string,
     toRef(formState.value.content, "raw")
   );
