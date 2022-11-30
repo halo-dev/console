@@ -1,4 +1,4 @@
-<script lang="ts" name="ViewsStatsWidget" setup>
+<script lang="ts" setup>
 import { apiClient } from "@/utils/api-client";
 import type { DashboardStats } from "@halo-dev/api-client";
 import { VCard } from "@halo-dev/components";

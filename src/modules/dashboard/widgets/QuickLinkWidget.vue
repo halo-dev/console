@@ -1,4 +1,4 @@
-<script lang="ts" name="QuickLinkWidget" setup>
+<script lang="ts" setup>
 import {
   IconArrowRight,
   IconBookRead,
@@ -121,7 +121,9 @@ const actions: Action[] = [
     class="h-full"
     title="快捷访问"
   >
-    <div class="grid grid-cols-1 gap-2 overflow-hidden @sm:grid-cols-3">
+    <div
+      class="grid grid-cols-1 gap-2 overflow-hidden @sm:grid-cols-2 @md:grid-cols-3"
+    >
       <div
         v-for="(action, index) in actions"
         :key="index"

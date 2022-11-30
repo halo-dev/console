@@ -11,7 +11,7 @@ import { markRaw } from "vue";
 
 export default definePlugin({
   name: "pageModule",
-  components: [],
+  components: {},
   routes: [
     {
       path: "/pages",

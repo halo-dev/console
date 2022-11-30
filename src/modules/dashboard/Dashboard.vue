@@ -137,7 +137,7 @@ const widgetsGroup = [
     label: "用户",
     widgets: [
       { x: 0, y: 0, w: 3, h: 3, i: 0, widget: "UserStatsWidget" },
-      { x: 0, y: 0, w: 6, h: 10, i: 1, widget: "RecentLoginWidget" },
+      { x: 0, y: 0, w: 3, h: 3, i: 1, widget: "UserProfileWidget" },
     ],
   },
   {

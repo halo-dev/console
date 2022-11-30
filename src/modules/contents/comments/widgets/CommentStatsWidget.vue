@@ -1,4 +1,4 @@
-<script lang="ts" name="CommentStatsWidget" setup>
+<script lang="ts" setup>
 import { apiClient } from "@/utils/api-client";
 import { VCard } from "@halo-dev/components";
 import { onMounted, ref } from "vue";

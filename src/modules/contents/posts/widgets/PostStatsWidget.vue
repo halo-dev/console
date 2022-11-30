@@ -1,4 +1,4 @@
-<script lang="ts" name="PostStatsWidget" setup>
+<script lang="ts" setup>
 import { VCard } from "@halo-dev/components";
 import { onMounted, ref } from "vue";
 import { apiClient } from "@/utils/api-client";

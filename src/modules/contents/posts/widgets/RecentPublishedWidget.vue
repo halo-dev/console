@@ -1,5 +1,11 @@
-<script lang="ts" name="RecentPublishedWidget" setup>
-import { VCard, VSpace, VEntity, VEntityField } from "@halo-dev/components";
+<script lang="ts" setup>
+import {
+  VCard,
+  VSpace,
+  VEntity,
+  VEntityField,
+  IconExternalLinkLine,
+} from "@halo-dev/components";
 import { onMounted, ref } from "vue";
 import type { ListedPost } from "@halo-dev/api-client";
 import { apiClient } from "@/utils/api-client";
@@ -54,6 +60,17 @@ onMounted(handleFetchPosts);
                     评论 {{ post.stats.totalComment || 0 }}
                   </span>
                 </VSpace>
+              </template>
+              <template #extra>
+                <a
+                  v-if="post.post.status?.permalink"
+                  target="_blank"
+                  :href="post.post.status?.permalink"
+                  :title="post.post.status?.permalink"
+                  class="hidden text-gray-600 transition-all hover:text-gray-900 group-hover:inline-block"
+                >
+                  <IconExternalLinkLine class="h-3.5 w-3.5" />
+                </a>
               </template>
             </VEntityField>
           </template>
