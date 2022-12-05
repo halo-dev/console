@@ -21,7 +21,7 @@ export const useThemeStore = defineStore("theme", {
             { mute: true }
           );
 
-        if (!data.data?.them) {
+        if (!data.data?.theme) {
           return;
         }
 
