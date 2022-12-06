@@ -427,10 +427,10 @@ function handleClearFilters() {
   >
     <template #actions>
       <span @click="handleSelectPrevious">
-        <IconArrowLeft />
+        <IconArrowLeft v-tooltip="`上一项`" />
       </span>
       <span @click="handleSelectNext">
-        <IconArrowRight />
+        <IconArrowRight v-tooltip="`下一项`" />
       </span>
     </template>
   </SinglePageSettingModal>
