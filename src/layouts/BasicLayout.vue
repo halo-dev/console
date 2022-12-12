@@ -18,7 +18,7 @@ import {
   useRouter,
   type RouteRecordRaw,
 } from "vue-router";
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, onUnmounted, ref } from "vue";
 import axios from "axios";
 import GlobalSearchModal from "@/components/global-search/GlobalSearchModal.vue";
 import LoginModal from "@/components/login/LoginModal.vue";
@@ -80,8 +80,8 @@ onMounted(() => {
   document.addEventListener("keydown", handleGlobalSearchKeybinding);
 });
 
-onUnmounted(() => {
-  document.addEventListener("keydown", handleGlobalSearchKeybinding);
+onBeforeUnmount(() => {
+  document.removeEventListener("keydown", handleGlobalSearchKeybinding);
 });
 
 // Generate menus by routes
