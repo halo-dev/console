@@ -20,12 +20,15 @@ const inputPreventFn = (node: FormKitNode) => {
   const id = node.props.id ?? "";
   if (node.type == "group") {
     nextTick(() => {
-      if (node.children.length == 1 && node.children[0].props.type == "text") {
+      if (
+        node.children.length == 1 &&
+        node.props.type == "form" &&
+        node.children[0].props.type == "text"
+      ) {
         const rootForm = document.getElementById(id);
         rootForm?.addEventListener("keydown", handleKeydown);
         node.props.hasKeydownEvent = true;
-        node.on("destroying", (e) => {
-          console.log(e);
+        node.on("destroying", () => {
           rootForm?.removeEventListener("keydown", handleKeydown);
         });
       }
