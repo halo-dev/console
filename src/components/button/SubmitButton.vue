@@ -24,10 +24,10 @@ const buttonText = computed(() => {
   return `${props.text} ${isMac ? "⌘" : "Ctrl"} + ↵`;
 });
 
-const { Command_Enter, Ctrl_Enter } = useMagicKeys();
+const { Command_Enter, Ctrl_Enter, Enter } = useMagicKeys();
 
 watchEffect(() => {
-  if (Command_Enter.value || Ctrl_Enter.value) {
+  if (Command_Enter.value || Ctrl_Enter.value || Enter.value) {
     emit("submit");
   }
 });
