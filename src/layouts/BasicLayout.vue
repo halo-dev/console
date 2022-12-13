@@ -80,7 +80,7 @@ onMounted(() => {
   document.addEventListener("keydown", handleGlobalSearchKeybinding);
 });
 
-onBeforeUnmount(() => {
+onUnmounted(() => {
   document.removeEventListener("keydown", handleGlobalSearchKeybinding);
 });
 
