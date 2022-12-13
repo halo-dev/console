@@ -8,6 +8,7 @@ import { useThemeCustomTemplates } from "@/modules/interface/themes/composables/
 import { postLabels } from "@/constants/labels";
 import { randomUUID } from "@/utils/id";
 import { toDatetimeLocal, toISOString } from "@/utils/date";
+import AnnotationsForm from "@/components/form/AnnotationsForm.vue";
 
 const initialFormState: Post = {
   spec: {
@@ -300,6 +301,9 @@ const onPublishTimeChange = (value: string) => {
           ></FormKit>
         </FormKit>
         <!--TODO: add SEO/Metas/Inject Code form-->
+      </VTabItem>
+      <VTabItem id="annotations" label="元数据">
+        <AnnotationsForm v-model:annotations="formState.metadata.annotations" />
       </VTabItem>
     </VTabs>
 
