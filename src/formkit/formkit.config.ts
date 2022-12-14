@@ -17,13 +17,13 @@ import { categoryCheckbox } from "./inputs/category-checkbox";
 import { tagCheckbox } from "./inputs/tag-checkbox";
 
 import radioAlt from "./plugins/radio-alt";
-import inputPreventFn from "./plugins/input-prevent";
+import stopImplicitSubmission from "./plugins/stop-implicit-submission";
 
 const config: DefaultConfigOptions = {
   config: {
     classes: generateClasses(theme),
   },
-  plugins: [radioAlt, inputPreventFn],
+  plugins: [radioAlt, stopImplicitSubmission],
   inputs: {
     form,
     attachment,
