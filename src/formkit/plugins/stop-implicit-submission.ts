@@ -17,7 +17,7 @@ function handleKeydown(e: KeyboardEvent) {
 
 // 以下表单键入enter引起表单提交，
 //https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission
-const impliciSubmissionType = [
+const implicitSubmissionType = [
   "text",
   "search",
   "url",
@@ -35,9 +35,9 @@ const FormKeydownEventControllerMap = new Map<string, AbortController>();
 
 const clearFormKeydownEventByPath = (fullPath: string) => {
   if (FormKeydownEventControllerMap.size) {
-    FormKeydownEventControllerMap.forEach((controll, path) => {
+    FormKeydownEventControllerMap.forEach((controller, path) => {
       if (!fullPath.includes(path)) {
-        controll.abort();
+        controller.abort();
         FormKeydownEventControllerMap.delete(path);
       }
     });
@@ -55,7 +55,7 @@ const inputPreventFn = (node: FormKitNode) => {
       if (
         node.children.length == 1 &&
         node.props.type == "form" &&
-        impliciSubmissionType.includes(node.children[0].props.type)
+        implicitSubmissionType.includes(node.children[0].props.type)
       ) {
         if (!controller) {
           controller = new AbortController();
