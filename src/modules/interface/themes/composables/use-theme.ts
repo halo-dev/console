@@ -69,7 +69,7 @@ export function useThemeLifeCycle(
             return;
           }
 
-          await apiClient.theme.resetThemeSettingConfig({
+          await apiClient.theme.resetThemeConfig({
             name: theme.value.metadata.name as string,
           });
 

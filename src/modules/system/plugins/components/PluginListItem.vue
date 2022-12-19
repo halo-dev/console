@@ -55,7 +55,7 @@ const handleResetSettingConfig = async () => {
           return;
         }
 
-        await apiClient.plugin.resetPluginSettingConfig({
+        await apiClient.plugin.resetPluginConfig({
           name: plugin.value.metadata.name as string,
         });
 
