@@ -95,13 +95,15 @@ import { useAttachmentSelect } from "@/modules/contents/attachments/composables/
 
 const props = withDefaults(
   defineProps<{
-    modelValue?: string;
+    raw?: string;
+    content: string;
     owner?: string;
     permalink?: string;
     publishTime?: string | null;
   }>(),
   {
-    modelValue: "",
+    raw: "",
+    content: "",
     owner: undefined,
     permalink: undefined,
     publishTime: undefined,
@@ -109,7 +111,8 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (event: "update:modelValue", value: string): void;
+  (event: "update:raw", value: string): void;
+  (event: "update:content", value: string): void;
   (event: "update", value: string): void;
 }>();
 
@@ -134,7 +137,7 @@ const extraActiveId = ref("toc");
 const attachmentSelectorModal = ref(false);
 
 const editor = useEditor({
-  content: props.modelValue,
+  content: props.raw,
   extensions: [
     ExtensionBlockquote,
     ExtensionBold,
@@ -226,7 +229,8 @@ const editor = useEditor({
   ],
   autofocus: "start",
   onUpdate: () => {
-    emit("update:modelValue", editor.value?.getHTML() + "");
+    emit("update:raw", editor.value?.getHTML() + "");
+    emit("update:content", editor.value?.getHTML() + "");
     emit("update", editor.value?.getHTML() + "");
     nextTick(() => {
       handleGenerateTableOfContent();
@@ -340,10 +344,10 @@ const handleSelectHeadingNode = (node: HeadingNode) => {
 const { onAttachmentSelect } = useAttachmentSelect(editor);
 
 watch(
-  () => props.modelValue,
+  () => props.raw,
   () => {
-    if (props.modelValue !== editor.value?.getHTML()) {
-      editor.value?.commands.setContent(props.modelValue);
+    if (props.raw !== editor.value?.getHTML()) {
+      editor.value?.commands.setContent(props.raw);
       nextTick(() => {
         handleGenerateTableOfContent();
       });
