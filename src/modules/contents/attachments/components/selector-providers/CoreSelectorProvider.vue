@@ -86,7 +86,7 @@ await handleFetchAttachments();
     <template #actions>
       <VSpace>
         <VButton @click="handleFetchAttachments">刷新</VButton>
-        <VButton type="secondary" @click="emit('change-provider', 'upload')">
+        <VButton type="secondary" @click="uploadVisible = true">
           <template #icon>
             <IconUpload class="h-full w-full" />
           </template>
@@ -199,4 +199,12 @@ await handleFetchAttachments();
       </span>
     </template>
   </AttachmentDetailModal>
+  <div
+    v-if="attachments.total > 0"
+    v-tooltip="'上传附件'"
+    class="fixed right-5 bottom-24 inline-flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-primary text-xs text-white transition-all hover:opacity-80 hover:shadow"
+    @click="uploadVisible = true"
+  >
+    <IconUpload />
+  </div>
 </template>
