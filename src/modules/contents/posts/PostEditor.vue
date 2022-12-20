@@ -12,7 +12,15 @@ import {
 import PostSettingModal from "./components/PostSettingModal.vue";
 import PostPreviewModal from "./components/PostPreviewModal.vue";
 import type { Post, PostRequest } from "@halo-dev/api-client";
-import { computed, nextTick, onMounted, ref, toRef } from "vue";
+import {
+  computed,
+  nextTick,
+  onMounted,
+  provide,
+  ref,
+  toRef,
+  type ComputedRef,
+} from "vue";
 import type { EditorProvider } from "@halo-dev/console-shared";
 import cloneDeep from "lodash.clonedeep";
 import { apiClient } from "@/utils/api-client";
@@ -72,6 +80,20 @@ const publishing = ref(false);
 const isUpdateMode = computed(() => {
   return !!formState.value.post.metadata.creationTimestamp;
 });
+
+// provide some data to editor
+provide<ComputedRef<string | undefined>>(
+  "owner",
+  computed(() => formState.value.post.spec.owner)
+);
+provide<ComputedRef<string | undefined>>(
+  "publishTime",
+  computed(() => formState.value.post.spec.publishTime)
+);
+provide<ComputedRef<string | undefined>>(
+  "permalink",
+  computed(() => formState.value.post.status?.permalink)
+);
 
 const handleSave = async () => {
   try {
@@ -338,9 +360,6 @@ const { handleSetContentCache, handleResetCache, handleClearCache } =
       v-model:raw="formState.content.raw"
       v-model:content="formState.content.content"
       class="h-full"
-      :owner="formState.post.spec.owner"
-      :permalink="formState.post.status?.permalink"
-      :publish-time="formState.post.spec.publishTime"
       @update="handleSetContentCache"
     />
   </div>
