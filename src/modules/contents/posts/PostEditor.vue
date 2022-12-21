@@ -8,6 +8,7 @@ import {
   VPageHeader,
   VSpace,
   Toast,
+  Dialog,
 } from "@halo-dev/components";
 import PostSettingModal from "./components/PostSettingModal.vue";
 import PostPreviewModal from "./components/PostPreviewModal.vue";
@@ -220,6 +221,14 @@ const handleFetchContent = async () => {
         ...formState.value.post.metadata.annotations,
         "content.halo.run/preferred-editor": provider.name,
       };
+    } else {
+      Dialog.warning({
+        title: "警告",
+        description: `未找到符合 ${data.rawType} 格式的编辑器，请检查是否已安装编辑器插件`,
+        onConfirm: () => {
+          router.back();
+        },
+      });
     }
 
     await nextTick();
