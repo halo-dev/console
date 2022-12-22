@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { VButton, VModal, VSpace } from "@halo-dev/components";
+import { Toast, VButton, VModal, VSpace } from "@halo-dev/components";
 import SubmitButton from "@/components/button/SubmitButton.vue";
 import type { Menu } from "@halo-dev/api-client";
 import { computed, ref, watch } from "vue";
@@ -45,6 +45,10 @@ const isUpdateMode = computed(() => {
   return !!formState.value.metadata.creationTimestamp;
 });
 
+const modalTitle = computed(() => {
+  return isUpdateMode.value ? "编辑菜单" : "新增菜单";
+});
+
 const handleCreateMenu = async () => {
   try {
     saving.value = true;
@@ -60,6 +64,8 @@ const handleCreateMenu = async () => {
       emit("created", data);
     }
     onVisibleChange(false);
+
+    Toast.success("保存成功");
   } catch (e) {
     console.error("Failed to create menu", e);
   } finally {
@@ -105,7 +111,7 @@ watch(
   <VModal
     :visible="visible"
     :width="500"
-    title="编辑菜单"
+    :title="modalTitle"
     @update:visible="onVisibleChange"
   >
     <FormKit

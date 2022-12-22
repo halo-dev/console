@@ -3,7 +3,7 @@ import IconLogo from "~icons/core/logo?width=5rem&height=2rem";
 import { useSettingForm } from "@/composables/use-setting-form";
 import { useSystemStatesStore } from "@/stores/system-states";
 import { apiClient } from "@/utils/api-client";
-import { VButton } from "@halo-dev/components";
+import { Toast, VButton } from "@halo-dev/components";
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import category from "./setup-data/category.json";
@@ -18,6 +18,7 @@ import type {
   SinglePageRequest,
   Tag,
 } from "@halo-dev/api-client";
+import { useThemeStore } from "@/stores/theme";
 
 const router = useRouter();
 
@@ -98,8 +99,12 @@ const handleSubmit = async () => {
 
     const systemStateStore = useSystemStatesStore();
     await systemStateStore.fetchSystemStates();
+    const themeStore = useThemeStore();
+    await themeStore.fetchActivatedTheme();
 
     router.push({ name: "Dashboard" });
+
+    Toast.success("初始化成功");
   } catch (error) {
     console.error("Failed to setup", error);
   } finally {

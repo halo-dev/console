@@ -9,6 +9,7 @@ import { VButton } from "@halo-dev/components";
 import { useSettingForm } from "@/composables/use-setting-form";
 import { useRouteParams } from "@vueuse/router";
 import type { FormKitSchemaCondition, FormKitSchemaNode } from "@formkit/core";
+import { useSystemConfigMapStore } from "@/stores/system-configmap";
 
 const group = useRouteParams<string>("group");
 
@@ -29,35 +30,47 @@ const formSchema = computed(() => {
     ?.formSchema as (FormKitSchemaCondition | FormKitSchemaNode)[];
 });
 
+const systemConfigMapStore = useSystemConfigMapStore();
+
+const handleSave = async () => {
+  await handleSaveConfigMap();
+  await systemConfigMapStore.fetchSystemConfigMap();
+};
+
 await handleFetchSettings();
 await handleFetchConfigMap();
 </script>
 <template>
-  <div class="bg-white p-4">
-    <div>
-      <FormKit
-        v-if="group && formSchema && configMapFormData"
-        :id="group"
-        v-model="configMapFormData[group]"
-        :name="group"
-        :actions="false"
-        :preserve="true"
-        type="form"
-        @submit="handleSaveConfigMap"
-      >
-        <FormKitSchema :schema="formSchema" :data="configMapFormData[group]" />
-      </FormKit>
-    </div>
-    <div v-permission="['system:configmaps:manage']" class="pt-5">
-      <div class="flex justify-start">
-        <VButton
-          :loading="saving"
-          type="secondary"
-          @click="$formkit.submit(group || '')"
+  <Transition mode="out-in" name="fade">
+    <div class="bg-white p-4">
+      <div>
+        <FormKit
+          v-if="group && formSchema && configMapFormData"
+          :id="group"
+          v-model="configMapFormData[group]"
+          :name="group"
+          :actions="false"
+          :preserve="true"
+          type="form"
+          @submit="handleSave"
         >
-          保存
-        </VButton>
+          <FormKitSchema
+            :schema="formSchema"
+            :data="configMapFormData[group]"
+          />
+        </FormKit>
+      </div>
+      <div v-permission="['system:configmaps:manage']" class="pt-5">
+        <div class="flex justify-start">
+          <VButton
+            :loading="saving"
+            type="secondary"
+            @click="$formkit.submit(group || '')"
+          >
+            保存
+          </VButton>
+        </div>
       </div>
     </div>
-  </div>
+  </Transition>
 </template>

@@ -2,6 +2,7 @@
 // core libs
 import { inject, ref } from "vue";
 import { RouterLink } from "vue-router";
+import { useThemeLifeCycle } from "./composables/use-theme";
 
 // components
 import {
@@ -12,18 +13,21 @@ import {
   VButton,
   Dialog,
   VAvatar,
+  Toast,
 } from "@halo-dev/components";
 import ThemeUploadModal from "./components/ThemeUploadModal.vue";
 
 // types
-import type { ComputedRef, Ref } from "vue";
+import type { Ref } from "vue";
 import type { Theme } from "@halo-dev/api-client";
 
 import { apiClient } from "@/utils/api-client";
 
-const selectedTheme = inject<Ref<Theme | undefined>>("selectedTheme");
-const isActivated = inject<ComputedRef<boolean>>("isActivated");
+const selectedTheme = inject<Ref<Theme | undefined>>("selectedTheme", ref());
 const upgradeModal = ref(false);
+
+const { isActivated, handleResetSettingConfig } =
+  useThemeLifeCycle(selectedTheme);
 
 const handleReloadTheme = async () => {
   Dialog.warning({
@@ -38,6 +42,8 @@ const handleReloadTheme = async () => {
         await apiClient.theme.reload({
           name: selectedTheme.value.metadata.name as string,
         });
+
+        Toast.success("重载配置成功");
 
         window.location.reload();
       } catch (e) {
@@ -104,6 +110,14 @@ const onUpgradeModalClose = () => {
                     @click="handleReloadTheme"
                   >
                     重载主题配置
+                  </VButton>
+                  <VButton
+                    v-close-popper
+                    block
+                    type="danger"
+                    @click="handleResetSettingConfig"
+                  >
+                    重置
                   </VButton>
                 </VSpace>
               </div>
