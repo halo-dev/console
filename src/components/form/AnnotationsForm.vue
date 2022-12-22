@@ -1,90 +1,72 @@
 <script lang="ts" setup>
 import {
   reset,
+  submitForm,
   type FormKitNode,
   type FormKitSchemaCondition,
   type FormKitSchemaNode,
 } from "@formkit/core";
-import { onMounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { apiClient } from "@/utils/api-client";
+import type { AnnotationSetting } from "@halo-dev/api-client";
+import cloneDeep from "lodash.clonedeep";
+import { getValidationMessages } from "@formkit/validation";
 
 const protectedKeys = ["content.halo.run/last-released-snapshot"];
 
 function keyValidationRule(node: FormKitNode) {
-  return !props.annotations?.[node.value as string];
+  return !annotations?.[node.value as string];
 }
 
 const props = withDefaults(
   defineProps<{
-    annotations?: {
+    group: string;
+    kind: string;
+    value?: {
       [key: string]: string;
     } | null;
   }>(),
   {
-    annotations: null,
+    value: null,
   }
 );
 
-const emit = defineEmits<{
-  (
-    e: "update:annotations",
-    annotations: {
-      [key: string]: string;
-    } | null
-  ): void;
-}>();
+const annotationSettings = ref<AnnotationSetting[]>([] as AnnotationSetting[]);
 
-// TODO 需要通过接口获取
-const themeAnnotationsFormSchema = ref<
-  (FormKitSchemaCondition | FormKitSchemaNode)[]
->([
-  {
-    $formkit: "text",
-    name: "download_url",
-    label: "下载链接",
-  },
-  {
-    $formkit: "select",
-    name: "version",
-    label: "支持的版本",
-    options: [
-      {
-        value: "1.5",
-        label: "1.5",
-      },
-      {
-        value: "2.0",
-        label: "2.0",
-      },
-    ],
-  },
-  {
-    $formkit: "radio",
-    name: "auto",
-    label: "是否自动",
-    options: [
-      {
-        value: "true",
-        label: "是",
-      },
-      {
-        value: "false",
-        label: "否",
-      },
-    ],
-  },
-  {
-    $formkit: "number",
-    name: "order",
-    label: "排序",
-  },
-]);
+const handleFetchAnnotationSettings = async () => {
+  try {
+    const { data } =
+      await apiClient.extension.annotationSetting.listv1alpha1AnnotationSetting();
+    annotationSettings.value = data.items;
+  } catch (error) {
+    console.log("Failed to fetch annotation settings", error);
+  }
+};
 
-const userCustomAnnotations = ref<{ key: string; value: string }[]>([]);
+const annotations = ref<{
+  [key: string]: string;
+}>({});
+const customAnnotationsState = ref<{ key: string; value: string }[]>([]);
 
-const handleProcessUserCustomAnnotations = () => {
-  userCustomAnnotations.value = Object.entries(props.annotations || {})
+const customAnnotations = computed(() => {
+  return customAnnotationsState.value.reduce((acc, cur) => {
+    acc[cur.key] = cur.value;
+    return acc;
+  }, {} as { [key: string]: string });
+});
+
+const handleProcessCustomAnnotations = () => {
+  let formSchemas: FormKitSchemaNode[] = [];
+
+  annotationSettings.value.forEach((annotationSetting) => {
+    formSchemas = formSchemas.concat(
+      annotationSetting.spec?.formSchema as FormKitSchemaNode[]
+    );
+  });
+
+  customAnnotationsState.value = Object.entries(props.value || {})
     .map(([key, value]) => {
-      const fromThemeSpec = themeAnnotationsFormSchema.value.some((item) => {
+      const fromThemeSpec = formSchemas.some((item) => {
         if (typeof item === "object" && "$formkit" in item) {
           return item.name === key;
         }
@@ -101,25 +83,58 @@ const handleProcessUserCustomAnnotations = () => {
     .filter((item) => item) as { key: string; value: string }[];
 };
 
-onMounted(() => {
-  if (!props.annotations) {
-    emit("update:annotations", {});
-  }
-  handleProcessUserCustomAnnotations();
+onMounted(async () => {
+  annotations.value = cloneDeep(props.value) || {};
+  await handleFetchAnnotationSettings();
+  handleProcessCustomAnnotations();
 });
 
 watch(
-  () => props.annotations,
+  () => props.value,
   (value) => {
     reset("specForm");
-    reset("userCustomForm");
+    reset("customForm");
+    annotations.value = cloneDeep(props.value) || {};
     if (value) {
-      handleProcessUserCustomAnnotations();
-    } else {
-      emit("update:annotations", {});
+      handleProcessCustomAnnotations();
     }
   }
 );
+
+// submit
+
+const specFormInvalid = ref(true);
+const customFormInvalid = ref(true);
+
+const handleSubmit = async () => {
+  submitForm("specForm");
+  submitForm("customForm");
+  await nextTick();
+};
+
+const onSpecFormSubmitCheck = async (node?: FormKitNode) => {
+  if (!node) {
+    return;
+  }
+  const validations = getValidationMessages(node);
+  specFormInvalid.value = validations.size <= 0;
+};
+
+const onCustomFormSubmitCheck = async (node?: FormKitNode) => {
+  if (!node) {
+    return;
+  }
+  const validations = getValidationMessages(node);
+  customFormInvalid.value = validations.size <= 0;
+};
+
+defineExpose({
+  handleSubmit,
+  specFormInvalid,
+  customFormInvalid,
+  annotations,
+  customAnnotations,
+});
 </script>
 
 <template>
@@ -127,13 +142,29 @@ watch(
     <FormKit
       v-if="annotations"
       id="specForm"
+      v-model="annotations"
       type="form"
-      :model-value="annotations"
+      :preserve="true"
+      @submit-invalid="onSpecFormSubmitCheck"
+      @submit="specFormInvalid = false"
     >
-      <FormKitSchema :schema="themeAnnotationsFormSchema" />
+      <template v-for="(annotationSetting, index) in annotationSettings">
+        <FormKitSchema
+          v-if="annotationSetting.spec?.formSchema"
+          :key="index"
+          :schema="annotationSetting.spec?.formSchema as (FormKitSchemaCondition| FormKitSchemaNode[])"
+        />
+      </template>
     </FormKit>
-    <FormKit v-if="annotations" id="userCustomForm" type="form">
-      <FormKit v-model="userCustomAnnotations" type="repeater" label="自定义">
+    <FormKit
+      v-if="annotations"
+      id="customForm"
+      type="form"
+      :preserve="true"
+      @submit-invalid="onCustomFormSubmitCheck"
+      @submit="customFormInvalid = false"
+    >
+      <FormKit v-model="customAnnotationsState" type="repeater" label="自定义">
         <FormKit
           type="text"
           label="Key"

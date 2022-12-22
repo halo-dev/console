@@ -7,7 +7,7 @@ import {
   VTabItem,
   VTabs,
 } from "@halo-dev/components";
-import { computed, ref, watchEffect } from "vue";
+import { computed, nextTick, ref, watchEffect } from "vue";
 import type { Post } from "@halo-dev/api-client";
 import cloneDeep from "lodash.clonedeep";
 import { apiClient } from "@/utils/api-client";
@@ -88,6 +88,22 @@ const handleVisibleChange = (visible: boolean) => {
 };
 
 const handleSave = async () => {
+  annotationsFormRef.value?.handleSubmit();
+  await nextTick();
+
+  const { customAnnotations, annotations, customFormInvalid, specFormInvalid } =
+    annotationsFormRef.value || {};
+
+  if (customFormInvalid || specFormInvalid) {
+    return;
+  }
+
+  formState.value.metadata.annotations = {
+    ...formState.value.metadata.annotations,
+    ...annotations,
+    ...customAnnotations,
+  };
+
   if (props.onlyEmit) {
     emit("saved", formState.value);
     return;
@@ -185,6 +201,8 @@ const publishTime = computed(() => {
 const onPublishTimeChange = (value: string) => {
   formState.value.spec.publishTime = value ? toISOString(value) : undefined;
 };
+
+const annotationsFormRef = ref<InstanceType<typeof AnnotationsForm>>();
 </script>
 <template>
   <VModal
@@ -316,7 +334,12 @@ const onPublishTimeChange = (value: string) => {
         <!--TODO: add SEO/Metas/Inject Code form-->
       </VTabItem>
       <VTabItem id="annotations" label="元数据">
-        <AnnotationsForm v-model:annotations="formState.metadata.annotations" />
+        <AnnotationsForm
+          ref="annotationsFormRef"
+          :value="formState.metadata.annotations"
+          kind="Post"
+          group="content.halo.run"
+        />
       </VTabItem>
     </VTabs>
 
