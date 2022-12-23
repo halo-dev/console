@@ -78,6 +78,14 @@ await handleFetchAttachments();
     readonly
     @select="onGroupChange"
   />
+  <div v-if="attachments.total > 0" class="mb-5">
+    <VButton @click="uploadVisible = true">
+      <template #icon>
+        <IconUpload class="h-full w-full" />
+      </template>
+      上传
+    </VButton>
+  </div>
   <VEmpty
     v-if="!attachments.total && !loading"
     message="当前没有附件，你可以尝试刷新或者上传附件"
@@ -199,12 +207,4 @@ await handleFetchAttachments();
       </span>
     </template>
   </AttachmentDetailModal>
-  <div
-    v-if="attachments.total > 0"
-    v-tooltip="'上传附件'"
-    class="fixed right-5 bottom-24 inline-flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-primary text-xs text-white transition-all hover:opacity-80 hover:shadow"
-    @click="uploadVisible = true"
-  >
-    <IconUpload />
-  </div>
 </template>
