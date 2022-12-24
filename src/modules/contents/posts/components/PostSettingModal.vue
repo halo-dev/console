@@ -369,12 +369,25 @@ const annotationsFormRef = ref<InstanceType<typeof AnnotationsForm>>();
       </div>
     </FormKit>
 
-    <AnnotationsForm
-      ref="annotationsFormRef"
-      :value="formState.metadata.annotations"
-      kind="Post"
-      group="content.halo.run"
-    />
+    <div class="py-5">
+      <div class="border-t border-gray-200"></div>
+    </div>
+
+    <div class="md:grid md:grid-cols-4 md:gap-6">
+      <div class="md:col-span-1">
+        <div class="sticky top-0">
+          <span class="text-base font-medium text-gray-900"> 元数据 </span>
+        </div>
+      </div>
+      <div class="mt-5 divide-y divide-gray-100 md:col-span-3 md:mt-0">
+        <AnnotationsForm
+          ref="annotationsFormRef"
+          :value="formState.metadata.annotations"
+          kind="Post"
+          group="content.halo.run"
+        />
+      </div>
+    </div>
 
     <template #footer>
       <VSpace>
