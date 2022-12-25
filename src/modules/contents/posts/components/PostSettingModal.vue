@@ -381,6 +381,7 @@ const annotationsFormRef = ref<InstanceType<typeof AnnotationsForm>>();
       </div>
       <div class="mt-5 divide-y divide-gray-100 md:col-span-3 md:mt-0">
         <AnnotationsForm
+          :key="formState.metadata.name"
           ref="annotationsFormRef"
           :value="formState.metadata.annotations"
           kind="Post"

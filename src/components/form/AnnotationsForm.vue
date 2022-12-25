@@ -11,6 +11,9 @@ import { apiClient } from "@/utils/api-client";
 import type { AnnotationSetting } from "@halo-dev/api-client";
 import cloneDeep from "lodash.clonedeep";
 import { getValidationMessages } from "@formkit/validation";
+import { useThemeStore } from "@/stores/theme";
+
+const themeStore = useThemeStore();
 
 const protectedKeys = ["content.halo.run/last-released-snapshot"];
 
@@ -32,6 +35,24 @@ const props = withDefaults(
 );
 
 const annotationSettings = ref<AnnotationSetting[]>([] as AnnotationSetting[]);
+
+const avaliableAnnotationSettings = computed(() => {
+  return annotationSettings.value
+    .filter(
+      (setting) =>
+        setting.spec?.targetRef?.group === props.group &&
+        setting.spec?.targetRef?.kind === props.kind
+    )
+    .filter((setting) => {
+      if (!setting.metadata.labels?.["theme.halo.run/theme-name"]) {
+        return true;
+      }
+      return (
+        setting.metadata.labels?.["theme.halo.run/theme-name"] ===
+        themeStore.activatedTheme?.metadata.name
+      );
+    });
+});
 
 const handleFetchAnnotationSettings = async () => {
   try {
@@ -58,7 +79,7 @@ const customAnnotations = computed(() => {
 const handleProcessCustomAnnotations = () => {
   let formSchemas: FormKitSchemaNode[] = [];
 
-  annotationSettings.value.forEach((annotationSetting) => {
+  avaliableAnnotationSettings.value.forEach((annotationSetting) => {
     formSchemas = formSchemas.concat(
       annotationSetting.spec?.formSchema as FormKitSchemaNode[]
     );
@@ -117,7 +138,7 @@ const onSpecFormSubmitCheck = async (node?: FormKitNode) => {
     return;
   }
   const validations = getValidationMessages(node);
-  specFormInvalid.value = validations.size <= 0;
+  specFormInvalid.value = validations.size > 0;
 };
 
 const onCustomFormSubmitCheck = async (node?: FormKitNode) => {
@@ -125,7 +146,7 @@ const onCustomFormSubmitCheck = async (node?: FormKitNode) => {
     return;
   }
   const validations = getValidationMessages(node);
-  customFormInvalid.value = validations.size <= 0;
+  customFormInvalid.value = validations.size > 0;
 };
 
 defineExpose({
@@ -138,7 +159,7 @@ defineExpose({
 </script>
 
 <template>
-  <div class="flex flex-col gap-3">
+  <div class="flex flex-col gap-3 divide-y divide-gray-100">
     <FormKit
       v-if="annotations"
       id="specForm"
@@ -148,7 +169,9 @@ defineExpose({
       @submit-invalid="onSpecFormSubmitCheck"
       @submit="specFormInvalid = false"
     >
-      <template v-for="(annotationSetting, index) in annotationSettings">
+      <template
+        v-for="(annotationSetting, index) in avaliableAnnotationSettings"
+      >
         <FormKitSchema
           v-if="annotationSetting.spec?.formSchema"
           :key="index"
@@ -161,6 +184,7 @@ defineExpose({
       id="customForm"
       type="form"
       :preserve="true"
+      form-class="py-4"
       @submit-invalid="onCustomFormSubmitCheck"
       @submit="customFormInvalid = false"
     >
