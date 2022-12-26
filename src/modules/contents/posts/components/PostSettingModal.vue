@@ -119,7 +119,6 @@ const handleSave = async () => {
   }
 
   formState.value.metadata.annotations = {
-    ...formState.value.metadata.annotations,
     ...annotations,
     ...customAnnotations,
   };

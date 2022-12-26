@@ -15,8 +15,6 @@ import { useThemeStore } from "@/stores/theme";
 
 const themeStore = useThemeStore();
 
-const protectedKeys = ["content.halo.run/last-released-snapshot"];
-
 function keyValidationRule(node: FormKitNode) {
   return !annotations?.[node.value as string];
 }
@@ -37,27 +35,27 @@ const props = withDefaults(
 const annotationSettings = ref<AnnotationSetting[]>([] as AnnotationSetting[]);
 
 const avaliableAnnotationSettings = computed(() => {
-  return annotationSettings.value
-    .filter(
-      (setting) =>
-        setting.spec?.targetRef?.group === props.group &&
-        setting.spec?.targetRef?.kind === props.kind
-    )
-    .filter((setting) => {
-      if (!setting.metadata.labels?.["theme.halo.run/theme-name"]) {
-        return true;
-      }
-      return (
-        setting.metadata.labels?.["theme.halo.run/theme-name"] ===
-        themeStore.activatedTheme?.metadata.name
-      );
-    });
+  return annotationSettings.value.filter((setting) => {
+    if (!setting.metadata.labels?.["theme.halo.run/theme-name"]) {
+      return true;
+    }
+    return (
+      setting.metadata.labels?.["theme.halo.run/theme-name"] ===
+      themeStore.activatedTheme?.metadata.name
+    );
+  });
 });
 
 const handleFetchAnnotationSettings = async () => {
   try {
     const { data } =
-      await apiClient.extension.annotationSetting.listv1alpha1AnnotationSetting();
+      await apiClient.extension.annotationSetting.listv1alpha1AnnotationSetting(
+        {
+          labelSelector: [
+            `halo.run/target-ref=${[props.group, props.kind].join("/")}`,
+          ],
+        }
+      );
     annotationSettings.value = data.items;
   } catch (error) {
     console.log("Failed to fetch annotation settings", error);
@@ -93,8 +91,7 @@ const handleProcessCustomAnnotations = () => {
         }
         return false;
       });
-      const isProtected = protectedKeys.includes(key);
-      if (!fromThemeSpec && !isProtected) {
+      if (!fromThemeSpec) {
         return {
           key,
           value,
@@ -102,6 +99,29 @@ const handleProcessCustomAnnotations = () => {
       }
     })
     .filter((item) => item) as { key: string; value: string }[];
+
+  annotations.value = Object.entries(props.value || {})
+    .map(([key, value]) => {
+      const fromThemeSpec = formSchemas.some((item) => {
+        if (typeof item === "object" && "$formkit" in item) {
+          return item.name === key;
+        }
+        return false;
+      });
+      if (fromThemeSpec) {
+        return {
+          key,
+          value,
+        };
+      }
+    })
+    .filter((item) => item)
+    .reduce((acc, cur) => {
+      if (cur) {
+        acc[cur.key] = cur.value;
+      }
+      return acc;
+    }, {} as { [key: string]: string });
 };
 
 onMounted(async () => {
