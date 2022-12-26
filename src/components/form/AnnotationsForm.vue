@@ -21,13 +21,14 @@ function keyValidationRule(node: FormKitNode) {
 
 const props = withDefaults(
   defineProps<{
-    group: string;
+    group?: string;
     kind: string;
     value?: {
       [key: string]: string;
     } | null;
   }>(),
   {
+    group: undefined,
     value: null,
   }
 );
@@ -48,11 +49,14 @@ const avaliableAnnotationSettings = computed(() => {
 
 const handleFetchAnnotationSettings = async () => {
   try {
+    console.log([props.group, props.kind]);
     const { data } =
       await apiClient.extension.annotationSetting.listv1alpha1AnnotationSetting(
         {
           labelSelector: [
-            `halo.run/target-ref=${[props.group, props.kind].join("/")}`,
+            `halo.run/target-ref=${[props.group, props.kind]
+              .filter(Boolean)
+              .join("/")}`,
           ],
         }
       );
@@ -148,7 +152,11 @@ const specFormInvalid = ref(true);
 const customFormInvalid = ref(true);
 
 const handleSubmit = async () => {
-  submitForm("specForm");
+  if (avaliableAnnotationSettings.value.length) {
+    submitForm("specForm");
+  } else {
+    specFormInvalid.value = false;
+  }
   submitForm("customForm");
   await nextTick();
 };
