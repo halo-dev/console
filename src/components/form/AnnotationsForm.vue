@@ -21,14 +21,13 @@ function keyValidationRule(node: FormKitNode) {
 
 const props = withDefaults(
   defineProps<{
-    group?: string;
+    group: string;
     kind: string;
     value?: {
       [key: string]: string;
     } | null;
   }>(),
   {
-    group: undefined,
     value: null,
   }
 );
@@ -54,9 +53,7 @@ const handleFetchAnnotationSettings = async () => {
       await apiClient.extension.annotationSetting.listv1alpha1AnnotationSetting(
         {
           labelSelector: [
-            `halo.run/target-ref=${[props.group, props.kind]
-              .filter(Boolean)
-              .join("/")}`,
+            `halo.run/target-ref=${[props.group, props.kind].join("/")}`,
           ],
         }
       );

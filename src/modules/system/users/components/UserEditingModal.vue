@@ -223,6 +223,7 @@ const handleCreateUser = async () => {
           ref="annotationsFormRef"
           :value="formState.metadata.annotations"
           kind="User"
+          group=""
         />
       </div>
     </div>

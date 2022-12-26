@@ -348,6 +348,7 @@ const onMenuItemSourceChange = () => {
           ref="annotationsFormRef"
           :value="formState.metadata.annotations"
           kind="MenuItem"
+          group=""
         />
       </div>
     </div>
