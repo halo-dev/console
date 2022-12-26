@@ -181,7 +181,7 @@ defineExpose({
 <template>
   <div class="flex flex-col gap-3 divide-y divide-gray-100">
     <FormKit
-      v-if="annotations"
+      v-if="annotations && avaliableAnnotationSettings.length > 0"
       id="specForm"
       v-model="annotations"
       type="form"
@@ -204,7 +204,7 @@ defineExpose({
       id="customForm"
       type="form"
       :preserve="true"
-      form-class="py-4"
+      :form-class="`${avaliableAnnotationSettings.length ? 'py-4' : ''}`"
       @submit-invalid="onCustomFormSubmitCheck"
       @submit="customFormInvalid = false"
     >
