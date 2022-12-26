@@ -48,7 +48,6 @@ const avaliableAnnotationSettings = computed(() => {
 
 const handleFetchAnnotationSettings = async () => {
   try {
-    console.log([props.group, props.kind]);
     const { data } =
       await apiClient.extension.annotationSetting.listv1alpha1AnnotationSetting(
         {
