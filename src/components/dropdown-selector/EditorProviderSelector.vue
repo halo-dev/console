@@ -3,7 +3,7 @@ import {
   useEditorExtensionPoints,
   type EditorProvider,
 } from "@/composables/use-editor-extension-points";
-import { VAvatar, VSpace } from "@halo-dev/components";
+import { VAvatar, VSpace, IconExchange } from "@halo-dev/components";
 
 withDefaults(
   defineProps<{
@@ -27,9 +27,10 @@ const { editorProviders } = useEditorExtensionPoints();
       class="group flex w-full cursor-pointer items-center gap-2 rounded p-1 hover:bg-gray-100"
     >
       <VAvatar v-if="provider?.logo" :src="provider.logo" size="xs"></VAvatar>
-      <div class="text-sm text-gray-600 group-hover:text-gray-900">
+      <div class="select-none text-sm text-gray-600 group-hover:text-gray-900">
         {{ provider?.displayName }}
       </div>
+      <IconExchange class="h-4 w-4 text-gray-600 group-hover:text-gray-900" />
     </div>
     <template #popper>
       <div class="w-48 p-2">
