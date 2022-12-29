@@ -45,6 +45,9 @@ const storedEditorProviderName = useLocalStorage("editor-provider-name", "");
 const handleChangeEditorProvider = (provider: EditorProvider) => {
   currentEditorProvider.value = provider;
   storedEditorProviderName.value = provider.name;
+  formState.value.post.metadata.annotations = {
+    "content.halo.run/preferred-editor": provider.name,
+  };
 };
 
 // Post form
