@@ -279,7 +279,7 @@ const onPublishTimeChange = (value: string) => {
             type="select"
           ></FormKit>
           <FormKit
-            :value="publishTime"
+            :model-value="publishTime"
             label="发表时间"
             type="datetime-local"
             @input="onPublishTimeChange"
