@@ -23,10 +23,6 @@
   </VPageHeader>
 
   <div class="dashboard m-4">
-    {{ tags }}
-    <FormKit type="form">
-      <FormKit v-model="tags" type="postTagSelect" label="文章标签"></FormKit>
-    </FormKit>
     <grid-layout
       v-model:layout="layout"
       :col-num="12"
@@ -119,24 +115,10 @@ import {
   VTabbar,
 } from "@halo-dev/components";
 import { onMounted, provide, ref, type Ref } from "vue";
-import { useLocalStorage, useStorage } from "@vueuse/core";
+import { useStorage } from "@vueuse/core";
 import cloneDeep from "lodash.clonedeep";
 import { apiClient } from "@/utils/api-client";
 import type { DashboardStats } from "@halo-dev/api-client/index";
-
-const tags = useLocalStorage("tags", [
-  "4",
-  "40",
-  "5",
-  "6",
-  "72",
-  "7",
-  "8",
-  "9",
-  "3",
-  "2",
-  "1",
-]);
 
 const widgetsGroup = [
   {
