@@ -2,7 +2,7 @@ const textClassification = {
   label: "block text-sm font-medium text-gray-700 formkit-invalid:text-red-500",
   wrapper: "flex flex-col gap-4",
   inner:
-    "inline-flex items-center w-full relative box-border border border-gray-300 formkit-invalid:border-red-500 h-9 rounded-base overflow-hidden focus-within:border-primary focus-within:shadow-sm w-full sm:max-w-lg transition-all",
+    "inline-flex items-center w-full relative box-border border border-gray-300 formkit-invalid:border-red-500 h-9 rounded-base  focus-within:border-primary focus-within:shadow-sm w-full sm:max-w-lg transition-all",
   input:
     "outline-0 bg-white antialiased resize-none w-full text-black block transition-all appearance-none h-full px-3 text-sm",
 };
@@ -90,6 +90,10 @@ const theme: Record<string, Record<string, string>> = {
     item: "border rounded-base grid grid-cols-12 focus-within:border-primary transition-all overflow-hidden focus-within:shadow-sm",
     content: "flex-1 p-2 col-span-11",
     controls: "bg-gray-200 col-span-1 flex items-center justify-center",
+  },
+  postTagSelect: {
+    ...textClassification,
+    inner: `${textClassification.inner} !h-auto min-h-[2.25rem]`,
   },
 };
 
