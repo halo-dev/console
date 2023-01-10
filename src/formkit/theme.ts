@@ -2,7 +2,7 @@ const textClassification = {
   label: "block text-sm font-medium text-gray-700 formkit-invalid:text-red-500",
   wrapper: "flex flex-col gap-4",
   inner:
-    "inline-flex items-center w-full relative box-border border border-gray-300 formkit-invalid:border-red-500 h-9 rounded-base  focus-within:border-primary focus-within:shadow-sm w-full sm:max-w-lg transition-all",
+    "inline-flex items-center w-full relative box-border border border-gray-300 formkit-invalid:border-red-500 h-9 rounded-base overflow-hidden focus-within:border-primary focus-within:shadow-sm w-full sm:max-w-lg transition-all",
   input:
     "outline-0 bg-white antialiased resize-none w-full text-black block transition-all appearance-none h-full px-3 text-sm",
 };
@@ -93,7 +93,12 @@ const theme: Record<string, Record<string, string>> = {
   },
   postTagSelect: {
     ...textClassification,
-    inner: `${textClassification.inner} !h-auto min-h-[2.25rem]`,
+    inner: `${textClassification.inner} !overflow-visible !h-auto min-h-[2.25rem]`,
+    input: `w-0 flex-grow outline-0 bg-transparent py-1 px-3 block transition-all appearance-none text-sm antialiased`,
+    "post-tags-button": "inline-flex h-full cursor-pointer items-center px-1",
+    "dropdown-wrapper":
+      "absolute ring-1 ring-white top-full bottom-auto right-0 z-10 mt-1 max-h-96 w-full overflow-auto rounded bg-white shadow-lg",
+    "post-tags-wrapper": "flex w-full items-center",
   },
 };
 

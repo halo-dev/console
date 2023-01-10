@@ -22,7 +22,6 @@ export const postTagSelect: FormKitTypeDefinition = {
         icon("prefix"),
         prefix(),
         TagSelectSection(),
-        icon("select"),
         suffix(),
         icon("suffix")
       )

@@ -2,12 +2,15 @@
 import { apiClient } from "@/utils/api-client";
 import type { FormKitFrameworkContext } from "@formkit/core";
 import type { Tag } from "@halo-dev/api-client";
-import { computed, onMounted, ref, type PropType } from "vue";
+import { computed, onMounted, ref, watch, type PropType } from "vue";
+import PostTag from "@/modules/contents/posts/tags/components/PostTag.vue";
 import {
   IconCheckboxCircle,
   IconArrowRight,
   IconClose,
 } from "@halo-dev/components";
+import { onClickOutside } from "@vueuse/core";
+import Fuse from "fuse.js";
 
 const props = defineProps({
   context: {
@@ -17,7 +20,36 @@ const props = defineProps({
 });
 
 const postTags = ref<Tag[]>([] as Tag[]);
+const selectedTag = ref<Tag>();
 const dropdownVisible = ref(false);
+const text = ref("");
+const wrapperRef = ref<HTMLElement>();
+
+onClickOutside(wrapperRef, () => {
+  dropdownVisible.value = false;
+});
+
+// search
+
+let fuse: Fuse<Tag> | undefined = undefined;
+
+const searchResults = computed(() => {
+  if (!fuse || !text.value) {
+    return postTags.value;
+  }
+
+  return fuse?.search(text.value).map((item) => item.item);
+});
+
+watch(
+  () => searchResults.value,
+  (value) => {
+    if (value?.length > 0) {
+      selectedTag.value = value[0];
+      scrollToSelected();
+    }
+  }
+);
 
 const handleFetchTags = async () => {
   const { data } = await apiClient.extension.tag.listcontentHaloRunV1alpha1Tag({
@@ -26,15 +58,25 @@ const handleFetchTags = async () => {
   });
 
   postTags.value = data.items;
+
+  fuse = new Fuse(data.items, {
+    keys: ["spec.displayName", "spec.slug"],
+    useExtendedSearch: true,
+  });
 };
 
-// get selected tags by props.context._value
 const selectedTags = computed(() => {
   const selectedTagNames = (props.context._value as string[]) || [];
-  return postTags.value.filter((tag) =>
-    selectedTagNames.includes(tag.metadata.name)
-  );
+  return selectedTagNames
+    .map((tagName): Tag | undefined => {
+      return postTags.value.find((tag) => tag.metadata.name === tagName);
+    })
+    .filter(Boolean) as Tag[];
 });
+
+const isSelected = (tag: Tag) => {
+  return (props.context._value || []).includes(tag.metadata.name);
+};
 
 const handleSelect = (tag: Tag) => {
   const currentValue = props.context._value || [];
@@ -47,68 +89,178 @@ const handleSelect = (tag: Tag) => {
   }
 };
 
+const handleKeydown = (e: KeyboardEvent) => {
+  if (e.key === "ArrowDown") {
+    e.preventDefault();
+
+    const index = searchResults.value.findIndex(
+      (tag) => tag.metadata.name === selectedTag.value?.metadata.name
+    );
+    if (index < searchResults.value.length - 1) {
+      selectedTag.value = searchResults.value[index + 1];
+    }
+
+    scrollToSelected();
+  }
+  if (e.key === "ArrowUp") {
+    e.preventDefault();
+
+    const index = searchResults.value.findIndex(
+      (tag) => tag.metadata.name === selectedTag.value?.metadata.name
+    );
+    if (index > 0) {
+      selectedTag.value = searchResults.value[index - 1];
+    }
+
+    scrollToSelected();
+  }
+
+  if (e.key === "Enter") {
+    if (searchResults.value.length === 0 && text.value) {
+      handleCreateTag();
+    }
+
+    if (selectedTag.value) {
+      handleSelect(selectedTag.value);
+      text.value = "";
+
+      e.preventDefault();
+    }
+  }
+};
+
+const scrollToSelected = () => {
+  if (!selectedTag.value) {
+    return;
+  }
+
+  const selectedNode = document.getElementById(
+    selectedTag.value?.metadata.name
+  );
+
+  if (selectedNode) {
+    selectedNode.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "start",
+    });
+  }
+};
+
+const handleCreateTag = async () => {
+  const { data } =
+    await apiClient.extension.tag.createcontentHaloRunV1alpha1Tag({
+      tag: {
+        spec: {
+          displayName: text.value,
+          slug: text.value,
+          color: "#ffffff",
+          cover: "",
+        },
+        apiVersion: "content.halo.run/v1alpha1",
+        kind: "Tag",
+        metadata: {
+          name: "",
+          generateName: "tag-",
+        },
+      },
+    });
+
+  handleFetchTags();
+
+  handleSelect(data);
+
+  text.value = "";
+};
+
+// update value immediately during IME composition
+// please see https://vuejs.org//guide/essentials/forms.html#text
+const onTextInput = (e: Event) => {
+  text.value = (e.target as HTMLInputElement).value;
+};
+
+// delete last tag when text input is empty
+const handleDelete = () => {
+  if (!text.value) {
+    const selectedTagNames = (props.context._value as string[]) || [];
+    props.context.node.input(selectedTagNames.slice(0, -1));
+  }
+};
+
 onMounted(handleFetchTags);
 </script>
 
 <template>
-  <div class="formkit-post-tags flex w-full flex-wrap items-center">
-    <div v-for="(tag, index) in selectedTags" :key="index" class="p-1">
+  <div
+    ref="wrapperRef"
+    :class="context.classes['post-tags-wrapper']"
+    @keydown="handleKeydown"
+  >
+    <div class="formkit-post-tags flex w-full flex-wrap items-center">
       <div
-        class="inline-flex items-center gap-1 rounded-full bg-gray-200 px-2 py-0.5"
+        v-for="(tag, index) in selectedTags"
+        :key="index"
+        class="inline-flex items-center p-1"
       >
-        <span class="text-xs">
-          {{ tag.spec.displayName }}
-        </span>
-        <IconClose
-          class="h-4 w-4 cursor-pointer text-gray-600 hover:rounded-full hover:bg-white"
-          @click="handleSelect(tag)"
-        />
+        <PostTag :tag="tag" rounded>
+          <template #rightIcon>
+            <IconClose
+              class="h-4 w-4 cursor-pointer text-gray-600 hover:text-gray-900"
+              @click="handleSelect(tag)"
+            />
+          </template>
+        </PostTag>
       </div>
+      <input
+        :value="text"
+        :class="context.classes.input"
+        type="text"
+        @input="onTextInput"
+        @focus="dropdownVisible = true"
+        @keydown.delete="handleDelete"
+      />
     </div>
-    <input
-      class="formkit-input block h-full flex-grow resize-none appearance-none bg-white px-3 text-sm text-black antialiased outline-0 transition-all"
-      type="text"
-      name="title"
-    />
-  </div>
 
-  <div
-    class="inline-flex h-full cursor-pointer items-center px-1"
-    @click="dropdownVisible = !dropdownVisible"
-  >
-    <IconArrowRight class="rotate-90" />
-  </div>
-  <div
-    v-show="dropdownVisible"
-    class="absolute top-full bottom-auto right-0 z-10 mt-1 max-h-96 w-full overflow-auto rounded bg-white drop-shadow-lg"
-  >
-    <ul class="left-0 overflow-hidden">
-      <li
-        v-for="tag in postTags"
-        :key="tag.metadata.name"
-        class="group flex cursor-pointer items-center justify-between py-2 px-2 hover:bg-gray-100"
-        :class="{
-          'bg-primary hover:bg-primary': props.context._value.includes(
-            tag.metadata.name
-          ),
-        }"
-        @click="handleSelect(tag)"
-      >
-        <span
-          class="text-sm text-gray-700 group-hover:text-gray-900"
-          :class="{
-            'text-white group-hover:text-white': context._value.includes(
-              tag.metadata.name
-            ),
-          }"
+    <div
+      :class="context.classes['post-tags-button']"
+      @click="dropdownVisible = !dropdownVisible"
+    >
+      <IconArrowRight class="rotate-90 text-gray-500 hover:text-gray-700" />
+    </div>
+
+    <div v-if="dropdownVisible" :class="context.classes['dropdown-wrapper']">
+      <ul class="left-0 overflow-hidden">
+        <li
+          v-if="text && searchResults.length <= 0"
+          class="group flex cursor-pointer items-center justify-between bg-gray-100 p-2"
+          @click="handleCreateTag"
         >
-          {{ tag.spec.displayName }}
-        </span>
-        <IconCheckboxCircle
-          v-if="context._value.includes(tag.metadata.name)"
-          class="text-white"
-        />
-      </li>
-    </ul>
+          <span class="text-xs text-gray-700 group-hover:text-gray-900">
+            创建 {{ text }} 标签
+          </span>
+        </li>
+        <li
+          v-for="tag in searchResults"
+          :id="tag.metadata.name"
+          :key="tag.metadata.name"
+          class="group flex cursor-pointer items-center justify-between p-2 hover:bg-gray-100"
+          :class="{
+            'bg-primary hover:bg-primary/80': isSelected(tag),
+            'bg-gray-100': selectedTag?.metadata.name === tag.metadata.name,
+            '!bg-primary/80':
+              selectedTag?.metadata.name === tag.metadata.name &&
+              isSelected(tag),
+          }"
+          @click="handleSelect(tag)"
+        >
+          <div
+            class="inline-flex items-center overflow-hidden rounded-base bg-white"
+          >
+            <PostTag :tag="tag" />
+          </div>
+          <IconCheckboxCircle v-if="isSelected(tag)" class="text-white" />
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
