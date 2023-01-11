@@ -5,11 +5,13 @@ import { computed, provide, ref, watch, type PropType, type Ref } from "vue";
 import { IconArrowRight } from "@halo-dev/components";
 import { usePostCategory } from "@/modules/contents/posts/categories/composables/use-post-category";
 import type { CategoryTree } from "@/modules/contents/posts/categories/utils";
+import { convertTreeToCategories } from "@/modules/contents/posts/categories/utils";
 import CategoryListItem from "./components/CategoryListItem.vue";
 import { onClickOutside } from "@vueuse/core";
 import Fuse from "fuse.js";
 import CategoryTag from "./components/CategoryTag.vue";
 import SearchResultListItem from "./components/SearchResultListItem.vue";
+import { apiClient } from "@/utils/api-client";
 
 const props = defineProps({
   context: {
@@ -18,11 +20,18 @@ const props = defineProps({
   },
 });
 
-const { categories, categoriesTree } = usePostCategory({
+const { categories, categoriesTree, handleFetchCategories } = usePostCategory({
   fetchOnMounted: true,
 });
 
 provide<Ref<CategoryTree[]>>("categoriesTree", categoriesTree);
+
+const selectedCategory = ref<Category | CategoryTree>();
+
+provide<Ref<Category | CategoryTree | undefined>>(
+  "selectedCategory",
+  selectedCategory
+);
 
 const dropdownVisible = ref(false);
 const text = ref("");
@@ -83,6 +92,96 @@ const handleSelect = (category: CategoryTree | Category) => {
   }
 };
 
+const handleKeydown = (e: KeyboardEvent) => {
+  if (e.key === "ArrowDown") {
+    e.preventDefault();
+
+    const categoryIndices = text.value
+      ? searchResults.value
+      : convertTreeToCategories(categoriesTree.value);
+
+    const index = categoryIndices.findIndex(
+      (category) =>
+        category.metadata.name === selectedCategory.value?.metadata.name
+    );
+
+    if (index < searchResults.value.length - 1) {
+      selectedCategory.value = categoryIndices[index + 1];
+    }
+    scrollToSelected();
+  }
+
+  if (e.key === "ArrowUp") {
+    e.preventDefault();
+
+    const categoryIndices = text.value
+      ? searchResults.value
+      : convertTreeToCategories(categoriesTree.value);
+
+    const index = categoryIndices.findIndex(
+      (tag) => tag.metadata.name === selectedCategory.value?.metadata.name
+    );
+    if (index > 0) {
+      selectedCategory.value = categoryIndices[index - 1];
+    }
+    scrollToSelected();
+  }
+
+  if (e.key === "Enter") {
+    if (searchResults.value.length === 0 && text.value) {
+      handleCreateCategory();
+    }
+    if (selectedCategory.value) {
+      handleSelect(selectedCategory.value);
+      text.value = "";
+      e.preventDefault();
+    }
+  }
+};
+
+const scrollToSelected = () => {
+  if (!selectedCategory.value) {
+    return;
+  }
+  const selectedNode = document.getElementById(
+    `category-${selectedCategory.value?.metadata.name}`
+  );
+  if (selectedNode) {
+    selectedNode.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "start",
+    });
+  }
+};
+
+const handleCreateCategory = async () => {
+  const { data } =
+    await apiClient.extension.category.createcontentHaloRunV1alpha1Category({
+      category: {
+        spec: {
+          displayName: text.value,
+          slug: text.value,
+          description: "",
+          cover: "",
+          template: "",
+          priority: categories.value.length + 1,
+          children: [],
+        },
+        apiVersion: "content.halo.run/v1alpha1",
+        kind: "Category",
+        metadata: {
+          name: "",
+          generateName: "category-",
+        },
+      },
+    });
+
+  handleFetchCategories();
+  handleSelect(data);
+  text.value = "";
+};
+
 // update value immediately during IME composition
 // please see https://vuejs.org//guide/essentials/forms.html#text
 const onTextInput = (e: Event) => {
@@ -99,7 +198,11 @@ const handleDelete = () => {
 </script>
 
 <template>
-  <div ref="wrapperRef" :class="context.classes['post-categories-wrapper']">
+  <div
+    ref="wrapperRef"
+    :class="context.classes['post-categories-wrapper']"
+    @keydown="handleKeydown"
+  >
     <div class="formkit-post-categories flex w-full flex-wrap items-center">
       <CategoryTag
         v-for="(category, index) in selectedCategories"
@@ -125,12 +228,13 @@ const handleDelete = () => {
     </div>
 
     <div v-if="dropdownVisible" :class="context.classes['dropdown-wrapper']">
-      <ul>
+      <ul class="p-1">
         <li
-          class="group flex cursor-pointer items-center justify-between bg-gray-100 p-2"
+          v-if="text && searchResults.length <= 0"
+          class="group flex cursor-pointer items-center justify-between rounded bg-gray-100 p-2"
         >
           <span class="text-xs text-gray-700 group-hover:text-gray-900">
-            创建 分类
+            创建 {{ text }} 分类
           </span>
         </li>
         <template v-if="text">
