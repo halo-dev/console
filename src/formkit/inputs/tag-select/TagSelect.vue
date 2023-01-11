@@ -229,10 +229,10 @@ onMounted(handleFetchTags);
     </div>
 
     <div v-if="dropdownVisible" :class="context.classes['dropdown-wrapper']">
-      <ul class="left-0 overflow-hidden">
+      <ul class="p-1">
         <li
           v-if="text && searchResults.length <= 0"
-          class="group flex cursor-pointer items-center justify-between bg-gray-100 p-2"
+          class="group flex cursor-pointer items-center justify-between rounded bg-gray-100 p-2"
           @click="handleCreateTag"
         >
           <span class="text-xs text-gray-700 group-hover:text-gray-900">
@@ -243,22 +243,16 @@ onMounted(handleFetchTags);
           v-for="tag in searchResults"
           :id="tag.metadata.name"
           :key="tag.metadata.name"
-          class="group flex cursor-pointer items-center justify-between p-2 hover:bg-gray-100"
+          class="group flex cursor-pointer items-center justify-between rounded p-2 hover:bg-gray-100"
           :class="{
-            'bg-primary hover:bg-primary/80': isSelected(tag),
             'bg-gray-100': selectedTag?.metadata.name === tag.metadata.name,
-            '!bg-primary/80':
-              selectedTag?.metadata.name === tag.metadata.name &&
-              isSelected(tag),
           }"
           @click="handleSelect(tag)"
         >
-          <div
-            class="inline-flex items-center overflow-hidden rounded-base bg-white"
-          >
+          <div class="inline-flex items-center overflow-hidden">
             <PostTag :tag="tag" />
           </div>
-          <IconCheckboxCircle v-if="isSelected(tag)" class="text-white" />
+          <IconCheckboxCircle v-if="isSelected(tag)" class="text-primary" />
         </li>
       </ul>
     </div>
