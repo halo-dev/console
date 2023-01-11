@@ -32,13 +32,13 @@ const label = computed(() => {
 <template>
   <div class="inline-flex items-center p-1">
     <div
-      class="inline-flex items-center gap-1 rounded-full bg-primary py-1 px-2 text-white"
+      class="box-border inline-flex min-h-[1.25rem] items-center gap-1 rounded-full border border-solid border-[#d9d9d9] bg-white px-1 align-middle"
     >
-      <span class="text-xs">
+      <span class="flex-1 text-xs">
         {{ label }}
       </span>
       <IconClose
-        class="h-4 w-4 cursor-pointer text-white hover:text-slate-200"
+        class="h-4 w-4 cursor-pointer text-gray-600 hover:text-gray-900"
         @click="emit('select', category)"
       />
     </div>
