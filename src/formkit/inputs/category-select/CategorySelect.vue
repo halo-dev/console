@@ -246,7 +246,7 @@ const handleDelete = () => {
     :class="context.classes['post-categories-wrapper']"
     @keydown="handleKeydown"
   >
-    <div class="formkit-post-categories flex w-full flex-wrap items-center">
+    <div :class="context.classes['post-categories']">
       <CategoryTag
         v-for="(category, index) in selectedCategories"
         :key="index"
