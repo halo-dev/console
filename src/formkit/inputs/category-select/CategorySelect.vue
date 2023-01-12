@@ -71,6 +71,7 @@ watch(
     fuse = new Fuse(categories.value, {
       keys: ["spec.displayName", "spec.slug"],
       useExtendedSearch: true,
+      threshold: 0.2,
     });
   }
 );
@@ -163,6 +164,7 @@ const handleKeydown = (e: KeyboardEvent) => {
   if (e.key === "Enter") {
     if (searchResults.value.length === 0 && text.value) {
       handleCreateCategory();
+      return;
     }
     if (selectedCategory.value) {
       handleSelect(selectedCategory.value);
@@ -271,7 +273,7 @@ const handleDelete = () => {
     <div v-if="dropdownVisible" :class="context.classes['dropdown-wrapper']">
       <ul class="p-1">
         <li
-          v-if="text && searchResults.length <= 0"
+          v-if="text.trim() && searchResults.length <= 0"
           v-permission="['system:posts:manage']"
           class="group flex cursor-pointer items-center justify-between rounded bg-gray-100 p-2"
         >
