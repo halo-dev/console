@@ -12,6 +12,9 @@ import Fuse from "fuse.js";
 import CategoryTag from "./components/CategoryTag.vue";
 import SearchResultListItem from "./components/SearchResultListItem.vue";
 import { apiClient } from "@/utils/api-client";
+import { usePermission } from "@/utils/permission";
+
+const { currentUserHasPermission } = usePermission();
 
 const props = defineProps({
   context: {
@@ -156,6 +159,10 @@ const scrollToSelected = () => {
 };
 
 const handleCreateCategory = async () => {
+  if (!currentUserHasPermission(["system:posts:manage"])) {
+    return;
+  }
+
   const { data } =
     await apiClient.extension.category.createcontentHaloRunV1alpha1Category({
       category: {
@@ -231,6 +238,7 @@ const handleDelete = () => {
       <ul class="p-1">
         <li
           v-if="text && searchResults.length <= 0"
+          v-permission="['system:posts:manage']"
           class="group flex cursor-pointer items-center justify-between rounded bg-gray-100 p-2"
         >
           <span class="text-xs text-gray-700 group-hover:text-gray-900">
