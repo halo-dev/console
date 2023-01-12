@@ -248,47 +248,32 @@ const handleBuildSearchIndex = () => {
           });
         });
       });
+  }
 
-    // get theme settings
-    apiClient.extension.configMap
-      .getv1alpha1ConfigMap({
-        name: "system",
-      })
-      .then(({ data: systemConfigMap }) => {
-        if (systemConfigMap.data?.theme) {
-          const themeConfig = JSON.parse(systemConfigMap.data.theme);
-
-          apiClient.extension.theme
-            .getthemeHaloRunV1alpha1Theme({
-              name: themeConfig.active,
-            })
-            .then(({ data: theme }) => {
-              if (theme && theme.spec.settingName) {
-                apiClient.extension.setting
-                  .getv1alpha1Setting({
-                    name: theme.spec.settingName,
-                  })
-                  .then(({ data: themeSettings }) => {
-                    themeSettings.spec.forms.forEach((form) => {
-                      fuse.add({
-                        title: `${theme.spec.displayName} / ${form.label}`,
-                        icon: {
-                          component: markRaw(IconPalette),
-                        },
-                        group: "主题设置",
-                        route: {
-                          name: "ThemeSetting",
-                          params: {
-                            group: form.group,
-                          },
-                        },
-                      });
-                    });
-                  });
-              }
+  if (currentUserHasPermission(["system:themes:view"])) {
+    apiClient.theme.fetchActivatedTheme().then(({ data: theme }) => {
+      if (theme) {
+        apiClient.theme
+          .fetchThemeSetting({ name: "-" })
+          .then(({ data: themeSettings }) => {
+            themeSettings.spec.forms.forEach((form) => {
+              fuse.add({
+                title: `${theme.spec.displayName} / ${form.label}`,
+                icon: {
+                  component: markRaw(IconPalette),
+                },
+                group: "主题设置",
+                route: {
+                  name: "ThemeSetting",
+                  params: {
+                    group: form.group,
+                  },
+                },
+              });
             });
-        }
-      });
+          });
+      }
+    });
   }
 };
 
