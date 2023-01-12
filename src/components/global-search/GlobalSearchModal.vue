@@ -16,11 +16,14 @@ import { computed, markRaw, ref, watch, type Component } from "vue";
 import Fuse from "fuse.js";
 import { apiClient } from "@/utils/api-client";
 import { usePermission } from "@/utils/permission";
+import { useThemeStore } from "@/stores/theme";
+import { storeToRefs } from "pinia";
 
 const router = useRouter();
 const route = useRoute();
 
 const { currentUserHasPermission } = usePermission();
+const { activatedTheme } = storeToRefs(useThemeStore());
 
 const props = withDefaults(
   defineProps<{
@@ -251,29 +254,27 @@ const handleBuildSearchIndex = () => {
   }
 
   if (currentUserHasPermission(["system:themes:view"])) {
-    apiClient.theme.fetchActivatedTheme().then(({ data: theme }) => {
-      if (theme) {
-        apiClient.theme
-          .fetchThemeSetting({ name: "-" })
-          .then(({ data: themeSettings }) => {
-            themeSettings.spec.forms.forEach((form) => {
-              fuse.add({
-                title: `${theme.spec.displayName} / ${form.label}`,
-                icon: {
-                  component: markRaw(IconPalette),
-                },
-                group: "主题设置",
-                route: {
-                  name: "ThemeSetting",
-                  params: {
-                    group: form.group,
-                  },
-                },
-              });
-            });
+    apiClient.theme
+      .fetchThemeSetting({ name: "-" })
+      .then(({ data: themeSettings }) => {
+        themeSettings.spec.forms.forEach((form) => {
+          fuse.add({
+            title: [activatedTheme.value?.spec.displayName, form.label].join(
+              " / "
+            ),
+            icon: {
+              component: markRaw(IconPalette),
+            },
+            group: "主题设置",
+            route: {
+              name: "ThemeSetting",
+              params: {
+                group: form.group,
+              },
+            },
           });
-      }
-    });
+        });
+      });
   }
 };
 
