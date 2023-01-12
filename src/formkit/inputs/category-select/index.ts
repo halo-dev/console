@@ -14,7 +14,7 @@ import {
 import CategorySelect from "./CategorySelect.vue";
 import { CategorySelectSection } from "./sections";
 
-export const postCategorySelect: FormKitTypeDefinition = {
+export const categorySelect: FormKitTypeDefinition = {
   schema: outer(
     wrapper(
       label("$label"),
@@ -30,6 +30,7 @@ export const postCategorySelect: FormKitTypeDefinition = {
     messages(message("$message.value"))
   ),
   type: "input",
+  props: ["multiple"],
   library: {
     CategorySelect: CategorySelect,
   },

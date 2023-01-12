@@ -23,6 +23,17 @@ const props = defineProps({
   },
 });
 
+const multiple = computed(() => {
+  const { multiple } = props.context;
+  if (multiple === undefined) {
+    return false;
+  }
+  if (typeof multiple === "boolean") {
+    return multiple;
+  }
+  return multiple === "true";
+});
+
 const { categories, categoriesTree, handleFetchCategories } = usePostCategory({
   fetchOnMounted: true,
 });
@@ -65,18 +76,28 @@ watch(
 );
 
 const selectedCategories = computed(() => {
-  const currentValue = props.context._value || [];
-  return currentValue
-    .map((categoryName): Category | undefined => {
-      return categories.value.find(
-        (category) => category.metadata.name === categoryName
-      );
-    })
-    .filter(Boolean) as Category[];
+  if (multiple.value) {
+    const currentValue = props.context._value || [];
+    return currentValue
+      .map((categoryName): Category | undefined => {
+        return categories.value.find(
+          (category) => category.metadata.name === categoryName
+        );
+      })
+      .filter(Boolean) as Category[];
+  }
+
+  const category = categories.value.find(
+    (category) => category.metadata.name === props.context._value
+  );
+  return [category].filter(Boolean) as Category[];
 });
 
 const isSelected = (category: CategoryTree | Category) => {
-  return (props.context._value || []).includes(category.metadata.name);
+  if (multiple.value) {
+    return (props.context._value || []).includes(category.metadata.name);
+  }
+  return props.context._value === category.metadata.name;
 };
 
 provide<(category: CategoryTree | Category) => boolean>(
@@ -85,14 +106,23 @@ provide<(category: CategoryTree | Category) => boolean>(
 );
 
 const handleSelect = (category: CategoryTree | Category) => {
-  const currentValue = props.context._value || [];
-  if (currentValue.includes(category.metadata.name)) {
-    props.context.node.input(
-      currentValue.filter((name: string) => name !== category.metadata.name)
-    );
-  } else {
-    props.context.node.input([...currentValue, category.metadata.name]);
+  if (multiple.value) {
+    const currentValue = props.context._value || [];
+    if (currentValue.includes(category.metadata.name)) {
+      props.context.node.input(
+        currentValue.filter((name: string) => name !== category.metadata.name)
+      );
+    } else {
+      props.context.node.input([...currentValue, category.metadata.name]);
+    }
+    return;
   }
+
+  props.context.node.input(
+    category.metadata.name === props.context._value
+      ? ""
+      : category.metadata.name
+  );
 };
 
 const handleKeydown = (e: KeyboardEvent) => {
@@ -198,8 +228,12 @@ const onTextInput = (e: Event) => {
 // delete last category when text input is empty
 const handleDelete = () => {
   if (!text.value) {
-    const selectedTagNames = (props.context._value as string[]) || [];
-    props.context.node.input(selectedTagNames.slice(0, -1));
+    if (multiple.value) {
+      const selectedTagNames = (props.context._value as string[]) || [];
+      props.context.node.input(selectedTagNames.slice(0, -1));
+      return;
+    }
+    props.context.node.input("");
   }
 };
 </script>

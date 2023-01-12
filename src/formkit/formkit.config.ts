@@ -11,11 +11,10 @@ import { menuRadio } from "./inputs/menu-radio";
 import { menuItemSelect } from "./inputs/menu-item-select";
 import { postSelect } from "./inputs/post-select";
 import { singlePageSelect } from "./inputs/singlePage-select";
-import { categorySelect } from "./inputs/category-select";
 import { tagSelect } from "./inputs/tag-select";
 import { categoryCheckbox } from "./inputs/category-checkbox";
 import { tagCheckbox } from "./inputs/tag-checkbox";
-import { postCategorySelect } from "./inputs/category-select/index";
+import { categorySelect } from "./inputs/category-select";
 
 import radioAlt from "./plugins/radio-alt";
 import stopImplicitSubmission from "./plugins/stop-implicit-submission";
@@ -39,7 +38,6 @@ const config: DefaultConfigOptions = {
     singlePageSelect,
     categoryCheckbox,
     tagCheckbox,
-    postCategorySelect,
   },
   locales: { zh },
   locale: "zh",
