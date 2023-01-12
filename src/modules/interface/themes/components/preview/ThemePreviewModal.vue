@@ -153,9 +153,17 @@ const handleSaveConfigMap = async () => {
 
   const configMapToUpdate = convertToSave();
 
-  if (!configMapToUpdate) {
+  if (!configMapToUpdate || !selectedTheme?.value) {
     return;
   }
+
+  const { data: newConfigMap } = await apiClient.theme.updateThemeConfig({
+    name: selectedTheme?.value?.metadata.name,
+    configMap: configMapToUpdate,
+  });
+
+  await handleFetchSettings();
+  configMap.value = newConfigMap;
 
   saving.value = false;
 
@@ -309,7 +317,7 @@ const iframeClasses = computed(() => {
                       configMapFormData &&
                       formSchema
                     "
-                    :id="tab.id"
+                    :id="`preview-setting-${tab.id}`"
                     :key="tab.id"
                     v-model="configMapFormData[tab.id]"
                     :name="tab.id"
@@ -324,12 +332,16 @@ const iframeClasses = computed(() => {
                     />
                   </FormKit>
                 </div>
-                <div v-permission="['system:configmaps:manage']" class="pt-5">
+                <div v-permission="['system:themes:manage']" class="pt-5">
                   <div class="flex justify-start">
                     <VButton
                       :loading="saving"
                       type="secondary"
-                      @click="$formkit.submit(activeSettingTab || '')"
+                      @click="
+                        $formkit.submit(
+                          `preview-setting-${activeSettingTab}` || ''
+                        )
+                      "
                     >
                       保存
                     </VButton>
