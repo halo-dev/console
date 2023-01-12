@@ -22,6 +22,19 @@ const props = defineProps({
   },
 });
 
+const multiple = computed(() => {
+  const { multiple } = props.context;
+  if (multiple === undefined) {
+    return false;
+  }
+
+  if (typeof multiple === "boolean") {
+    return multiple;
+  }
+
+  return multiple === "true";
+});
+
 const postTags = ref<Tag[]>([] as Tag[]);
 const selectedTag = ref<Tag>();
 const dropdownVisible = ref(false);
@@ -69,27 +82,46 @@ const handleFetchTags = async () => {
 };
 
 const selectedTags = computed(() => {
-  const selectedTagNames = (props.context._value as string[]) || [];
-  return selectedTagNames
-    .map((tagName): Tag | undefined => {
-      return postTags.value.find((tag) => tag.metadata.name === tagName);
-    })
-    .filter(Boolean) as Tag[];
+  if (multiple.value) {
+    const selectedTagNames = (props.context._value as string[]) || [];
+    return selectedTagNames
+      .map((tagName): Tag | undefined => {
+        return postTags.value.find((tag) => tag.metadata.name === tagName);
+      })
+      .filter(Boolean) as Tag[];
+  }
+
+  const tag = postTags.value.find(
+    (tag) => tag.metadata.name === props.context._value
+  );
+
+  return [tag].filter(Boolean) as Tag[];
 });
 
 const isSelected = (tag: Tag) => {
-  return (props.context._value || []).includes(tag.metadata.name);
+  if (multiple.value) {
+    return (props.context._value || []).includes(tag.metadata.name);
+  }
+
+  return props.context._value === tag.metadata.name;
 };
 
 const handleSelect = (tag: Tag) => {
-  const currentValue = props.context._value || [];
-  if (currentValue.includes(tag.metadata.name)) {
-    props.context.node.input(
-      currentValue.filter((t) => t !== tag.metadata.name)
-    );
-  } else {
-    props.context.node.input([...currentValue, tag.metadata.name]);
+  if (multiple.value) {
+    const currentValue = props.context._value || [];
+    if (currentValue.includes(tag.metadata.name)) {
+      props.context.node.input(
+        currentValue.filter((t) => t !== tag.metadata.name)
+      );
+    } else {
+      props.context.node.input([...currentValue, tag.metadata.name]);
+    }
+    return;
   }
+
+  props.context.node.input(
+    tag.metadata.name === props.context._value ? "" : tag.metadata.name
+  );
 };
 
 const handleKeydown = (e: KeyboardEvent) => {
@@ -189,8 +221,12 @@ const onTextInput = (e: Event) => {
 // delete last tag when text input is empty
 const handleDelete = () => {
   if (!text.value) {
-    const selectedTagNames = (props.context._value as string[]) || [];
-    props.context.node.input(selectedTagNames.slice(0, -1));
+    if (multiple.value) {
+      const selectedTagNames = (props.context._value as string[]) || [];
+      props.context.node.input(selectedTagNames.slice(0, -1));
+      return;
+    }
+    props.context.node.input("");
   }
 };
 

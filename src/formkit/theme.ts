@@ -91,7 +91,7 @@ const theme: Record<string, Record<string, string>> = {
     content: "flex-1 p-2 col-span-11",
     controls: "bg-gray-200 col-span-1 flex items-center justify-center",
   },
-  postTagSelect: {
+  tagSelect: {
     ...textClassification,
     inner: `${textClassification.inner} !overflow-visible !h-auto min-h-[2.25rem]`,
     input: `w-0 flex-grow outline-0 bg-transparent py-1 px-3 block transition-all appearance-none text-sm antialiased`,

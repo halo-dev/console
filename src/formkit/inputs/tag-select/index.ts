@@ -14,7 +14,7 @@ import {
 import TagSelect from "./TagSelect.vue";
 import { TagSelectSection } from "./sections";
 
-export const postTagSelect: FormKitTypeDefinition = {
+export const tagSelect: FormKitTypeDefinition = {
   schema: outer(
     wrapper(
       label("$label"),
@@ -30,6 +30,7 @@ export const postTagSelect: FormKitTypeDefinition = {
     messages(message("$message.value"))
   ),
   type: "input",
+  props: ["multiple"],
   library: {
     TagSelect: TagSelect,
   },
