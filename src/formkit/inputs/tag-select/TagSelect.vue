@@ -203,16 +203,16 @@ onMounted(handleFetchTags);
     :class="context.classes['post-tags-wrapper']"
     @keydown="handleKeydown"
   >
-    <div class="formkit-post-tags flex w-full flex-wrap items-center">
+    <div :class="context.classes['post-tags']">
       <div
         v-for="(tag, index) in selectedTags"
         :key="index"
-        class="inline-flex items-center p-1"
+        :class="context.classes['post-tag-wrapper']"
       >
         <PostTag :tag="tag" rounded>
           <template #rightIcon>
             <IconClose
-              class="h-4 w-4 cursor-pointer text-gray-600 hover:text-gray-900"
+              :class="context.classes['post-tag-close']"
               @click="handleSelect(tag)"
             />
           </template>
