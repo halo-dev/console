@@ -11,6 +11,9 @@ import {
 } from "@halo-dev/components";
 import { onClickOutside } from "@vueuse/core";
 import Fuse from "fuse.js";
+import { usePermission } from "@/utils/permission";
+
+const { currentUserHasPermission } = usePermission();
 
 const props = defineProps({
   context: {
@@ -148,6 +151,10 @@ const scrollToSelected = () => {
 };
 
 const handleCreateTag = async () => {
+  if (!currentUserHasPermission(["system:posts:manage"])) {
+    return;
+  }
+
   const { data } =
     await apiClient.extension.tag.createcontentHaloRunV1alpha1Tag({
       tag: {
@@ -232,6 +239,7 @@ onMounted(handleFetchTags);
       <ul class="p-1">
         <li
           v-if="text && searchResults.length <= 0"
+          v-permission="['system:posts:manage']"
           class="group flex cursor-pointer items-center justify-between rounded bg-gray-100 p-2"
           @click="handleCreateTag"
         >
