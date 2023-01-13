@@ -206,15 +206,18 @@ export function useSettingFormConvert(
     )[];
   });
 
-  watch([() => setting.value, () => configMap.value], () => {
-    const { forms } = setting.value?.spec || {};
+  watch(
+    () => configMap.value,
+    () => {
+      const { forms } = setting.value?.spec || {};
 
-    forms?.forEach((form) => {
-      configMapFormData.value[form.group] = JSON.parse(
-        configMap.value?.data?.[form.group] || "{}"
-      );
-    });
-  });
+      forms?.forEach((form) => {
+        configMapFormData.value[form.group] = JSON.parse(
+          configMap.value?.data?.[form.group] || "{}"
+        );
+      });
+    }
+  );
 
   function convertToSave() {
     const configMapToUpdate = cloneDeep(configMap.value);
