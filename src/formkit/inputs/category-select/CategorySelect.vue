@@ -59,14 +59,26 @@ onClickOutside(wrapperRef, () => {
 let fuse: Fuse<Category> | undefined = undefined;
 
 const searchResults = computed(() => {
-  if (!fuse || !text.value) {
+  if (!text.value) {
     return categories.value;
   }
-  return fuse?.search(text.value).map((item) => item.item);
+  return fuse?.search(text.value).map((item) => item.item) || [];
 });
 
 watch(
-  () => categoriesTree.value,
+  () => searchResults.value,
+  (value) => {
+    if (value?.length > 0 && text.value) {
+      selectedCategory.value = value[0];
+      scrollToSelected();
+    } else {
+      selectedCategory.value = undefined;
+    }
+  }
+);
+
+watch(
+  () => categories.value,
   () => {
     fuse = new Fuse(categories.value, {
       keys: ["spec.displayName", "spec.slug"],
