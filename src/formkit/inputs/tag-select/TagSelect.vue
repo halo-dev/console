@@ -60,9 +60,11 @@ const searchResults = computed(() => {
 watch(
   () => searchResults.value,
   (value) => {
-    if (value?.length > 0) {
+    if (value?.length > 0 && text.value) {
       selectedTag.value = value[0];
       scrollToSelected();
+    } else {
+      selectedTag.value = undefined;
     }
   }
 );
