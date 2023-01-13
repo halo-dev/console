@@ -77,6 +77,7 @@ import {
   IconCharacterRecognition,
   IconLink,
   IconUserFollow,
+  Toast,
   VTabItem,
   VTabs,
 } from "@halo-dev/components";
@@ -100,6 +101,7 @@ import {
 } from "vue";
 import { formatDatetime } from "@/utils/date";
 import { useAttachmentSelect } from "@/modules/contents/attachments/composables/use-attachment";
+import { apiClient } from "@/utils/api-client";
 
 const props = withDefaults(
   defineProps<{
@@ -142,6 +144,20 @@ const selectedHeadingNode = ref<HeadingNode>();
 const extraActiveId = ref("toc");
 const attachmentSelectorModal = ref(false);
 
+function getFilesFromClipboardEvent(e: ClipboardEvent): File[] {
+  const items = e.clipboardData?.items;
+  const files: File[] = [];
+  if (items) {
+    for (let i = 0; i < items.length; i++) {
+      const file = items[i].getAsFile();
+      if (!file) continue;
+      files.push(file);
+    }
+  }
+
+  return files;
+}
+
 const editor = useEditor({
   content: props.raw,
   extensions: [
@@ -164,6 +180,7 @@ const editor = useEditor({
     ExtensionText,
     ExtensionImage.configure({
       inline: true,
+      allowBase64: false,
       HTMLAttributes: {
         loading: "lazy",
       },
@@ -242,7 +259,95 @@ const editor = useEditor({
       handleGenerateTableOfContent();
     });
   },
+  editorProps: {
+    handleDrop: (view, event, _, moved) => {
+      if (!moved && event.dataTransfer && event.dataTransfer.files) {
+        const files = Array.from(event.dataTransfer.files);
+
+        files.forEach((file, index) => {
+          handleUploadImage(file, (url: string) => {
+            const { schema } = view.state;
+            const coordinates = view.posAtCoords({
+              left: event.clientX,
+              top: event.clientY,
+            });
+
+            if (!coordinates) return;
+
+            const node = schema.nodes.image.create({
+              src: url,
+            });
+
+            const transaction = view.state.tr.insert(
+              coordinates.pos + index,
+              node
+            );
+
+            editor.value?.view.dispatch(transaction);
+          });
+        });
+
+        return true;
+      }
+      return false;
+    },
+    handlePaste: (view, event, slice) => {
+      const images = getFilesFromClipboardEvent(event).filter(
+        (file) => file.type.indexOf("image") !== -1
+      );
+
+      images.forEach((file) => {
+        handleUploadImage(file, (url: string) => {
+          editor.value
+            ?.chain()
+            .focus()
+            .insertContent([
+              {
+                type: "image",
+                attrs: {
+                  url: url,
+                },
+              },
+            ])
+            .run();
+        });
+      });
+    },
+  },
 });
+
+const handleUploadImage = (file: File, callback: (url: string) => void) => {
+  Promise.all([
+    apiClient.extension.storage.policy.liststorageHaloRunV1alpha1Policy({
+      page: 1,
+      size: 1,
+    }),
+    apiClient.extension.storage.group.liststorageHaloRunV1alpha1Group({
+      page: 1,
+      size: 1,
+    }),
+  ]).then((responses) => {
+    const policy = responses[0].data.items[0];
+    const group = responses[1].data.items[0];
+
+    if (!policy) {
+      Toast.warning("目前没有可用的存储策略");
+      return;
+    }
+
+    apiClient.attachment
+      .uploadAttachment({
+        file,
+        policyName: policy.metadata.name,
+        groupName: group ? group.metadata.name : "",
+      })
+      .then((response) => {
+        callback(
+          response.data.metadata.annotations?.["storage.halo.run/uri"] || ""
+        );
+      });
+  });
+};
 
 const toolbarMenuItems = computed(() => {
   if (!editor.value) return [];
