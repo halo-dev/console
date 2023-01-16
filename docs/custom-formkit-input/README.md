@@ -24,6 +24,8 @@
     1. multiple: 是否多选，默认为 `false`
 - `categoryCheckbox`：选择多个分类
 - `tagSelect`：选择标签
+  - 参数
+    1. multiple: 是否多选，默认为 `false`
 - `tagCheckbox`：选择多个标签
 
 在 Vue 单组件中使用：

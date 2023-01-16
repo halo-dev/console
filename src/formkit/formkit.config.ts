@@ -12,9 +12,9 @@ import { menuItemSelect } from "./inputs/menu-item-select";
 import { postSelect } from "./inputs/post-select";
 import { singlePageSelect } from "./inputs/singlePage-select";
 import { tagSelect } from "./inputs/tag-select";
+import { categorySelect } from "./inputs/category-select";
 import { categoryCheckbox } from "./inputs/category-checkbox";
 import { tagCheckbox } from "./inputs/tag-checkbox";
-import { categorySelect } from "./inputs/category-select";
 
 import radioAlt from "./plugins/radio-alt";
 import stopImplicitSubmission from "./plugins/stop-implicit-submission";

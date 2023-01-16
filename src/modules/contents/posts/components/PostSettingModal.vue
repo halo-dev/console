@@ -277,7 +277,8 @@ const annotationsFormRef = ref<InstanceType<typeof AnnotationsForm>>();
               v-model="formState.spec.tags"
               label="标签"
               name="tags"
-              type="tagCheckbox"
+              type="tagSelect"
+              :multiple="true"
             />
             <FormKit
               v-model="formState.spec.excerpt.autoGenerate"
