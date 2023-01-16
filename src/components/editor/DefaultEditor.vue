@@ -260,11 +260,19 @@ const editor = useEditor({
     });
   },
   editorProps: {
-    handleDrop: (view, event, _, moved) => {
+    handleDrop: (view, event: DragEvent, _, moved) => {
       if (!moved && event.dataTransfer && event.dataTransfer.files) {
-        const files = Array.from(event.dataTransfer.files);
+        const images = Array.from(event.dataTransfer.files).filter((file) =>
+          file.type.startsWith("image/")
+        ) as File[];
 
-        files.forEach((file, index) => {
+        if (images.length === 0) {
+          return;
+        }
+
+        event.preventDefault();
+
+        images.forEach((file, index) => {
           handleUploadImage(file, (url: string) => {
             const { schema } = view.state;
             const coordinates = view.posAtCoords({
@@ -291,10 +299,20 @@ const editor = useEditor({
       }
       return false;
     },
-    handlePaste: (view, event, slice) => {
-      const images = getFilesFromClipboardEvent(event).filter(
-        (file) => file.type.indexOf("image") !== -1
-      );
+    handlePaste: (view, event: ClipboardEvent, slice) => {
+      const images = Array.from(event.clipboardData?.items || [])
+        .map((item) => {
+          return item.getAsFile();
+        })
+        .filter((file) => {
+          return file && file.type.startsWith("image/");
+        }) as File[];
+
+      if (images.length === 0) {
+        return;
+      }
+
+      event.preventDefault();
 
       images.forEach((file) => {
         handleUploadImage(file, (url: string) => {
@@ -305,7 +323,7 @@ const editor = useEditor({
               {
                 type: "image",
                 attrs: {
-                  url: url,
+                  src: url,
                 },
               },
             ])
@@ -317,36 +335,30 @@ const editor = useEditor({
 });
 
 const handleUploadImage = (file: File, callback: (url: string) => void) => {
-  Promise.all([
-    apiClient.extension.storage.policy.liststorageHaloRunV1alpha1Policy({
+  apiClient.extension.storage.policy
+    .liststorageHaloRunV1alpha1Policy({
       page: 1,
       size: 1,
-    }),
-    apiClient.extension.storage.group.liststorageHaloRunV1alpha1Group({
-      page: 1,
-      size: 1,
-    }),
-  ]).then((responses) => {
-    const policy = responses[0].data.items[0];
-    const group = responses[1].data.items[0];
+    })
+    .then((response) => {
+      const policy = response.data.items[0];
 
-    if (!policy) {
-      Toast.warning("目前没有可用的存储策略");
-      return;
-    }
+      if (!policy) {
+        Toast.warning("目前没有可用的存储策略");
+        return;
+      }
 
-    apiClient.attachment
-      .uploadAttachment({
-        file,
-        policyName: policy.metadata.name,
-        groupName: group ? group.metadata.name : "",
-      })
-      .then((response) => {
-        callback(
-          response.data.metadata.annotations?.["storage.halo.run/uri"] || ""
-        );
-      });
-  });
+      apiClient.attachment
+        .uploadAttachment({
+          file,
+          policyName: policy.metadata.name,
+        })
+        .then((response) => {
+          callback(
+            response.data.metadata.annotations?.["storage.halo.run/uri"] || ""
+          );
+        });
+    });
 };
 
 const toolbarMenuItems = computed(() => {
