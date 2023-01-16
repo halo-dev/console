@@ -82,7 +82,7 @@ await handleFetchConfigMap();
           />
         </FormKit>
       </div>
-      <div v-permission="['system:configmaps:manage']" class="pt-5">
+      <div v-permission="['system:plugins:manage']" class="pt-5">
         <div class="flex justify-start">
           <VButton
             :loading="saving"
