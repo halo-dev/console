@@ -102,6 +102,10 @@ import {
 import { formatDatetime } from "@/utils/date";
 import { useAttachmentSelect } from "@/modules/contents/attachments/composables/use-attachment";
 import { apiClient } from "@/utils/api-client";
+import * as fastq from "fastq";
+import type { queueAsPromised } from "fastq";
+import type { Attachment } from "@halo-dev/api-client";
+import { useFetchAttachmentPolicy } from "@/modules/contents/attachments/composables/use-attachment-policy";
 
 const props = withDefaults(
   defineProps<{
@@ -143,20 +147,6 @@ const headingNodes = ref<HeadingNode[]>();
 const selectedHeadingNode = ref<HeadingNode>();
 const extraActiveId = ref("toc");
 const attachmentSelectorModal = ref(false);
-
-function getFilesFromClipboardEvent(e: ClipboardEvent): File[] {
-  const items = e.clipboardData?.items;
-  const files: File[] = [];
-  if (items) {
-    for (let i = 0; i < items.length; i++) {
-      const file = items[i].getAsFile();
-      if (!file) continue;
-      files.push(file);
-    }
-  }
-
-  return files;
-}
 
 const editor = useEditor({
   content: props.raw,
@@ -273,25 +263,28 @@ const editor = useEditor({
         event.preventDefault();
 
         images.forEach((file, index) => {
-          handleUploadImage(file, (url: string) => {
-            const { schema } = view.state;
-            const coordinates = view.posAtCoords({
-              left: event.clientX,
-              top: event.clientY,
-            });
+          uploadQueue.push({
+            file,
+            process: (url: string) => {
+              const { schema } = view.state;
+              const coordinates = view.posAtCoords({
+                left: event.clientX,
+                top: event.clientY,
+              });
 
-            if (!coordinates) return;
+              if (!coordinates) return;
 
-            const node = schema.nodes.image.create({
-              src: url,
-            });
+              const node = schema.nodes.image.create({
+                src: url,
+              });
 
-            const transaction = view.state.tr.insert(
-              coordinates.pos + index,
-              node
-            );
+              const transaction = view.state.tr.insert(
+                coordinates.pos + index,
+                node
+              );
 
-            editor.value?.view.dispatch(transaction);
+              editor.value?.view.dispatch(transaction);
+            },
           });
         });
 
@@ -315,50 +308,83 @@ const editor = useEditor({
       event.preventDefault();
 
       images.forEach((file) => {
-        handleUploadImage(file, (url: string) => {
-          editor.value
-            ?.chain()
-            .focus()
-            .insertContent([
-              {
-                type: "image",
-                attrs: {
-                  src: url,
+        uploadQueue.push({
+          file,
+          process: (url: string) => {
+            editor.value
+              ?.chain()
+              .focus()
+              .insertContent([
+                {
+                  type: "image",
+                  attrs: {
+                    src: url,
+                  },
                 },
-              },
-            ])
-            .run();
+              ])
+              .run();
+          },
         });
       });
     },
   },
 });
 
-const handleUploadImage = (file: File, callback: (url: string) => void) => {
-  apiClient.extension.storage.policy
-    .liststorageHaloRunV1alpha1Policy({
-      page: 1,
-      size: 1,
-    })
-    .then((response) => {
-      const policy = response.data.items[0];
+// image drag and paste upload
+const { policies } = useFetchAttachmentPolicy({ fetchOnMounted: true });
 
-      if (!policy) {
-        Toast.warning("目前没有可用的存储策略");
-        return;
+type Task = {
+  file: File;
+  process: (permalink: string) => void;
+};
+
+const uploadQueue: queueAsPromised<Task> = fastq.promise(asyncWorker, 1);
+
+async function asyncWorker(arg: Task): Promise<void> {
+  if (!policies.value.length) {
+    Toast.warning("目前没有可用的存储策略");
+    return;
+  }
+
+  const { data: attachmentData } = await apiClient.attachment.uploadAttachment({
+    file: arg.file,
+    policyName: policies.value[0].metadata.name,
+  });
+
+  const permalink = await handleFetchPermalink(attachmentData, 3);
+
+  if (permalink) {
+    arg.process(permalink);
+  }
+}
+
+const handleFetchPermalink = async (
+  attachment: Attachment,
+  maxRetry: number
+): Promise<string | undefined> => {
+  if (maxRetry === 0) {
+    Toast.error(`获取附件永久链接失败：${attachment.spec.displayName}`);
+    return undefined;
+  }
+
+  const { data } =
+    await apiClient.extension.storage.attachment.getstorageHaloRunV1alpha1Attachment(
+      {
+        name: attachment.metadata.name,
       }
+    );
 
-      apiClient.attachment
-        .uploadAttachment({
-          file,
-          policyName: policy.metadata.name,
-        })
-        .then((response) => {
-          callback(
-            response.data.metadata.annotations?.["storage.halo.run/uri"] || ""
-          );
-        });
-    });
+  if (data.status?.permalink) {
+    return data.status.permalink;
+  }
+
+  return await new Promise((resolve) => {
+    const timer = setTimeout(() => {
+      const permalink = handleFetchPermalink(attachment, maxRetry - 1);
+      clearTimeout(timer);
+      resolve(permalink);
+    }, 300);
+  });
 };
 
 const toolbarMenuItems = computed(() => {
