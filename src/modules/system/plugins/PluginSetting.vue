@@ -46,6 +46,7 @@ const handleSaveConfigMap = async () => {
   saving.value = true;
   const configMapToUpdate = convertToSave();
   if (!configMapToUpdate || !plugin?.value) {
+    saving.value = false;
     return;
   }
 
