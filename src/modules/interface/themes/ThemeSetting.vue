@@ -54,6 +54,7 @@ const handleSaveConfigMap = async () => {
   const configMapToUpdate = convertToSave();
 
   if (!configMapToUpdate || !selectedTheme?.value) {
+    saving.value = false;
     return;
   }
 
