@@ -270,13 +270,15 @@ const annotationsFormRef = ref<InstanceType<typeof AnnotationsForm>>();
               v-model="formState.spec.categories"
               label="分类目录"
               name="categories"
-              type="categoryCheckbox"
+              type="categorySelect"
+              :multiple="true"
             />
             <FormKit
               v-model="formState.spec.tags"
               label="标签"
               name="tags"
-              type="tagCheckbox"
+              type="tagSelect"
+              :multiple="true"
             />
             <FormKit
               v-model="formState.spec.excerpt.autoGenerate"
