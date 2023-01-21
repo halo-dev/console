@@ -192,7 +192,7 @@ const { handleGenerateSlug } = useSlugify(
             ></FormKit>
             <FormKit
               v-model="formState.spec.slug"
-              help="通常作为分类访问地址标识"
+              help="通常用于生成分类的固定链接"
               name="slug"
               label="别名"
               type="text"

@@ -197,7 +197,7 @@ const { handleGenerateSlug } = useSlugify(
             ></FormKit>
             <FormKit
               v-model="formState.spec.slug"
-              help="通常作为标签访问地址标识"
+              help="通常用于生成标签的固定链接"
               label="别名"
               name="slug"
               type="text"

@@ -323,6 +323,7 @@ const { handleGenerateSlug } = useSlugify(
               name="slug"
               type="text"
               validation="required|length:0,100"
+              help="通常用于生成页面的固定链接"
             >
               <template #suffix>
                 <div
