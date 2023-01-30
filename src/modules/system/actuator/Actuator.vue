@@ -1,14 +1,18 @@
 <script lang="ts" setup>
 import {
   IconTerminalBoxLine,
+  IconClipboardLine,
   VAlert,
   VPageHeader,
   VCard,
+  VButton,
+  Toast,
 } from "@halo-dev/components";
 import { computed, onMounted, ref } from "vue";
 import type { Info, GlobalInfo, Startup } from "./types";
 import axios from "axios";
 import { formatDatetime } from "@/utils/date";
+import { useClipboard } from "@vueuse/core";
 
 const info = ref<Info>();
 const globalInfo = ref<GlobalInfo>();
@@ -58,12 +62,43 @@ onMounted(() => {
   handleFetchActuatorGlobalInfo();
   handleFetchActuatorStartup();
 });
+
+// copy system information to clipboard
+const { copy, isSupported } = useClipboard();
+
+const handleCopy = () => {
+  if (!isSupported.value) {
+    Toast.warning("当前浏览器不支持复制");
+  }
+
+  const text = `
+- 外部访问地址：${globalInfo.value?.externalUrl}
+- 启动时间：${formatDatetime(startup.value?.timeline.startTime)}
+- Halo 版本：${info.value?.build?.version}
+- 构建时间：${formatDatetime(info.value?.build?.time)}
+- Git Commit：${info.value?.git?.commit.id}
+- Java：${info.value?.java.runtime.name} / ${info.value?.java.runtime.version}
+- 操作系统：${info.value?.os.name} / ${info.value?.os.version}
+  `;
+
+  copy(text);
+
+  Toast.success("复制成功");
+};
 </script>
 
 <template>
   <VPageHeader title="系统信息">
     <template #icon>
       <IconTerminalBoxLine class="mr-2 self-center" />
+    </template>
+    <template #actions>
+      <VButton size="sm" @click="handleCopy">
+        <template #icon>
+          <IconClipboardLine class="h-full w-full" />
+        </template>
+        复制
+      </VButton>
     </template>
   </VPageHeader>
 
@@ -124,32 +159,6 @@ onMounted(() => {
               <dt class="text-sm font-medium text-gray-900">语言</dt>
               <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
                 {{ globalInfo?.locale }}
-              </dd>
-            </div>
-            <div
-              class="bg-white px-4 py-5 hover:bg-gray-50 sm:grid sm:grid-cols-6 sm:gap-4 sm:px-6"
-            >
-              <dt class="text-sm font-medium text-gray-900">允许评论</dt>
-              <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                {{ globalInfo?.allowComments ? "允许" : "不允许" }}
-              </dd>
-            </div>
-            <div
-              class="bg-white px-4 py-5 hover:bg-gray-50 sm:grid sm:grid-cols-6 sm:gap-4 sm:px-6"
-            >
-              <dt class="text-sm font-medium text-gray-900">
-                允许非注册用户评论
-              </dt>
-              <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                {{ globalInfo?.allowAnonymousComments ? "允许" : "不允许" }}
-              </dd>
-            </div>
-            <div
-              class="bg-white px-4 py-5 hover:bg-gray-50 sm:grid sm:grid-cols-6 sm:gap-4 sm:px-6"
-            >
-              <dt class="text-sm font-medium text-gray-900">允许注册</dt>
-              <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
-                {{ globalInfo?.allowRegistration ? "允许" : "不允许" }}
               </dd>
             </div>
           </dl>

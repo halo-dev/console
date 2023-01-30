@@ -57,6 +57,7 @@ import IconRocketLine from "~icons/ri/rocket-line";
 import IconArrowUpCircleLine from "~icons/ri/arrow-up-circle-line";
 import IconArrowDownCircleLine from "~icons/ri/arrow-down-circle-line";
 import IconTerminalBoxLine from "~icons/ri/terminal-box-line";
+import IconClipboardLine from "~icons/ri/clipboard-line";
 
 export {
   IconDashboard,
@@ -118,4 +119,5 @@ export {
   IconArrowUpCircleLine,
   IconArrowDownCircleLine,
   IconTerminalBoxLine,
+  IconClipboardLine,
 };
