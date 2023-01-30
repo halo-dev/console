@@ -125,7 +125,7 @@ const handleCopy = () => {
                   {{ globalInfo?.externalUrl }}
                 </span>
                 <VAlert
-                  v-if="isExternalUrlValid"
+                  v-if="!isExternalUrlValid"
                   class="mt-3"
                   type="warning"
                   title="警告"
