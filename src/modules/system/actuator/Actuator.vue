@@ -88,7 +88,7 @@ const handleCopy = () => {
 </script>
 
 <template>
-  <VPageHeader title="系统信息">
+  <VPageHeader title="系统概览">
     <template #icon>
       <IconTerminalBoxLine class="mr-2 self-center" />
     </template>
