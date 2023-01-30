@@ -204,7 +204,7 @@ const handleFetchContent = async () => {
   if (!formState.value.page.spec.headSnapshot) {
     return;
   }
-  const { data } = await apiClient.post.fetchPostHeadContent({
+  const { data } = await apiClient.singlePage.fetchSinglePageHeadContent({
     name: formState.value.page.metadata.name,
   });
 
