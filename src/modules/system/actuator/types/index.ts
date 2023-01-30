@@ -3,6 +3,7 @@ export interface GlobalInfo {
   timeZone: string;
   locale: string;
   allowComments: boolean;
+  allowAnonymousComments: boolean;
   allowRegistration: boolean;
 }
 

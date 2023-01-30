@@ -137,6 +137,16 @@ onMounted(() => {
             <div
               class="bg-white px-4 py-5 hover:bg-gray-50 sm:grid sm:grid-cols-6 sm:gap-4 sm:px-6"
             >
+              <dt class="text-sm font-medium text-gray-900">
+                允许非注册用户评论
+              </dt>
+              <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                {{ globalInfo?.allowAnonymousComments ? "允许" : "不允许" }}
+              </dd>
+            </div>
+            <div
+              class="bg-white px-4 py-5 hover:bg-gray-50 sm:grid sm:grid-cols-6 sm:gap-4 sm:px-6"
+            >
               <dt class="text-sm font-medium text-gray-900">允许注册</dt>
               <dd class="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
                 {{ globalInfo?.allowRegistration ? "允许" : "不允许" }}
