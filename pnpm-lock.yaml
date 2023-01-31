@@ -16,7 +16,7 @@ importers:
       '@halo-dev/api-client': 0.0.71
       '@halo-dev/components': workspace:*
       '@halo-dev/console-shared': workspace:*
-      '@halo-dev/richtext-editor': 0.0.0-alpha.18-2
+      '@halo-dev/richtext-editor': 0.0.0-alpha.19
       '@iconify-json/mdi': ^1.1.36
       '@iconify-json/vscode-icons': ^1.1.16
       '@rushstack/eslint-patch': ^1.2.0
@@ -113,7 +113,7 @@ importers:
       '@halo-dev/api-client': 0.0.71
       '@halo-dev/components': link:packages/components
       '@halo-dev/console-shared': link:packages/shared
-      '@halo-dev/richtext-editor': 0.0.0-alpha.18-2_oau5uimcdfyintci7kxkcutjea
+      '@halo-dev/richtext-editor': 0.0.0-alpha.19_oau5uimcdfyintci7kxkcutjea
       '@tiptap/extension-character-count': 2.0.0-beta.202_f4ffqkgz5d3wev7su7t7l2rrua
       '@uppy/core': 3.0.4
       '@uppy/dashboard': 3.2.0_@uppy+core@3.0.4
@@ -2219,8 +2219,8 @@ packages:
     resolution: {integrity: sha512-KbB3Ydws0VGeYNzpCgnf8WBviMMzo9ZkCjoONPyGgRbGLu8znoi2p0Pz9Mi4jig6xA7A+XlhUT6uNpIPRcO/Ug==}
     dev: false
 
-  /@halo-dev/richtext-editor/0.0.0-alpha.18-2_oau5uimcdfyintci7kxkcutjea:
-    resolution: {integrity: sha512-zho+LRs+5xg7YTcCQxJ4HPcdH+a+EbbfAKAO55mTFzD/NMsalYXt9VhhPEM8m84mEuxWKO/IEShwN3tnBmdJjQ==}
+  /@halo-dev/richtext-editor/0.0.0-alpha.19_oau5uimcdfyintci7kxkcutjea:
+    resolution: {integrity: sha512-fJpHCKKo4U0cA+VnSjLK7Ob8q+IuAF4BsMfMyRFVnKxcViAALxAV+USvn6KCQsjh4RD64P/5vNFgmJ/dA4n/8w==}
     peerDependencies:
       vue: ^3.2.37
     dependencies:
@@ -9687,7 +9687,7 @@ packages:
         optional: true
     dependencies:
       esbuild: 0.15.9
-      postcss: 8.4.19
+      postcss: 8.4.21
       resolve: 1.22.1
       rollup: 2.79.1
     optionalDependencies:
