@@ -125,8 +125,8 @@ const isHoveredReply = computed(() => {
       <VEntityField>
         <template #description>
           <div class="flex flex-col gap-2">
-            <div class="w-96 text-sm text-gray-800">
-              <p>
+            <div class="text-sm text-gray-800">
+              <p class="break-all">
                 <a
                   v-if="quoteReply"
                   class="mr-1 inline-flex flex-row items-center gap-1 rounded bg-gray-200 py-0.5 px-1 text-xs font-medium text-gray-600 hover:text-blue-500 hover:underline"
