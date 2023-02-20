@@ -78,6 +78,7 @@ const handleCopy = () => {
 - 构建时间：${formatDatetime(info.value?.build?.time)}
 - Git Commit：${info.value?.git?.commit.id}
 - Java：${info.value?.java.runtime.name} / ${info.value?.java.runtime.version}
+- 数据库：${info.value?.database.name} / ${info.value?.database.version}
 - 操作系统：${info.value?.os.name} / ${info.value?.os.version}
   `;
 
