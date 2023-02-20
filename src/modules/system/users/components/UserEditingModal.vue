@@ -173,7 +173,17 @@ const handleCreateUser = async () => {
               label="用户名"
               type="text"
               name="name"
-              validation="required|alphanumeric|length:0,50"
+              :validation="[
+                ['required'],
+                ['length:0,50'],
+                [
+                  'matches',
+                  /^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-\_]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$/,
+                ],
+              ]"
+              :validation-messages="{
+                matches: '请输入有效的用户名',
+              }"
             ></FormKit>
             <FormKit
               id="displayNameInput"
