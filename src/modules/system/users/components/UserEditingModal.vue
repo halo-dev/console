@@ -178,7 +178,7 @@ const handleCreateUser = async () => {
                 ['length:0,50'],
                 [
                   'matches',
-                  /^[a-z0-9]([-a-z0-9]*[a-z0-9])?(.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$/,
+                  /^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$/,
                 ],
               ]"
               :validation-messages="{
