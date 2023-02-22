@@ -3,7 +3,7 @@ import { VButton, VModal, VSpace, VTag } from "@halo-dev/components";
 import LazyImage from "@/components/image/LazyImage.vue";
 import type { Attachment, Policy } from "@halo-dev/api-client";
 import prettyBytes from "pretty-bytes";
-import { ref, watch, watchEffect } from "vue";
+import { ref, watchEffect } from "vue";
 import { apiClient } from "@/utils/api-client";
 import { isImage } from "@/utils/image";
 import { formatDatetime } from "@/utils/date";
@@ -27,7 +27,7 @@ const emit = defineEmits<{
   (event: "close"): void;
 }>();
 
-const { groups, handleFetchGroups } = useFetchAttachmentGroup();
+const { groups } = useFetchAttachmentGroup();
 
 const policy = ref<Policy>();
 const onlyPreview = ref(false);
@@ -46,17 +46,8 @@ watchEffect(async () => {
   }
 });
 
-watch(
-  () => props.visible,
-  (newValue) => {
-    if (newValue) {
-      handleFetchGroups();
-    }
-  }
-);
-
 const getGroupName = (name: string | undefined) => {
-  const group = groups.value.find((group) => group.metadata.name === name);
+  const group = groups.value?.find((group) => group.metadata.name === name);
   return group?.spec.displayName || name;
 };
 
