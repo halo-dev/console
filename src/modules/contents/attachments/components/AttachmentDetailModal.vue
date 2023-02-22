@@ -1,13 +1,14 @@
 <script lang="ts" setup>
 import { VButton, VModal, VSpace, VTag } from "@halo-dev/components";
 import LazyImage from "@/components/image/LazyImage.vue";
-import type { Attachment, Policy } from "@halo-dev/api-client";
+import type { Attachment } from "@halo-dev/api-client";
 import prettyBytes from "pretty-bytes";
-import { ref, watchEffect } from "vue";
+import { computed, ref } from "vue";
 import { apiClient } from "@/utils/api-client";
 import { isImage } from "@/utils/image";
 import { formatDatetime } from "@/utils/date";
 import { useFetchAttachmentGroup } from "../composables/use-attachment-group";
+import { useQuery } from "@tanstack/vue-query";
 
 const props = withDefaults(
   defineProps<{
@@ -29,21 +30,28 @@ const emit = defineEmits<{
 
 const { groups } = useFetchAttachmentGroup();
 
-const policy = ref<Policy>();
 const onlyPreview = ref(false);
 
-watchEffect(async () => {
-  if (props.attachment) {
-    const { policyName } = props.attachment.spec;
-    if (!policyName) {
+const policyName = computed(() => {
+  return props.attachment?.spec.policyName;
+});
+
+const { data: policy } = useQuery({
+  queryKey: ["attachment-policy", policyName],
+  queryFn: async () => {
+    if (!policyName.value) {
       return;
     }
+
     const { data } =
       await apiClient.extension.storage.policy.getstorageHaloRunV1alpha1Policy({
-        name: policyName,
+        name: policyName.value,
       });
-    policy.value = data;
-  }
+
+    return data;
+  },
+  refetchOnWindowFocus: false,
+  enabled: computed(() => !!policyName.value),
 });
 
 const getGroupName = (name: string | undefined) => {
@@ -54,7 +62,6 @@ const getGroupName = (name: string | undefined) => {
 const onVisibleChange = (visible: boolean) => {
   emit("update:visible", visible);
   if (!visible) {
-    policy.value = undefined;
     onlyPreview.value = false;
     emit("close");
   }
