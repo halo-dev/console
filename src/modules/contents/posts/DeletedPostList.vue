@@ -132,6 +132,7 @@ const handleRecovery = async (post: Post) => {
         name: postToUpdate.metadata.name,
         post: postToUpdate,
       });
+
       await refetch();
 
       Toast.success("恢复成功");
@@ -154,10 +155,15 @@ const handleRecoveryInBatch = async () => {
             return Promise.resolve();
           }
 
-          post.spec.deleted = false;
           return apiClient.extension.post.updatecontentHaloRunV1alpha1Post({
             name: post.metadata.name,
-            post: post,
+            post: {
+              ...post,
+              spec: {
+                ...post.spec,
+                deleted: false,
+              },
+            },
           });
         })
       );

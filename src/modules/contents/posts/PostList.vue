@@ -399,18 +399,8 @@ const handleDeleteInBatch = async () => {
     onConfirm: async () => {
       await Promise.all(
         selectedPostNames.value.map((name) => {
-          const post = posts.value?.find(
-            (item) => item.post.metadata.name === name
-          )?.post;
-
-          if (!post) {
-            return Promise.resolve();
-          }
-
-          post.spec.deleted = true;
-          return apiClient.extension.post.updatecontentHaloRunV1alpha1Post({
-            name: post.metadata.name,
-            post: post,
+          return apiClient.post.recyclePost({
+            name,
           });
         })
       );
