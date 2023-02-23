@@ -220,11 +220,6 @@ const onUploadModalClose = () => {
   handleFetchAttachments();
 };
 
-const onGroupChange = () => {
-  handleReset();
-  handleFetchAttachments();
-};
-
 const getPolicyName = (name: string | undefined) => {
   const policy = policies.value?.find((p) => p.metadata.name === name);
   return policy?.spec.displayName;
@@ -565,7 +560,7 @@ onMounted(() => {
           <div :style="`${viewType === 'list' ? 'padding:12px 16px 0' : ''}`">
             <AttachmentGroupList
               v-model:selected-group="selectedGroup"
-              @select="onGroupChange"
+              @select="handleReset"
               @update="handleFetchGroups"
               @reload-attachments="handleFetchAttachments"
             />

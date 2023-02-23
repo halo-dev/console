@@ -177,6 +177,7 @@ watch(
 );
 
 onMounted(async () => {
+  await handleFetchGroups();
   if (routeQuery.value && !props.readonly) {
     const allGroups = [...defaultGroups, ...(groups.value || [])];
     const group = allGroups.find(

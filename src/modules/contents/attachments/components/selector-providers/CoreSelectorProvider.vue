@@ -66,17 +66,12 @@ const handleOpenDetail = (attachment: Attachment) => {
   selectedAttachment.value = attachment;
   detailVisible.value = true;
 };
-
-const onGroupChange = () => {
-  handleReset();
-  handleFetchAttachments();
-};
 </script>
 <template>
   <AttachmentGroupList
     v-model:selected-group="selectedGroup"
     readonly
-    @select="onGroupChange"
+    @select="handleReset"
   />
   <div v-if="attachments?.length" class="mb-5">
     <VButton @click="uploadVisible = true">
