@@ -54,6 +54,7 @@ defineProps<{
   }
 
   .card-body {
+    @apply overflow-x-auto;
     padding: 12px 16px;
   }
 

@@ -313,7 +313,7 @@ function handleClearFilters() {
       <template #header>
         <div class="block w-full bg-gray-50 px-4 py-3">
           <div
-            class="relative flex flex-col items-start sm:flex-row sm:items-center"
+            class="relative flex flex-col flex-wrap items-start sm:flex-row sm:items-center"
           >
             <div
               v-permission="['system:comments:manage']"
@@ -329,11 +329,11 @@ function handleClearFilters() {
             <div class="flex w-full flex-1 items-center sm:w-auto">
               <div
                 v-if="!selectedCommentNames.length"
-                class="flex items-center gap-2"
+                class="flex w-full flex-wrap items-center gap-2 sm:w-auto"
               >
                 <FormKit
                   id="keywordInput"
-                  outer-class="!p-0"
+                  outer-class="!p-0 w-full sm:w-auto"
                   placeholder="输入关键词搜索"
                   type="text"
                   name="keyword"

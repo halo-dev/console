@@ -217,7 +217,7 @@ const handleResetMenuItems = async () => {
   </VPageHeader>
   <div class="m-0 md:m-4">
     <div class="flex flex-col gap-4 sm:flex-row">
-      <div class="w-96">
+      <div class="w-full sm:w-96">
         <MenuList
           ref="menuListRef"
           v-model:selected-menu="selectedMenu"
@@ -228,25 +228,21 @@ const handleResetMenuItems = async () => {
         <VCard :body-class="['!p-0']">
           <template #header>
             <div class="block w-full bg-gray-50 px-4 py-3">
-              <div
-                class="relative flex flex-col items-start sm:flex-row sm:items-center"
-              >
-                <div class="flex w-full flex-1 sm:w-auto">
+              <div class="relative flex flex-wrap items-center justify-between">
+                <div>
                   <span class="text-base font-medium">
                     {{ selectedMenu?.spec.displayName }}
                   </span>
                 </div>
-                <div class="mt-4 flex sm:mt-0">
-                  <VSpace>
-                    <VButton
-                      v-permission="['system:menus:manage']"
-                      size="xs"
-                      type="default"
-                      @click="menuItemEditingModal = true"
-                    >
-                      新增
-                    </VButton>
-                  </VSpace>
+                <div>
+                  <VButton
+                    v-permission="['system:menus:manage']"
+                    size="xs"
+                    type="default"
+                    @click="menuItemEditingModal = true"
+                  >
+                    新增
+                  </VButton>
                 </div>
               </div>
             </div>

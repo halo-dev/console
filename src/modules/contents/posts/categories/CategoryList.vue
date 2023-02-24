@@ -102,7 +102,7 @@ const onEditingModalClose = () => {
       <template #header>
         <div class="block w-full bg-gray-50 px-4 py-3">
           <div
-            class="relative flex flex-col items-start sm:flex-row sm:items-center"
+            class="relative flex flex-col flex-wrap items-start sm:flex-row sm:items-center"
           >
             <div class="flex w-full flex-1 sm:w-auto">
               <span class="text-base font-medium">

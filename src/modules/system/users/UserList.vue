@@ -344,7 +344,7 @@ const hasFilters = computed(() => {
       <template #header>
         <div class="block w-full bg-gray-50 px-4 py-3">
           <div
-            class="relative flex flex-col items-start sm:flex-row sm:items-center"
+            class="relative flex flex-col flex-wrap items-start sm:flex-row sm:items-center"
           >
             <div
               v-permission="['system:users:manage']"
@@ -360,11 +360,11 @@ const hasFilters = computed(() => {
             <div class="flex w-full flex-1 items-center sm:w-auto">
               <div
                 v-if="!selectedUserNames.length"
-                class="flex items-center gap-2"
+                class="flex w-full flex-wrap items-center gap-2 sm:w-auto"
               >
                 <FormKit
                   id="keywordInput"
-                  outer-class="!p-0"
+                  outer-class="!p-0 w-full sm:w-auto"
                   :model-value="keyword"
                   name="keyword"
                   placeholder="输入关键词搜索"
