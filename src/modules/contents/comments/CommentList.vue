@@ -15,14 +15,9 @@ import {
 } from "@halo-dev/components";
 import CommentListItem from "./components/CommentListItem.vue";
 import UserDropdownSelector from "@/components/dropdown-selector/UserDropdownSelector.vue";
-import type {
-  ListedComment,
-  ListedCommentList,
-  User,
-} from "@halo-dev/api-client";
-import { computed, onMounted, ref, watch } from "vue";
+import type { ListedComment, User } from "@halo-dev/api-client";
+import { computed, ref, watch } from "vue";
 import { apiClient } from "@/utils/api-client";
-import { onBeforeRouteLeave } from "vue-router";
 import FilterTag from "@/components/filter/FilterTag.vue";
 import FilterCleanButton from "@/components/filter/FilterCleanButton.vue";
 import { getNode } from "@formkit/core";
@@ -247,15 +242,20 @@ const handleApproveInBatch = async () => {
             ) && !comment.comment.spec.approved
           );
         });
+
         const promises = commentsToUpdate?.map((comment) => {
-          const commentToUpdate = comment.comment;
-          commentToUpdate.spec.approved = true;
-          // TODO: 暂时由前端设置发布时间。see https://github.com/halo-dev/halo/pull/2746
-          commentToUpdate.spec.approvedTime = new Date().toISOString();
           return apiClient.extension.comment.updatecontentHaloRunV1alpha1Comment(
             {
-              name: commentToUpdate.metadata.name,
-              comment: commentToUpdate,
+              name: comment.comment.metadata.name,
+              comment: {
+                ...comment.comment,
+                spec: {
+                  ...comment.comment.spec,
+                  approved: true,
+                  // TODO: 暂时由前端设置发布时间。see https://github.com/halo-dev/halo/pull/2746
+                  approvedTime: new Date().toISOString(),
+                },
+              },
             }
           );
         });

@@ -84,13 +84,17 @@ const handleApproveReplyInBatch = async () => {
           return !reply.reply.spec.approved;
         });
         const promises = repliesToUpdate?.map((reply) => {
-          const replyToUpdate = reply.reply;
-          replyToUpdate.spec.approved = true;
-          // TODO: 暂时由前端设置发布时间。see https://github.com/halo-dev/halo/pull/2746
-          replyToUpdate.spec.approvedTime = new Date().toISOString();
           return apiClient.extension.reply.updatecontentHaloRunV1alpha1Reply({
-            name: replyToUpdate.metadata.name,
-            reply: replyToUpdate,
+            name: reply.reply.metadata.name,
+            reply: {
+              ...reply.reply,
+              spec: {
+                ...reply.reply.spec,
+                approved: true,
+                // TODO: 暂时由前端设置发布时间。see https://github.com/halo-dev/halo/pull/2746
+                approvedTime: new Date().toISOString(),
+              },
+            },
           });
         });
         await Promise.all(promises || []);
@@ -163,12 +167,14 @@ const handleToggleShowReplies = async () => {
   showReplies.value = !showReplies.value;
   if (showReplies.value) {
     // update last read time
-    const commentToUpdate = cloneDeep(props.comment.comment);
-    commentToUpdate.spec.lastReadTime = new Date().toISOString();
-    await apiClient.extension.comment.updatecontentHaloRunV1alpha1Comment({
-      name: commentToUpdate.metadata.name,
-      comment: commentToUpdate,
-    });
+    if (props.comment.comment.status?.unreadReplyCount) {
+      const commentToUpdate = cloneDeep(props.comment.comment);
+      commentToUpdate.spec.lastReadTime = new Date().toISOString();
+      await apiClient.extension.comment.updatecontentHaloRunV1alpha1Comment({
+        name: commentToUpdate.metadata.name,
+        comment: commentToUpdate,
+      });
+    }
   } else {
     emit("reload");
   }
