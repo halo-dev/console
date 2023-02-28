@@ -52,12 +52,7 @@ const handleSubmit = async () => {
     const { data: postData } = await apiClient.post.draftPost({
       postRequest: post as PostRequest,
     });
-
-    try {
-      await apiClient.post.publishPost({ name: postData.metadata.name });
-    } catch (e) {
-      console.error("Publish post failed", e);
-    }
+    await apiClient.post.publishPost({ name: postData.metadata.name });
 
     // Create singlePage
     const { data: singlePageData } = await apiClient.singlePage.draftSinglePage(
@@ -66,13 +61,9 @@ const handleSubmit = async () => {
       }
     );
 
-    try {
-      await apiClient.singlePage.publishSinglePage({
-        name: singlePageData.metadata.name,
-      });
-    } catch (e) {
-      console.error("Publish single page failed", e);
-    }
+    await apiClient.singlePage.publishSinglePage({
+      name: singlePageData.metadata.name,
+    });
 
     // Create menu and menu items
     const menuItemPromises = menuItems.map((item) => {
@@ -85,56 +76,60 @@ const handleSubmit = async () => {
 
     // Install preset plugins
     const { data: presetPlugins } = await apiClient.plugin.listPluginPresets();
-    const installPluginPromises = presetPlugins.map((plugin) => {
-      return apiClient.plugin.installPlugin({
-        source: "PRESET",
-        presetName: plugin.metadata.name as string,
-      });
-    });
-    const installPluginResponses = await Promise.all(installPluginPromises);
 
-    await Promise.all(
-      installPluginResponses.map((response) => {
-        return apiClient.extension.plugin.updatepluginHaloRunV1alpha1Plugin({
-          name: response.data.metadata.name as string,
-          plugin: {
-            ...response.data,
-            spec: {
-              ...response.data.spec,
-              enabled: true,
-            },
-          },
+    const installPluginResponses = await Promise.all(
+      presetPlugins.map((plugin) => {
+        return apiClient.plugin.installPlugin({
+          source: "PRESET",
+          presetName: plugin.metadata.name as string,
         });
       })
     );
 
-    // Create system-states ConfigMap
-    await apiClient.extension.configMap.createv1alpha1ConfigMap({
-      configMap: {
-        metadata: {
-          name: "system-states",
+    for (let i = 0; i < installPluginResponses.length; i++) {
+      const response = installPluginResponses[i];
+      const { data: plugin } =
+        await apiClient.extension.plugin.getpluginHaloRunV1alpha1Plugin({
+          name: response.data.metadata.name,
+        });
+
+      plugin.spec.enabled = true;
+      await apiClient.extension.plugin.updatepluginHaloRunV1alpha1Plugin(
+        {
+          name: response.data.metadata.name as string,
+          plugin,
         },
-        kind: "ConfigMap",
-        apiVersion: "v1alpha1",
-        data: {
-          states: JSON.stringify({ isSetup: true }),
-        },
-      },
-    });
-
-    const systemStateStore = useSystemStatesStore();
-    await systemStateStore.fetchSystemStates();
-    const themeStore = useThemeStore();
-    await themeStore.fetchActivatedTheme();
-
-    router.push({ name: "Dashboard" });
-
-    Toast.success("初始化成功");
+        { mute: true }
+      );
+    }
   } catch (error) {
-    console.error("Failed to setup", error);
-  } finally {
-    loading.value = false;
+    console.error("Failed to initialize preset data", error);
   }
+
+  // Create system-states ConfigMap
+  await apiClient.extension.configMap.createv1alpha1ConfigMap({
+    configMap: {
+      metadata: {
+        name: "system-states",
+      },
+      kind: "ConfigMap",
+      apiVersion: "v1alpha1",
+      data: {
+        states: JSON.stringify({ isSetup: true }),
+      },
+    },
+  });
+
+  const systemStateStore = useSystemStatesStore();
+  await systemStateStore.fetchSystemStates();
+  const themeStore = useThemeStore();
+  await themeStore.fetchActivatedTheme();
+
+  loading.value = false;
+
+  router.push({ name: "Dashboard" });
+
+  Toast.success("初始化成功");
 };
 
 onMounted(async () => {
