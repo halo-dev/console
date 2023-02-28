@@ -14,11 +14,13 @@ import menu from "./setup-data/menu.json";
 import menuItems from "./setup-data/menu-items.json";
 import type {
   Category,
+  Plugin,
   PostRequest,
   SinglePageRequest,
   Tag,
 } from "@halo-dev/api-client";
 import { useThemeStore } from "@/stores/theme";
+import { useMutation } from "@tanstack/vue-query";
 
 const router = useRouter();
 
@@ -31,6 +33,24 @@ const {
 
 const siteTitle = ref("");
 const loading = ref(false);
+
+const { mutate: pluginStartMutate } = useMutation({
+  mutationKey: ["plugin-start"],
+  mutationFn: async (plugin: Plugin) => {
+    const { data: pluginToUpdate } =
+      await apiClient.extension.plugin.getpluginHaloRunV1alpha1Plugin({
+        name: plugin.metadata.name,
+      });
+
+    pluginToUpdate.spec.enabled = true;
+
+    return apiClient.extension.plugin.updatepluginHaloRunV1alpha1Plugin({
+      name: plugin.metadata.name,
+      plugin: pluginToUpdate,
+    });
+  },
+  retry: 3,
+});
 
 const handleSubmit = async () => {
   try {
@@ -88,19 +108,7 @@ const handleSubmit = async () => {
 
     for (let i = 0; i < installPluginResponses.length; i++) {
       const response = installPluginResponses[i];
-      const { data: plugin } =
-        await apiClient.extension.plugin.getpluginHaloRunV1alpha1Plugin({
-          name: response.data.metadata.name,
-        });
-
-      plugin.spec.enabled = true;
-      await apiClient.extension.plugin.updatepluginHaloRunV1alpha1Plugin(
-        {
-          name: response.data.metadata.name as string,
-          plugin,
-        },
-        { mute: true }
-      );
+      pluginStartMutate(response.data);
     }
   } catch (error) {
     console.error("Failed to initialize preset data", error);
