@@ -133,7 +133,11 @@ const {
   isLoading,
   refetch,
 } = useQuery<ListedReply[]>({
-  queryKey: ["comment-replies", props.comment.comment.metadata.name],
+  queryKey: [
+    "comment-replies",
+    props.comment.comment.metadata.name,
+    showReplies,
+  ],
   queryFn: async () => {
     const { data } = await apiClient.reply.listReplies({
       commentName: props.comment.comment.metadata.name,
@@ -149,19 +153,8 @@ const {
     );
     return deletingReplies?.length ? 3000 : false;
   },
-  enabled: showReplies.value,
+  enabled: computed(() => showReplies.value),
 });
-
-watch(
-  () => showReplies.value,
-  (newValue) => {
-    if (newValue) {
-      refetch();
-    } else {
-      replies.value = [];
-    }
-  }
-);
 
 const handleToggleShowReplies = async () => {
   showReplies.value = !showReplies.value;
