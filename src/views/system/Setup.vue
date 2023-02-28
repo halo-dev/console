@@ -83,6 +83,31 @@ const handleSubmit = async () => {
     await Promise.all(menuItemPromises);
     await apiClient.extension.menu.createv1alpha1Menu({ menu: menu });
 
+    // Install preset plugins
+    const { data: presetPlugins } = await apiClient.plugin.listPluginPresets();
+    const installPluginPromises = presetPlugins.map((plugin) => {
+      return apiClient.plugin.installPlugin({
+        source: "PRESET",
+        presetName: plugin.metadata.name as string,
+      });
+    });
+    const installPluginResponses = await Promise.all(installPluginPromises);
+
+    await Promise.all(
+      installPluginResponses.map((response) => {
+        return apiClient.extension.plugin.updatepluginHaloRunV1alpha1Plugin({
+          name: response.data.metadata.name as string,
+          plugin: {
+            ...response.data,
+            spec: {
+              ...response.data.spec,
+              enabled: true,
+            },
+          },
+        });
+      })
+    );
+
     // Create system-states ConfigMap
     await apiClient.extension.configMap.createv1alpha1ConfigMap({
       configMap: {
