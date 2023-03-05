@@ -212,6 +212,7 @@ const handleFetchContent = async () => {
   const { data } = await apiClient.post.fetchPostHeadContent({
     name: formState.value.post.metadata.name,
   });
+  formState.value.content = Object.assign(formState.value.content, data);
 
   // get editor provider
   if (!currentEditorProvider.value) {
@@ -253,11 +254,8 @@ const handleFetchContent = async () => {
         },
       });
     }
-
     await nextTick();
   }
-
-  formState.value.content = Object.assign(formState.value.content, data);
 };
 
 const handleOpenSettingModal = async () => {
