@@ -20,6 +20,10 @@
 
 当前仓库已经将 `halo-admin` 改为了 `console`。但对于 Halo 1.x 版本，依旧保持 halo-admin 的概念。
 
+>**Warning**
+>
+> 此仓库已经进入维护阶段，仅维护旧版本。2.3.0 以后的版本（不包含 2.3.0）已托管在 [halo-dev/halo](https://github.com/halo-dev/halo)。
+
 ## 开发环境运行
 
 ```bash
