@@ -22,7 +22,7 @@
 
 >**Warning**
 >
-> 此仓库已经进入维护阶段，仅维护旧版本。2.3.0 以后的版本（不包含 2.3.0）已托管在 [halo-dev/halo](https://github.com/halo-dev/halo)。
+> 当前仓库已**移动**至 [halo-dev/halo](https://github.com/halo-dev/halo)。旧版本（2.3.x 及之前版本）的维护仍然在当前仓库进行。
 
 ## 开发环境运行
 
