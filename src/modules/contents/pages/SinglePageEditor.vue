@@ -208,6 +208,8 @@ const handleFetchContent = async () => {
     snapshotName: formState.value.page.spec.headSnapshot,
   });
 
+  formState.value.content = Object.assign(formState.value.content, data);
+
   // get editor provider
   if (!currentEditorProvider.value) {
     const preferredEditor = editorProviders.value.find(
@@ -249,8 +251,6 @@ const handleFetchContent = async () => {
     }
     await nextTick();
   }
-
-  formState.value.content = Object.assign(formState.value.content, data);
 };
 
 // SinglePage settings
