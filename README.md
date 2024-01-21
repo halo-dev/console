@@ -6,7 +6,7 @@
     </a>
 </p>
 
-> Halo 2.0 的管理端项目（原 halo-admin）
+> Halo 2.0 的管理端项目，已归档，现在已经托管在 Halo 主仓库中。https://github.com/halo-dev/halo/tree/main/console
 
 <p align="center">
 <a href="https://github.com/halo-dev/console/releases"><img alt="GitHub release" src="https://img.shields.io/github/release/halo-dev/console.svg?style=flat-square" /></a>
